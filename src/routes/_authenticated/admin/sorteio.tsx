@@ -57,10 +57,15 @@ function SorteioPage() {
 
   const handleCreate = async () => {
     if (!newName.trim()) return;
+    const seasonNum = parseInt(newSeason, 10);
+    if (!Number.isFinite(seasonNum)) {
+      toast.error("Temporada inválida");
+      return;
+    }
     setCreating(true);
     const { error } = await supabase
       .from("competitions")
-      .insert({ name: newName.trim() });
+      .insert({ name: newName.trim(), season: seasonNum });
     setCreating(false);
     if (error) {
       toast.error("Erro ao criar competição", { description: error.message });
