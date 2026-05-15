@@ -121,6 +121,7 @@ export type Database = {
         }
         Returns: boolean
       }
+      promote_waitlist_for_type: { Args: { _type: string }; Returns: undefined }
     }
     Enums: {
       app_role: "admin" | "team_manager" | "athlete"
