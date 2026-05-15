@@ -13,6 +13,7 @@ import { Route as SignupRouteImport } from './routes/signup'
 import { Route as LoginRouteImport } from './routes/login'
 import { Route as AuthenticatedRouteImport } from './routes/_authenticated'
 import { Route as IndexRouteImport } from './routes/index'
+import { Route as AuthenticatedMinhaContaRouteImport } from './routes/_authenticated/minha-conta'
 import { Route as AuthenticatedInscricaoRouteImport } from './routes/_authenticated/inscricao'
 
 const SignupRoute = SignupRouteImport.update({
@@ -34,6 +35,11 @@ const IndexRoute = IndexRouteImport.update({
   path: '/',
   getParentRoute: () => rootRouteImport,
 } as any)
+const AuthenticatedMinhaContaRoute = AuthenticatedMinhaContaRouteImport.update({
+  id: '/minha-conta',
+  path: '/minha-conta',
+  getParentRoute: () => AuthenticatedRoute,
+} as any)
 const AuthenticatedInscricaoRoute = AuthenticatedInscricaoRouteImport.update({
   id: '/inscricao',
   path: '/inscricao',
@@ -45,12 +51,14 @@ export interface FileRoutesByFullPath {
   '/login': typeof LoginRoute
   '/signup': typeof SignupRoute
   '/inscricao': typeof AuthenticatedInscricaoRoute
+  '/minha-conta': typeof AuthenticatedMinhaContaRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
   '/login': typeof LoginRoute
   '/signup': typeof SignupRoute
   '/inscricao': typeof AuthenticatedInscricaoRoute
+  '/minha-conta': typeof AuthenticatedMinhaContaRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
@@ -59,12 +67,13 @@ export interface FileRoutesById {
   '/login': typeof LoginRoute
   '/signup': typeof SignupRoute
   '/_authenticated/inscricao': typeof AuthenticatedInscricaoRoute
+  '/_authenticated/minha-conta': typeof AuthenticatedMinhaContaRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
-  fullPaths: '/' | '/login' | '/signup' | '/inscricao'
+  fullPaths: '/' | '/login' | '/signup' | '/inscricao' | '/minha-conta'
   fileRoutesByTo: FileRoutesByTo
-  to: '/' | '/login' | '/signup' | '/inscricao'
+  to: '/' | '/login' | '/signup' | '/inscricao' | '/minha-conta'
   id:
     | '__root__'
     | '/'
@@ -72,6 +81,7 @@ export interface FileRouteTypes {
     | '/login'
     | '/signup'
     | '/_authenticated/inscricao'
+    | '/_authenticated/minha-conta'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
@@ -111,6 +121,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof IndexRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/_authenticated/minha-conta': {
+      id: '/_authenticated/minha-conta'
+      path: '/minha-conta'
+      fullPath: '/minha-conta'
+      preLoaderRoute: typeof AuthenticatedMinhaContaRouteImport
+      parentRoute: typeof AuthenticatedRoute
+    }
     '/_authenticated/inscricao': {
       id: '/_authenticated/inscricao'
       path: '/inscricao'
@@ -123,10 +140,12 @@ declare module '@tanstack/react-router' {
 
 interface AuthenticatedRouteChildren {
   AuthenticatedInscricaoRoute: typeof AuthenticatedInscricaoRoute
+  AuthenticatedMinhaContaRoute: typeof AuthenticatedMinhaContaRoute
 }
 
 const AuthenticatedRouteChildren: AuthenticatedRouteChildren = {
   AuthenticatedInscricaoRoute: AuthenticatedInscricaoRoute,
+  AuthenticatedMinhaContaRoute: AuthenticatedMinhaContaRoute,
 }
 
 const AuthenticatedRouteWithChildren = AuthenticatedRoute._addFileChildren(
