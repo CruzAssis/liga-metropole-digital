@@ -17,6 +17,7 @@ import { Route as AuthenticatedMinhaContaRouteImport } from './routes/_authentic
 import { Route as AuthenticatedInscricaoRouteImport } from './routes/_authenticated/inscricao'
 import { Route as AuthenticatedAdminRouteImport } from './routes/_authenticated/admin'
 import { Route as AuthenticatedAdminTriagemRouteImport } from './routes/_authenticated/admin/triagem'
+import { Route as AuthenticatedAdminSorteioRouteImport } from './routes/_authenticated/admin/sorteio'
 import { Route as AuthenticatedAdminDashboardRouteImport } from './routes/_authenticated/admin/dashboard'
 
 const SignupRoute = SignupRouteImport.update({
@@ -59,6 +60,12 @@ const AuthenticatedAdminTriagemRoute =
     path: '/triagem',
     getParentRoute: () => AuthenticatedAdminRoute,
   } as any)
+const AuthenticatedAdminSorteioRoute =
+  AuthenticatedAdminSorteioRouteImport.update({
+    id: '/sorteio',
+    path: '/sorteio',
+    getParentRoute: () => AuthenticatedAdminRoute,
+  } as any)
 const AuthenticatedAdminDashboardRoute =
   AuthenticatedAdminDashboardRouteImport.update({
     id: '/dashboard',
@@ -74,6 +81,7 @@ export interface FileRoutesByFullPath {
   '/inscricao': typeof AuthenticatedInscricaoRoute
   '/minha-conta': typeof AuthenticatedMinhaContaRoute
   '/admin/dashboard': typeof AuthenticatedAdminDashboardRoute
+  '/admin/sorteio': typeof AuthenticatedAdminSorteioRoute
   '/admin/triagem': typeof AuthenticatedAdminTriagemRoute
 }
 export interface FileRoutesByTo {
@@ -84,6 +92,7 @@ export interface FileRoutesByTo {
   '/inscricao': typeof AuthenticatedInscricaoRoute
   '/minha-conta': typeof AuthenticatedMinhaContaRoute
   '/admin/dashboard': typeof AuthenticatedAdminDashboardRoute
+  '/admin/sorteio': typeof AuthenticatedAdminSorteioRoute
   '/admin/triagem': typeof AuthenticatedAdminTriagemRoute
 }
 export interface FileRoutesById {
@@ -96,6 +105,7 @@ export interface FileRoutesById {
   '/_authenticated/inscricao': typeof AuthenticatedInscricaoRoute
   '/_authenticated/minha-conta': typeof AuthenticatedMinhaContaRoute
   '/_authenticated/admin/dashboard': typeof AuthenticatedAdminDashboardRoute
+  '/_authenticated/admin/sorteio': typeof AuthenticatedAdminSorteioRoute
   '/_authenticated/admin/triagem': typeof AuthenticatedAdminTriagemRoute
 }
 export interface FileRouteTypes {
@@ -108,6 +118,7 @@ export interface FileRouteTypes {
     | '/inscricao'
     | '/minha-conta'
     | '/admin/dashboard'
+    | '/admin/sorteio'
     | '/admin/triagem'
   fileRoutesByTo: FileRoutesByTo
   to:
@@ -118,6 +129,7 @@ export interface FileRouteTypes {
     | '/inscricao'
     | '/minha-conta'
     | '/admin/dashboard'
+    | '/admin/sorteio'
     | '/admin/triagem'
   id:
     | '__root__'
@@ -129,6 +141,7 @@ export interface FileRouteTypes {
     | '/_authenticated/inscricao'
     | '/_authenticated/minha-conta'
     | '/_authenticated/admin/dashboard'
+    | '/_authenticated/admin/sorteio'
     | '/_authenticated/admin/triagem'
   fileRoutesById: FileRoutesById
 }
@@ -197,6 +210,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedAdminTriagemRouteImport
       parentRoute: typeof AuthenticatedAdminRoute
     }
+    '/_authenticated/admin/sorteio': {
+      id: '/_authenticated/admin/sorteio'
+      path: '/sorteio'
+      fullPath: '/admin/sorteio'
+      preLoaderRoute: typeof AuthenticatedAdminSorteioRouteImport
+      parentRoute: typeof AuthenticatedAdminRoute
+    }
     '/_authenticated/admin/dashboard': {
       id: '/_authenticated/admin/dashboard'
       path: '/dashboard'
@@ -209,11 +229,13 @@ declare module '@tanstack/react-router' {
 
 interface AuthenticatedAdminRouteChildren {
   AuthenticatedAdminDashboardRoute: typeof AuthenticatedAdminDashboardRoute
+  AuthenticatedAdminSorteioRoute: typeof AuthenticatedAdminSorteioRoute
   AuthenticatedAdminTriagemRoute: typeof AuthenticatedAdminTriagemRoute
 }
 
 const AuthenticatedAdminRouteChildren: AuthenticatedAdminRouteChildren = {
   AuthenticatedAdminDashboardRoute: AuthenticatedAdminDashboardRoute,
+  AuthenticatedAdminSorteioRoute: AuthenticatedAdminSorteioRoute,
   AuthenticatedAdminTriagemRoute: AuthenticatedAdminTriagemRoute,
 }
 
