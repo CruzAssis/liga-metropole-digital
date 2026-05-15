@@ -38,6 +38,7 @@ function SorteioPage() {
   const [loading, setLoading] = useState(true);
   const [running, setRunning] = useState<string | null>(null);
   const [newName, setNewName] = useState("");
+  const [newSeason, setNewSeason] = useState<string>(String(new Date().getFullYear()));
   const [creating, setCreating] = useState(false);
   const drawFn = useServerFn(executeDraw);
 
@@ -56,10 +57,15 @@ function SorteioPage() {
 
   const handleCreate = async () => {
     if (!newName.trim()) return;
+    const seasonNum = parseInt(newSeason, 10);
+    if (!Number.isFinite(seasonNum)) {
+      toast.error("Temporada inválida");
+      return;
+    }
     setCreating(true);
     const { error } = await supabase
       .from("competitions")
-      .insert({ name: newName.trim() });
+      .insert({ name: newName.trim(), season: seasonNum });
     setCreating(false);
     if (error) {
       toast.error("Erro ao criar competição", { description: error.message });
@@ -120,13 +126,20 @@ function SorteioPage() {
           <CardTitle className="text-base">Nova competição</CardTitle>
           <CardDescription>Crie a competição antes de executar o sorteio.</CardDescription>
         </CardHeader>
-        <CardContent className="flex gap-2">
+        <CardContent className="flex flex-col gap-2 sm:flex-row">
           <Input
-            placeholder="Nome da competição (ex: Liga Metrópole 2026)"
+            placeholder="Nome (ex: Liga Metrópole 2026)"
             value={newName}
             onChange={(e) => setNewName(e.target.value)}
           />
-          <Button onClick={handleCreate} disabled={creating || !newName.trim()}>
+          <Input
+            type="number"
+            placeholder="Temporada"
+            className="sm:w-32"
+            value={newSeason}
+            onChange={(e) => setNewSeason(e.target.value)}
+          />
+          <Button onClick={handleCreate} disabled={creating || !newName.trim() || !newSeason.trim()}>
             <Plus className="h-4 w-4 mr-1" /> Criar
           </Button>
         </CardContent>

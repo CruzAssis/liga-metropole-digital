@@ -19,25 +19,37 @@ export type Database = {
           created_at: string
           draw_executed_at: string | null
           id: string
+          monthly_fee_brl: number | null
           name: string
-          season: string | null
+          season: number
           status: string
+          sumula_confirm_window_hours: number | null
+          wo_fine_brl: number | null
+          wo_tolerance_minutes: number | null
         }
         Insert: {
           created_at?: string
           draw_executed_at?: string | null
           id?: string
+          monthly_fee_brl?: number | null
           name: string
-          season?: string | null
+          season: number
           status?: string
+          sumula_confirm_window_hours?: number | null
+          wo_fine_brl?: number | null
+          wo_tolerance_minutes?: number | null
         }
         Update: {
           created_at?: string
           draw_executed_at?: string | null
           id?: string
+          monthly_fee_brl?: number | null
           name?: string
-          season?: string | null
+          season?: number
           status?: string
+          sumula_confirm_window_hours?: number | null
+          wo_fine_brl?: number | null
+          wo_tolerance_minutes?: number | null
         }
         Relationships: []
       }
@@ -45,19 +57,16 @@ export type Database = {
         Row: {
           created_at: string
           group_id: string
-          id: string
           team_id: string
         }
         Insert: {
           created_at?: string
           group_id: string
-          id?: string
           team_id: string
         }
         Update: {
           created_at?: string
           group_id?: string
-          id?: string
           team_id?: string
         }
         Relationships: [
@@ -111,44 +120,59 @@ export type Database = {
       }
       matches: {
         Row: {
+          bracket_position: number | null
           competition_id: string
           created_at: string
           group_label: string | null
+          host_filled_at: string | null
           host_score: number | null
           host_team_id: string
           id: string
+          parent_match_id: string | null
           round: number
           scheduled_at: string | null
           stage: string
           status: string
+          venue: string | null
+          visitor_confirmed_at: string | null
           visitor_score: number | null
           visitor_team_id: string
         }
         Insert: {
+          bracket_position?: number | null
           competition_id: string
           created_at?: string
           group_label?: string | null
+          host_filled_at?: string | null
           host_score?: number | null
           host_team_id: string
           id?: string
+          parent_match_id?: string | null
           round: number
           scheduled_at?: string | null
           stage?: string
           status?: string
+          venue?: string | null
+          visitor_confirmed_at?: string | null
           visitor_score?: number | null
           visitor_team_id: string
         }
         Update: {
+          bracket_position?: number | null
           competition_id?: string
           created_at?: string
           group_label?: string | null
+          host_filled_at?: string | null
           host_score?: number | null
           host_team_id?: string
           id?: string
+          parent_match_id?: string | null
           round?: number
           scheduled_at?: string | null
           stage?: string
           status?: string
+          venue?: string | null
+          visitor_confirmed_at?: string | null
           visitor_score?: number | null
           visitor_team_id?: string
         }
@@ -165,6 +189,13 @@ export type Database = {
             columns: ["host_team_id"]
             isOneToOne: false
             referencedRelation: "teams"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "matches_parent_match_id_fkey"
+            columns: ["parent_match_id"]
+            isOneToOne: false
+            referencedRelation: "matches"
             referencedColumns: ["id"]
           },
           {
