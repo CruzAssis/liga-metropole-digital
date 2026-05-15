@@ -38,6 +38,7 @@ function SorteioPage() {
   const [loading, setLoading] = useState(true);
   const [running, setRunning] = useState<string | null>(null);
   const [newName, setNewName] = useState("");
+  const [newSeason, setNewSeason] = useState<string>(String(new Date().getFullYear()));
   const [creating, setCreating] = useState(false);
   const drawFn = useServerFn(executeDraw);
 
