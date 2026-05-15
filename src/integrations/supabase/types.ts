@@ -14,6 +14,168 @@ export type Database = {
   }
   public: {
     Tables: {
+      competitions: {
+        Row: {
+          created_at: string
+          draw_executed_at: string | null
+          id: string
+          name: string
+          season: string | null
+          status: string
+        }
+        Insert: {
+          created_at?: string
+          draw_executed_at?: string | null
+          id?: string
+          name: string
+          season?: string | null
+          status?: string
+        }
+        Update: {
+          created_at?: string
+          draw_executed_at?: string | null
+          id?: string
+          name?: string
+          season?: string | null
+          status?: string
+        }
+        Relationships: []
+      }
+      group_teams: {
+        Row: {
+          created_at: string
+          group_id: string
+          id: string
+          team_id: string
+        }
+        Insert: {
+          created_at?: string
+          group_id: string
+          id?: string
+          team_id: string
+        }
+        Update: {
+          created_at?: string
+          group_id?: string
+          id?: string
+          team_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "group_teams_group_id_fkey"
+            columns: ["group_id"]
+            isOneToOne: false
+            referencedRelation: "groups"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "group_teams_team_id_fkey"
+            columns: ["team_id"]
+            isOneToOne: true
+            referencedRelation: "teams"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      groups: {
+        Row: {
+          competition_id: string
+          created_at: string
+          id: string
+          label: string
+          team_role: string
+        }
+        Insert: {
+          competition_id: string
+          created_at?: string
+          id?: string
+          label: string
+          team_role: string
+        }
+        Update: {
+          competition_id?: string
+          created_at?: string
+          id?: string
+          label?: string
+          team_role?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "groups_competition_id_fkey"
+            columns: ["competition_id"]
+            isOneToOne: false
+            referencedRelation: "competitions"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      matches: {
+        Row: {
+          competition_id: string
+          created_at: string
+          group_label: string | null
+          host_score: number | null
+          host_team_id: string
+          id: string
+          round: number
+          scheduled_at: string | null
+          stage: string
+          status: string
+          visitor_score: number | null
+          visitor_team_id: string
+        }
+        Insert: {
+          competition_id: string
+          created_at?: string
+          group_label?: string | null
+          host_score?: number | null
+          host_team_id: string
+          id?: string
+          round: number
+          scheduled_at?: string | null
+          stage?: string
+          status?: string
+          visitor_score?: number | null
+          visitor_team_id: string
+        }
+        Update: {
+          competition_id?: string
+          created_at?: string
+          group_label?: string | null
+          host_score?: number | null
+          host_team_id?: string
+          id?: string
+          round?: number
+          scheduled_at?: string | null
+          stage?: string
+          status?: string
+          visitor_score?: number | null
+          visitor_team_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "matches_competition_id_fkey"
+            columns: ["competition_id"]
+            isOneToOne: false
+            referencedRelation: "competitions"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "matches_host_team_id_fkey"
+            columns: ["host_team_id"]
+            isOneToOne: false
+            referencedRelation: "teams"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "matches_visitor_team_id_fkey"
+            columns: ["visitor_team_id"]
+            isOneToOne: false
+            referencedRelation: "teams"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       profiles: {
         Row: {
           avatar_url: string | null
