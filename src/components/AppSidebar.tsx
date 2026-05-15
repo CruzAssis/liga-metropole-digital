@@ -26,7 +26,14 @@ export function AppSidebar() {
   const collapsed = state === "collapsed";
   const pathname = useRouterState({ select: (s) => s.location.pathname });
   const { signOut } = useAuth();
+  const { isAdmin } = useIsAdmin();
   const navigate = useNavigate();
+
+  const adminItems = [
+    { title: "Dashboard", url: "/admin/dashboard", icon: LayoutDashboard },
+    { title: "Triagem", url: "/admin/triagem", icon: ListChecks },
+    { title: "Sorteio", url: "/admin/sorteio", icon: Shuffle },
+  ];
 
   const handleSignOut = async () => {
     await signOut();
