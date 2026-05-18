@@ -134,10 +134,10 @@ function RankingPage() {
 
       const ids = Array.from(new Set(list.flatMap((x) => [x.host_team_id, x.visitor_team_id])));
       if (ids.length > 0) {
-        const [{ data: tdata }, { data: regs }] = await Promise.all([
-          supabase.from("teams").select("id, name, registration_type").in("id", ids),
-          Promise.resolve({ data: [] }),
-        ]);
+        const { data: tdata } = await supabase
+          .from("teams")
+          .select("id, name, registration_type")
+          .in("id", ids);
         const nameMap = new Map<string, string>();
         const roleMap = new Map<string, string>();
         for (const t of tdata ?? []) {
@@ -146,7 +146,6 @@ function RankingPage() {
         }
         setTeams(nameMap);
         setTeamRoles(roleMap);
-        void regs;
       }
     })();
   }, []);
