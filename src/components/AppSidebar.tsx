@@ -1,5 +1,5 @@
 import { Link, useRouterState, useNavigate } from "@tanstack/react-router";
-import { Home, ClipboardList, UserCircle, LogOut, Trophy, Shuffle, LayoutDashboard, ListChecks, Users, BadgeCheck } from "lucide-react";
+import { Home, ClipboardList, UserCircle, LogOut, Trophy, Shuffle, LayoutDashboard, ListChecks, Users, BadgeCheck, Shield } from "lucide-react";
 import { useIsAdmin } from "@/hooks/use-is-admin";
 import {
   Sidebar,
@@ -35,6 +35,7 @@ export function AppSidebar() {
     { title: "Dashboard", url: "/admin/dashboard", icon: LayoutDashboard },
     { title: "Triagem", url: "/admin/triagem", icon: ListChecks },
     { title: "Sorteio", url: "/admin/sorteio", icon: Shuffle },
+    { title: "Usuários", url: "/admin/usuarios", icon: Shield },
   ];
 
   const handleSignOut = async () => {
