@@ -3,7 +3,6 @@ import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { useServerFn } from "@tanstack/react-start";
 import {
   listMyTeamMatches,
-  confirmSumula,
   disputeSumula,
 } from "@/lib/sumula.functions";
 import { Button } from "@/components/ui/button";
@@ -21,6 +20,7 @@ import {
 } from "lucide-react";
 import { buildWhatsAppLink } from "@/lib/wa";
 import { SumulaDialog } from "./SumulaDialog";
+import { ConfirmSumulaDialog } from "./ConfirmSumulaDialog";
 
 const HOURS_TO_CONFIRM = 48;
 
@@ -117,20 +117,12 @@ export function TeamMatchesSection() {
 
 function MatchCard({ match }: { match: Match }) {
   const qc = useQueryClient();
-  const confirm = useServerFn(confirmSumula);
   const dispute = useServerFn(disputeSumula);
   const [sumulaOpen, setSumulaOpen] = useState(false);
+  const [confirmOpen, setConfirmOpen] = useState(false);
 
   const meta = statusMeta[match.status] ?? statusMeta.scheduled;
 
-  const confirmMut = useMutation({
-    mutationFn: async () => confirm({ data: { matchId: match.id } }),
-    onSuccess: () => {
-      toast.success("Súmula confirmada.");
-      qc.invalidateQueries({ queryKey: ["my-team-matches"] });
-    },
-    onError: (e: Error) => toast.error(e.message),
-  });
   const disputeMut = useMutation({
     mutationFn: async () => dispute({ data: { matchId: match.id } }),
     onSuccess: () => {
@@ -221,11 +213,10 @@ function MatchCard({ match }: { match: Match }) {
             <>
               <Button
                 size="sm"
-                onClick={() => confirmMut.mutate()}
-                disabled={confirmMut.isPending}
+                onClick={() => setConfirmOpen(true)}
                 className="gap-1"
               >
-                <CheckCircle2 className="h-4 w-4" /> Confirmar
+                <CheckCircle2 className="h-4 w-4" /> Confirmar súmula
               </Button>
               <Button
                 size="sm"
@@ -246,6 +237,13 @@ function MatchCard({ match }: { match: Match }) {
           matchId={match.id}
           open={sumulaOpen}
           onOpenChange={setSumulaOpen}
+        />
+      )}
+      {confirmOpen && (
+        <ConfirmSumulaDialog
+          matchId={match.id}
+          open={confirmOpen}
+          onOpenChange={setConfirmOpen}
         />
       )}
     </div>

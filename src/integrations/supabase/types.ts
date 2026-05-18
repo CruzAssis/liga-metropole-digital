@@ -180,6 +180,51 @@ export type Database = {
           },
         ]
       }
+      match_best_opponent_votes: {
+        Row: {
+          created_at: string
+          id: string
+          identified_at: string | null
+          identified_name: string | null
+          jersey_number: number
+          match_id: string
+          note: string | null
+          opponent_athlete_id: string | null
+          opponent_team_id: string
+          rating: number
+          updated_at: string
+          voter_team_id: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          identified_at?: string | null
+          identified_name?: string | null
+          jersey_number: number
+          match_id: string
+          note?: string | null
+          opponent_athlete_id?: string | null
+          opponent_team_id: string
+          rating: number
+          updated_at?: string
+          voter_team_id: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          identified_at?: string | null
+          identified_name?: string | null
+          jersey_number?: number
+          match_id?: string
+          note?: string | null
+          opponent_athlete_id?: string | null
+          opponent_team_id?: string
+          rating?: number
+          updated_at?: string
+          voter_team_id?: string
+        }
+        Relationships: []
+      }
       match_events: {
         Row: {
           athlete_id: string
