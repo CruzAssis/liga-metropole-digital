@@ -184,6 +184,7 @@ function TeamProfilePage() {
           <Link to="/ranking">Ver classificação completa</Link>
         </Button>
       </div>
+      </div>
     </PublicShell>
   );
 }
