@@ -1,5 +1,5 @@
 import { Link, useRouterState, useNavigate } from "@tanstack/react-router";
-import { Home, ClipboardList, UserCircle, LogOut, Trophy, Shuffle, LayoutDashboard, ListChecks } from "lucide-react";
+import { Home, ClipboardList, UserCircle, LogOut, Trophy, Shuffle, LayoutDashboard, ListChecks, Users, BadgeCheck } from "lucide-react";
 import { useIsAdmin } from "@/hooks/use-is-admin";
 import {
   Sidebar,
@@ -17,6 +17,8 @@ import { useAuth } from "@/hooks/use-auth";
 
 const items = [
   { title: "Início", url: "/", icon: Home },
+  { title: "Atletas", url: "/atletas", icon: Users },
+  { title: "Verificar ID", url: "/verificar", icon: BadgeCheck },
   { title: "Inscrição", url: "/inscricao", icon: ClipboardList },
   { title: "Minha Conta", url: "/minha-conta", icon: UserCircle },
 ];
