@@ -14,6 +14,68 @@ export type Database = {
   }
   public: {
     Tables: {
+      athletes: {
+        Row: {
+          cpf_hash: string
+          cpf_last4: string
+          created_at: string
+          full_name: string | null
+          id: string
+          instagram_handle: string | null
+          nickname: string | null
+          photo_url: string | null
+          position: string | null
+          team_id: string | null
+          updated_at: string
+          user_id: string | null
+          verified: boolean
+          verified_at: string | null
+          whatsapp: string | null
+        }
+        Insert: {
+          cpf_hash: string
+          cpf_last4: string
+          created_at?: string
+          full_name?: string | null
+          id?: string
+          instagram_handle?: string | null
+          nickname?: string | null
+          photo_url?: string | null
+          position?: string | null
+          team_id?: string | null
+          updated_at?: string
+          user_id?: string | null
+          verified?: boolean
+          verified_at?: string | null
+          whatsapp?: string | null
+        }
+        Update: {
+          cpf_hash?: string
+          cpf_last4?: string
+          created_at?: string
+          full_name?: string | null
+          id?: string
+          instagram_handle?: string | null
+          nickname?: string | null
+          photo_url?: string | null
+          position?: string | null
+          team_id?: string | null
+          updated_at?: string
+          user_id?: string | null
+          verified?: boolean
+          verified_at?: string | null
+          whatsapp?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "athletes_team_id_fkey"
+            columns: ["team_id"]
+            isOneToOne: false
+            referencedRelation: "teams"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       competitions: {
         Row: {
           created_at: string
