@@ -117,20 +117,12 @@ export function TeamMatchesSection() {
 
 function MatchCard({ match }: { match: Match }) {
   const qc = useQueryClient();
-  const confirm = useServerFn(confirmSumula);
   const dispute = useServerFn(disputeSumula);
   const [sumulaOpen, setSumulaOpen] = useState(false);
+  const [confirmOpen, setConfirmOpen] = useState(false);
 
   const meta = statusMeta[match.status] ?? statusMeta.scheduled;
 
-  const confirmMut = useMutation({
-    mutationFn: async () => confirm({ data: { matchId: match.id } }),
-    onSuccess: () => {
-      toast.success("Súmula confirmada.");
-      qc.invalidateQueries({ queryKey: ["my-team-matches"] });
-    },
-    onError: (e: Error) => toast.error(e.message),
-  });
   const disputeMut = useMutation({
     mutationFn: async () => dispute({ data: { matchId: match.id } }),
     onSuccess: () => {
