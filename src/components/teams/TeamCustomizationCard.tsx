@@ -48,8 +48,8 @@ export function TeamCustomizationCard({ teamId, logoUrl, bannerUrl, primaryColor
       if (upErr) throw upErr;
       const { data: pub } = supabase.storage.from("team-logos").getPublicUrl(path);
       const url = pub.publicUrl;
-      const field = kind === "logo" ? "logo_url" : "banner_url";
-      const { error: updErr } = await supabase.from("teams").update({ [field]: url }).eq("id", teamId);
+      const patch = kind === "logo" ? { logo_url: url } : { banner_url: url };
+      const { error: updErr } = await supabase.from("teams").update(patch).eq("id", teamId);
       if (updErr) throw updErr;
       if (kind === "logo") setLogo(url); else setBanner(url);
       toast.success(kind === "logo" ? "Escudo atualizado!" : "Banner atualizado!");
