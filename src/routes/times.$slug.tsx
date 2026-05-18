@@ -39,12 +39,16 @@ export const Route = createFileRoute("/times/$slug")({
   ),
 });
 
+type LoaderData = NonNullable<Awaited<ReturnType<typeof getTeamPublicProfile>>>;
+type Match = LoaderData["matches"][number];
+type Athlete = LoaderData["athletes"][number];
+
 function TeamProfilePage() {
-  const data = Route.useLoaderData();
+  const data = Route.useLoaderData() as LoaderData;
   const { team, groupLabel, athletes, matches } = data;
 
-  const upcoming = matches.filter((m) => ["scheduled", "awaiting_confirmation"].includes(m.status)).slice(0, 5);
-  const results = matches.filter((m) => ["confirmed", "wo"].includes(m.status)).slice(-5).reverse();
+  const upcoming = matches.filter((m: Match) => ["scheduled", "awaiting_confirmation"].includes(m.status)).slice(0, 5);
+  const results = matches.filter((m: Match) => ["confirmed", "wo"].includes(m.status)).slice(-5).reverse();
 
   return (
     <PublicShell>
