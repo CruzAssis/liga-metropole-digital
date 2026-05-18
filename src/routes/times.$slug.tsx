@@ -50,28 +50,50 @@ function TeamProfilePage() {
   const upcoming = matches.filter((m: Match) => ["scheduled", "awaiting_confirmation"].includes(m.status)).slice(0, 5);
   const results = matches.filter((m: Match) => ["confirmed", "wo"].includes(m.status)).slice(-5).reverse();
 
+  const primaryStyle = team.primary_color
+    ? ({ ["--team-primary" as string]: team.primary_color } as React.CSSProperties)
+    : undefined;
+
   return (
     <PublicShell>
-      {/* Header */}
-      <header className="flex flex-col sm:flex-row items-start sm:items-center gap-5 mb-8">
-        <div className="h-24 w-24 rounded-md border border-border bg-card overflow-hidden flex items-center justify-center shrink-0">
-          {team.logo_url ? (
-            <img src={team.logo_url} alt={`Escudo ${team.name}`} className="h-full w-full object-cover" />
-          ) : (
-            <span className="font-display text-3xl">{team.short_name?.[0] ?? "?"}</span>
-          )}
-        </div>
-        <div className="flex-1 min-w-0">
-          <h1 className="font-display text-4xl tracking-wide">{team.name}</h1>
-          <div className="flex flex-wrap items-center gap-2 mt-2">
-            <Badge variant="outline" className="font-mono">{team.short_name}</Badge>
-            <Badge variant={team.registration_type === "host" ? "default" : "secondary"}>
-              {team.registration_type === "host" ? "Mandante" : "Visitante"}
-            </Badge>
-            {groupLabel && <Badge variant="outline">Grupo {groupLabel}</Badge>}
+      <div style={primaryStyle}>
+        {/* Banner */}
+        {team.banner_url ? (
+          <div className="-mx-4 sm:-mx-6 lg:-mx-8 -mt-6 mb-6 h-40 sm:h-56 overflow-hidden relative">
+            <img src={team.banner_url} alt={`Banner ${team.name}`} className="h-full w-full object-cover" />
+            <div className="absolute inset-0 bg-gradient-to-t from-background via-background/30 to-transparent" />
           </div>
-        </div>
-      </header>
+        ) : null}
+
+        {/* Header */}
+        <header
+          className="flex flex-col sm:flex-row items-start sm:items-center gap-5 mb-8"
+          style={team.primary_color ? { borderLeft: `4px solid ${team.primary_color}`, paddingLeft: "1rem" } : undefined}
+        >
+          <div className="h-24 w-24 rounded-md border border-border bg-card overflow-hidden flex items-center justify-center shrink-0">
+            {team.logo_url ? (
+              <img src={team.logo_url} alt={`Escudo ${team.name}`} className="h-full w-full object-cover" />
+            ) : (
+              <span className="font-display text-3xl">{team.short_name?.[0] ?? "?"}</span>
+            )}
+          </div>
+          <div className="flex-1 min-w-0">
+            <h1
+              className="font-display text-4xl tracking-wide"
+              style={team.primary_color ? { color: team.primary_color } : undefined}
+            >
+              {team.name}
+            </h1>
+            <div className="flex flex-wrap items-center gap-2 mt-2">
+              <Badge variant="outline" className="font-mono">{team.short_name}</Badge>
+              <Badge variant={team.registration_type === "host" ? "default" : "secondary"}>
+                {team.registration_type === "host" ? "Mandante" : "Visitante"}
+              </Badge>
+              {groupLabel && <Badge variant="outline">Grupo {groupLabel}</Badge>}
+            </div>
+          </div>
+        </header>
+
 
       {/* Contact */}
       <ContactSection slug={team.slug ?? ""} teamName={team.name} />
@@ -161,6 +183,7 @@ function TeamProfilePage() {
         <Button asChild variant="outline">
           <Link to="/ranking">Ver classificação completa</Link>
         </Button>
+      </div>
       </div>
     </PublicShell>
   );

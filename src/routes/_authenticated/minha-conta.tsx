@@ -12,6 +12,7 @@ import { Badge } from "@/components/ui/badge";
 import { ClipboardList, ExternalLink, User2 } from "lucide-react";
 import { TeamAthletesSection } from "@/components/athletes/TeamAthletesSection";
 import { TeamMatchesSection } from "@/components/matches/TeamMatchesSection";
+import { TeamCustomizationCard } from "@/components/teams/TeamCustomizationCard";
 import { getMyProfile, updateMyProfile } from "@/lib/profile.functions";
 import { formatPhoneBR } from "@/lib/wa";
 
@@ -21,6 +22,8 @@ type Team = {
   short_name: string;
   slug: string | null;
   logo_url: string | null;
+  banner_url: string | null;
+  primary_color: string | null;
   registration_type: "host" | "visitor";
   status: "pending" | "approved" | "rejected" | "waitlist";
   rejected_reason: string | null;
@@ -43,17 +46,20 @@ function MinhaContaPage() {
   const [team, setTeam] = useState<Team | null>(null);
   const [loading, setLoading] = useState(true);
 
-  useEffect(() => {
+  const loadTeam = async () => {
     if (!user) return;
-    (async () => {
-      const { data } = await supabase
-        .from("teams")
-        .select("id,name,short_name,slug,logo_url,registration_type,status,rejected_reason,created_at")
-        .eq("manager_id", user.id)
-        .maybeSingle();
-      setTeam((data as Team | null) ?? null);
-      setLoading(false);
-    })();
+    const { data } = await supabase
+      .from("teams")
+      .select("id,name,short_name,slug,logo_url,banner_url,primary_color,registration_type,status,rejected_reason,created_at")
+      .eq("manager_id", user.id)
+      .maybeSingle();
+    setTeam((data as Team | null) ?? null);
+    setLoading(false);
+  };
+
+  useEffect(() => {
+    void loadTeam();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [user]);
 
   if (loading) {
@@ -86,6 +92,13 @@ function MinhaContaPage() {
 
       {team?.status === "approved" && (
         <>
+          <TeamCustomizationCard
+            teamId={team.id}
+            logoUrl={team.logo_url}
+            bannerUrl={team.banner_url}
+            primaryColor={team.primary_color}
+            onSaved={loadTeam}
+          />
           <TeamAthletesSection />
           <TeamMatchesSection />
         </>

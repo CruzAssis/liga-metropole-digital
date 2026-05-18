@@ -323,11 +323,13 @@ export type Database = {
       teams: {
         Row: {
           approved_at: string | null
+          banner_url: string | null
           created_at: string
           id: string
           logo_url: string | null
           manager_id: string
           name: string
+          primary_color: string | null
           registration_type: string
           rejected_reason: string | null
           short_name: string
@@ -336,11 +338,13 @@ export type Database = {
         }
         Insert: {
           approved_at?: string | null
+          banner_url?: string | null
           created_at?: string
           id?: string
           logo_url?: string | null
           manager_id: string
           name: string
+          primary_color?: string | null
           registration_type: string
           rejected_reason?: string | null
           short_name: string
@@ -349,11 +353,13 @@ export type Database = {
         }
         Update: {
           approved_at?: string | null
+          banner_url?: string | null
           created_at?: string
           id?: string
           logo_url?: string | null
           manager_id?: string
           name?: string
+          primary_color?: string | null
           registration_type?: string
           rejected_reason?: string | null
           short_name?: string

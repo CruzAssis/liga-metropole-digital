@@ -11,7 +11,7 @@ export const getTeamPublicProfile = createServerFn({ method: "GET" })
   .handler(async ({ data }) => {
     const { data: team, error } = await supabaseAdmin
       .from("teams")
-      .select("id, name, short_name, slug, logo_url, registration_type, status, created_at")
+      .select("id, name, short_name, slug, logo_url, banner_url, primary_color, registration_type, status, created_at")
       .eq("slug", data.slug)
       .eq("status", "approved")
       .maybeSingle();
