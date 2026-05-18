@@ -120,6 +120,11 @@ export const getSumulaContext = createServerFn({ method: "POST" })
       .eq("match_id", data.matchId)
       .order("minute", { ascending: true, nullsFirst: false });
 
+    const { data: bestVotes } = await supabaseAdmin
+      .from("match_best_opponent_votes")
+      .select("id, voter_team_id, opponent_team_id, jersey_number, rating, note, opponent_athlete_id, identified_name, identified_at")
+      .eq("match_id", data.matchId);
+
     return {
       match,
       host: host ? { id: host.id, name: host.name, short_name: host.short_name } : null,
@@ -129,6 +134,7 @@ export const getSumulaContext = createServerFn({ method: "POST" })
       hostAthletes: (athletes ?? []).filter((a) => a.team_id === match.host_team_id),
       visitorAthletes: (athletes ?? []).filter((a) => a.team_id === match.visitor_team_id),
       events: events ?? [],
+      bestVotes: bestVotes ?? [],
     };
   });
 
