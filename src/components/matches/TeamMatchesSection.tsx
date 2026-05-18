@@ -18,7 +18,9 @@ import {
   AlertTriangle,
   FileText,
   Flag,
+  MessageCircle,
 } from "lucide-react";
+import { buildWhatsAppLink } from "@/lib/wa";
 
 const HOURS_TO_CONFIRM = 48;
 
@@ -34,8 +36,8 @@ type Match = {
   venue: string | null;
   host_filled_at: string | null;
   visitor_confirmed_at: string | null;
-  host: { name: string; short_name: string; logo_url: string | null } | null;
-  visitor: { name: string; short_name: string; logo_url: string | null } | null;
+  host: { name: string; short_name: string; slug: string | null; logo_url: string | null; manager_name: string | null; manager_phone: string | null } | null;
+  visitor: { name: string; short_name: string; slug: string | null; logo_url: string | null; manager_name: string | null; manager_phone: string | null } | null;
   is_host: boolean;
 };
 
