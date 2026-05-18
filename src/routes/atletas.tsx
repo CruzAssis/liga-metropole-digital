@@ -50,7 +50,7 @@ function AtletasPage() {
   }, []);
 
   return (
-    <div className="max-w-6xl mx-auto">
+    <PublicShell>
       <header className="mb-6">
         <h1 className="font-display text-5xl tracking-wide">Atletas</h1>
         <p className="text-muted-foreground mt-1">
@@ -94,6 +94,7 @@ function AtletasPage() {
           {open && <IDMetropoleCard athlete={open} />}
         </DialogContent>
       </Dialog>
-    </div>
+    </PublicShell>
   );
 }
+
