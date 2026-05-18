@@ -1,88 +1,108 @@
-## Visão geral
+## Escopo desta fase
 
-Estrutura inicial do SaaS "Liga Metrópole Várzea" com Lovable Cloud (Supabase gerenciado), autenticação email/senha, cadastro de times com upload de escudo, controle de vagas (40 por tipo) e painel do gestor.
+Implementar o módulo **Atletas + ID Metropole** do documento (seções 2.1, 5 — tabela `atletas`, 7 — `/verificar` e `/atletas`, 8 — funções `hash-cpf` e `buscar-atleta-cpf`, 12 — `<VerifiedSeal>`, `<AtletaCard>`, `<IDMetropoleCard>`).
 
-## 1. Lovable Cloud + Banco de dados
+Decisões já aprovadas:
+- Manter schema atual em inglês; **adicionar** apenas o que falta.
+- Hash/busca de CPF via `createServerFn` (não Edge Function).
+- Nada de migração destrutiva nas tabelas existentes (teams/matches/competitions intactos).
 
-Habilitar Lovable Cloud e criar via migração:
+Fora desta fase (próximas iterações): páginas públicas de ranking/resultados/agenda, súmula digital, torcidômetro, premiações, refresh de identidade visual (#0A0A0A + textura).
 
-- **Tabela `profiles`** — vinculada a `auth.users`, com `full_name`, `phone`, `cpf` (único), `avatar_url`. O campo `role` será movido para tabela separada por segurança (ver abaixo).
-- **Enum `app_role`** + tabela **`user_roles`** (`user_id`, `role`) com função `has_role(_user_id, _role)` SECURITY DEFINER — padrão obrigatório para evitar escalonamento de privilégios. Default ao cadastrar: `team_manager`.
-- **Tabela `teams`** conforme spec (name, short_name, logo_url, manager_id, registration_type, status, rejected_reason, approved_at) + índices em `status` e `registration_type`.
-- **Trigger** `handle_new_user` em `auth.users` → cria `profiles` automaticamente lendo `full_name`, `phone`, `cpf` dos metadados do signup, e insere `team_manager` em `user_roles`.
-- **Bucket Storage** `team-logos` (público) com policies para o gestor enviar/atualizar seu escudo.
+---
 
-### RLS
+## 1. Banco de dados (migration aditiva)
 
-- `profiles`: SELECT/UPDATE apenas onde `id = auth.uid()`.
-- `user_roles`: SELECT do próprio usuário; INSERT/UPDATE somente admin (via `has_role`).
-- `teams`: 
-  - SELECT público quando `status = 'approved'`
-  - SELECT/UPDATE pelo gestor (`manager_id = auth.uid()`)
-  - INSERT autenticado com `manager_id = auth.uid()`
-  - Admins têm acesso total via `has_role(auth.uid(), 'admin')`
-
-## 2. Identidade visual
-
-- Configurar `src/styles.css` com tokens semânticos em **oklch**: `--background` (#1A1A1A), `--card` (#242424), `--primary` (#007BFF), foreground branco, bordas sutis. Definir variantes `.dark` (default ativo no `<html>`).
-- Importar **Bebas Neue** e **Montserrat** via `<link>` no `__root.tsx` head.
-- Classes utilitárias `font-display` (Bebas) e `font-sans` (Montserrat) no Tailwind theme.
-- Tema dark forçado por padrão.
-
-## 3. Layout
-
-- **`AppShell`** (componente): sidebar fixa à esquerda + header superior + `<Outlet />`.
-- Sidebar usando shadcn `Sidebar` com itens: Início, Inscrição, Minha Conta, Sair (collapse para ícones).
-- Header com logo "Liga Metrópole Várzea", `SidebarTrigger`, avatar/menu do usuário.
-- Landing (`/`) renderiza fora do shell (página pública full-bleed). `/login` e `/signup` também fora do shell.
-
-## 4. Rotas (TanStack Router file-based)
+Nova tabela `athletes` (mantém convenção em inglês do projeto):
 
 ```
-src/routes/
-  __root.tsx              (fonts, providers, auth listener)
-  index.tsx               (landing)
-  login.tsx
-  signup.tsx
-  _authenticated.tsx      (guard: redirect /login se sem sessão)
-  _authenticated/inscricao.tsx
-  _authenticated/minha-conta.tsx
+athletes (
+  id uuid pk,
+  team_id uuid references teams(id) on delete set null,  -- time atual
+  full_name text,
+  nickname text,
+  position text,                          -- goleiro/zagueiro/...
+  photo_url text,
+  cpf_hash text unique not null,          -- bcrypt, nunca em claro
+  cpf_last4 text not null,                -- últimos 4 dígitos para UX de busca
+  verified boolean default false,
+  verified_at timestamptz,
+  whatsapp text,
+  instagram_handle text,
+  user_id uuid references auth.users(id), -- preenchido ao auto-verificar
+  created_at, updated_at
+)
 ```
 
-### Páginas
+Índice em `team_id`, `verified`, `cpf_last4`.
 
-- **`/` Landing**: hero com "Metrópole Várzea" em Bebas Neue gigante, subtítulo, CTA primário "Inscrever meu time" → `/signup` (ou `/inscricao` se logado). Fundo dark com destaque azul.
-- **`/signup`**: form (nome completo, CPF, telefone, email, senha) → `supabase.auth.signUp` com `options.data` para o trigger criar o profile. `emailRedirectTo: window.location.origin`.
-- **`/login`**: email + senha. Após login → `/minha-conta`.
-- **`/inscricao`**: form com Nome do time, Sigla (3-4 letras maiúsculas), upload do escudo (preview + upload para `team-logos/{user_id}/{filename}`), tipo (radio Mandante/Visitante). Validação Zod. Lógica de submit:
-  1. Conta `teams` aprovados do mesmo `registration_type`.
-  2. Se ≥ 40 → insere com `status='waitlist'` e exibe toast "Vagas de [tipo] esgotadas — você entrou na sala de espera".
-  3. Caso contrário → `status='pending'`, mensagem "Time enviado para análise".
-  4. Bloqueia se o gestor já tem time cadastrado.
-- **`/minha-conta`**: lê o time do gestor, exibe card com escudo, nome, sigla, tipo e badge de status colorido (Em análise / Aprovado / Rejeitado / Sala de espera). Se rejeitado, mostra `rejected_reason`. Botão "Editar" se `pending`/`waitlist`.
+RLS:
+- `select` público apenas das colunas não sensíveis (via view `public_athletes` ou policy direta — colunas `cpf_hash`/`whatsapp` ficam ocultas no client lendo apenas via server fn).
+- `insert/update` pelo manager do time (`teams.manager_id = auth.uid()`).
+- `update` pelo próprio atleta após verificação (`user_id = auth.uid()`).
+- `all` para admin.
 
-## 5. Auth
+Trigger `updated_at`.
 
-- Listener `onAuthStateChange` no `__root.tsx` invalidando router + react-query.
-- Guard `_authenticated.tsx` com `beforeLoad` checando `supabase.auth.getUser()`.
-- Hook `useCurrentUser()` em `src/hooks/`.
+## 2. Server functions (`src/lib/athletes.functions.ts`)
 
-## 6. Validação e segurança
+- `preRegisterAthletes({ cpfs: string[] })` — manager do time autenticado; valida cada CPF (dígito verificador), gera bcrypt hash, insere `athletes` com `team_id = time do manager`, `verified=false`. Retorna `{ created, skipped_duplicates }`.
+- `findAthleteByCpf({ cpf })` — público; valida CPF, busca por `cpf_last4`, faz `bcrypt.compare` nos candidatos, retorna atleta SEM `cpf_hash` ou 404.
+- `verifyAthlete({ cpf, photo_url, whatsapp, instagram })` — autenticado; valida + bcrypt.compare, seta `verified=true`, `verified_at=now()`, `user_id=auth.uid()`, grava dados.
+- `listTeamAthletes({ team_id })` — manager do time ou admin.
 
-- Zod schemas para todos os forms (CPF 11 dígitos, telefone, sigla regex `^[A-Z]{3,4}$`, tamanho do upload ≤ 2MB, mime `image/*`).
-- Contagem de vagas feita server-side via `createServerFn` com `requireSupabaseAuth` para evitar race conditions no cliente; alternativa simples nesta primeira versão: contagem + insert no client com RLS (aceitável MVP — anotar para reforçar depois com unique partial index ou função RPC).
+Validação Zod em todos. CPF helpers em `src/lib/cpf.ts` (mascara, valida dígito).
+
+Dependência: `bun add bcryptjs` (puro JS, compatível com Worker).
+
+## 3. Componentes UI
+
+`src/components/athletes/`:
+- `VerifiedSeal.tsx` — círculo `#007BFF` com check branco, absolute bottom-right do avatar container. Props: `size`.
+- `Avatar.tsx` (ou estende shadcn) — exibe foto OU iniciais em Bebas Neue + Selo se `verified`.
+- `AtletaCard.tsx` — card escuro com avatar+selo, apelido, time, posição, stats placeholder (0 gols / 0 assist enquanto não temos `goals`/`assists`).
+- `IDMetropoleCard.tsx` — cartão visual do perfil completo do atleta (usado em modal e em `/perfil-atleta`).
+
+## 4. Páginas
+
+- `src/routes/atletas.tsx` (pública) — grid de `AtletaCard` lendo todos os atletas; sub-tabs preparadas (Artilharia/Assistências/Nota — desabilitadas com chip "em breve" até existir tabela `goals`). Clique abre modal com `IDMetropoleCard`.
+- `src/routes/verificar.tsx` (pública) — input de CPF com máscara, validação no submit, chama `findAthleteByCpf`. Se achado: exibe dados pré-cadastrados, formulário (upload foto via bucket `team-logos` ou novo bucket `athletes`, whatsapp, instagram), botão "Ativar meu ID Metropole" que chama `verifyAthlete`. Toast de sucesso → redirect `/atletas`.
+- `src/routes/_authenticated/minha-conta.tsx` (edição) — adicionar seção "Pré-cadastrar atletas (CPFs)": textarea com 1 CPF por linha, botão chama `preRegisterAthletes`. Lista atletas do time com chip verde/âmbar (Verificado / Pendente).
+
+Sidebar (`AppSidebar.tsx`): adicionar item público "Atletas" → `/atletas`. Adicionar "Verificar ID" no header público.
+
+## 5. Storage
+
+Novo bucket público `athlete-photos` (path `{athlete_id}/{filename}`), policy: insert pelo `user_id` do atleta verificado OU manager do time. Limite 2MB, mime `image/*`.
+
+## 6. Migration de seed (opcional)
+
+Não inserir dados fake automaticamente — apenas script comentado em SQL anexado para o admin testar.
+
+---
 
 ## Detalhes técnicos
 
-- **Stack**: TanStack Start + React 19 + Tailwind v4 + shadcn/ui + Lovable Cloud.
-- **Roles**: nunca em `profiles` — sempre em `user_roles` + `has_role()` SECURITY DEFINER (padrão Lovable obrigatório).
-- **Storage**: bucket `team-logos` público; path `{auth.uid()}/{timestamp}-{filename}`; policy de INSERT/UPDATE/DELETE restrita ao próprio uid via `(storage.foldername(name))[1] = auth.uid()::text`.
-- **Trigger profile**: lê `new.raw_user_meta_data->>'full_name'`, `'phone'`, `'cpf'`. Signup deve passar esses campos em `options.data`.
-- **Tema**: `<html class="dark">` fixo (sem toggle nesta etapa).
-- **Não incluído nesta etapa**: painel admin de aprovação, gestão de atletas, partidas, pagamentos — escopo de iterações futuras.
+- `bcryptjs` (não `bcrypt` nativo) por causa do runtime Worker.
+- `cpf_last4` é necessário porque bcrypt não permite busca direta — usamos `last4` como índice e fazemos compare nos candidatos. Caso de colisão raríssimo (≤10 candidatos).
+- `findAthleteByCpf` é público, não usa `requireSupabaseAuth`; chama `supabaseAdmin` internamente mas só retorna campos seguros (`id, nickname, full_name, team_id, position, verified`).
+- `verifyAthlete` exige sessão autenticada (usuário logado quer vincular o atleta a si).
+- Atualizar `src/integrations/supabase/types.ts` é automático após migration aprovada.
+- Rotas dentro de `_authenticated/admin/*` continuam intactas.
 
-## Próximas iterações sugeridas
+## Ordem de execução após aprovação
 
-- Painel admin (`/admin`) para aprovar/rejeitar times.
-- Função RPC com lock para garantir o limite de 40 sem race condition.
-- Email transacional ao mudar status do time.
+1. Migration (tabela + RLS + bucket + policies).
+2. `bun add bcryptjs @types/bcryptjs`.
+3. `src/lib/cpf.ts` + `src/lib/athletes.functions.ts`.
+4. Componentes (`VerifiedSeal`, `AtletaCard`, `IDMetropoleCard`).
+5. Rotas `/atletas` e `/verificar` + sidebar.
+6. Seção de pré-cadastro em `/minha-conta`.
+7. Verificação manual no preview.
+
+## Itens NÃO incluídos (intencionalmente)
+
+- Cor base ainda `#1A1A1A` (refresh visual fica para outra fase).
+- Sem `goals`/`assists`/`fair_play` — stats no card mostram 0/em breve.
+- Sem realtime nem notificações.
+- Sem mudança no fluxo de sorteio/triagem existente.
