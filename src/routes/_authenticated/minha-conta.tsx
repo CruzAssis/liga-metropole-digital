@@ -120,6 +120,8 @@ function MinhaContaPage() {
           </div>
         )}
       </div>
+
+      {team.status === "approved" && <TeamAthletesSection />}
     </div>
   );
 }
