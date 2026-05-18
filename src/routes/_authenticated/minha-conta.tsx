@@ -92,6 +92,13 @@ function MinhaContaPage() {
 
       {team?.status === "approved" && (
         <>
+          <TeamCustomizationCard
+            teamId={team.id}
+            logoUrl={team.logo_url}
+            bannerUrl={team.banner_url}
+            primaryColor={team.primary_color}
+            onSaved={loadTeam}
+          />
           <TeamAthletesSection />
           <TeamMatchesSection />
         </>
