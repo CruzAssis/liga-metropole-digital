@@ -276,6 +276,8 @@ export const fillSumula = createServerFn({ method: "POST" })
     }
 
     return { success: true };
+  });
+
 
 // =============================================================
 // Confirm (visitante)
