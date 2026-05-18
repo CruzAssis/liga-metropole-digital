@@ -9,6 +9,7 @@
 // Additionally, you should also exclude this file from your linter and/or formatter to prevent it from being checked or modified.
 
 import { Route as rootRouteImport } from './routes/__root'
+import { Route as VerificarRouteImport } from './routes/verificar'
 import { Route as SignupRouteImport } from './routes/signup'
 import { Route as LoginRouteImport } from './routes/login'
 import { Route as AtletasRouteImport } from './routes/atletas'
@@ -21,6 +22,11 @@ import { Route as AuthenticatedAdminTriagemRouteImport } from './routes/_authent
 import { Route as AuthenticatedAdminSorteioRouteImport } from './routes/_authenticated/admin/sorteio'
 import { Route as AuthenticatedAdminDashboardRouteImport } from './routes/_authenticated/admin/dashboard'
 
+const VerificarRoute = VerificarRouteImport.update({
+  id: '/verificar',
+  path: '/verificar',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const SignupRoute = SignupRouteImport.update({
   id: '/signup',
   path: '/signup',
@@ -84,6 +90,7 @@ export interface FileRoutesByFullPath {
   '/atletas': typeof AtletasRoute
   '/login': typeof LoginRoute
   '/signup': typeof SignupRoute
+  '/verificar': typeof VerificarRoute
   '/admin': typeof AuthenticatedAdminRouteWithChildren
   '/inscricao': typeof AuthenticatedInscricaoRoute
   '/minha-conta': typeof AuthenticatedMinhaContaRoute
@@ -96,6 +103,7 @@ export interface FileRoutesByTo {
   '/atletas': typeof AtletasRoute
   '/login': typeof LoginRoute
   '/signup': typeof SignupRoute
+  '/verificar': typeof VerificarRoute
   '/admin': typeof AuthenticatedAdminRouteWithChildren
   '/inscricao': typeof AuthenticatedInscricaoRoute
   '/minha-conta': typeof AuthenticatedMinhaContaRoute
@@ -110,6 +118,7 @@ export interface FileRoutesById {
   '/atletas': typeof AtletasRoute
   '/login': typeof LoginRoute
   '/signup': typeof SignupRoute
+  '/verificar': typeof VerificarRoute
   '/_authenticated/admin': typeof AuthenticatedAdminRouteWithChildren
   '/_authenticated/inscricao': typeof AuthenticatedInscricaoRoute
   '/_authenticated/minha-conta': typeof AuthenticatedMinhaContaRoute
@@ -124,6 +133,7 @@ export interface FileRouteTypes {
     | '/atletas'
     | '/login'
     | '/signup'
+    | '/verificar'
     | '/admin'
     | '/inscricao'
     | '/minha-conta'
@@ -136,6 +146,7 @@ export interface FileRouteTypes {
     | '/atletas'
     | '/login'
     | '/signup'
+    | '/verificar'
     | '/admin'
     | '/inscricao'
     | '/minha-conta'
@@ -149,6 +160,7 @@ export interface FileRouteTypes {
     | '/atletas'
     | '/login'
     | '/signup'
+    | '/verificar'
     | '/_authenticated/admin'
     | '/_authenticated/inscricao'
     | '/_authenticated/minha-conta'
@@ -163,10 +175,18 @@ export interface RootRouteChildren {
   AtletasRoute: typeof AtletasRoute
   LoginRoute: typeof LoginRoute
   SignupRoute: typeof SignupRoute
+  VerificarRoute: typeof VerificarRoute
 }
 
 declare module '@tanstack/react-router' {
   interface FileRoutesByPath {
+    '/verificar': {
+      id: '/verificar'
+      path: '/verificar'
+      fullPath: '/verificar'
+      preLoaderRoute: typeof VerificarRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/signup': {
       id: '/signup'
       path: '/signup'
@@ -284,7 +304,18 @@ const rootRouteChildren: RootRouteChildren = {
   AtletasRoute: AtletasRoute,
   LoginRoute: LoginRoute,
   SignupRoute: SignupRoute,
+  VerificarRoute: VerificarRoute,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)
   ._addFileTypes<FileRouteTypes>()
+
+import type { getRouter } from './router.tsx'
+import type { startInstance } from './start.ts'
+declare module '@tanstack/react-start' {
+  interface Register {
+    ssr: true
+    router: Awaited<ReturnType<typeof getRouter>>
+    config: Awaited<ReturnType<typeof startInstance.getOptions>>
+  }
+}
