@@ -269,6 +269,30 @@ export type Database = {
           },
         ]
       }
+      notification_log: {
+        Row: {
+          id: string
+          kind: string
+          match_id: string
+          sent_at: string
+          user_id: string
+        }
+        Insert: {
+          id?: string
+          kind: string
+          match_id: string
+          sent_at?: string
+          user_id: string
+        }
+        Update: {
+          id?: string
+          kind?: string
+          match_id?: string
+          sent_at?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
       profiles: {
         Row: {
           avatar_url: string | null
@@ -307,6 +331,7 @@ export type Database = {
           registration_type: string
           rejected_reason: string | null
           short_name: string
+          slug: string | null
           status: string
         }
         Insert: {
@@ -319,6 +344,7 @@ export type Database = {
           registration_type: string
           rejected_reason?: string | null
           short_name: string
+          slug?: string | null
           status?: string
         }
         Update: {
@@ -331,6 +357,7 @@ export type Database = {
           registration_type?: string
           rejected_reason?: string | null
           short_name?: string
+          slug?: string | null
           status?: string
         }
         Relationships: [
