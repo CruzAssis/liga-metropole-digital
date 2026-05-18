@@ -78,12 +78,75 @@ export const listMyTeamMatches = createServerFn({ method: "GET" })
   });
 
 // =============================================================
-// Fill score (mandante)
+// Sumula context (rosters + current events) for the fill form
 // =============================================================
+export const getSumulaContext = createServerFn({ method: "POST" })
+  .middleware([requireSupabaseAuth])
+  .inputValidator((input) => z.object({ matchId: z.string().uuid() }).parse(input))
+  .handler(async ({ data, context }) => {
+    const { userId } = context;
+
+    const { data: match } = await supabaseAdmin
+      .from("matches")
+      .select("id, host_team_id, visitor_team_id, host_score, visitor_score, status")
+      .eq("id", data.matchId)
+      .maybeSingle();
+    if (!match) throw new Response("Jogo não encontrado", { status: 404 });
+
+    const { data: teams } = await supabaseAdmin
+      .from("teams")
+      .select("id, name, short_name, manager_id")
+      .in("id", [match.host_team_id, match.visitor_team_id]);
+    const host = teams?.find((t) => t.id === match.host_team_id);
+    const visitor = teams?.find((t) => t.id === match.visitor_team_id);
+    const isHostManager = host?.manager_id === userId;
+    const isVisitorManager = visitor?.manager_id === userId;
+    const { data: roleRow } = await supabaseAdmin
+      .from("user_roles").select("role").eq("user_id", userId).eq("role", "admin").maybeSingle();
+    const isAdmin = !!roleRow;
+    if (!isHostManager && !isVisitorManager && !isAdmin) {
+      throw new Response(JSON.stringify({ error: "Sem permissão" }), { status: 403 });
+    }
+
+    const { data: athletes } = await supabaseAdmin
+      .from("athletes")
+      .select("id, full_name, nickname, team_id")
+      .in("team_id", [match.host_team_id, match.visitor_team_id])
+      .order("full_name");
+
+    const { data: events } = await supabaseAdmin
+      .from("match_events")
+      .select("id, team_id, athlete_id, kind, minute")
+      .eq("match_id", data.matchId)
+      .order("minute", { ascending: true, nullsFirst: false });
+
+    return {
+      match,
+      host: host ? { id: host.id, name: host.name, short_name: host.short_name } : null,
+      visitor: visitor ? { id: visitor.id, name: visitor.name, short_name: visitor.short_name } : null,
+      isHostManager,
+      isVisitorManager,
+      hostAthletes: (athletes ?? []).filter((a) => a.team_id === match.host_team_id),
+      visitorAthletes: (athletes ?? []).filter((a) => a.team_id === match.visitor_team_id),
+      events: events ?? [],
+    };
+  });
+
+// =============================================================
+// Fill score + events (mandante)
+// =============================================================
+const eventSchema = z.object({
+  team_id: z.string().uuid(),
+  athlete_id: z.string().uuid(),
+  kind: z.enum(["goal", "yellow_card", "red_card"]),
+  minute: z.number().int().min(0).max(200).nullable().optional(),
+});
+
 const fillSchema = z.object({
   matchId: z.string().uuid(),
   hostScore: z.number().int().min(0).max(50),
   visitorScore: z.number().int().min(0).max(50),
+  events: z.array(eventSchema).max(200).optional(),
 });
 
 export const fillSumula = createServerFn({ method: "POST" })
@@ -94,7 +157,7 @@ export const fillSumula = createServerFn({ method: "POST" })
 
     const { data: match, error: mErr } = await supabaseAdmin
       .from("matches")
-      .select("id, status, host_team_id")
+      .select("id, status, host_team_id, visitor_team_id")
       .eq("id", data.matchId)
       .maybeSingle();
     if (mErr) throw new Error(mErr.message);
@@ -114,6 +177,59 @@ export const fillSumula = createServerFn({ method: "POST" })
         JSON.stringify({ error: "Apenas o mandante pode preencher a súmula" }),
         { status: 403 },
       );
+    }
+
+    const events = data.events ?? [];
+    const validTeamIds = new Set([match.host_team_id, match.visitor_team_id]);
+    for (const ev of events) {
+      if (!validTeamIds.has(ev.team_id)) {
+        throw new Response(JSON.stringify({ error: "Evento de time inválido" }), { status: 400 });
+      }
+    }
+    const hostGoals = events.filter((e) => e.kind === "goal" && e.team_id === match.host_team_id).length;
+    const visitorGoals = events.filter((e) => e.kind === "goal" && e.team_id === match.visitor_team_id).length;
+    if (events.length > 0 && (hostGoals !== data.hostScore || visitorGoals !== data.visitorScore)) {
+      throw new Response(
+        JSON.stringify({
+          error: `Gols informados (${hostGoals}×${visitorGoals}) não batem com o placar (${data.hostScore}×${data.visitorScore})`,
+        }),
+        { status: 400 },
+      );
+    }
+
+    // Confirma que cada atleta pertence ao time do evento
+    const athleteIds = Array.from(new Set(events.map((e) => e.athlete_id)));
+    if (athleteIds.length > 0) {
+      const { data: athletes } = await supabaseAdmin
+        .from("athletes")
+        .select("id, team_id")
+        .in("id", athleteIds);
+      const athleteTeam = new Map((athletes ?? []).map((a) => [a.id, a.team_id]));
+      for (const ev of events) {
+        if (athleteTeam.get(ev.athlete_id) !== ev.team_id) {
+          throw new Response(JSON.stringify({ error: "Atleta não pertence ao time do evento" }), { status: 400 });
+        }
+      }
+    }
+
+    // Reescreve eventos do jogo
+    const { error: delErr } = await supabaseAdmin
+      .from("match_events")
+      .delete()
+      .eq("match_id", data.matchId);
+    if (delErr) throw new Error(delErr.message);
+
+    if (events.length > 0) {
+      const { error: insErr } = await supabaseAdmin.from("match_events").insert(
+        events.map((e) => ({
+          match_id: data.matchId,
+          team_id: e.team_id,
+          athlete_id: e.athlete_id,
+          kind: e.kind,
+          minute: e.minute ?? null,
+        })),
+      );
+      if (insErr) throw new Error(insErr.message);
     }
 
     const { error: updErr } = await supabaseAdmin
