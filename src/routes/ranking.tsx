@@ -1,5 +1,5 @@
 import { createFileRoute } from "@tanstack/react-router";
-import { useEffect, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { PublicShell } from "@/components/PublicShell";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
@@ -14,9 +14,17 @@ type Match = {
   stage: string;
 };
 
+type Team = {
+  id: string;
+  name: string;
+  short_name: string;
+  registration_type: "host" | "visitor";
+};
+
 type Standing = {
   team_id: string;
   team_name: string;
+  short_name: string;
   played: number;
   wins: number;
   draws: number;
@@ -27,7 +35,7 @@ type Standing = {
   points: number;
 };
 
-const FINISHED = ["confirmed", "wo_host", "wo_visitor"];
+const FINISHED = ["confirmed", "wo"];
 
 export const Route = createFileRoute("/ranking")({
   component: RankingPage,
@@ -39,13 +47,15 @@ export const Route = createFileRoute("/ranking")({
   }),
 });
 
-function computeStandings(matches: Match[], teamNames: Map<string, string>): Standing[] {
+function computeStandings(matches: Match[], teams: Map<string, Team>): Standing[] {
   const t = new Map<string, Standing>();
   const ensure = (id: string) => {
     if (!t.has(id)) {
+      const team = teams.get(id);
       t.set(id, {
         team_id: id,
-        team_name: teamNames.get(id) ?? "—",
+        team_name: team?.name ?? "—",
+        short_name: team?.short_name ?? "—",
         played: 0, wins: 0, draws: 0, losses: 0, gf: 0, ga: 0, gd: 0, points: 0,
       });
     }
@@ -67,23 +77,23 @@ function computeStandings(matches: Match[], teamNames: Map<string, string>): Sta
 
   return Array.from(t.values())
     .map((s) => ({ ...s, gd: s.gf - s.ga }))
-    .sort((a, b) => b.points - a.points || b.gd - a.gd || b.gf - a.gf);
+    .sort((a, b) => b.points - a.points || b.gd - a.gd || b.gf - a.gf || a.team_name.localeCompare(b.team_name));
 }
 
 function StandingsTable({ rows }: { rows: Standing[] }) {
   if (rows.length === 0) {
     return (
-      <div className="rounded-lg border border-border bg-card p-8 text-center text-muted-foreground">
+      <div className="rounded-md border border-border bg-card p-6 text-center text-sm text-muted-foreground">
         Sem partidas confirmadas neste grupo.
       </div>
     );
   }
   return (
-    <div className="rounded-lg border border-border bg-card overflow-x-auto">
+    <div className="rounded-md border border-border bg-card overflow-x-auto">
       <table className="w-full text-sm">
         <thead className="text-xs uppercase text-muted-foreground border-b border-border">
           <tr>
-            <th className="text-left p-3">#</th>
+            <th className="text-left p-3 w-8">#</th>
             <th className="text-left p-3">Time</th>
             <th className="text-center p-2">P</th>
             <th className="text-center p-2">J</th>
@@ -98,16 +108,19 @@ function StandingsTable({ rows }: { rows: Standing[] }) {
         <tbody>
           {rows.map((r, i) => (
             <tr key={r.team_id} className="border-b border-border last:border-0">
-              <td className="p-3 text-muted-foreground">{i + 1}</td>
-              <td className="p-3 font-medium">{r.team_name}</td>
-              <td className="text-center p-2 font-bold text-primary">{r.points}</td>
-              <td className="text-center p-2">{r.played}</td>
-              <td className="text-center p-2">{r.wins}</td>
-              <td className="text-center p-2">{r.draws}</td>
-              <td className="text-center p-2">{r.losses}</td>
-              <td className="text-center p-2">{r.gf}</td>
-              <td className="text-center p-2">{r.ga}</td>
-              <td className="text-center p-2">{r.gd}</td>
+              <td className="p-3 text-muted-foreground tabular-nums">{i + 1}</td>
+              <td className="p-3 font-medium">
+                <span className="hidden sm:inline">{r.team_name}</span>
+                <span className="sm:hidden font-mono">{r.short_name}</span>
+              </td>
+              <td className="text-center p-2 font-bold text-primary tabular-nums">{r.points}</td>
+              <td className="text-center p-2 tabular-nums">{r.played}</td>
+              <td className="text-center p-2 tabular-nums">{r.wins}</td>
+              <td className="text-center p-2 tabular-nums">{r.draws}</td>
+              <td className="text-center p-2 tabular-nums">{r.losses}</td>
+              <td className="text-center p-2 tabular-nums">{r.gf}</td>
+              <td className="text-center p-2 tabular-nums">{r.ga}</td>
+              <td className="text-center p-2 tabular-nums">{r.gd}</td>
             </tr>
           ))}
         </tbody>
@@ -116,10 +129,47 @@ function StandingsTable({ rows }: { rows: Standing[] }) {
   );
 }
 
+function ConferenceView({
+  matches,
+  teams,
+}: {
+  matches: Match[];
+  teams: Map<string, Team>;
+}) {
+  // Group matches by group_label
+  const groups = useMemo(() => {
+    const m = new Map<string, Match[]>();
+    for (const match of matches) {
+      const key = match.group_label ?? "—";
+      if (!m.has(key)) m.set(key, []);
+      m.get(key)!.push(match);
+    }
+    return Array.from(m.entries()).sort((a, b) => a[0].localeCompare(b[0]));
+  }, [matches]);
+
+  if (groups.length === 0) {
+    return (
+      <div className="rounded-lg border border-border bg-card p-8 text-center text-muted-foreground">
+        Nenhum jogo confirmado nesta conferência.
+      </div>
+    );
+  }
+
+  return (
+    <div className="space-y-6">
+      {groups.map(([label, list]) => (
+        <div key={label}>
+          <h3 className="font-display text-xl tracking-wide mb-2">Grupo {label}</h3>
+          <StandingsTable rows={computeStandings(list, teams)} />
+        </div>
+      ))}
+    </div>
+  );
+}
+
 function RankingPage() {
   const [matches, setMatches] = useState<Match[] | null>(null);
-  const [teams, setTeams] = useState<Map<string, string>>(new Map());
-  const [teamRoles, setTeamRoles] = useState<Map<string, string>>(new Map());
+  const [teams, setTeams] = useState<Map<string, Team>>(new Map());
 
   useEffect(() => {
     (async () => {
@@ -136,29 +186,24 @@ function RankingPage() {
       if (ids.length > 0) {
         const { data: tdata } = await supabase
           .from("teams")
-          .select("id, name, registration_type")
+          .select("id, name, short_name, registration_type")
           .in("id", ids);
-        const nameMap = new Map<string, string>();
-        const roleMap = new Map<string, string>();
-        for (const t of tdata ?? []) {
-          nameMap.set(t.id, t.name);
-          roleMap.set(t.id, t.registration_type);
-        }
-        setTeams(nameMap);
-        setTeamRoles(roleMap);
+        const map = new Map<string, Team>();
+        for (const t of (tdata ?? []) as Team[]) map.set(t.id, t);
+        setTeams(map);
       }
     })();
   }, []);
 
-  const hostMatches = matches?.filter((m) => teamRoles.get(m.host_team_id) === "host") ?? [];
-  const visitorMatches = matches?.filter((m) => teamRoles.get(m.host_team_id) === "visitor") ?? [];
+  const hostMatches = matches?.filter((m) => teams.get(m.host_team_id)?.registration_type === "host") ?? [];
+  const visitorMatches = matches?.filter((m) => teams.get(m.host_team_id)?.registration_type === "visitor") ?? [];
 
   return (
     <PublicShell>
       <header className="mb-6">
         <h1 className="font-display text-5xl tracking-wide">Ranking</h1>
         <p className="text-muted-foreground mt-1">
-          Classificação por pontos · fase de grupos.
+          Classificação por pontos · fase de grupos. P=Pontos · J=Jogos · V/E/D · GP/GC/SG.
         </p>
       </header>
 
@@ -167,14 +212,14 @@ function RankingPage() {
       {matches && (
         <Tabs defaultValue="mandantes">
           <TabsList>
-            <TabsTrigger value="mandantes">Mandantes</TabsTrigger>
-            <TabsTrigger value="visitantes">Visitantes</TabsTrigger>
+            <TabsTrigger value="mandantes">Conferência Mandantes</TabsTrigger>
+            <TabsTrigger value="visitantes">Conferência Visitantes</TabsTrigger>
           </TabsList>
           <TabsContent value="mandantes" className="mt-4">
-            <StandingsTable rows={computeStandings(hostMatches, teams)} />
+            <ConferenceView matches={hostMatches} teams={teams} />
           </TabsContent>
           <TabsContent value="visitantes" className="mt-4">
-            <StandingsTable rows={computeStandings(visitorMatches, teams)} />
+            <ConferenceView matches={visitorMatches} teams={teams} />
           </TabsContent>
         </Tabs>
       )}
