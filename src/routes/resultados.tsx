@@ -18,7 +18,7 @@ type Match = {
   status: string;
 };
 
-const FINISHED = ["confirmed", "wo_host", "wo_visitor"];
+const FINISHED = ["confirmed", "wo"];
 
 export const Route = createFileRoute("/resultados")({
   component: ResultadosPage,
@@ -72,7 +72,7 @@ function ResultadosPage() {
 
       <div className="space-y-3">
         {matches?.map((m) => {
-          const isWO = m.status === "wo_host" || m.status === "wo_visitor";
+          const isWO = m.status === "wo";
           return (
             <div
               key={m.id}
