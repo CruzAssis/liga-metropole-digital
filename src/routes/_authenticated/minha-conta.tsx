@@ -6,6 +6,7 @@ import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { ClipboardList } from "lucide-react";
 import { TeamAthletesSection } from "@/components/athletes/TeamAthletesSection";
+import { TeamMatchesSection } from "@/components/matches/TeamMatchesSection";
 
 type Team = {
   id: string;
@@ -121,7 +122,12 @@ function MinhaContaPage() {
         )}
       </div>
 
-      {team.status === "approved" && <TeamAthletesSection />}
+      {team.status === "approved" && (
+        <>
+          <TeamAthletesSection />
+          <TeamMatchesSection />
+        </>
+      )}
     </div>
   );
 }
