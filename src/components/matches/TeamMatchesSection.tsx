@@ -213,11 +213,10 @@ function MatchCard({ match }: { match: Match }) {
             <>
               <Button
                 size="sm"
-                onClick={() => confirmMut.mutate()}
-                disabled={confirmMut.isPending}
+                onClick={() => setConfirmOpen(true)}
                 className="gap-1"
               >
-                <CheckCircle2 className="h-4 w-4" /> Confirmar
+                <CheckCircle2 className="h-4 w-4" /> Confirmar súmula
               </Button>
               <Button
                 size="sm"
@@ -238,6 +237,13 @@ function MatchCard({ match }: { match: Match }) {
           matchId={match.id}
           open={sumulaOpen}
           onOpenChange={setSumulaOpen}
+        />
+      )}
+      {confirmOpen && (
+        <ConfirmSumulaDialog
+          matchId={match.id}
+          open={confirmOpen}
+          onOpenChange={setConfirmOpen}
         />
       )}
     </div>
