@@ -76,26 +76,37 @@ export function SumulaDialog({
     );
   }, [data]);
 
+  const hostId = data?.host?.id;
+  const visitorId = data?.visitor?.id;
+  const validEvents = events.filter((e) => e.team_id && e.athlete_id);
+  const hostGoals = validEvents.filter((e) => e.kind === "goal" && e.team_id === hostId).length;
+  const visitorGoals = validEvents.filter((e) => e.kind === "goal" && e.team_id === visitorId).length;
+  const hScoreNum = parseInt(hostScore, 10);
+  const vScoreNum = parseInt(visitorScore, 10);
+  const scoreValid = !Number.isNaN(hScoreNum) && !Number.isNaN(vScoreNum) && hScoreNum >= 0 && vScoreNum >= 0;
+  const goalsMatch = hostGoals === hScoreNum && visitorGoals === vScoreNum;
+  const hasIncompleteEvent = events.some((e) => !e.athlete_id);
+
   const mut = useMutation({
     mutationFn: async () => {
-      const h = parseInt(hostScore, 10);
-      const v = parseInt(visitorScore, 10);
-      if (Number.isNaN(h) || Number.isNaN(v) || h < 0 || v < 0) {
-        throw new Error("Placar inválido");
+      if (!scoreValid) throw new Error("Placar inválido");
+      if (hasIncompleteEvent) throw new Error("Selecione o atleta em todos os eventos lançados");
+      if (!goalsMatch) {
+        throw new Error(
+          `Gols lançados (${hostGoals}×${visitorGoals}) não batem com o placar (${hScoreNum}×${vScoreNum})`,
+        );
       }
       return fillFn({
         data: {
           matchId,
-          hostScore: h,
-          visitorScore: v,
-          events: events
-            .filter((e) => e.team_id && e.athlete_id)
-            .map((e) => ({
-              team_id: e.team_id,
-              athlete_id: e.athlete_id,
-              kind: e.kind,
-              minute: e.minute === "" ? null : parseInt(e.minute, 10),
-            })),
+          hostScore: hScoreNum,
+          visitorScore: vScoreNum,
+          events: validEvents.map((e) => ({
+            team_id: e.team_id,
+            athlete_id: e.athlete_id,
+            kind: e.kind,
+            minute: e.minute === "" ? null : parseInt(e.minute, 10),
+          })),
         },
       });
     },
@@ -172,6 +183,18 @@ export function SumulaDialog({
               />
             )}
 
+            {canEdit && scoreValid && !goalsMatch && (
+              <div className="rounded-md border border-destructive/40 bg-destructive/10 px-3 py-2 text-xs text-destructive">
+                Gols lançados ({hostGoals}×{visitorGoals}) não batem com o placar ({hScoreNum}×{vScoreNum}).
+                Ajuste o placar ou os eventos de gol antes de enviar.
+              </div>
+            )}
+            {canEdit && hasIncompleteEvent && (
+              <div className="rounded-md border border-amber-500/40 bg-amber-500/10 px-3 py-2 text-xs text-amber-700 dark:text-amber-300">
+                Há eventos sem atleta selecionado.
+              </div>
+            )}
+
             {!canEdit && (
               <p className="text-xs text-muted-foreground">
                 Apenas o mandante pode editar a súmula. Status atual: {data.match.status}.
@@ -185,7 +208,10 @@ export function SumulaDialog({
             Fechar
           </Button>
           {canEdit && (
-            <Button onClick={() => mut.mutate()} disabled={mut.isPending}>
+            <Button
+              onClick={() => mut.mutate()}
+              disabled={mut.isPending || !scoreValid || !goalsMatch || hasIncompleteEvent}
+            >
               {mut.isPending ? "Enviando..." : "Enviar súmula"}
             </Button>
           )}
