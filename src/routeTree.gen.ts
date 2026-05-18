@@ -20,6 +20,7 @@ import { Route as AtletasRouteImport } from './routes/atletas'
 import { Route as AgendaRouteImport } from './routes/agenda'
 import { Route as AuthenticatedRouteImport } from './routes/_authenticated'
 import { Route as IndexRouteImport } from './routes/index'
+import { Route as TimesSlugRouteImport } from './routes/times.$slug'
 import { Route as AuthenticatedMinhaContaRouteImport } from './routes/_authenticated/minha-conta'
 import { Route as AuthenticatedInscricaoRouteImport } from './routes/_authenticated/inscricao'
 import { Route as AuthenticatedAdminRouteImport } from './routes/_authenticated/admin'
@@ -83,6 +84,11 @@ const IndexRoute = IndexRouteImport.update({
   path: '/',
   getParentRoute: () => rootRouteImport,
 } as any)
+const TimesSlugRoute = TimesSlugRouteImport.update({
+  id: '/$slug',
+  path: '/$slug',
+  getParentRoute: () => TimesRoute,
+} as any)
 const AuthenticatedMinhaContaRoute = AuthenticatedMinhaContaRouteImport.update({
   id: '/minha-conta',
   path: '/minha-conta',
@@ -138,11 +144,12 @@ export interface FileRoutesByFullPath {
   '/ranking': typeof RankingRoute
   '/resultados': typeof ResultadosRoute
   '/signup': typeof SignupRoute
-  '/times': typeof TimesRoute
+  '/times': typeof TimesRouteWithChildren
   '/verificar': typeof VerificarRoute
   '/admin': typeof AuthenticatedAdminRouteWithChildren
   '/inscricao': typeof AuthenticatedInscricaoRoute
   '/minha-conta': typeof AuthenticatedMinhaContaRoute
+  '/times/$slug': typeof TimesSlugRoute
   '/admin/dashboard': typeof AuthenticatedAdminDashboardRoute
   '/admin/sorteio': typeof AuthenticatedAdminSorteioRoute
   '/admin/sumulas': typeof AuthenticatedAdminSumulasRoute
@@ -158,11 +165,12 @@ export interface FileRoutesByTo {
   '/ranking': typeof RankingRoute
   '/resultados': typeof ResultadosRoute
   '/signup': typeof SignupRoute
-  '/times': typeof TimesRoute
+  '/times': typeof TimesRouteWithChildren
   '/verificar': typeof VerificarRoute
   '/admin': typeof AuthenticatedAdminRouteWithChildren
   '/inscricao': typeof AuthenticatedInscricaoRoute
   '/minha-conta': typeof AuthenticatedMinhaContaRoute
+  '/times/$slug': typeof TimesSlugRoute
   '/admin/dashboard': typeof AuthenticatedAdminDashboardRoute
   '/admin/sorteio': typeof AuthenticatedAdminSorteioRoute
   '/admin/sumulas': typeof AuthenticatedAdminSumulasRoute
@@ -180,11 +188,12 @@ export interface FileRoutesById {
   '/ranking': typeof RankingRoute
   '/resultados': typeof ResultadosRoute
   '/signup': typeof SignupRoute
-  '/times': typeof TimesRoute
+  '/times': typeof TimesRouteWithChildren
   '/verificar': typeof VerificarRoute
   '/_authenticated/admin': typeof AuthenticatedAdminRouteWithChildren
   '/_authenticated/inscricao': typeof AuthenticatedInscricaoRoute
   '/_authenticated/minha-conta': typeof AuthenticatedMinhaContaRoute
+  '/times/$slug': typeof TimesSlugRoute
   '/_authenticated/admin/dashboard': typeof AuthenticatedAdminDashboardRoute
   '/_authenticated/admin/sorteio': typeof AuthenticatedAdminSorteioRoute
   '/_authenticated/admin/sumulas': typeof AuthenticatedAdminSumulasRoute
@@ -207,6 +216,7 @@ export interface FileRouteTypes {
     | '/admin'
     | '/inscricao'
     | '/minha-conta'
+    | '/times/$slug'
     | '/admin/dashboard'
     | '/admin/sorteio'
     | '/admin/sumulas'
@@ -227,6 +237,7 @@ export interface FileRouteTypes {
     | '/admin'
     | '/inscricao'
     | '/minha-conta'
+    | '/times/$slug'
     | '/admin/dashboard'
     | '/admin/sorteio'
     | '/admin/sumulas'
@@ -248,6 +259,7 @@ export interface FileRouteTypes {
     | '/_authenticated/admin'
     | '/_authenticated/inscricao'
     | '/_authenticated/minha-conta'
+    | '/times/$slug'
     | '/_authenticated/admin/dashboard'
     | '/_authenticated/admin/sorteio'
     | '/_authenticated/admin/sumulas'
@@ -265,7 +277,7 @@ export interface RootRouteChildren {
   RankingRoute: typeof RankingRoute
   ResultadosRoute: typeof ResultadosRoute
   SignupRoute: typeof SignupRoute
-  TimesRoute: typeof TimesRoute
+  TimesRoute: typeof TimesRouteWithChildren
   VerificarRoute: typeof VerificarRoute
 }
 
@@ -347,6 +359,13 @@ declare module '@tanstack/react-router' {
       fullPath: '/'
       preLoaderRoute: typeof IndexRouteImport
       parentRoute: typeof rootRouteImport
+    }
+    '/times/$slug': {
+      id: '/times/$slug'
+      path: '/$slug'
+      fullPath: '/times/$slug'
+      preLoaderRoute: typeof TimesSlugRouteImport
+      parentRoute: typeof TimesRoute
     }
     '/_authenticated/minha-conta': {
       id: '/_authenticated/minha-conta'
@@ -442,6 +461,16 @@ const AuthenticatedRouteWithChildren = AuthenticatedRoute._addFileChildren(
   AuthenticatedRouteChildren,
 )
 
+interface TimesRouteChildren {
+  TimesSlugRoute: typeof TimesSlugRoute
+}
+
+const TimesRouteChildren: TimesRouteChildren = {
+  TimesSlugRoute: TimesSlugRoute,
+}
+
+const TimesRouteWithChildren = TimesRoute._addFileChildren(TimesRouteChildren)
+
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
   AuthenticatedRoute: AuthenticatedRouteWithChildren,
@@ -452,19 +481,9 @@ const rootRouteChildren: RootRouteChildren = {
   RankingRoute: RankingRoute,
   ResultadosRoute: ResultadosRoute,
   SignupRoute: SignupRoute,
-  TimesRoute: TimesRoute,
+  TimesRoute: TimesRouteWithChildren,
   VerificarRoute: VerificarRoute,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)
   ._addFileTypes<FileRouteTypes>()
-
-import type { getRouter } from './router.tsx'
-import type { startInstance } from './start.ts'
-declare module '@tanstack/react-start' {
-  interface Register {
-    ssr: true
-    router: Awaited<ReturnType<typeof getRouter>>
-    config: Awaited<ReturnType<typeof startInstance.getOptions>>
-  }
-}

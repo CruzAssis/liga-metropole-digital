@@ -18,7 +18,9 @@ import {
   AlertTriangle,
   FileText,
   Flag,
+  MessageCircle,
 } from "lucide-react";
+import { buildWhatsAppLink } from "@/lib/wa";
 
 const HOURS_TO_CONFIRM = 48;
 
@@ -34,8 +36,8 @@ type Match = {
   venue: string | null;
   host_filled_at: string | null;
   visitor_confirmed_at: string | null;
-  host: { name: string; short_name: string; logo_url: string | null } | null;
-  visitor: { name: string; short_name: string; logo_url: string | null } | null;
+  host: { name: string; short_name: string; slug: string | null; logo_url: string | null; manager_name: string | null; manager_phone: string | null } | null;
+  visitor: { name: string; short_name: string; slug: string | null; logo_url: string | null; manager_name: string | null; manager_phone: string | null } | null;
   is_host: boolean;
 };
 
@@ -188,6 +190,8 @@ function MatchCard({ match }: { match: Match }) {
         </div>
       </div>
 
+      <OpponentContact match={match} />
+
       {match.status === "scheduled" && match.is_host && (
         <FillForm onSubmit={(h, v) => fillMut.mutate({ hostScore: h, visitorScore: v })} loading={fillMut.isPending} />
       )}
@@ -242,6 +246,30 @@ function MatchCard({ match }: { match: Match }) {
           Súmula contestada. A organização vai analisar e decidir.
         </p>
       )}
+    </div>
+  );
+}
+
+function OpponentContact({ match }: { match: Match }) {
+  const opponent = match.is_host ? match.visitor : match.host;
+  if (!opponent || !opponent.manager_phone) return null;
+  const myName = match.is_host ? match.host?.short_name : match.visitor?.short_name;
+  const dateStr = match.scheduled_at
+    ? new Date(match.scheduled_at).toLocaleDateString("pt-BR")
+    : "(data a definir)";
+  const text = `Olá! Sou do ${myName ?? "time"} (Liga Metrópole Várzea). Vamos combinar nosso jogo contra ${opponent.short_name} — ${dateStr}${match.venue ? ` em ${match.venue}` : ""}.`;
+  const link = buildWhatsAppLink(opponent.manager_phone, text);
+  if (!link) return null;
+  return (
+    <div className="mt-3 pt-3 border-t border-border flex items-center justify-between gap-2 text-xs">
+      <span className="text-muted-foreground truncate">
+        Adversário: <span className="font-medium">{opponent.manager_name ?? opponent.name}</span>
+      </span>
+      <Button asChild size="sm" variant="outline" className="gap-1">
+        <a href={link} target="_blank" rel="noreferrer">
+          <MessageCircle className="h-3 w-3" /> Falar no WhatsApp
+        </a>
+      </Button>
     </div>
   );
 }

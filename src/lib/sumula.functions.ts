@@ -39,17 +39,39 @@ export const listMyTeamMatches = createServerFn({ method: "GET" })
     );
     const { data: teams } = await supabaseAdmin
       .from("teams")
-      .select("id, name, short_name, logo_url")
+      .select("id, name, short_name, slug, logo_url, manager_id")
       .in("id", ids);
-    const map: Record<string, { name: string; short_name: string; logo_url: string | null }> = {};
+    const map: Record<string, { name: string; short_name: string; slug: string | null; logo_url: string | null; manager_id: string }> = {};
     for (const t of teams ?? []) map[t.id] = t;
+
+    // Fetch manager profiles (phone) for adversaries
+    const managerIds = Array.from(new Set(Object.values(map).map((t) => t.manager_id).filter(Boolean)));
+    const { data: profiles } = managerIds.length
+      ? await supabaseAdmin.from("profiles").select("id, full_name, phone").in("id", managerIds)
+      : { data: [] as { id: string; full_name: string; phone: string | null }[] };
+    const profileMap: Record<string, { full_name: string; phone: string | null }> = {};
+    for (const p of profiles ?? []) profileMap[p.id] = { full_name: p.full_name, phone: p.phone };
+
+    const hydrate = (teamId: string) => {
+      const t = map[teamId];
+      if (!t) return null;
+      const p = profileMap[t.manager_id];
+      return {
+        name: t.name,
+        short_name: t.short_name,
+        slug: t.slug,
+        logo_url: t.logo_url,
+        manager_name: p?.full_name ?? null,
+        manager_phone: p?.phone ?? null,
+      };
+    };
 
     return {
       team,
       matches: (matches ?? []).map((m) => ({
         ...m,
-        host: map[m.host_team_id] ?? null,
-        visitor: map[m.visitor_team_id] ?? null,
+        host: hydrate(m.host_team_id),
+        visitor: hydrate(m.visitor_team_id),
         is_host: m.host_team_id === team.id,
       })),
     };

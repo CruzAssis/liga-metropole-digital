@@ -1,4 +1,4 @@
-import { createFileRoute } from "@tanstack/react-router";
+import { createFileRoute, Link } from "@tanstack/react-router";
 import { useEffect, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { PublicShell } from "@/components/PublicShell";
@@ -8,6 +8,7 @@ type Team = {
   id: string;
   name: string;
   short_name: string;
+  slug: string | null;
   logo_url: string | null;
   registration_type: string;
 };
@@ -29,7 +30,7 @@ function TimesPage() {
     (async () => {
       const { data } = await supabase
         .from("teams")
-        .select("id, name, short_name, logo_url, registration_type")
+        .select("id, name, short_name, slug, logo_url, registration_type")
         .eq("status", "approved")
         .order("name");
       setTeams(data ?? []);
@@ -65,24 +66,37 @@ function TimesPage() {
                 {group.label} <Badge variant={group.variant}>{group.list.length}</Badge>
               </h2>
               <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
-                {group.list.map((t) => (
-                  <div
-                    key={t.id}
-                    className="flex items-center gap-3 rounded-lg border border-border bg-card p-4"
-                  >
-                    <div className="h-12 w-12 rounded-full bg-muted overflow-hidden flex items-center justify-center">
-                      {t.logo_url ? (
-                        <img src={t.logo_url} alt={t.name} className="h-full w-full object-cover" />
-                      ) : (
-                        <span className="font-display text-lg">{t.short_name?.[0] ?? "?"}</span>
-                      )}
+                {group.list.map((t) => {
+                  const inner = (
+                    <>
+                      <div className="h-12 w-12 rounded-full bg-muted overflow-hidden flex items-center justify-center">
+                        {t.logo_url ? (
+                          <img src={t.logo_url} alt={t.name} className="h-full w-full object-cover" />
+                        ) : (
+                          <span className="font-display text-lg">{t.short_name?.[0] ?? "?"}</span>
+                        )}
+                      </div>
+                      <div className="min-w-0">
+                        <div className="font-medium truncate">{t.name}</div>
+                        <div className="text-xs text-muted-foreground">{t.short_name}</div>
+                      </div>
+                    </>
+                  );
+                  return t.slug ? (
+                    <Link
+                      key={t.id}
+                      to="/times/$slug"
+                      params={{ slug: t.slug }}
+                      className="flex items-center gap-3 rounded-lg border border-border bg-card p-4 hover:bg-accent transition-colors"
+                    >
+                      {inner}
+                    </Link>
+                  ) : (
+                    <div key={t.id} className="flex items-center gap-3 rounded-lg border border-border bg-card p-4">
+                      {inner}
                     </div>
-                    <div className="min-w-0">
-                      <div className="font-medium truncate">{t.name}</div>
-                      <div className="text-xs text-muted-foreground">{t.short_name}</div>
-                    </div>
-                  </div>
-                ))}
+                  );
+                })}
               </div>
             </section>
           ),
