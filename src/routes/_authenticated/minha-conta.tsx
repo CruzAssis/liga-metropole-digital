@@ -5,6 +5,7 @@ import { useAuth } from "@/hooks/use-auth";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { ClipboardList } from "lucide-react";
+import { TeamAthletesSection } from "@/components/athletes/TeamAthletesSection";
 
 type Team = {
   id: string;
