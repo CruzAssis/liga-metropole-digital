@@ -180,6 +180,58 @@ export type Database = {
           },
         ]
       }
+      match_events: {
+        Row: {
+          athlete_id: string
+          created_at: string
+          id: string
+          kind: string
+          match_id: string
+          minute: number | null
+          team_id: string
+        }
+        Insert: {
+          athlete_id: string
+          created_at?: string
+          id?: string
+          kind: string
+          match_id: string
+          minute?: number | null
+          team_id: string
+        }
+        Update: {
+          athlete_id?: string
+          created_at?: string
+          id?: string
+          kind?: string
+          match_id?: string
+          minute?: number | null
+          team_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "match_events_athlete_id_fkey"
+            columns: ["athlete_id"]
+            isOneToOne: false
+            referencedRelation: "athletes"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "match_events_match_id_fkey"
+            columns: ["match_id"]
+            isOneToOne: false
+            referencedRelation: "matches"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "match_events_team_id_fkey"
+            columns: ["team_id"]
+            isOneToOne: false
+            referencedRelation: "teams"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       matches: {
         Row: {
           bracket_position: number | null
