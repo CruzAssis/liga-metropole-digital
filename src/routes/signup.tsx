@@ -14,7 +14,7 @@ import { Trophy } from "lucide-react";
 const schema = z.object({
   full_name: z.string().trim().min(3, "Informe seu nome completo").max(120),
   cpf: z.string().regex(/^\d{11}$/, "CPF deve ter 11 dígitos numéricos"),
-  phone: z.string().trim().min(10, "Telefone inválido").max(20),
+  phone: z.string().trim().regex(/^\d{10,11}$/, "WhatsApp deve ter DDD + número (só dígitos)"),
   email: z.string().email("Email inválido").max(255),
   password: z.string().min(6, "Mínimo 6 caracteres").max(72),
 });
@@ -88,8 +88,8 @@ function SignupPage() {
                 {errors.cpf && <p className="text-sm text-destructive">{errors.cpf.message}</p>}
               </div>
               <div className="space-y-2">
-                <Label htmlFor="phone">Telefone</Label>
-                <Input id="phone" inputMode="tel" {...register("phone")} />
+                <Label htmlFor="phone">WhatsApp (DDD + número)</Label>
+                <Input id="phone" inputMode="numeric" placeholder="11987654321" maxLength={11} {...register("phone")} />
                 {errors.phone && <p className="text-sm text-destructive">{errors.phone.message}</p>}
               </div>
             </div>
