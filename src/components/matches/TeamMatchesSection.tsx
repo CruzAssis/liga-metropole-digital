@@ -3,14 +3,11 @@ import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { useServerFn } from "@tanstack/react-start";
 import {
   listMyTeamMatches,
-  fillSumula,
   confirmSumula,
   disputeSumula,
 } from "@/lib/sumula.functions";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
-import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
 import { toast } from "sonner";
 import {
   CheckCircle2,
@@ -19,8 +16,11 @@ import {
   FileText,
   Flag,
   MessageCircle,
+  ClipboardEdit,
+  Eye,
 } from "lucide-react";
 import { buildWhatsAppLink } from "@/lib/wa";
+import { SumulaDialog } from "./SumulaDialog";
 
 const HOURS_TO_CONFIRM = 48;
 
@@ -117,21 +117,12 @@ export function TeamMatchesSection() {
 
 function MatchCard({ match }: { match: Match }) {
   const qc = useQueryClient();
-  const fill = useServerFn(fillSumula);
   const confirm = useServerFn(confirmSumula);
   const dispute = useServerFn(disputeSumula);
+  const [sumulaOpen, setSumulaOpen] = useState(false);
 
   const meta = statusMeta[match.status] ?? statusMeta.scheduled;
 
-  const fillMut = useMutation({
-    mutationFn: async (args: { hostScore: number; visitorScore: number }) =>
-      fill({ data: { matchId: match.id, ...args } }),
-    onSuccess: () => {
-      toast.success("Placar enviado. Aguardando confirmação do visitante.");
-      qc.invalidateQueries({ queryKey: ["my-team-matches"] });
-    },
-    onError: (e: Error) => toast.error(e.message),
-  });
   const confirmMut = useMutation({
     mutationFn: async () => confirm({ data: { matchId: match.id } }),
     onSuccess: () => {
@@ -148,6 +139,9 @@ function MatchCard({ match }: { match: Match }) {
     },
     onError: (e: Error) => toast.error(e.message),
   });
+
+  const canFill = match.is_host && ["scheduled", "awaiting_confirmation"].includes(match.status);
+  const canView = !canFill && match.host_score != null;
 
   return (
     <div className="rounded-md border border-border bg-background/40 p-4">
@@ -192,59 +186,67 @@ function MatchCard({ match }: { match: Match }) {
 
       <OpponentContact match={match} />
 
-      {match.status === "scheduled" && match.is_host && (
-        <FillForm onSubmit={(h, v) => fillMut.mutate({ hostScore: h, visitorScore: v })} loading={fillMut.isPending} />
-      )}
-      {match.status === "scheduled" && !match.is_host && (
-        <p className="text-xs text-muted-foreground text-center">
-          Aguardando o mandante preencher o placar.
-        </p>
-      )}
-
-      {match.status === "awaiting_confirmation" && match.is_host && (
-        <div className="flex items-center gap-2 text-xs text-muted-foreground">
-          <Clock className="h-3 w-3" />
-          Enviado em {match.host_filled_at && new Date(match.host_filled_at).toLocaleString("pt-BR")}.
-          Pode reenviar caso precise corrigir:
-          <FillForm
-            compact
-            onSubmit={(h, v) => fillMut.mutate({ hostScore: h, visitorScore: v })}
-            loading={fillMut.isPending}
-            initialHost={match.host_score ?? 0}
-            initialVisitor={match.visitor_score ?? 0}
-          />
+      <div className="mt-3 flex flex-wrap items-center justify-between gap-2">
+        <div className="text-xs text-muted-foreground flex items-center gap-1">
+          {match.status === "scheduled" && !match.is_host && (
+            <span>Aguardando o mandante preencher.</span>
+          )}
+          {match.status === "awaiting_confirmation" && match.is_host && match.host_filled_at && (
+            <>
+              <Clock className="h-3 w-3" />
+              Enviado em {new Date(match.host_filled_at).toLocaleString("pt-BR")}
+            </>
+          )}
+          {match.status === "awaiting_confirmation" && !match.is_host && (
+            <Deadline filledAt={match.host_filled_at} />
+          )}
+          {match.status === "disputed" && (
+            <span className="text-destructive">Contestado — aguardando organização.</span>
+          )}
         </div>
-      )}
 
-      {match.status === "awaiting_confirmation" && !match.is_host && (
-        <div className="space-y-2">
-          <Deadline filledAt={match.host_filled_at} />
-          <div className="flex gap-2">
-            <Button
-              size="sm"
-              onClick={() => confirmMut.mutate()}
-              disabled={confirmMut.isPending}
-              className="gap-1"
-            >
-              <CheckCircle2 className="h-4 w-4" /> Confirmar
+        <div className="flex gap-2">
+          {canFill && (
+            <Button size="sm" onClick={() => setSumulaOpen(true)} className="gap-1">
+              <ClipboardEdit className="h-4 w-4" />
+              {match.status === "scheduled" ? "Lançar súmula" : "Editar súmula"}
             </Button>
-            <Button
-              size="sm"
-              variant="destructive"
-              onClick={() => disputeMut.mutate()}
-              disabled={disputeMut.isPending}
-              className="gap-1"
-            >
-              <AlertTriangle className="h-4 w-4" /> Contestar
+          )}
+          {canView && (
+            <Button size="sm" variant="outline" onClick={() => setSumulaOpen(true)} className="gap-1">
+              <Eye className="h-4 w-4" /> Ver súmula
             </Button>
-          </div>
+          )}
+          {match.status === "awaiting_confirmation" && !match.is_host && (
+            <>
+              <Button
+                size="sm"
+                onClick={() => confirmMut.mutate()}
+                disabled={confirmMut.isPending}
+                className="gap-1"
+              >
+                <CheckCircle2 className="h-4 w-4" /> Confirmar
+              </Button>
+              <Button
+                size="sm"
+                variant="destructive"
+                onClick={() => disputeMut.mutate()}
+                disabled={disputeMut.isPending}
+                className="gap-1"
+              >
+                <AlertTriangle className="h-4 w-4" /> Contestar
+              </Button>
+            </>
+          )}
         </div>
-      )}
+      </div>
 
-      {match.status === "disputed" && (
-        <p className="text-xs text-destructive">
-          Súmula contestada. A organização vai analisar e decidir.
-        </p>
+      {sumulaOpen && (
+        <SumulaDialog
+          matchId={match.id}
+          open={sumulaOpen}
+          onOpenChange={setSumulaOpen}
+        />
       )}
     </div>
   );
@@ -281,92 +283,10 @@ function Deadline({ filledAt }: { filledAt: string | null }) {
   const hours = Math.max(0, Math.floor(remaining / 3600000));
   const expired = remaining <= 0;
   return (
-    <p className={`text-xs ${expired ? "text-destructive" : "text-muted-foreground"}`}>
+    <span className={expired ? "text-destructive" : ""}>
       {expired
         ? "Prazo expirado — a organização pode confirmar automaticamente."
         : `Confirme em ~${hours}h ou será confirmado automaticamente.`}
-    </p>
-  );
-}
-
-function FillForm({
-  onSubmit,
-  loading,
-  compact,
-  initialHost = 0,
-  initialVisitor = 0,
-}: {
-  onSubmit: (h: number, v: number) => void;
-  loading: boolean;
-  compact?: boolean;
-  initialHost?: number;
-  initialVisitor?: number;
-}) {
-  const [host, setHost] = useState(String(initialHost));
-  const [visitor, setVisitor] = useState(String(initialVisitor));
-
-  const handle = () => {
-    const h = parseInt(host, 10);
-    const v = parseInt(visitor, 10);
-    if (Number.isNaN(h) || Number.isNaN(v) || h < 0 || v < 0) {
-      toast.error("Placar inválido");
-      return;
-    }
-    onSubmit(h, v);
-  };
-
-  return (
-    <div className={`flex items-end gap-2 ${compact ? "" : "mt-2"}`}>
-      {!compact && (
-        <>
-          <div>
-            <Label className="text-xs">Mandante</Label>
-            <Input
-              type="number"
-              min={0}
-              max={50}
-              value={host}
-              onChange={(e) => setHost(e.target.value)}
-              className="w-20 text-center font-mono"
-            />
-          </div>
-          <div>
-            <Label className="text-xs">Visitante</Label>
-            <Input
-              type="number"
-              min={0}
-              max={50}
-              value={visitor}
-              onChange={(e) => setVisitor(e.target.value)}
-              className="w-20 text-center font-mono"
-            />
-          </div>
-        </>
-      )}
-      {compact && (
-        <>
-          <Input
-            type="number"
-            min={0}
-            max={50}
-            value={host}
-            onChange={(e) => setHost(e.target.value)}
-            className="w-14 text-center font-mono h-8"
-          />
-          <span>×</span>
-          <Input
-            type="number"
-            min={0}
-            max={50}
-            value={visitor}
-            onChange={(e) => setVisitor(e.target.value)}
-            className="w-14 text-center font-mono h-8"
-          />
-        </>
-      )}
-      <Button size={compact ? "sm" : "default"} onClick={handle} disabled={loading}>
-        {loading ? "Enviando..." : "Enviar placar"}
-      </Button>
-    </div>
+    </span>
   );
 }
