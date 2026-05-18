@@ -190,6 +190,8 @@ function MatchCard({ match }: { match: Match }) {
         </div>
       </div>
 
+      <OpponentContact match={match} />
+
       {match.status === "scheduled" && match.is_host && (
         <FillForm onSubmit={(h, v) => fillMut.mutate({ hostScore: h, visitorScore: v })} loading={fillMut.isPending} />
       )}
