@@ -12,6 +12,7 @@ import { Badge } from "@/components/ui/badge";
 import { ClipboardList, ExternalLink, User2 } from "lucide-react";
 import { TeamAthletesSection } from "@/components/athletes/TeamAthletesSection";
 import { TeamMatchesSection } from "@/components/matches/TeamMatchesSection";
+import { TeamCustomizationCard } from "@/components/teams/TeamCustomizationCard";
 import { getMyProfile, updateMyProfile } from "@/lib/profile.functions";
 import { formatPhoneBR } from "@/lib/wa";
 
@@ -21,6 +22,8 @@ type Team = {
   short_name: string;
   slug: string | null;
   logo_url: string | null;
+  banner_url: string | null;
+  primary_color: string | null;
   registration_type: "host" | "visitor";
   status: "pending" | "approved" | "rejected" | "waitlist";
   rejected_reason: string | null;
