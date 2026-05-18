@@ -183,6 +183,18 @@ export function SumulaDialog({
               />
             )}
 
+            {canEdit && scoreValid && !goalsMatch && (
+              <div className="rounded-md border border-destructive/40 bg-destructive/10 px-3 py-2 text-xs text-destructive">
+                Gols lançados ({hostGoals}×{visitorGoals}) não batem com o placar ({hScoreNum}×{vScoreNum}).
+                Ajuste o placar ou os eventos de gol antes de enviar.
+              </div>
+            )}
+            {canEdit && hasIncompleteEvent && (
+              <div className="rounded-md border border-amber-500/40 bg-amber-500/10 px-3 py-2 text-xs text-amber-700 dark:text-amber-300">
+                Há eventos sem atleta selecionado.
+              </div>
+            )}
+
             {!canEdit && (
               <p className="text-xs text-muted-foreground">
                 Apenas o mandante pode editar a súmula. Status atual: {data.match.status}.
@@ -196,7 +208,10 @@ export function SumulaDialog({
             Fechar
           </Button>
           {canEdit && (
-            <Button onClick={() => mut.mutate()} disabled={mut.isPending}>
+            <Button
+              onClick={() => mut.mutate()}
+              disabled={mut.isPending || !scoreValid || !goalsMatch || hasIncompleteEvent}
+            >
               {mut.isPending ? "Enviando..." : "Enviar súmula"}
             </Button>
           )}
