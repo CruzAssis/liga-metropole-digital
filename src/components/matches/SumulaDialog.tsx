@@ -1,8 +1,8 @@
-import { useEffect, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { useServerFn } from "@tanstack/react-start";
 import { toast } from "sonner";
-import { Plus, Trash2, Goal, Square } from "lucide-react";
+import { Plus, Trash2, Goal, Square, Star, UserCheck } from "lucide-react";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -15,7 +15,7 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { Badge } from "@/components/ui/badge";
-import { getSumulaContext, fillSumula } from "@/lib/sumula.functions";
+import { getSumulaContext, fillSumula, identifyBestOpponent } from "@/lib/sumula.functions";
 
 type Kind = "goal" | "yellow_card" | "red_card";
 type EventDraft = {
@@ -27,6 +27,18 @@ type EventDraft = {
 };
 
 type Athlete = { id: string; full_name: string | null; nickname: string | null };
+
+type BestVote = {
+  id: string;
+  voter_team_id: string;
+  opponent_team_id: string;
+  jersey_number: number;
+  rating: number;
+  note: string | null;
+  opponent_athlete_id: string | null;
+  identified_name: string | null;
+  identified_at: string | null;
+};
 
 function newUid() {
   return Math.random().toString(36).slice(2);
@@ -60,6 +72,9 @@ export function SumulaDialog({
   const [hostScore, setHostScore] = useState("0");
   const [visitorScore, setVisitorScore] = useState("0");
   const [events, setEvents] = useState<EventDraft[]>([]);
+  const [bestJersey, setBestJersey] = useState("");
+  const [bestRating, setBestRating] = useState("");
+  const [bestNote, setBestNote] = useState("");
 
   useEffect(() => {
     if (!data) return;
@@ -74,6 +89,18 @@ export function SumulaDialog({
         minute: e.minute == null ? "" : String(e.minute),
       })),
     );
+    const myVote = (data.bestVotes as BestVote[] | undefined)?.find(
+      (v) => v.voter_team_id === data.host?.id,
+    );
+    if (myVote) {
+      setBestJersey(String(myVote.jersey_number));
+      setBestRating(String(myVote.rating));
+      setBestNote(myVote.note ?? "");
+    } else {
+      setBestJersey("");
+      setBestRating("");
+      setBestNote("");
+    }
   }, [data]);
 
   const hostId = data?.host?.id;
@@ -87,6 +114,21 @@ export function SumulaDialog({
   const goalsMatch = hostGoals === hScoreNum && visitorGoals === vScoreNum;
   const hasIncompleteEvent = events.some((e) => !e.athlete_id);
 
+  const bestJerseyNum = bestJersey === "" ? null : parseInt(bestJersey, 10);
+  const bestRatingNum = bestRating === "" ? null : Number(bestRating);
+  const bestPartial =
+    (bestJersey !== "" || bestRating !== "") &&
+    !(bestJerseyNum !== null && !Number.isNaN(bestJerseyNum) && bestRatingNum !== null && !Number.isNaN(bestRatingNum));
+  const bestComplete =
+    bestJerseyNum !== null &&
+    !Number.isNaN(bestJerseyNum) &&
+    bestJerseyNum >= 0 &&
+    bestJerseyNum <= 999 &&
+    bestRatingNum !== null &&
+    !Number.isNaN(bestRatingNum) &&
+    bestRatingNum >= 0 &&
+    bestRatingNum <= 10;
+
   const mut = useMutation({
     mutationFn: async () => {
       if (!scoreValid) throw new Error("Placar inválido");
@@ -95,6 +137,9 @@ export function SumulaDialog({
         throw new Error(
           `Gols lançados (${hostGoals}×${visitorGoals}) não batem com o placar (${hScoreNum}×${vScoreNum})`,
         );
+      }
+      if (bestPartial) {
+        throw new Error("Preencha o número da camisa e a nota do melhor jogador adversário, ou deixe ambos em branco");
       }
       return fillFn({
         data: {
@@ -107,6 +152,13 @@ export function SumulaDialog({
             kind: e.kind,
             minute: e.minute === "" ? null : parseInt(e.minute, 10),
           })),
+          bestOpponent: bestComplete
+            ? {
+                jersey_number: bestJerseyNum!,
+                rating: bestRatingNum!,
+                note: bestNote.trim() || null,
+              }
+            : null,
         },
       });
     },
@@ -128,6 +180,15 @@ export function SumulaDialog({
     setEvents((cur) => cur.map((e) => (e.uid === uid ? { ...e, ...patch } : e)));
 
   const canEdit = !!data?.isHostManager && ["scheduled", "awaiting_confirmation"].includes(data?.match.status ?? "");
+
+  // Votos recebidos pelo time do usuário (visitante votou no mandante quando isHostManager,
+  // ou mandante votou no visitante quando isVisitorManager)
+  const myTeamId = data?.isHostManager ? data?.host?.id : data?.isVisitorManager ? data?.visitor?.id : null;
+  const myAthletes = data?.isHostManager ? data?.hostAthletes : data?.visitorAthletes;
+  const receivedVotes = useMemo(
+    () => ((data?.bestVotes ?? []) as BestVote[]).filter((v) => v.opponent_team_id === myTeamId),
+    [data?.bestVotes, myTeamId],
+  );
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
@@ -183,6 +244,29 @@ export function SumulaDialog({
               />
             )}
 
+            {/* Melhor jogador adversário — mandante vota no visitante */}
+            {data.visitor && (
+              <BestOpponentBlock
+                opponentName={data.visitor.short_name}
+                jersey={bestJersey}
+                rating={bestRating}
+                note={bestNote}
+                onJersey={setBestJersey}
+                onRating={setBestRating}
+                onNote={setBestNote}
+                canEdit={canEdit}
+              />
+            )}
+
+            {/* Indicações recebidas (do adversário) */}
+            {receivedVotes.length > 0 && myTeamId && (
+              <ReceivedVotesBlock
+                matchId={matchId}
+                votes={receivedVotes}
+                athletes={myAthletes ?? []}
+              />
+            )}
+
             {canEdit && scoreValid && !goalsMatch && (
               <div className="rounded-md border border-destructive/40 bg-destructive/10 px-3 py-2 text-xs text-destructive">
                 Gols lançados ({hostGoals}×{visitorGoals}) não batem com o placar ({hScoreNum}×{vScoreNum}).
@@ -192,6 +276,11 @@ export function SumulaDialog({
             {canEdit && hasIncompleteEvent && (
               <div className="rounded-md border border-amber-500/40 bg-amber-500/10 px-3 py-2 text-xs text-amber-700 dark:text-amber-300">
                 Há eventos sem atleta selecionado.
+              </div>
+            )}
+            {canEdit && bestPartial && (
+              <div className="rounded-md border border-amber-500/40 bg-amber-500/10 px-3 py-2 text-xs text-amber-700 dark:text-amber-300">
+                Preencha número da camisa e nota do melhor jogador adversário, ou deixe ambos em branco.
               </div>
             )}
 
@@ -210,7 +299,7 @@ export function SumulaDialog({
           {canEdit && (
             <Button
               onClick={() => mut.mutate()}
-              disabled={mut.isPending || !scoreValid || !goalsMatch || hasIncompleteEvent}
+              disabled={mut.isPending || !scoreValid || !goalsMatch || hasIncompleteEvent || bestPartial}
             >
               {mut.isPending ? "Enviando..." : "Enviar súmula"}
             </Button>
@@ -335,7 +424,6 @@ function TeamEventsBlock({
                 <Trash2 className="h-4 w-4" />
               </Button>
             )}
-            {/* hidden — só para suprimir warning de teamId não usado */}
             <input type="hidden" value={teamId} readOnly />
           </div>
         ))}
@@ -363,5 +451,186 @@ function KindBadge({ kind }: { kind: Kind }) {
     <Badge variant="outline" className="gap-1 shrink-0">
       <Square className="h-3 w-3 fill-destructive text-destructive" /> CV
     </Badge>
+  );
+}
+
+export function BestOpponentBlock({
+  opponentName,
+  jersey,
+  rating,
+  note,
+  onJersey,
+  onRating,
+  onNote,
+  canEdit,
+}: {
+  opponentName: string;
+  jersey: string;
+  rating: string;
+  note: string;
+  onJersey: (v: string) => void;
+  onRating: (v: string) => void;
+  onNote: (v: string) => void;
+  canEdit: boolean;
+}) {
+  return (
+    <div className="rounded-md border border-primary/30 bg-primary/5 p-3">
+      <div className="flex items-center gap-2 mb-2">
+        <Star className="h-4 w-4 text-primary" />
+        <div className="font-display text-base">
+          Melhor jogador adversário <span className="text-muted-foreground text-sm">({opponentName})</span>
+        </div>
+      </div>
+      <p className="text-xs text-muted-foreground mb-3">
+        Indique pelo número da camisa. O diretor adversário vai identificar o nome do atleta depois.
+        Deixe em branco se não quiser indicar.
+      </p>
+      <div className="grid grid-cols-2 gap-3">
+        <div>
+          <Label className="text-xs">Nº da camisa</Label>
+          <Input
+            type="number"
+            min={0}
+            max={999}
+            value={jersey}
+            onChange={(e) => onJersey(e.target.value)}
+            disabled={!canEdit}
+            placeholder="ex: 10"
+            className="font-mono"
+          />
+        </div>
+        <div>
+          <Label className="text-xs">Nota (0 a 10)</Label>
+          <Input
+            type="number"
+            step="0.5"
+            min={0}
+            max={10}
+            value={rating}
+            onChange={(e) => onRating(e.target.value)}
+            disabled={!canEdit}
+            placeholder="ex: 8.5"
+            className="font-mono"
+          />
+        </div>
+      </div>
+      <div className="mt-2">
+        <Label className="text-xs">Comentário (opcional)</Label>
+        <Input
+          value={note}
+          onChange={(e) => onNote(e.target.value)}
+          disabled={!canEdit}
+          placeholder="ex: ditou o ritmo do meio campo"
+          maxLength={280}
+        />
+      </div>
+    </div>
+  );
+}
+
+function ReceivedVotesBlock({
+  matchId,
+  votes,
+  athletes,
+}: {
+  matchId: string;
+  votes: BestVote[];
+  athletes: Athlete[];
+}) {
+  const identifyFn = useServerFn(identifyBestOpponent);
+  const qc = useQueryClient();
+
+  const mut = useMutation({
+    mutationFn: async (input: { voteId: string; athleteId: string | null; name: string | null }) =>
+      identifyFn({ data: input }),
+    onSuccess: () => {
+      toast.success("Jogador identificado.");
+      qc.invalidateQueries({ queryKey: ["sumula-ctx", matchId] });
+    },
+    onError: (e: Error) => toast.error(e.message),
+  });
+
+  return (
+    <div className="rounded-md border border-accent/40 bg-accent/5 p-3">
+      <div className="flex items-center gap-2 mb-2">
+        <UserCheck className="h-4 w-4 text-primary" />
+        <div className="font-display text-base">Indicações do adversário ao seu time</div>
+      </div>
+      <p className="text-xs text-muted-foreground mb-3">
+        O adversário indicou seu(s) melhor(es) jogador(es) por número de camisa. Identifique quem é.
+      </p>
+      <div className="space-y-3">
+        {votes.map((v) => (
+          <ReceivedVoteRow key={v.id} vote={v} athletes={athletes} onSubmit={(payload) => mut.mutate(payload)} />
+        ))}
+      </div>
+    </div>
+  );
+}
+
+function ReceivedVoteRow({
+  vote,
+  athletes,
+  onSubmit,
+}: {
+  vote: BestVote;
+  athletes: Athlete[];
+  onSubmit: (payload: { voteId: string; athleteId: string | null; name: string | null }) => void;
+}) {
+  const [athleteId, setAthleteId] = useState<string>(vote.opponent_athlete_id ?? "");
+  const [name, setName] = useState<string>(vote.identified_name ?? "");
+
+  return (
+    <div className="rounded-md border border-border bg-background/60 p-3 space-y-2">
+      <div className="flex items-center justify-between flex-wrap gap-2">
+        <div className="flex items-center gap-2">
+          <Badge variant="outline" className="font-mono">#{vote.jersey_number}</Badge>
+          <Badge className="gap-1">
+            <Star className="h-3 w-3" /> {Number(vote.rating).toFixed(1)}
+          </Badge>
+          {vote.identified_at && <Badge variant="secondary">Identificado</Badge>}
+        </div>
+      </div>
+      {vote.note && <p className="text-xs text-muted-foreground">"{vote.note}"</p>}
+      <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
+        <div>
+          <Label className="text-xs">Atleta do elenco</Label>
+          <Select value={athleteId || undefined} onValueChange={setAthleteId}>
+            <SelectTrigger className="h-9">
+              <SelectValue placeholder="Selecione" />
+            </SelectTrigger>
+            <SelectContent>
+              {athletes.map((a) => (
+                <SelectItem key={a.id} value={a.id}>
+                  {labelAthlete(a)}
+                </SelectItem>
+              ))}
+              {athletes.length === 0 && (
+                <div className="px-2 py-1 text-xs text-muted-foreground">Sem atletas</div>
+              )}
+            </SelectContent>
+          </Select>
+        </div>
+        <div>
+          <Label className="text-xs">Ou digite o nome</Label>
+          <Input value={name} onChange={(e) => setName(e.target.value)} placeholder="Nome do jogador" maxLength={120} />
+        </div>
+      </div>
+      <div className="flex justify-end">
+        <Button
+          size="sm"
+          onClick={() =>
+            onSubmit({
+              voteId: vote.id,
+              athleteId: athleteId || null,
+              name: name.trim() || null,
+            })
+          }
+          disabled={!athleteId && !name.trim()}
+        >
+          Salvar identificação
+        </Button>
+      </div>
+    </div>
   );
 }
