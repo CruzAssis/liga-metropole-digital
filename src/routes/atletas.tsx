@@ -6,6 +6,7 @@ import { IDMetropoleCard, type IDMetropoleData } from "@/components/athletes/IDM
 import { Dialog, DialogContent, DialogTitle } from "@/components/ui/dialog";
 import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Badge } from "@/components/ui/badge";
+import { PublicShell } from "@/components/PublicShell";
 
 type Row = AthleteCardData & IDMetropoleData & { team_id: string | null };
 
