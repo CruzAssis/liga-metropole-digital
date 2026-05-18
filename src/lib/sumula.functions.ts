@@ -148,11 +148,18 @@ const eventSchema = z.object({
   minute: z.number().int().min(0).max(200).nullable().optional(),
 });
 
+const bestOpponentSchema = z.object({
+  jersey_number: z.number().int().min(0).max(999),
+  rating: z.number().min(0).max(10),
+  note: z.string().max(280).optional().nullable(),
+});
+
 const fillSchema = z.object({
   matchId: z.string().uuid(),
   hostScore: z.number().int().min(0).max(50),
   visitorScore: z.number().int().min(0).max(50),
   events: z.array(eventSchema).max(200).optional(),
+  bestOpponent: bestOpponentSchema.optional().nullable(),
 });
 
 export const fillSumula = createServerFn({ method: "POST" })
