@@ -3,7 +3,6 @@ import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { useServerFn } from "@tanstack/react-start";
 import {
   listMyTeamMatches,
-  confirmSumula,
   disputeSumula,
 } from "@/lib/sumula.functions";
 import { Button } from "@/components/ui/button";
@@ -21,6 +20,7 @@ import {
 } from "lucide-react";
 import { buildWhatsAppLink } from "@/lib/wa";
 import { SumulaDialog } from "./SumulaDialog";
+import { ConfirmSumulaDialog } from "./ConfirmSumulaDialog";
 
 const HOURS_TO_CONFIRM = 48;
 
