@@ -10,9 +10,14 @@
 
 import { Route as rootRouteImport } from './routes/__root'
 import { Route as VerificarRouteImport } from './routes/verificar'
+import { Route as TimesRouteImport } from './routes/times'
 import { Route as SignupRouteImport } from './routes/signup'
+import { Route as ResultadosRouteImport } from './routes/resultados'
+import { Route as RankingRouteImport } from './routes/ranking'
 import { Route as LoginRouteImport } from './routes/login'
+import { Route as LocaisRouteImport } from './routes/locais'
 import { Route as AtletasRouteImport } from './routes/atletas'
+import { Route as AgendaRouteImport } from './routes/agenda'
 import { Route as AuthenticatedRouteImport } from './routes/_authenticated'
 import { Route as IndexRouteImport } from './routes/index'
 import { Route as AuthenticatedMinhaContaRouteImport } from './routes/_authenticated/minha-conta'
@@ -27,9 +32,24 @@ const VerificarRoute = VerificarRouteImport.update({
   path: '/verificar',
   getParentRoute: () => rootRouteImport,
 } as any)
+const TimesRoute = TimesRouteImport.update({
+  id: '/times',
+  path: '/times',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const SignupRoute = SignupRouteImport.update({
   id: '/signup',
   path: '/signup',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ResultadosRoute = ResultadosRouteImport.update({
+  id: '/resultados',
+  path: '/resultados',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const RankingRoute = RankingRouteImport.update({
+  id: '/ranking',
+  path: '/ranking',
   getParentRoute: () => rootRouteImport,
 } as any)
 const LoginRoute = LoginRouteImport.update({
@@ -37,9 +57,19 @@ const LoginRoute = LoginRouteImport.update({
   path: '/login',
   getParentRoute: () => rootRouteImport,
 } as any)
+const LocaisRoute = LocaisRouteImport.update({
+  id: '/locais',
+  path: '/locais',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const AtletasRoute = AtletasRouteImport.update({
   id: '/atletas',
   path: '/atletas',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const AgendaRoute = AgendaRouteImport.update({
+  id: '/agenda',
+  path: '/agenda',
   getParentRoute: () => rootRouteImport,
 } as any)
 const AuthenticatedRoute = AuthenticatedRouteImport.update({
@@ -87,9 +117,14 @@ const AuthenticatedAdminDashboardRoute =
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
+  '/agenda': typeof AgendaRoute
   '/atletas': typeof AtletasRoute
+  '/locais': typeof LocaisRoute
   '/login': typeof LoginRoute
+  '/ranking': typeof RankingRoute
+  '/resultados': typeof ResultadosRoute
   '/signup': typeof SignupRoute
+  '/times': typeof TimesRoute
   '/verificar': typeof VerificarRoute
   '/admin': typeof AuthenticatedAdminRouteWithChildren
   '/inscricao': typeof AuthenticatedInscricaoRoute
@@ -100,9 +135,14 @@ export interface FileRoutesByFullPath {
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
+  '/agenda': typeof AgendaRoute
   '/atletas': typeof AtletasRoute
+  '/locais': typeof LocaisRoute
   '/login': typeof LoginRoute
+  '/ranking': typeof RankingRoute
+  '/resultados': typeof ResultadosRoute
   '/signup': typeof SignupRoute
+  '/times': typeof TimesRoute
   '/verificar': typeof VerificarRoute
   '/admin': typeof AuthenticatedAdminRouteWithChildren
   '/inscricao': typeof AuthenticatedInscricaoRoute
@@ -115,9 +155,14 @@ export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/': typeof IndexRoute
   '/_authenticated': typeof AuthenticatedRouteWithChildren
+  '/agenda': typeof AgendaRoute
   '/atletas': typeof AtletasRoute
+  '/locais': typeof LocaisRoute
   '/login': typeof LoginRoute
+  '/ranking': typeof RankingRoute
+  '/resultados': typeof ResultadosRoute
   '/signup': typeof SignupRoute
+  '/times': typeof TimesRoute
   '/verificar': typeof VerificarRoute
   '/_authenticated/admin': typeof AuthenticatedAdminRouteWithChildren
   '/_authenticated/inscricao': typeof AuthenticatedInscricaoRoute
@@ -130,9 +175,14 @@ export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
   fullPaths:
     | '/'
+    | '/agenda'
     | '/atletas'
+    | '/locais'
     | '/login'
+    | '/ranking'
+    | '/resultados'
     | '/signup'
+    | '/times'
     | '/verificar'
     | '/admin'
     | '/inscricao'
@@ -143,9 +193,14 @@ export interface FileRouteTypes {
   fileRoutesByTo: FileRoutesByTo
   to:
     | '/'
+    | '/agenda'
     | '/atletas'
+    | '/locais'
     | '/login'
+    | '/ranking'
+    | '/resultados'
     | '/signup'
+    | '/times'
     | '/verificar'
     | '/admin'
     | '/inscricao'
@@ -157,9 +212,14 @@ export interface FileRouteTypes {
     | '__root__'
     | '/'
     | '/_authenticated'
+    | '/agenda'
     | '/atletas'
+    | '/locais'
     | '/login'
+    | '/ranking'
+    | '/resultados'
     | '/signup'
+    | '/times'
     | '/verificar'
     | '/_authenticated/admin'
     | '/_authenticated/inscricao'
@@ -172,9 +232,14 @@ export interface FileRouteTypes {
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
   AuthenticatedRoute: typeof AuthenticatedRouteWithChildren
+  AgendaRoute: typeof AgendaRoute
   AtletasRoute: typeof AtletasRoute
+  LocaisRoute: typeof LocaisRoute
   LoginRoute: typeof LoginRoute
+  RankingRoute: typeof RankingRoute
+  ResultadosRoute: typeof ResultadosRoute
   SignupRoute: typeof SignupRoute
+  TimesRoute: typeof TimesRoute
   VerificarRoute: typeof VerificarRoute
 }
 
@@ -187,11 +252,32 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof VerificarRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/times': {
+      id: '/times'
+      path: '/times'
+      fullPath: '/times'
+      preLoaderRoute: typeof TimesRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/signup': {
       id: '/signup'
       path: '/signup'
       fullPath: '/signup'
       preLoaderRoute: typeof SignupRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/resultados': {
+      id: '/resultados'
+      path: '/resultados'
+      fullPath: '/resultados'
+      preLoaderRoute: typeof ResultadosRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/ranking': {
+      id: '/ranking'
+      path: '/ranking'
+      fullPath: '/ranking'
+      preLoaderRoute: typeof RankingRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/login': {
@@ -201,11 +287,25 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof LoginRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/locais': {
+      id: '/locais'
+      path: '/locais'
+      fullPath: '/locais'
+      preLoaderRoute: typeof LocaisRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/atletas': {
       id: '/atletas'
       path: '/atletas'
       fullPath: '/atletas'
       preLoaderRoute: typeof AtletasRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/agenda': {
+      id: '/agenda'
+      path: '/agenda'
+      fullPath: '/agenda'
+      preLoaderRoute: typeof AgendaRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/_authenticated': {
@@ -301,11 +401,26 @@ const AuthenticatedRouteWithChildren = AuthenticatedRoute._addFileChildren(
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
   AuthenticatedRoute: AuthenticatedRouteWithChildren,
+  AgendaRoute: AgendaRoute,
   AtletasRoute: AtletasRoute,
+  LocaisRoute: LocaisRoute,
   LoginRoute: LoginRoute,
+  RankingRoute: RankingRoute,
+  ResultadosRoute: ResultadosRoute,
   SignupRoute: SignupRoute,
+  TimesRoute: TimesRoute,
   VerificarRoute: VerificarRoute,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)
   ._addFileTypes<FileRouteTypes>()
+
+import type { getRouter } from './router.tsx'
+import type { startInstance } from './start.ts'
+declare module '@tanstack/react-start' {
+  interface Register {
+    ssr: true
+    router: Awaited<ReturnType<typeof getRouter>>
+    config: Awaited<ReturnType<typeof startInstance.getOptions>>
+  }
+}
