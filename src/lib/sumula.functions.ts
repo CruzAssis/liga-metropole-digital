@@ -257,8 +257,25 @@ export const fillSumula = createServerFn({ method: "POST" })
       .eq("id", data.matchId);
     if (updErr) throw new Error(updErr.message);
 
+    // Voto de melhor jogador adversário (mandante vota no time visitante)
+    if (data.bestOpponent) {
+      const { error: voteErr } = await supabaseAdmin
+        .from("match_best_opponent_votes")
+        .upsert(
+          {
+            match_id: data.matchId,
+            voter_team_id: match.host_team_id,
+            opponent_team_id: match.visitor_team_id,
+            jersey_number: data.bestOpponent.jersey_number,
+            rating: data.bestOpponent.rating,
+            note: data.bestOpponent.note ?? null,
+          },
+          { onConflict: "match_id,voter_team_id" },
+        );
+      if (voteErr) throw new Error(voteErr.message);
+    }
+
     return { success: true };
-  });
 
 // =============================================================
 // Confirm (visitante)
