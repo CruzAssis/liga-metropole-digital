@@ -3,14 +3,11 @@ import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { useServerFn } from "@tanstack/react-start";
 import {
   listMyTeamMatches,
-  fillSumula,
   confirmSumula,
   disputeSumula,
 } from "@/lib/sumula.functions";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
-import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
 import { toast } from "sonner";
 import {
   CheckCircle2,
@@ -19,8 +16,11 @@ import {
   FileText,
   Flag,
   MessageCircle,
+  ClipboardEdit,
+  Eye,
 } from "lucide-react";
 import { buildWhatsAppLink } from "@/lib/wa";
+import { SumulaDialog } from "./SumulaDialog";
 
 const HOURS_TO_CONFIRM = 48;
 
