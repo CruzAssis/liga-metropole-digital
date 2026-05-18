@@ -1,57 +1,121 @@
-## Como você acessa a conta admin (hoje)
+## Visão geral
 
-Hoje **ninguém é admin**. Sua conta `shelderdouglasdacruz@gmail.com` foi criada com o papel `team_manager` (padrão do trigger). O grupo "Admin" na sidebar e as rotas `/admin/dashboard`, `/admin/triagem`, `/admin/sorteio` só aparecem/funcionam quando `has_role(auth.uid(),'admin')` retorna `true`.
-
-Solução: dois passos — bootstrap (promover sua conta agora) + tela permanente para gerenciar papéis de qualquer usuário daqui em diante.
+Três frentes integradas:
+1. **Cadastro do diretor** com WhatsApp + e-mail (já temos os dois — falta exibir e tornar editável).
+2. **Notificações** por e-mail automático (Lovable Cloud) + botões wa.me prontos para o diretor disparar.
+3. **Perfil público do clube** em `/times/:slug` com contatos, elenco, jogos e classificação.
 
 ---
 
-## 1. Bootstrap: promover sua conta a admin
+## 1. Cadastro do diretor (WhatsApp + e-mail)
 
-Migration única que insere a linha em `public.user_roles`:
+Hoje já coletamos `full_name`, `cpf`, `phone`, `email` no signup. Vamos:
 
-```sql
-insert into public.user_roles (user_id, role)
-values ('e47e2788-9a0b-4759-a5fa-864af84c93fe', 'admin')
-on conflict (user_id, role) do nothing;
+- Renomear visualmente "Telefone" para **"WhatsApp"** em `/signup` e validar formato BR (10–11 dígitos, DDD).
+- Adicionar bloco **"Dados do diretor/técnico"** em `/minha-conta` com edição inline de WhatsApp e e-mail (e-mail muda via `supabase.auth.updateUser`, WhatsApp via `profiles`).
+- Garantir que `profiles.phone` nunca fica nulo para gestores aprovados (validação no formulário de inscrição).
+
+## 2. Notificações de partida
+
+Para cada jogo, três momentos:
+
+| Momento | Canal | Conteúdo |
+|---|---|---|
+| **Jogo agendado** (sorteio ou reagendamento) | E-mail aos dois diretores | Data, local, adversário, link `wa.me` do adversário com mensagem pré-pronta ("Olá, sou o diretor do {time}, vamos jogar dia X…") |
+| **24h antes do jogo** | E-mail aos dois diretores | Lembrete + botão "Falar com adversário no WhatsApp" |
+| **Pós-jogo (status `scheduled` → expirou sem placar)** | E-mail ao mandante | "Lance o placar da súmula" + link direto para `/minha-conta` |
+| **Placar lançado, aguardando confirmação** | E-mail ao visitante | "Confirme o placar X–Y em até 48h" + link |
+
+**Implementação:**
+- Habilitar infra de e-mail (Lovable Cloud — domínio padrão, sem custo).
+- Tabela `notification_log` (match_id, recipient_user_id, kind, sent_at) para evitar duplicatas.
+- `pg_cron` a cada 15min chamando `/api/public/hooks/match-notifications` que:
+  - busca jogos `scheduled` cuja `scheduled_at` está entre 23h–25h no futuro → envia lembrete 24h
+  - busca jogos `scheduled` cuja `scheduled_at` passou há > tolerância → envia "lance o placar"
+  - busca jogos `awaiting_confirmation` há > 24h → reenvia ao visitante
+- Disparos imediatos (jogo agendado, placar lançado) via server function chamada nos handlers existentes (sorteio, súmula).
+- Cada e-mail inclui botão **"Abrir WhatsApp do adversário"** = `https://wa.me/55{phone}?text={mensagem URL-encoded}`.
+
+## 3. Perfil público do clube
+
+Rota nova `src/routes/times.$slug.tsx` (slug derivado de `short_name`, ex.: `/times/santos-fc`).
+
+**Layout (mobile-first, single column):**
+
+```text
+┌─────────────────────────────┐
+│  [Escudo grande]            │
+│  Nome do Time     [✓ Verif] │
+│  Sigla · Mandante           │
+├─────────────────────────────┤
+│  Contato                    │
+│  Diretor: João Silva        │
+│  [WhatsApp] [E-mail]        │  ← botões; só logado vê os dados
+├─────────────────────────────┤
+│  Elenco (12 atletas)        │
+│  grid de AthleteCard        │
+├─────────────────────────────┤
+│  Próximos jogos             │
+│  lista de 3 cards           │
+├─────────────────────────────┤
+│  Resultados                 │
+│  últimos 5                  │
+├─────────────────────────────┤
+│  Classificação              │
+│  posição na tabela do grupo │
+└─────────────────────────────┘
 ```
 
-Após aprovação, faça logout/login e o grupo "Admin" aparece na sidebar. A partir daí você acessa `/admin/dashboard`, `/admin/triagem`, `/admin/sorteio` e a nova `/admin/usuarios`.
-
-## 2. Tela `/admin/usuarios` (gestão permanente de papéis)
-
-Rota nova: `src/routes/_authenticated/admin/usuarios.tsx`. Acessível só por admin (componente checa `useIsAdmin` e redireciona se falso, igual às outras telas admin).
-
-**UI:**
-- Campo de busca por e-mail/nome (filtra a lista).
-- Tabela listando todos os usuários: nome, e-mail, CPF (mascarado), papéis atuais (chips: Admin / Gestor de time), data de cadastro.
-- Em cada linha: switch "Admin" e switch "Gestor de time". Toggle chama mutation.
-- Toast de sucesso/erro.
-
-**Server functions** (`src/lib/users.functions.ts`):
-- `listUsers()` — middleware `requireSupabaseAuth` + checa se o caller é admin (`has_role`); usa `supabaseAdmin` para juntar `auth.users` (email) + `profiles` (full_name, cpf) + `user_roles`. Retorna lista DTO segura.
-- `setUserRole({ user_id, role, enabled })` — middleware admin-only, valida com Zod (`role` ∈ `admin|team_manager`), faz insert ou delete em `user_roles`. Bloqueia o próprio admin de remover seu último admin role (evita lockout).
-
-**Sidebar:** adicionar item "Usuários" (ícone `Users2` ou `Shield`) no grupo Admin, apontando para `/admin/usuarios`.
+- Página renderiza para qualquer visitante (status='approved' já é público via RLS).
+- WhatsApp/e-mail do diretor: **escondidos para anônimos**, visíveis para qualquer logado (anti-scraping). Server fn `getTeamContact(slug)` exige `requireSupabaseAuth`.
+- Adicionar link "Ver perfil público" em `/times` (lista) e em `/minha-conta`.
 
 ---
 
 ## Detalhes técnicos
 
-- A migration de bootstrap NÃO altera o trigger `handle_new_user` — todo novo cadastro continua sendo `team_manager` por padrão. Admin é concedido só manualmente, pela nova tela.
-- `setUserRole` usa `supabaseAdmin` (service role) porque a RLS em `user_roles` só permite ao próprio admin gerenciar — e a checagem de admin é feita no handler antes de qualquer escrita.
-- Trava anti-lockout: ao desativar o switch "Admin" do próprio usuário, se ele for o único admin do sistema, a server fn retorna erro "Não é possível remover o último admin".
-- Nenhuma mudança nas rotas admin existentes (dashboard/triagem/sorteio) — só passa a existir uma a mais.
+**Migration**:
+- `ALTER TABLE teams ADD COLUMN slug text UNIQUE` + backfill (`lower(regexp_replace(short_name, '[^a-z0-9]', '-', 'gi'))`).
+- `CREATE TABLE notification_log (id, match_id, user_id, kind, sent_at)`.
+- Habilitar `pg_cron` + `pg_net`, agendar job a cada 15min.
 
-## Arquivos
+**Server functions** (novos arquivos):
+- `src/lib/notifications.functions.ts` — `sendMatchScheduledEmail`, `sendScoreRequestEmail`, `sendConfirmRequestEmail`.
+- `src/lib/team-profile.functions.ts` — `getTeamPublicProfile(slug)`, `getTeamContact(slug)` (auth).
+- `src/lib/wa.ts` — helper puro `buildWhatsAppLink(phone, message)`.
 
-- **Nova migration**: promove `e47e2788-…` a admin.
-- **Novo**: `src/lib/users.functions.ts` (listUsers, setUserRole).
-- **Nova rota**: `src/routes/_authenticated/admin/usuarios.tsx`.
-- **Editar**: `src/components/AppSidebar.tsx` (adiciona item "Usuários").
+**E-mail**:
+- Infra Lovable Cloud (sem custo até 3k/mês, domínio compartilhado).
+- Template simples: header com escudo da liga, corpo com info do jogo, botão WhatsApp, botão "Abrir liga".
+
+**Edição em `/signup` e `/minha-conta`**:
+- Validação WhatsApp: `z.string().regex(/^\d{10,11}$/)` (só dígitos, DDD obrigatório).
+- Exibição formatada: `(11) 98765-4321`.
+
+---
 
 ## Fora desta fase
 
-- Convite por e-mail de novos admins.
-- Logs/auditoria de mudanças de papel.
-- Papéis adicionais (moderador, árbitro etc.) — quando precisar, é só adicionar ao enum `app_role`.
+- Envio real via WhatsApp Business API (continua sendo só link `wa.me`).
+- Estatísticas individuais por atleta (gols, cartões).
+- Histórico de confrontos diretos no perfil.
+- Customização de avatar/banner do clube no perfil público.
+
+---
+
+## Arquivos afetados
+
+**Novos:**
+- `src/routes/times.$slug.tsx` — perfil público
+- `src/routes/api/public/hooks/match-notifications.ts` — cron handler
+- `src/lib/notifications.functions.ts`
+- `src/lib/team-profile.functions.ts`
+- `src/lib/wa.ts`
+- 1 migration (slug + notification_log + cron)
+
+**Editados:**
+- `src/routes/signup.tsx` — label "WhatsApp"
+- `src/routes/_authenticated/minha-conta.tsx` — bloco contato editável + link "perfil público"
+- `src/routes/times.tsx` — cards linkam para `/times/:slug`
+- `src/lib/sumula.functions.ts` — dispara e-mail no lançamento de placar
+- `src/lib/draw.functions.ts` — dispara e-mail no sorteio
