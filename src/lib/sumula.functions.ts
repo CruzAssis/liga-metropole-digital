@@ -284,15 +284,20 @@ export const fillSumula = createServerFn({ method: "POST" })
 // =============================================================
 const idSchema = z.object({ matchId: z.string().uuid() });
 
+const confirmSchema = z.object({
+  matchId: z.string().uuid(),
+  bestOpponent: bestOpponentSchema.optional().nullable(),
+});
+
 export const confirmSumula = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
-  .inputValidator((input) => idSchema.parse(input))
+  .inputValidator((input) => confirmSchema.parse(input))
   .handler(async ({ data, context }) => {
     const { userId } = context;
 
     const { data: match } = await supabaseAdmin
       .from("matches")
-      .select("id, status, visitor_team_id")
+      .select("id, status, host_team_id, visitor_team_id")
       .eq("id", data.matchId)
       .maybeSingle();
     if (!match) throw new Response("Jogo não encontrado", { status: 404 });
@@ -319,6 +324,85 @@ export const confirmSumula = createServerFn({ method: "POST" })
       .update({ status: "confirmed", visitor_confirmed_at: new Date().toISOString() })
       .eq("id", data.matchId);
     if (updErr) throw new Error(updErr.message);
+
+    // Voto do visitante: melhor jogador do mandante
+    if (data.bestOpponent) {
+      const { error: voteErr } = await supabaseAdmin
+        .from("match_best_opponent_votes")
+        .upsert(
+          {
+            match_id: data.matchId,
+            voter_team_id: match.visitor_team_id,
+            opponent_team_id: match.host_team_id,
+            jersey_number: data.bestOpponent.jersey_number,
+            rating: data.bestOpponent.rating,
+            note: data.bestOpponent.note ?? null,
+          },
+          { onConflict: "match_id,voter_team_id" },
+        );
+      if (voteErr) throw new Error(voteErr.message);
+    }
+
+    return { success: true };
+  });
+
+// =============================================================
+// Identificar jogador escolhido pelo adversário
+// =============================================================
+const identifySchema = z.object({
+  voteId: z.string().uuid(),
+  athleteId: z.string().uuid().nullable().optional(),
+  name: z.string().trim().min(1).max(120).nullable().optional(),
+});
+
+export const identifyBestOpponent = createServerFn({ method: "POST" })
+  .middleware([requireSupabaseAuth])
+  .inputValidator((input) => identifySchema.parse(input))
+  .handler(async ({ data, context }) => {
+    const { userId } = context;
+
+    const { data: vote } = await supabaseAdmin
+      .from("match_best_opponent_votes")
+      .select("id, opponent_team_id")
+      .eq("id", data.voteId)
+      .maybeSingle();
+    if (!vote) throw new Response("Voto não encontrado", { status: 404 });
+
+    const { data: team } = await supabaseAdmin
+      .from("teams")
+      .select("id")
+      .eq("id", vote.opponent_team_id)
+      .eq("manager_id", userId)
+      .maybeSingle();
+    if (!team) {
+      throw new Response(
+        JSON.stringify({ error: "Apenas o diretor do time indicado pode identificar o jogador" }),
+        { status: 403 },
+      );
+    }
+
+    let name = data.name ?? null;
+    if (data.athleteId) {
+      const { data: ath } = await supabaseAdmin
+        .from("athletes")
+        .select("id, full_name, nickname, team_id")
+        .eq("id", data.athleteId)
+        .maybeSingle();
+      if (!ath || ath.team_id !== vote.opponent_team_id) {
+        throw new Response(JSON.stringify({ error: "Atleta não pertence ao seu time" }), { status: 400 });
+      }
+      name = name || ath.nickname || ath.full_name || null;
+    }
+
+    const { error } = await supabaseAdmin
+      .from("match_best_opponent_votes")
+      .update({
+        opponent_athlete_id: data.athleteId ?? null,
+        identified_name: name,
+        identified_at: new Date().toISOString(),
+      })
+      .eq("id", data.voteId);
+    if (error) throw new Error(error.message);
 
     return { success: true };
   });
