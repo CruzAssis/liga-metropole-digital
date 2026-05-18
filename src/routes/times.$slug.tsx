@@ -82,7 +82,7 @@ function TeamProfilePage() {
           <EmptyText>Nenhum atleta cadastrado.</EmptyText>
         ) : (
           <div className="grid gap-3 grid-cols-2 sm:grid-cols-3 lg:grid-cols-4">
-            {athletes.map((a) => (
+            {athletes.map((a: Athlete) => (
               <div key={a.id} className="rounded-lg border border-border bg-card p-3 flex items-center gap-3">
                 <div className="h-12 w-12 rounded-full bg-muted overflow-hidden shrink-0">
                   {a.photo_url ? (
@@ -108,7 +108,7 @@ function TeamProfilePage() {
           <EmptyText>Sem jogos agendados.</EmptyText>
         ) : (
           <ul className="divide-y divide-border rounded-lg border border-border bg-card">
-            {upcoming.map((m) => (
+            {upcoming.map((m: Match) => (
               <li key={m.id} className="p-3 flex flex-wrap items-center justify-between gap-2 text-sm">
                 <div className="flex items-center gap-2 min-w-0">
                   <Badge variant="outline" className="text-xs">Rod. {m.round}</Badge>
@@ -141,7 +141,7 @@ function TeamProfilePage() {
           <EmptyText>Sem resultados ainda.</EmptyText>
         ) : (
           <ul className="divide-y divide-border rounded-lg border border-border bg-card">
-            {results.map((m) => (
+            {results.map((m: Match) => (
               <li key={m.id} className="p-3 flex items-center justify-between text-sm">
                 <div className="flex items-center gap-2 min-w-0">
                   <span className="font-medium truncate">{m.host?.short_name}</span>
