@@ -46,17 +46,20 @@ function MinhaContaPage() {
   const [team, setTeam] = useState<Team | null>(null);
   const [loading, setLoading] = useState(true);
 
-  useEffect(() => {
+  const loadTeam = async () => {
     if (!user) return;
-    (async () => {
-      const { data } = await supabase
-        .from("teams")
-        .select("id,name,short_name,slug,logo_url,registration_type,status,rejected_reason,created_at")
-        .eq("manager_id", user.id)
-        .maybeSingle();
-      setTeam((data as Team | null) ?? null);
-      setLoading(false);
-    })();
+    const { data } = await supabase
+      .from("teams")
+      .select("id,name,short_name,slug,logo_url,banner_url,primary_color,registration_type,status,rejected_reason,created_at")
+      .eq("manager_id", user.id)
+      .maybeSingle();
+    setTeam((data as Team | null) ?? null);
+    setLoading(false);
+  };
+
+  useEffect(() => {
+    void loadTeam();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [user]);
 
   if (loading) {
