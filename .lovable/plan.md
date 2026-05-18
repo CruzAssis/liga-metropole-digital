@@ -1,108 +1,57 @@
-## Escopo desta fase
+## Como você acessa a conta admin (hoje)
 
-Implementar o módulo **Atletas + ID Metropole** do documento (seções 2.1, 5 — tabela `atletas`, 7 — `/verificar` e `/atletas`, 8 — funções `hash-cpf` e `buscar-atleta-cpf`, 12 — `<VerifiedSeal>`, `<AtletaCard>`, `<IDMetropoleCard>`).
+Hoje **ninguém é admin**. Sua conta `shelderdouglasdacruz@gmail.com` foi criada com o papel `team_manager` (padrão do trigger). O grupo "Admin" na sidebar e as rotas `/admin/dashboard`, `/admin/triagem`, `/admin/sorteio` só aparecem/funcionam quando `has_role(auth.uid(),'admin')` retorna `true`.
 
-Decisões já aprovadas:
-- Manter schema atual em inglês; **adicionar** apenas o que falta.
-- Hash/busca de CPF via `createServerFn` (não Edge Function).
-- Nada de migração destrutiva nas tabelas existentes (teams/matches/competitions intactos).
-
-Fora desta fase (próximas iterações): páginas públicas de ranking/resultados/agenda, súmula digital, torcidômetro, premiações, refresh de identidade visual (#0A0A0A + textura).
+Solução: dois passos — bootstrap (promover sua conta agora) + tela permanente para gerenciar papéis de qualquer usuário daqui em diante.
 
 ---
 
-## 1. Banco de dados (migration aditiva)
+## 1. Bootstrap: promover sua conta a admin
 
-Nova tabela `athletes` (mantém convenção em inglês do projeto):
+Migration única que insere a linha em `public.user_roles`:
 
-```
-athletes (
-  id uuid pk,
-  team_id uuid references teams(id) on delete set null,  -- time atual
-  full_name text,
-  nickname text,
-  position text,                          -- goleiro/zagueiro/...
-  photo_url text,
-  cpf_hash text unique not null,          -- bcrypt, nunca em claro
-  cpf_last4 text not null,                -- últimos 4 dígitos para UX de busca
-  verified boolean default false,
-  verified_at timestamptz,
-  whatsapp text,
-  instagram_handle text,
-  user_id uuid references auth.users(id), -- preenchido ao auto-verificar
-  created_at, updated_at
-)
+```sql
+insert into public.user_roles (user_id, role)
+values ('e47e2788-9a0b-4759-a5fa-864af84c93fe', 'admin')
+on conflict (user_id, role) do nothing;
 ```
 
-Índice em `team_id`, `verified`, `cpf_last4`.
+Após aprovação, faça logout/login e o grupo "Admin" aparece na sidebar. A partir daí você acessa `/admin/dashboard`, `/admin/triagem`, `/admin/sorteio` e a nova `/admin/usuarios`.
 
-RLS:
-- `select` público apenas das colunas não sensíveis (via view `public_athletes` ou policy direta — colunas `cpf_hash`/`whatsapp` ficam ocultas no client lendo apenas via server fn).
-- `insert/update` pelo manager do time (`teams.manager_id = auth.uid()`).
-- `update` pelo próprio atleta após verificação (`user_id = auth.uid()`).
-- `all` para admin.
+## 2. Tela `/admin/usuarios` (gestão permanente de papéis)
 
-Trigger `updated_at`.
+Rota nova: `src/routes/_authenticated/admin/usuarios.tsx`. Acessível só por admin (componente checa `useIsAdmin` e redireciona se falso, igual às outras telas admin).
 
-## 2. Server functions (`src/lib/athletes.functions.ts`)
+**UI:**
+- Campo de busca por e-mail/nome (filtra a lista).
+- Tabela listando todos os usuários: nome, e-mail, CPF (mascarado), papéis atuais (chips: Admin / Gestor de time), data de cadastro.
+- Em cada linha: switch "Admin" e switch "Gestor de time". Toggle chama mutation.
+- Toast de sucesso/erro.
 
-- `preRegisterAthletes({ cpfs: string[] })` — manager do time autenticado; valida cada CPF (dígito verificador), gera bcrypt hash, insere `athletes` com `team_id = time do manager`, `verified=false`. Retorna `{ created, skipped_duplicates }`.
-- `findAthleteByCpf({ cpf })` — público; valida CPF, busca por `cpf_last4`, faz `bcrypt.compare` nos candidatos, retorna atleta SEM `cpf_hash` ou 404.
-- `verifyAthlete({ cpf, photo_url, whatsapp, instagram })` — autenticado; valida + bcrypt.compare, seta `verified=true`, `verified_at=now()`, `user_id=auth.uid()`, grava dados.
-- `listTeamAthletes({ team_id })` — manager do time ou admin.
+**Server functions** (`src/lib/users.functions.ts`):
+- `listUsers()` — middleware `requireSupabaseAuth` + checa se o caller é admin (`has_role`); usa `supabaseAdmin` para juntar `auth.users` (email) + `profiles` (full_name, cpf) + `user_roles`. Retorna lista DTO segura.
+- `setUserRole({ user_id, role, enabled })` — middleware admin-only, valida com Zod (`role` ∈ `admin|team_manager`), faz insert ou delete em `user_roles`. Bloqueia o próprio admin de remover seu último admin role (evita lockout).
 
-Validação Zod em todos. CPF helpers em `src/lib/cpf.ts` (mascara, valida dígito).
-
-Dependência: `bun add bcryptjs` (puro JS, compatível com Worker).
-
-## 3. Componentes UI
-
-`src/components/athletes/`:
-- `VerifiedSeal.tsx` — círculo `#007BFF` com check branco, absolute bottom-right do avatar container. Props: `size`.
-- `Avatar.tsx` (ou estende shadcn) — exibe foto OU iniciais em Bebas Neue + Selo se `verified`.
-- `AtletaCard.tsx` — card escuro com avatar+selo, apelido, time, posição, stats placeholder (0 gols / 0 assist enquanto não temos `goals`/`assists`).
-- `IDMetropoleCard.tsx` — cartão visual do perfil completo do atleta (usado em modal e em `/perfil-atleta`).
-
-## 4. Páginas
-
-- `src/routes/atletas.tsx` (pública) — grid de `AtletaCard` lendo todos os atletas; sub-tabs preparadas (Artilharia/Assistências/Nota — desabilitadas com chip "em breve" até existir tabela `goals`). Clique abre modal com `IDMetropoleCard`.
-- `src/routes/verificar.tsx` (pública) — input de CPF com máscara, validação no submit, chama `findAthleteByCpf`. Se achado: exibe dados pré-cadastrados, formulário (upload foto via bucket `team-logos` ou novo bucket `athletes`, whatsapp, instagram), botão "Ativar meu ID Metropole" que chama `verifyAthlete`. Toast de sucesso → redirect `/atletas`.
-- `src/routes/_authenticated/minha-conta.tsx` (edição) — adicionar seção "Pré-cadastrar atletas (CPFs)": textarea com 1 CPF por linha, botão chama `preRegisterAthletes`. Lista atletas do time com chip verde/âmbar (Verificado / Pendente).
-
-Sidebar (`AppSidebar.tsx`): adicionar item público "Atletas" → `/atletas`. Adicionar "Verificar ID" no header público.
-
-## 5. Storage
-
-Novo bucket público `athlete-photos` (path `{athlete_id}/{filename}`), policy: insert pelo `user_id` do atleta verificado OU manager do time. Limite 2MB, mime `image/*`.
-
-## 6. Migration de seed (opcional)
-
-Não inserir dados fake automaticamente — apenas script comentado em SQL anexado para o admin testar.
+**Sidebar:** adicionar item "Usuários" (ícone `Users2` ou `Shield`) no grupo Admin, apontando para `/admin/usuarios`.
 
 ---
 
 ## Detalhes técnicos
 
-- `bcryptjs` (não `bcrypt` nativo) por causa do runtime Worker.
-- `cpf_last4` é necessário porque bcrypt não permite busca direta — usamos `last4` como índice e fazemos compare nos candidatos. Caso de colisão raríssimo (≤10 candidatos).
-- `findAthleteByCpf` é público, não usa `requireSupabaseAuth`; chama `supabaseAdmin` internamente mas só retorna campos seguros (`id, nickname, full_name, team_id, position, verified`).
-- `verifyAthlete` exige sessão autenticada (usuário logado quer vincular o atleta a si).
-- Atualizar `src/integrations/supabase/types.ts` é automático após migration aprovada.
-- Rotas dentro de `_authenticated/admin/*` continuam intactas.
+- A migration de bootstrap NÃO altera o trigger `handle_new_user` — todo novo cadastro continua sendo `team_manager` por padrão. Admin é concedido só manualmente, pela nova tela.
+- `setUserRole` usa `supabaseAdmin` (service role) porque a RLS em `user_roles` só permite ao próprio admin gerenciar — e a checagem de admin é feita no handler antes de qualquer escrita.
+- Trava anti-lockout: ao desativar o switch "Admin" do próprio usuário, se ele for o único admin do sistema, a server fn retorna erro "Não é possível remover o último admin".
+- Nenhuma mudança nas rotas admin existentes (dashboard/triagem/sorteio) — só passa a existir uma a mais.
 
-## Ordem de execução após aprovação
+## Arquivos
 
-1. Migration (tabela + RLS + bucket + policies).
-2. `bun add bcryptjs @types/bcryptjs`.
-3. `src/lib/cpf.ts` + `src/lib/athletes.functions.ts`.
-4. Componentes (`VerifiedSeal`, `AtletaCard`, `IDMetropoleCard`).
-5. Rotas `/atletas` e `/verificar` + sidebar.
-6. Seção de pré-cadastro em `/minha-conta`.
-7. Verificação manual no preview.
+- **Nova migration**: promove `e47e2788-…` a admin.
+- **Novo**: `src/lib/users.functions.ts` (listUsers, setUserRole).
+- **Nova rota**: `src/routes/_authenticated/admin/usuarios.tsx`.
+- **Editar**: `src/components/AppSidebar.tsx` (adiciona item "Usuários").
 
-## Itens NÃO incluídos (intencionalmente)
+## Fora desta fase
 
-- Cor base ainda `#1A1A1A` (refresh visual fica para outra fase).
-- Sem `goals`/`assists`/`fair_play` — stats no card mostram 0/em breve.
-- Sem realtime nem notificações.
-- Sem mudança no fluxo de sorteio/triagem existente.
+- Convite por e-mail de novos admins.
+- Logs/auditoria de mudanças de papel.
+- Papéis adicionais (moderador, árbitro etc.) — quando precisar, é só adicionar ao enum `app_role`.
