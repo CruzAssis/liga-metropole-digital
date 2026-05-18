@@ -11,19 +11,16 @@ export function PublicShell({ children }: { children: React.ReactNode }) {
             <Trophy className="h-6 w-6 text-primary" />
             <span className="font-display text-xl tracking-wider">Liga Metrópole Várzea</span>
           </Link>
-          <nav className="flex items-center gap-2">
-            <Button asChild variant="ghost" size="sm">
-              <Link to="/atletas">Atletas</Link>
-            </Button>
-            <Button asChild variant="ghost" size="sm">
-              <Link to="/verificar">Verificar ID</Link>
-            </Button>
-            <Button asChild variant="ghost" size="sm">
-              <Link to="/login">Entrar</Link>
-            </Button>
-            <Button asChild size="sm">
-              <Link to="/signup">Criar conta</Link>
-            </Button>
+          <nav className="flex flex-wrap items-center gap-1">
+            <Button asChild variant="ghost" size="sm"><Link to="/ranking">Ranking</Link></Button>
+            <Button asChild variant="ghost" size="sm"><Link to="/resultados">Resultados</Link></Button>
+            <Button asChild variant="ghost" size="sm"><Link to="/agenda">Agenda</Link></Button>
+            <Button asChild variant="ghost" size="sm"><Link to="/times">Times</Link></Button>
+            <Button asChild variant="ghost" size="sm"><Link to="/locais">Locais</Link></Button>
+            <Button asChild variant="ghost" size="sm"><Link to="/atletas">Atletas</Link></Button>
+            <Button asChild variant="ghost" size="sm"><Link to="/verificar">Verificar ID</Link></Button>
+            <Button asChild variant="ghost" size="sm"><Link to="/login">Entrar</Link></Button>
+            <Button asChild size="sm"><Link to="/signup">Criar conta</Link></Button>
           </nav>
         </div>
       </header>
