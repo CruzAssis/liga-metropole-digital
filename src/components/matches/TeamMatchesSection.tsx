@@ -257,6 +257,20 @@ function MatchCard({ match }: { match: Match }) {
           onOpenChange={setConfirmOpen}
         />
       )}
+      {flyerOpen && match.host && match.visitor && (
+        <MatchdayFlyer
+          open={flyerOpen}
+          onOpenChange={setFlyerOpen}
+          data={{
+            host: { name: match.host.name, short_name: match.host.short_name, logo_url: match.host.logo_url },
+            visitor: { name: match.visitor.name, short_name: match.visitor.short_name, logo_url: match.visitor.logo_url },
+            round: match.round,
+            stage: match.stage,
+            venue: match.venue,
+            scheduled_at: match.scheduled_at,
+          }}
+        />
+      )}
     </div>
   );
 }
