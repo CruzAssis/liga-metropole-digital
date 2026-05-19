@@ -100,6 +100,7 @@ function MinhaContaPage() {
             primaryColor={team.primary_color}
             onSaved={loadTeam}
           />
+          <TeamHomeVenueCard teamId={team.id} />
           <TeamAthletesSection />
           <TeamMatchesSection />
         </>
