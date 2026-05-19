@@ -123,7 +123,7 @@ function PartidaPage() {
           .select("id, full_name, nickname")
           .in("id", athleteIds);
         const amap: Record<string, { full_name: string; nickname: string | null }> = {};
-        for (const a of adata ?? []) amap[a.id] = { full_name: a.full_name, nickname: a.nickname };
+        for (const a of adata ?? []) amap[a.id] = { full_name: a.full_name ?? "—", nickname: a.nickname };
         setAthletes(amap);
       }
       setLoading(false);
