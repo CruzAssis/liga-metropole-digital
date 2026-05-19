@@ -13,6 +13,7 @@ import { ClipboardList, ExternalLink, User2 } from "lucide-react";
 import { TeamAthletesSection } from "@/components/athletes/TeamAthletesSection";
 import { TeamMatchesSection } from "@/components/matches/TeamMatchesSection";
 import { TeamCustomizationCard } from "@/components/teams/TeamCustomizationCard";
+import { TeamHomeVenueCard } from "@/components/teams/TeamHomeVenueCard";
 import { getMyProfile, updateMyProfile } from "@/lib/profile.functions";
 import { formatPhoneBR } from "@/lib/wa";
 
@@ -119,6 +120,7 @@ function TeamCard({ team }: { team: Team }) {
             alt={`Escudo ${team.name}`}
             className="h-24 w-24 rounded-md object-cover border border-border"
           />
+          <TeamHomeVenueCard teamId={team.id} onSaved={loadTeam} />
         ) : (
           <div className="h-24 w-24 rounded-md border border-border bg-background/50 flex items-center justify-center font-display text-2xl">
             {team.short_name}
