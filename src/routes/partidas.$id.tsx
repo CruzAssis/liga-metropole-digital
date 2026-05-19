@@ -167,13 +167,14 @@ function PartidaPage() {
 
   return (
     <PublicShell>
-      <div className="mb-4">
+      <div className="mb-4 flex items-center justify-between gap-2">
         <Button asChild variant="ghost" size="sm">
           <Link to="/resultados">
             <ArrowLeft className="h-4 w-4" />
             Voltar
           </Link>
         </Button>
+        <ShareButton />
       </div>
 
       {/* Header */}
