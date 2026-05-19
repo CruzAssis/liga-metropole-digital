@@ -102,7 +102,7 @@ export function TeamMatchesSection() {
             </p>
           )}
           {pending.map((m) => (
-            <MatchCard key={m.id} match={m} />
+            <MatchCard key={m.id} match={m} home={home} />
           ))}
         </div>
       </div>
@@ -132,7 +132,7 @@ export function TeamMatchesSection() {
   );
 }
 
-function MatchCard({ match }: { match: Match }) {
+function MatchCard({ match, home }: { match: Match; home: { venue: string | null; time: string | null } }) {
   const qc = useQueryClient();
   const dispute = useServerFn(disputeSumula);
   const [sumulaOpen, setSumulaOpen] = useState(false);
