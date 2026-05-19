@@ -120,7 +120,6 @@ function TeamCard({ team }: { team: Team }) {
             alt={`Escudo ${team.name}`}
             className="h-24 w-24 rounded-md object-cover border border-border"
           />
-          <TeamHomeVenueCard teamId={team.id} onSaved={loadTeam} />
         ) : (
           <div className="h-24 w-24 rounded-md border border-border bg-background/50 flex items-center justify-center font-display text-2xl">
             {team.short_name}
