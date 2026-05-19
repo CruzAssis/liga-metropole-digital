@@ -2,6 +2,7 @@ import type { ReactNode } from "react";
 import { Link } from "@tanstack/react-router";
 import { SidebarProvider, SidebarTrigger } from "@/components/ui/sidebar";
 import { AppSidebar } from "./AppSidebar";
+import { BrandLogo } from "./BrandLogo";
 import { useAuth } from "@/hooks/use-auth";
 import { useIsAdmin } from "@/hooks/use-is-admin";
 import { Button } from "@/components/ui/button";
@@ -19,6 +20,7 @@ export function AppShell({ children }: { children: ReactNode }) {
           <header className="h-14 flex items-center justify-between border-b border-border px-4">
             <div className="flex items-center gap-3">
               <SidebarTrigger />
+              <BrandLogo className="h-7 w-7" />
               <span className="font-display text-xl tracking-wider">Liga Metrópole Várzea</span>
             </div>
             <div className="flex items-center gap-3">
