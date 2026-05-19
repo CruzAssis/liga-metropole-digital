@@ -1,5 +1,5 @@
 import { Link } from "@tanstack/react-router";
-import { Trophy } from "lucide-react";
+import { BrandLogo } from "@/components/BrandLogo";
 import { Button } from "@/components/ui/button";
 
 export function PublicShell({ children }: { children: React.ReactNode }) {
@@ -8,7 +8,7 @@ export function PublicShell({ children }: { children: React.ReactNode }) {
       <header className="border-b border-border">
         <div className="mx-auto flex max-w-6xl items-center justify-between px-6 py-4">
           <Link to="/" className="flex items-center gap-2">
-            <Trophy className="h-6 w-6 text-primary" />
+            <BrandLogo className="h-8 w-8" />
             <span className="font-display text-xl tracking-wider">Liga Metrópole Várzea</span>
           </Link>
           <nav className="flex flex-wrap items-center gap-1">
