@@ -179,6 +179,11 @@ function TeamProfilePage() {
         )}
       </Section>
 
+      {/* H2H */}
+      <Section title="Histórico de confrontos (H2H)">
+        <H2HBlock teamId={team.id} matches={matches} />
+      </Section>
+
       <div className="mt-10">
         <Button asChild variant="outline">
           <Link to="/ranking">Ver classificação completa</Link>
@@ -260,3 +265,147 @@ function ContactSection({ slug, teamName }: { slug: string; teamName: string }) 
     </section>
   );
 }
+
+type H2HMatch = LoaderData["matches"][number];
+
+function H2HBlock({ teamId, matches }: { teamId: string; matches: H2HMatch[] }) {
+  // Group played matches by opponent
+  const played = matches.filter((m) => ["confirmed", "wo"].includes(m.status));
+  if (played.length === 0) {
+    return <EmptyText>Sem confrontos disputados ainda.</EmptyText>;
+  }
+
+  type Group = {
+    opponentId: string;
+    opponent: { name: string; short_name: string; slug: string | null; logo_url: string | null } | null;
+    matches: H2HMatch[];
+    w: number;
+    d: number;
+    l: number;
+    gf: number;
+    ga: number;
+  };
+
+  const groups = new Map<string, Group>();
+  for (const m of played) {
+    const opponentId = m.is_host ? m.visitor_team_id : m.host_team_id;
+    const opponent = m.is_host ? m.visitor : m.host;
+    const myScore = (m.is_host ? m.host_score : m.visitor_score) ?? 0;
+    const oppScore = (m.is_host ? m.visitor_score : m.host_score) ?? 0;
+    const g = groups.get(opponentId) ?? {
+      opponentId,
+      opponent,
+      matches: [],
+      w: 0,
+      d: 0,
+      l: 0,
+      gf: 0,
+      ga: 0,
+    };
+    g.matches.push(m);
+    g.gf += myScore;
+    g.ga += oppScore;
+    if (myScore > oppScore) g.w++;
+    else if (myScore === oppScore) g.d++;
+    else g.l++;
+    groups.set(opponentId, g);
+  }
+
+  const list = Array.from(groups.values()).sort(
+    (a, b) => b.matches.length - a.matches.length,
+  );
+
+  return (
+    <div className="space-y-3">
+      {list.map((g) => (
+        <details
+          key={g.opponentId}
+          className="rounded-lg border border-border bg-card overflow-hidden group"
+        >
+          <summary className="p-3 flex items-center justify-between gap-3 cursor-pointer hover:bg-accent/30 transition-colors list-none">
+            <div className="flex items-center gap-3 min-w-0">
+              <div className="h-9 w-9 rounded-md border border-border bg-background overflow-hidden flex items-center justify-center shrink-0">
+                {g.opponent?.logo_url ? (
+                  <img src={g.opponent.logo_url} alt="" className="h-full w-full object-cover" />
+                ) : (
+                  <span className="font-mono text-xs">{g.opponent?.short_name?.[0] ?? "?"}</span>
+                )}
+              </div>
+              <div className="min-w-0">
+                {g.opponent?.slug ? (
+                  <Link
+                    to="/times/$slug"
+                    params={{ slug: g.opponent.slug }}
+                    className="text-sm font-medium hover:underline truncate block"
+                  >
+                    {g.opponent.name}
+                  </Link>
+                ) : (
+                  <span className="text-sm font-medium truncate block">
+                    {g.opponent?.name ?? "Adversário"}
+                  </span>
+                )}
+                <span className="text-xs text-muted-foreground">
+                  {g.matches.length} {g.matches.length === 1 ? "jogo" : "jogos"} · {g.gf}–{g.ga} gols
+                </span>
+              </div>
+            </div>
+            <div className="flex items-center gap-1 text-xs font-mono shrink-0">
+              <Badge variant="default" className="bg-emerald-600 hover:bg-emerald-600">
+                {g.w}V
+              </Badge>
+              <Badge variant="secondary">{g.d}E</Badge>
+              <Badge variant="destructive">{g.l}D</Badge>
+            </div>
+          </summary>
+          <ul className="divide-y divide-border border-t border-border">
+            {g.matches
+              .slice()
+              .sort((a, b) => {
+                const ta = a.scheduled_at ? new Date(a.scheduled_at).getTime() : 0;
+                const tb = b.scheduled_at ? new Date(b.scheduled_at).getTime() : 0;
+                return tb - ta;
+              })
+              .map((m) => {
+                const myScore = (m.is_host ? m.host_score : m.visitor_score) ?? 0;
+                const oppScore = (m.is_host ? m.visitor_score : m.host_score) ?? 0;
+                const result =
+                  myScore > oppScore ? "V" : myScore === oppScore ? "E" : "D";
+                const resultColor =
+                  result === "V"
+                    ? "bg-emerald-600 text-white"
+                    : result === "E"
+                      ? "bg-muted text-foreground"
+                      : "bg-destructive text-destructive-foreground";
+                return (
+                  <li key={m.id} className="p-3 flex items-center justify-between gap-2 text-xs">
+                    <div className="flex items-center gap-2 min-w-0">
+                      <span
+                        className={`h-5 w-5 rounded flex items-center justify-center font-mono font-bold ${resultColor}`}
+                      >
+                        {result}
+                      </span>
+                      <span className="font-medium">
+                        {m.is_host ? "Casa" : "Fora"}
+                      </span>
+                      <span className="font-mono font-bold">
+                        {m.host_score}×{m.visitor_score}
+                      </span>
+                      {m.status === "wo" && <Badge variant="destructive" className="text-[10px]">WO</Badge>}
+                      <Badge variant="outline" className="text-[10px]">Rod. {m.round}</Badge>
+                    </div>
+                    {m.scheduled_at && (
+                      <span className="text-muted-foreground shrink-0">
+                        {new Date(m.scheduled_at).toLocaleDateString("pt-BR")}
+                      </span>
+                    )}
+                  </li>
+                );
+              })}
+          </ul>
+        </details>
+      ))}
+    </div>
+  );
+}
+
