@@ -1,10 +1,11 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { useServerFn } from "@tanstack/react-start";
 import {
   listMyTeamMatches,
   disputeSumula,
 } from "@/lib/sumula.functions";
+import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { toast } from "sonner";
@@ -58,6 +59,20 @@ export function TeamMatchesSection() {
     queryKey: ["my-team-matches"],
     queryFn: () => list(),
   });
+
+  const teamId = data?.team?.id ?? null;
+  const [home, setHome] = useState<{ venue: string | null; time: string | null }>({ venue: null, time: null });
+  useEffect(() => {
+    if (!teamId) return;
+    (async () => {
+      const { data: t } = await supabase
+        .from("teams")
+        .select("home_venue, home_time")
+        .eq("id", teamId)
+        .maybeSingle();
+      setHome({ venue: t?.home_venue ?? null, time: t?.home_time ?? null });
+    })();
+  }, [teamId]);
 
   if (isLoading) {
     return <div className="text-muted-foreground">Carregando jogos...</div>;
