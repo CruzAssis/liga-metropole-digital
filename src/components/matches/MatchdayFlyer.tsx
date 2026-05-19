@@ -8,7 +8,7 @@ import {
   DialogTitle,
 } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
-import { Download, Shield, Calendar, MapPin, Clock } from "lucide-react";
+import { Download } from "lucide-react";
 
 type TeamLite = {
   name: string;
@@ -265,7 +265,6 @@ function TeamColumn({ team, side, isStory }: { team: TeamLite; side: "left" | "r
         }}
       >
         {team.logo_url ? (
-          // eslint-disable-next-line @next/next/no-img-element
           <img
             src={team.logo_url}
             alt={team.name}
@@ -299,6 +298,3 @@ function FlyerRow({ icon, label }: { icon: string; label: string }) {
     </div>
   );
 }
-
-// Re-export icons used elsewhere (avoids unused imports lint)
-export const _flyerIcons = { Shield, Calendar, MapPin, Clock };
