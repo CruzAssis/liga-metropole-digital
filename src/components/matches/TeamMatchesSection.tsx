@@ -328,3 +328,14 @@ function Deadline({ filledAt }: { filledAt: string | null }) {
     </span>
   );
 }
+
+// If the match has no scheduled_at, synthesize an ISO datetime today using the team's home_time fallback.
+// If scheduled_at exists, return as-is.
+function mergeDateWithFallbackTime(scheduledAt: string | null, homeTime: string | null): string | null {
+  if (scheduledAt) return scheduledAt;
+  if (!homeTime) return null;
+  const [hh, mm] = homeTime.split(":");
+  const d = new Date();
+  d.setHours(Number(hh) || 0, Number(mm) || 0, 0, 0);
+  return d.toISOString();
+}
