@@ -279,6 +279,31 @@ function PartidaPage() {
   );
 }
 
+function ShareButton() {
+  const [copied, setCopied] = useState(false);
+  const onClick = async () => {
+    const url = typeof window !== "undefined" ? window.location.href : "";
+    try {
+      if (typeof navigator !== "undefined" && (navigator as any).share) {
+        await (navigator as any).share({ url, title: "Partida · Liga Metrópole" });
+        return;
+      }
+      await navigator.clipboard.writeText(url);
+      setCopied(true);
+      toast.success("Link copiado!");
+      setTimeout(() => setCopied(false), 2000);
+    } catch {
+      toast.error("Não foi possível copiar o link.");
+    }
+  };
+  return (
+    <Button variant="outline" size="sm" onClick={onClick}>
+      {copied ? <Check className="h-4 w-4" /> : <Link2 className="h-4 w-4" />}
+      {copied ? "Copiado" : "Compartilhar"}
+    </Button>
+  );
+}
+
 function TeamSide({ team, align }: { team: Team | undefined; align: "left" | "right" }) {
   if (!team) return <div />;
   const inner = (
