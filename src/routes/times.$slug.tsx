@@ -394,11 +394,20 @@ function H2HBlock({ teamId, matches }: { teamId: string; matches: H2HMatch[] }) 
                       {m.status === "wo" && <Badge variant="destructive" className="text-[10px]">WO</Badge>}
                       <Badge variant="outline" className="text-[10px]">Rod. {m.round}</Badge>
                     </div>
-                    {m.scheduled_at && (
-                      <span className="text-muted-foreground shrink-0">
-                        {new Date(m.scheduled_at).toLocaleDateString("pt-BR")}
-                      </span>
-                    )}
+                    <div className="flex items-center gap-2 shrink-0">
+                      {m.scheduled_at && (
+                        <span className="text-muted-foreground">
+                          {new Date(m.scheduled_at).toLocaleDateString("pt-BR")}
+                        </span>
+                      )}
+                      <Link
+                        to="/partidas/$id"
+                        params={{ id: m.id }}
+                        className="text-primary hover:underline font-medium"
+                      >
+                        Súmula →
+                      </Link>
+                    </div>
                   </li>
                 );
               })}

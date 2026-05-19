@@ -21,6 +21,7 @@ import { Route as AgendaRouteImport } from './routes/agenda'
 import { Route as AuthenticatedRouteImport } from './routes/_authenticated'
 import { Route as IndexRouteImport } from './routes/index'
 import { Route as TimesSlugRouteImport } from './routes/times.$slug'
+import { Route as PartidasIdRouteImport } from './routes/partidas.$id'
 import { Route as AuthenticatedMinhaContaRouteImport } from './routes/_authenticated/minha-conta'
 import { Route as AuthenticatedInscricaoRouteImport } from './routes/_authenticated/inscricao'
 import { Route as AuthenticatedAdminRouteImport } from './routes/_authenticated/admin'
@@ -89,6 +90,11 @@ const TimesSlugRoute = TimesSlugRouteImport.update({
   path: '/$slug',
   getParentRoute: () => TimesRoute,
 } as any)
+const PartidasIdRoute = PartidasIdRouteImport.update({
+  id: '/partidas/$id',
+  path: '/partidas/$id',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const AuthenticatedMinhaContaRoute = AuthenticatedMinhaContaRouteImport.update({
   id: '/minha-conta',
   path: '/minha-conta',
@@ -149,6 +155,7 @@ export interface FileRoutesByFullPath {
   '/admin': typeof AuthenticatedAdminRouteWithChildren
   '/inscricao': typeof AuthenticatedInscricaoRoute
   '/minha-conta': typeof AuthenticatedMinhaContaRoute
+  '/partidas/$id': typeof PartidasIdRoute
   '/times/$slug': typeof TimesSlugRoute
   '/admin/dashboard': typeof AuthenticatedAdminDashboardRoute
   '/admin/sorteio': typeof AuthenticatedAdminSorteioRoute
@@ -170,6 +177,7 @@ export interface FileRoutesByTo {
   '/admin': typeof AuthenticatedAdminRouteWithChildren
   '/inscricao': typeof AuthenticatedInscricaoRoute
   '/minha-conta': typeof AuthenticatedMinhaContaRoute
+  '/partidas/$id': typeof PartidasIdRoute
   '/times/$slug': typeof TimesSlugRoute
   '/admin/dashboard': typeof AuthenticatedAdminDashboardRoute
   '/admin/sorteio': typeof AuthenticatedAdminSorteioRoute
@@ -193,6 +201,7 @@ export interface FileRoutesById {
   '/_authenticated/admin': typeof AuthenticatedAdminRouteWithChildren
   '/_authenticated/inscricao': typeof AuthenticatedInscricaoRoute
   '/_authenticated/minha-conta': typeof AuthenticatedMinhaContaRoute
+  '/partidas/$id': typeof PartidasIdRoute
   '/times/$slug': typeof TimesSlugRoute
   '/_authenticated/admin/dashboard': typeof AuthenticatedAdminDashboardRoute
   '/_authenticated/admin/sorteio': typeof AuthenticatedAdminSorteioRoute
@@ -216,6 +225,7 @@ export interface FileRouteTypes {
     | '/admin'
     | '/inscricao'
     | '/minha-conta'
+    | '/partidas/$id'
     | '/times/$slug'
     | '/admin/dashboard'
     | '/admin/sorteio'
@@ -237,6 +247,7 @@ export interface FileRouteTypes {
     | '/admin'
     | '/inscricao'
     | '/minha-conta'
+    | '/partidas/$id'
     | '/times/$slug'
     | '/admin/dashboard'
     | '/admin/sorteio'
@@ -259,6 +270,7 @@ export interface FileRouteTypes {
     | '/_authenticated/admin'
     | '/_authenticated/inscricao'
     | '/_authenticated/minha-conta'
+    | '/partidas/$id'
     | '/times/$slug'
     | '/_authenticated/admin/dashboard'
     | '/_authenticated/admin/sorteio'
@@ -279,6 +291,7 @@ export interface RootRouteChildren {
   SignupRoute: typeof SignupRoute
   TimesRoute: typeof TimesRouteWithChildren
   VerificarRoute: typeof VerificarRoute
+  PartidasIdRoute: typeof PartidasIdRoute
 }
 
 declare module '@tanstack/react-router' {
@@ -366,6 +379,13 @@ declare module '@tanstack/react-router' {
       fullPath: '/times/$slug'
       preLoaderRoute: typeof TimesSlugRouteImport
       parentRoute: typeof TimesRoute
+    }
+    '/partidas/$id': {
+      id: '/partidas/$id'
+      path: '/partidas/$id'
+      fullPath: '/partidas/$id'
+      preLoaderRoute: typeof PartidasIdRouteImport
+      parentRoute: typeof rootRouteImport
     }
     '/_authenticated/minha-conta': {
       id: '/_authenticated/minha-conta'
@@ -483,6 +503,7 @@ const rootRouteChildren: RootRouteChildren = {
   SignupRoute: SignupRoute,
   TimesRoute: TimesRouteWithChildren,
   VerificarRoute: VerificarRoute,
+  PartidasIdRoute: PartidasIdRoute,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)
