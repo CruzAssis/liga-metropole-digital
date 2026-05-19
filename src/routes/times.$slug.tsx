@@ -179,6 +179,11 @@ function TeamProfilePage() {
         )}
       </Section>
 
+      {/* H2H */}
+      <Section title="Histórico de confrontos (H2H)">
+        <H2HBlock teamId={team.id} matches={matches} />
+      </Section>
+
       <div className="mt-10">
         <Button asChild variant="outline">
           <Link to="/ranking">Ver classificação completa</Link>
