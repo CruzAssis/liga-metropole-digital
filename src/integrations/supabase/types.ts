@@ -422,6 +422,8 @@ export type Database = {
           approved_at: string | null
           banner_url: string | null
           created_at: string
+          home_time: string | null
+          home_venue: string | null
           id: string
           logo_url: string | null
           manager_id: string
@@ -437,6 +439,8 @@ export type Database = {
           approved_at?: string | null
           banner_url?: string | null
           created_at?: string
+          home_time?: string | null
+          home_venue?: string | null
           id?: string
           logo_url?: string | null
           manager_id: string
@@ -452,6 +456,8 @@ export type Database = {
           approved_at?: string | null
           banner_url?: string | null
           created_at?: string
+          home_time?: string | null
+          home_venue?: string | null
           id?: string
           logo_url?: string | null
           manager_id?: string
