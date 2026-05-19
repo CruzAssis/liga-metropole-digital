@@ -4,7 +4,8 @@ import { supabase } from "@/integrations/supabase/client";
 import { PublicShell } from "@/components/PublicShell";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import { ArrowLeft, MapPin, Calendar } from "lucide-react";
+import { ArrowLeft, MapPin, Calendar, Link2, Check } from "lucide-react";
+import { toast } from "sonner";
 
 export const Route = createFileRoute("/partidas/$id")({
   component: PartidaPage,
@@ -166,13 +167,14 @@ function PartidaPage() {
 
   return (
     <PublicShell>
-      <div className="mb-4">
+      <div className="mb-4 flex items-center justify-between gap-2">
         <Button asChild variant="ghost" size="sm">
           <Link to="/resultados">
             <ArrowLeft className="h-4 w-4" />
             Voltar
           </Link>
         </Button>
+        <ShareButton />
       </div>
 
       {/* Header */}
@@ -274,6 +276,31 @@ function PartidaPage() {
         </div>
       )}
     </PublicShell>
+  );
+}
+
+function ShareButton() {
+  const [copied, setCopied] = useState(false);
+  const onClick = async () => {
+    const url = typeof window !== "undefined" ? window.location.href : "";
+    try {
+      if (typeof navigator !== "undefined" && (navigator as any).share) {
+        await (navigator as any).share({ url, title: "Partida · Liga Metrópole" });
+        return;
+      }
+      await navigator.clipboard.writeText(url);
+      setCopied(true);
+      toast.success("Link copiado!");
+      setTimeout(() => setCopied(false), 2000);
+    } catch {
+      toast.error("Não foi possível copiar o link.");
+    }
+  };
+  return (
+    <Button variant="outline" size="sm" onClick={onClick}>
+      {copied ? <Check className="h-4 w-4" /> : <Link2 className="h-4 w-4" />}
+      {copied ? "Copiado" : "Compartilhar"}
+    </Button>
   );
 }
 
