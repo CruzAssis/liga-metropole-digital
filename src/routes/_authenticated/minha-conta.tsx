@@ -13,6 +13,7 @@ import { ClipboardList, ExternalLink, User2 } from "lucide-react";
 import { TeamAthletesSection } from "@/components/athletes/TeamAthletesSection";
 import { TeamMatchesSection } from "@/components/matches/TeamMatchesSection";
 import { TeamCustomizationCard } from "@/components/teams/TeamCustomizationCard";
+import { TeamHomeVenueCard } from "@/components/teams/TeamHomeVenueCard";
 import { getMyProfile, updateMyProfile } from "@/lib/profile.functions";
 import { formatPhoneBR } from "@/lib/wa";
 
@@ -99,6 +100,7 @@ function MinhaContaPage() {
             primaryColor={team.primary_color}
             onSaved={loadTeam}
           />
+          <TeamHomeVenueCard teamId={team.id} />
           <TeamAthletesSection />
           <TeamMatchesSection />
         </>

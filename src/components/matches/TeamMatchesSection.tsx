@@ -17,10 +17,12 @@ import {
   MessageCircle,
   ClipboardEdit,
   Eye,
+  Image as ImageIcon,
 } from "lucide-react";
 import { buildWhatsAppLink } from "@/lib/wa";
 import { SumulaDialog } from "./SumulaDialog";
 import { ConfirmSumulaDialog } from "./ConfirmSumulaDialog";
+import { MatchdayFlyer } from "./MatchdayFlyer";
 
 const HOURS_TO_CONFIRM = 48;
 
@@ -120,6 +122,7 @@ function MatchCard({ match }: { match: Match }) {
   const dispute = useServerFn(disputeSumula);
   const [sumulaOpen, setSumulaOpen] = useState(false);
   const [confirmOpen, setConfirmOpen] = useState(false);
+  const [flyerOpen, setFlyerOpen] = useState(false);
 
   const meta = statusMeta[match.status] ?? statusMeta.scheduled;
 
@@ -197,7 +200,15 @@ function MatchCard({ match }: { match: Match }) {
           )}
         </div>
 
-        <div className="flex gap-2">
+        <div className="flex gap-2 flex-wrap">
+          <Button
+            size="sm"
+            variant="outline"
+            onClick={() => setFlyerOpen(true)}
+            className="gap-1"
+          >
+            <ImageIcon className="h-4 w-4" /> Flyer
+          </Button>
           {canFill && (
             <Button size="sm" onClick={() => setSumulaOpen(true)} className="gap-1">
               <ClipboardEdit className="h-4 w-4" />
@@ -244,6 +255,20 @@ function MatchCard({ match }: { match: Match }) {
           matchId={match.id}
           open={confirmOpen}
           onOpenChange={setConfirmOpen}
+        />
+      )}
+      {flyerOpen && match.host && match.visitor && (
+        <MatchdayFlyer
+          open={flyerOpen}
+          onOpenChange={setFlyerOpen}
+          data={{
+            host: { name: match.host.name, short_name: match.host.short_name, logo_url: match.host.logo_url },
+            visitor: { name: match.visitor.name, short_name: match.visitor.short_name, logo_url: match.visitor.logo_url },
+            round: match.round,
+            stage: match.stage,
+            venue: match.venue,
+            scheduled_at: match.scheduled_at,
+          }}
         />
       )}
     </div>
