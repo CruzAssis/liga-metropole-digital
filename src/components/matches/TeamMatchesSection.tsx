@@ -281,8 +281,8 @@ function MatchCard({ match, home }: { match: Match; home: { venue: string | null
             visitor: { name: match.visitor.name, short_name: match.visitor.short_name, logo_url: match.visitor.logo_url },
             round: match.round,
             stage: match.stage,
-            venue: match.venue,
-            scheduled_at: match.scheduled_at,
+            venue: match.venue ?? home.venue,
+            scheduled_at: mergeDateWithFallbackTime(match.scheduled_at, home.time),
           }}
         />
       )}
