@@ -74,9 +74,11 @@ function ResultadosPage() {
         {matches?.map((m) => {
           const isWO = m.status === "wo";
           return (
-            <div
+            <Link
               key={m.id}
-              className="rounded-lg border border-border bg-card p-4 flex flex-wrap items-center justify-between gap-3"
+              to="/partidas/$id"
+              params={{ id: m.id }}
+              className="rounded-lg border border-border bg-card p-4 flex flex-wrap items-center justify-between gap-3 hover:bg-accent transition-colors"
             >
               <div className="flex items-center gap-3">
                 <Badge variant="outline">
@@ -95,7 +97,7 @@ function ResultadosPage() {
                   {new Date(m.scheduled_at).toLocaleDateString("pt-BR")}
                 </span>
               )}
-            </div>
+            </Link>
           );
         })}
       </div>
