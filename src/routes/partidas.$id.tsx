@@ -4,7 +4,8 @@ import { supabase } from "@/integrations/supabase/client";
 import { PublicShell } from "@/components/PublicShell";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import { ArrowLeft, MapPin, Calendar } from "lucide-react";
+import { ArrowLeft, MapPin, Calendar, Link2, Check } from "lucide-react";
+import { toast } from "sonner";
 
 export const Route = createFileRoute("/partidas/$id")({
   component: PartidaPage,
