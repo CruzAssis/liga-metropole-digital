@@ -1,5 +1,6 @@
 import { Link, useRouterState, useNavigate } from "@tanstack/react-router";
-import { Home, ClipboardList, UserCircle, LogOut, Trophy, Shuffle, LayoutDashboard, ListChecks, Users, BadgeCheck, Shield, FileText } from "lucide-react";
+import { Home, ClipboardList, UserCircle, LogOut, Shuffle, LayoutDashboard, ListChecks, Users, BadgeCheck, Shield, FileText } from "lucide-react";
+import { BrandLogo } from "@/components/BrandLogo";
 import { useIsAdmin } from "@/hooks/use-is-admin";
 import {
   Sidebar,
@@ -48,7 +49,7 @@ export function AppSidebar() {
     <Sidebar collapsible="icon">
       <SidebarHeader className="border-b border-sidebar-border">
         <div className="flex items-center gap-2 px-2 py-3">
-          <Trophy className="h-6 w-6 text-primary shrink-0" />
+          <BrandLogo className="h-8 w-8" />
           {!collapsed && (
             <div className="font-display text-lg leading-none">
               <div>Liga</div>

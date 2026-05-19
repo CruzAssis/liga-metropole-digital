@@ -9,7 +9,7 @@ import { useAuth } from "@/hooks/use-auth";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { Trophy } from "lucide-react";
+import { BrandLogo } from "@/components/BrandLogo";
 
 const schema = z.object({
   email: z.string().email("Email inválido").max(255),
@@ -51,7 +51,7 @@ function LoginPage() {
     <div className="min-h-screen flex items-center justify-center px-4">
       <div className="w-full max-w-md">
         <Link to="/" className="flex items-center gap-2 justify-center mb-8">
-          <Trophy className="h-7 w-7 text-primary" />
+          <BrandLogo className="h-10 w-10" />
           <span className="font-display text-2xl tracking-wider">Liga Metrópole Várzea</span>
         </Link>
 
