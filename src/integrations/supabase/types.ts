@@ -515,7 +515,13 @@ export type Database = {
       promote_waitlist_for_type: { Args: { _type: string }; Returns: undefined }
     }
     Enums: {
-      app_role: "admin" | "team_manager" | "athlete"
+      app_role:
+        | "admin"
+        | "team_manager"
+        | "athlete"
+        | "director"
+        | "player"
+        | "supporter"
     }
     CompositeTypes: {
       [_ in never]: never
@@ -643,7 +649,14 @@ export type CompositeTypes<
 export const Constants = {
   public: {
     Enums: {
-      app_role: ["admin", "team_manager", "athlete"],
+      app_role: [
+        "admin",
+        "team_manager",
+        "athlete",
+        "director",
+        "player",
+        "supporter",
+      ],
     },
   },
 } as const
