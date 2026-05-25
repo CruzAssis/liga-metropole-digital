@@ -1,94 +1,117 @@
-# Auditoria: App Atual vs. Master Blueprint V3
+# Auditoria de RLS e Server Functions — V3 (Diretor / Jogador / Torcedor)
 
-Análise feita lendo o schema do Supabase, as rotas (`src/routes/**`), os server functions (`src/lib/*.functions.ts`) e o estado de dados (`teams` está praticamente vazio, só com `team_manager` / `admin` / `athlete` no enum de roles).
+## 1. Estado atual do controle de acesso
 
----
+- `app_role` enum tem apenas `admin`, `team_manager`, `athlete` (este último não é usado em policy nenhuma). Não existem `player` nem `supporter`.
+- Trigger `handle_new_user` atribui `team_manager` a **todo signup**, indistintamente.
+- Toda autorização de "dono do time" no banco é feita por `teams.manager_id = auth.uid()` (1 manager = 1 time, hard-coded). Não há tabela N:N de jogadores em times.
+- Server functions críticas (`fillSumula`, `getSumulaContext`, `preRegisterAthletes`, `listMyTeamMatches`, `listMyTeamAthletes`) usam `supabaseAdmin` e validam manualmente `teams.manager_id = userId` — **bypassam RLS**.
 
-## [OK] — Já existe e respeita o Blueprint V3
+## 2. As policies atuais impedem Jogador/Torcedor de editar time ou súmula?
 
-- **Autenticação base**: signup/login/reset, perfis com `full_name`, `phone`, `cpf` obrigatórios, trigger `handle_new_user`, RLS via `has_role()` + tabela `user_roles` separada (padrão seguro).
-- **Cadastro de time (Diretor)**: fluxo de inscrição, status `pending/approved/rejected/waitlist`, fila de espera com `promote_waitlist_for_type`, triagem admin.
-- **Elenco e atletas**: CRUD de atletas vinculados ao time, foto, posição, verificação por CPF (hash + last4), selo "verificado".
-- **Súmula**: fluxo Mandante preenche → Visitante confirma, com `host_filled_at` / `visitor_confirmed_at`, eventos em `match_events`, janela de confirmação configurável (`sumula_confirm_window_hours`).
-- **Melhor em campo do adversário**: tabela `match_best_opponent_votes` já modelada com identificação posterior.
-- **Mando de campo (Diretor)**: `teams.home_venue` e `teams.home_time` + painel + fallback no Matchday Flyer.
-- **Páginas públicas básicas**: home, agenda, resultados, ranking, atletas, locais, perfil de time (`/times/$slug`), página de partida (`/partidas/$id`) com share link.
-- **Admin**: dashboard, triagem, sorteio (fase de grupos M/V × A–H, 5+5 rodadas), súmulas, usuários.
-- **Matchday Flyer**: geração PNG client-side (`html2canvas`).
-- **Logo institucional** padronizado via `BrandLogo`.
+Resposta curta: **parcialmente, e por motivo errado** — hoje impedem porque ninguém além do `manager_id` passa nos checks. Mas no momento em que você criar perfis `player`/`supporter`, vão herdar `team_manager` do trigger `handle_new_user` e ganhar permissões de diretor por acidente.
 
----
+Pontos verificados:
 
-## [AJUSTAR] — Existe mas precisa mudar para V3
+| Superfície | Quem hoje passa | Risco com V3 |
+|---|---|---|
+| `teams UPDATE` (RLS) | só `manager_id = auth.uid()` | OK desde que `handle_new_user` pare de dar `team_manager` automático |
+| `athletes INSERT/UPDATE` (RLS) | manager do `team_id` | OK |
+| `match_events ALL` (RLS) | manager do host | OK |
+| `mbov INSERT` (RLS) | manager do `voter_team_id` | Bloqueia Jogador de votar pelo seu time (precisa expandir se for desejado) |
+| `fillSumula` (server fn) | checa `manager_id = userId` no host | Bloqueia Jogador/Torcedor. OK. |
+| `getSumulaContext` | host OR visitor manager OR admin | OK |
+| `preRegisterAthletes` | qualquer um com `teams.manager_id = userId` | OK enquanto trigger não distribuir `team_manager` |
 
-1. **Estrutura de competição (1 → 3 séries)**
-   - Hoje `competitions` é genérica e `registration_type` no time é só `host` / `visitor`. V3 exige **Série A, Série B, Série C** (cada uma com sub-divisão M/V em A e B, e formato livre em C).
-   - Ajustar: adicionar `division` (`A|B|C`) em `teams` e `competitions`, e em `groups`; o `team_role` (`host|visitor`) só se aplica a A e B.
+**Conclusão:** a vedação só se sustenta se você (a) **parar de atribuir `team_manager` automático no signup** e (b) trocar `team_manager` por uma role explícita `director` atribuída no momento em que o time é aprovado.
 
-2. **Sorteio / fase de grupos** (`src/lib/draw.functions.ts`)
-   - Hoje gera 16 grupos fixos (A–H × host/visitor) com 5 times cada — ou seja, foi desenhado para **uma divisão** (80 times). Precisa ser parametrizado **por divisão** (rodar 3 vezes: A, B, C) e a Série C precisa de regra própria: **livre, máx. 2 jogos contra o mesmo adversário, máx. 3 pontos/semana**.
+## 3. Onde um `team_manager` pode burlar e ler dados de outras equipes
 
-3. **Perfis de usuário**
-   - Hoje só existe `team_manager` (Diretor) + `admin` + `athlete` (no enum mas sem fluxo). V3 exige **3 perfis autenticados distintos: Diretor, Jogador, Torcedor**, todos com Nome/Email/CPF/Telefone. Ajustar enum + fluxos de signup que escolhem o perfil + vínculos:
-     - Diretor → **1 time** (já é assim).
-     - Jogador → **N times** (precisa tabela de vínculo N:N e fluxo "aceitar indicação do diretor").
-     - Torcedor → **1 time** (precisa tabela `team_supporters`).
+### 3.1. CRÍTICO — `athletes` está com leitura pública e sem máscara
 
-4. **Súmula com indicação opcional**
-   - Hoje a súmula usa `athletes` cadastrados. V3 permite o Diretor indicar atleta **só com nome + idade + posição + foto opcional**, sem CPF. Ajustar: tornar `cpf_hash`/`cpf_last4` nullable OU criar tabela `match_lineup_guests` para escalações ad-hoc por partida.
+`CREATE POLICY athletes public read ... USING (true)` permite que **qualquer usuário autenticado ou anônimo** faça `select *` em `athletes` e leia:
 
-5. **Página pública / Dashboard**
-   - Hoje há `ranking`, `resultados`, `agenda` genéricos. V3 exige **3 tabelas separadas (A/B/C)**, **Artilharia Monoclub** (gols agrupados por time, isolando o maior artilheiro de cada) e **Torcedômetro**. Vai virar refatoração da home + novas seções.
+- `cpf_hash` (bcrypt — alvo de brute-force offline com `cpf_last4` como dica)
+- `cpf_last4`
+- `whatsapp`, `instagram_handle`
+- `user_id` (link com `auth.users`)
 
-6. **Mata-mata** (já discutimos: não existe lógica)
-   - `matches.stage='knockout'`, `bracket_position`, `parent_match_id` existem mas **nenhum código lê/escreve**. Precisa virar implementação real seguindo V3 (ver abaixo).
+Arquivo: `supabase/migrations/...athletes_public_read` (policy atual) — **deve ser substituída por uma view pública** com colunas seguras (`id, full_name, nickname, position, photo_url, verified, team_id`) e a tabela base com `SELECT` restrito a admin + dono.
 
----
+### 3.2. ALTO — Não existe tabela de cobrança
 
-## [CRIAR DO ZERO] — Ausente, precisa programar
+`competitions.monthly_fee_brl` e `wo_fine_brl` ficam no nível da competição, sem por-time. Não há `team_invoices`/`payments` ainda → não há vazamento hoje, **mas qualquer tabela de cobrança que você adicionar precisa de RLS escopada a `team_id` + `director`/`admin`, nunca leitura pública.**
 
-1. **Sistema de Acesso/Degola entre semestres**
-   - Job/tela admin que, ao encerrar a temporada, rebaixa os 4 últimos de A→B e B→C, sobe os 4 primeiros de B→A e C→B, e cria o **Play-In** (jogo único): 5º e 6º da divisão inferior **na casa** do 15º e 16º da divisão superior.
+### 3.3. MÉDIO — `getTeamContact` devolve telefone+e-mail do diretor para qualquer autenticado
 
-2. **Mata-mata com chaves separadas Mandantes × Visitantes**
-   - Gerador de chaveamento por divisão e por papel (host bracket / visitor bracket), avanço automático do vencedor para `parent_match_id`, final da categoria na casa da melhor campanha, **Grande Finalíssima Geral em campo neutro** (campo `is_neutral_venue` + `venue` definido pelo admin).
-   - Tela pública de bracket + tela admin de avanço/W.O.
+Hoje aceitável (só `team_manager` é autenticado). Com `Torcedor` autenticado em escala, qualquer torcedor consulta o telefone pessoal e o e-mail de qualquer diretor adversário. Precisa virar opt-in (`teams.contact_public boolean`) ou exigir `director`/`admin`.
 
-3. **Final Anual: Campeão do 1º Semestre × Campeão do 2º Semestre**
-   - Modelo `seasons` (ano), `competition.season_half` (1|2), e uma "Super Final" anual cruzando os dois campeões.
+### 3.4. MÉDIO — `listMyTeamMatches` assume "1 time por usuário"
 
-4. **Série C — regras próprias**
-   - Engine de agendamento que respeita: **máx. 2 jogos contra o mesmo adversário** e **máx. 3 pontos/semana por time** (cap de pontos contabilizados). Ranking absoluto por pontos.
+`select ... eq("manager_id", userId).maybeSingle()` falha silenciosamente quando o Jogador estiver atrelado a N times. Precisa virar `select id from team_members where user_id = ... and role in ('director','player')`.
 
-5. **Perfil Jogador (multi-time)**
-   - Signup com escolha de perfil; tabela `athlete_team_links` (athlete_user_id, team_id, status `invited|accepted|rejected`); fluxo "Diretor indica → Jogador aceita" (notificação + tela "Meus convites").
-   - Vinculação automática quando CPF do jogador bate com `athletes.cpf_hash`.
+### 3.5. BAIXO — `match_events host manager write` é `FOR ALL`
 
-6. **Perfil Torcedor + Torcedômetro**
-   - Tabela `team_supporters (user_id, team_id, created_at)` com unique em `user_id`; agregação pública (contagem por time, evolução semanal) e widget na home.
+Policy permissiva: além de INSERT/UPDATE/DELETE também cobre SELECT (sem filtrar). Inofensivo porque a policy `public read` já libera leitura, mas vale restringir para `INSERT, UPDATE, DELETE` por higiene.
 
-7. **Artilharia Monoclub**
-   - View/server fn que pega o maior artilheiro de cada time e os ranqueia entre si (artilharia "monoclube" = um jogador por clube).
+## 4. Arquivos que precisam mudar imediatamente
 
-8. **Auditoria de Arbitragem**
-   - Tabela `referee_ratings (match_id, visitor_team_id, rating 1-10, created_at)`; após súmula, visitante avalia o juiz do mandante; gatilho que detecta **3 notas consecutivas < 5 para o mesmo time mandante** → cria registro em `referee_audit_alerts` e notifica admin; tela admin de auditoria.
+### 4.1. Migrations (banco)
 
-9. **Notificações in-app**
-   - `notification_log` existe mas só registra envio; falta UI de inbox e os disparos para: convite de jogador, alerta de auditoria, súmula pendente, play-in agendado, etc.
+1. **Nova migration — separar roles e quebrar 1:1**
+   - `ALTER TYPE app_role ADD VALUE 'director'; ADD VALUE 'player'; ADD VALUE 'supporter';` (deprecar `team_manager` depois)
+   - Tabela `team_members (team_id, user_id, role in ('director','player'), accepted_at)` com unique parcial `(user_id) where role='director'` para garantir **1 diretor por usuário**.
+   - Tabela `team_supporters (user_id PK, team_id)` — **1 time por torcedor**.
+   - Helper SECURITY DEFINER: `is_team_director(_user uuid, _team uuid)`, `is_team_member(_user uuid, _team uuid)`.
 
-10. **Calendário com travas anti-conflito**
-    - Validação no agendamento para não violar "3 pts/semana" (Série C) e para respeitar mando/horário padrão do clube mandante.
+2. **Reescrever trigger `handle_new_user`**
+   - Não inserir mais `team_manager` automático. Role só é concedida quando time é aprovado (insert em `team_members` com `role='director'`) ou quando o usuário escolhe perfil Jogador/Torcedor.
 
----
+3. **Refatorar policies que usam `teams.manager_id`**
+   - `teams UPDATE/INSERT/SELECT-own`, `athletes INSERT/UPDATE`, `match_events ALL`, `mbov INSERT/UPDATE`, `mbov opponent identify` → trocar `manager_id = auth.uid()` por `public.is_team_director(auth.uid(), team_id)`.
 
-## Ordem sugerida de implementação (próximos passos)
+4. **Substituir `athletes public read true`**
+   - `DROP POLICY athletes public read;`
+   - `CREATE VIEW athletes_public WITH (security_invoker=on) AS SELECT id, team_id, full_name, nickname, position, photo_url, verified FROM athletes;`
+   - Nova policy base: `SELECT` apenas para `admin` OR `is_team_member(auth.uid(), team_id)` OR `athletes.user_id = auth.uid()`.
+   - Trocar todos os `from('athletes').select(...)` públicos em `src/routes/atletas.tsx`, `times.$slug.tsx`, `team-profile.functions.ts`, `athletes.functions.ts` (busca pública) para a view.
 
-1. Refatorar `competitions`/`teams` para **divisão A/B/C** + `season` + `season_half` (migration grande, base de tudo).
-2. Parametrizar o sorteio por divisão e implementar engine da Série C.
-3. Introduzir os perfis **Jogador** e **Torcedor** (enum + signup + vínculos N:N e 1:1).
-4. Mata-mata (chaves separadas, finais, finalíssima neutra) + Play-In + Super Final anual.
-5. Dashboard pública nova (3 tabelas + Artilharia Monoclub + Torcedômetro).
-6. Auditoria de Arbitragem.
-7. Polimento de notificações e travas de calendário.
+5. **Endurecer `competitions`/futuras tabelas de cobrança** com RLS por `team_id` + `director`/`admin` e bloquear leitura pública.
 
-Confirma se quer que eu já gere o plano de implementação detalhado do passo 1 (refatoração para 3 divisões + temporadas) para começarmos?
+### 4.2. Server functions (TanStack)
+
+| Arquivo | Mudança |
+|---|---|
+| `src/lib/sumula.functions.ts` → `fillSumula`, `getSumulaContext` | trocar `teams.manager_id = userId` por `is_team_director`. Continuar bloqueando preenchimento pelo visitante. |
+| `src/lib/sumula.functions.ts` → `listMyTeamMatches` | usar `team_members` (retornar lista de times do usuário, não `maybeSingle`). |
+| `src/lib/athletes.functions.ts` → `preRegisterAthletes`, `listMyTeamAthletes` | idem (resolver `team_id` via `team_members` + `director`). |
+| `src/lib/team-profile.functions.ts` → `getTeamContact` | exigir role `director` no mesmo time OU `teams.contact_public = true`, senão devolver só nome. |
+| `src/lib/team-profile.functions.ts` → `getTeamPublicProfile` | trocar `from('athletes')` por `from('athletes_public')`. |
+| `src/lib/users.functions.ts` | adicionar `director`/`player`/`supporter` ao enum no `setRoleSchema`; manter regra anti-lockout do último admin. |
+| `src/lib/draw.functions.ts` | revisar uso de `team_manager` (se houver) — provavelmente só admin, ok. |
+
+### 4.3. Rotas (front)
+
+| Rota | Risco | Ação |
+|---|---|---|
+| `src/routes/_authenticated/minha-conta.tsx` | assume 1 time por usuário (`team_manager`) | adicionar seletor de time + branch por role (director / player / supporter) |
+| `src/routes/_authenticated/inscricao.tsx` | qualquer logado pode inscrever um time | restringir a usuários sem role `director` ativa |
+| `src/routes/atletas.tsx`, `src/routes/times.$slug.tsx`, `verificar.tsx` | consultam `athletes` direto pelo cliente, podem expor CPF/whatsapp depois da policy | passar a usar `athletes_public` (view) |
+| `src/hooks/use-is-admin.tsx` | só checa admin | criar `use-team-roles` que devolve `{ directorTeamIds, playerTeamIds, supporterTeamId, isAdmin }` |
+
+## 5. Ordem recomendada de execução
+
+1. Migration "team_members + team_supporters + helpers + novos enum values".
+2. Reescrever trigger `handle_new_user` para não dar role automática.
+3. Migration "view `athletes_public` + restringir policy base" e atualizar leituras públicas no front/server-fn no mesmo passo (build quebra senão).
+4. Trocar policies de `teams/athletes/match_events/mbov` para usar `is_team_director`/`is_team_member`.
+5. Refatorar server functions listadas em §4.2.
+6. Adicionar fluxo de convite Diretor → Jogador (insert em `team_members` pendente + aceite).
+7. Adicionar UI de "escolher time" para Torcedor (insert em `team_supporters`).
+
+## 6. Resumo executivo
+
+- **Bloqueio Jogador/Torcedor editar time/súmula:** depende de remover a role automática `team_manager` do trigger. Hoje, qualquer signup vira gestor.
+- **Vazamento mais grave hoje:** `athletes public read true` expõe `cpf_hash`, `cpf_last4`, `whatsapp`, `user_id` para anônimos. Corrigir antes de qualquer coisa.
+- **Não há tabela de cobrança ainda** — risco é prospectivo; planejar RLS por `team_id` antes de criá-la.
+- **Arquivos prioritários:** policies de `athletes`, trigger `handle_new_user`, `sumula.functions.ts`, `athletes.functions.ts`, `team-profile.functions.ts`, `minha-conta.tsx`, `inscricao.tsx`.
