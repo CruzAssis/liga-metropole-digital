@@ -1,121 +1,94 @@
-## Visão geral
+# Auditoria: App Atual vs. Master Blueprint V3
 
-Três frentes integradas:
-1. **Cadastro do diretor** com WhatsApp + e-mail (já temos os dois — falta exibir e tornar editável).
-2. **Notificações** por e-mail automático (Lovable Cloud) + botões wa.me prontos para o diretor disparar.
-3. **Perfil público do clube** em `/times/:slug` com contatos, elenco, jogos e classificação.
+Análise feita lendo o schema do Supabase, as rotas (`src/routes/**`), os server functions (`src/lib/*.functions.ts`) e o estado de dados (`teams` está praticamente vazio, só com `team_manager` / `admin` / `athlete` no enum de roles).
 
 ---
 
-## 1. Cadastro do diretor (WhatsApp + e-mail)
+## [OK] — Já existe e respeita o Blueprint V3
 
-Hoje já coletamos `full_name`, `cpf`, `phone`, `email` no signup. Vamos:
-
-- Renomear visualmente "Telefone" para **"WhatsApp"** em `/signup` e validar formato BR (10–11 dígitos, DDD).
-- Adicionar bloco **"Dados do diretor/técnico"** em `/minha-conta` com edição inline de WhatsApp e e-mail (e-mail muda via `supabase.auth.updateUser`, WhatsApp via `profiles`).
-- Garantir que `profiles.phone` nunca fica nulo para gestores aprovados (validação no formulário de inscrição).
-
-## 2. Notificações de partida
-
-Para cada jogo, três momentos:
-
-| Momento | Canal | Conteúdo |
-|---|---|---|
-| **Jogo agendado** (sorteio ou reagendamento) | E-mail aos dois diretores | Data, local, adversário, link `wa.me` do adversário com mensagem pré-pronta ("Olá, sou o diretor do {time}, vamos jogar dia X…") |
-| **24h antes do jogo** | E-mail aos dois diretores | Lembrete + botão "Falar com adversário no WhatsApp" |
-| **Pós-jogo (status `scheduled` → expirou sem placar)** | E-mail ao mandante | "Lance o placar da súmula" + link direto para `/minha-conta` |
-| **Placar lançado, aguardando confirmação** | E-mail ao visitante | "Confirme o placar X–Y em até 48h" + link |
-
-**Implementação:**
-- Habilitar infra de e-mail (Lovable Cloud — domínio padrão, sem custo).
-- Tabela `notification_log` (match_id, recipient_user_id, kind, sent_at) para evitar duplicatas.
-- `pg_cron` a cada 15min chamando `/api/public/hooks/match-notifications` que:
-  - busca jogos `scheduled` cuja `scheduled_at` está entre 23h–25h no futuro → envia lembrete 24h
-  - busca jogos `scheduled` cuja `scheduled_at` passou há > tolerância → envia "lance o placar"
-  - busca jogos `awaiting_confirmation` há > 24h → reenvia ao visitante
-- Disparos imediatos (jogo agendado, placar lançado) via server function chamada nos handlers existentes (sorteio, súmula).
-- Cada e-mail inclui botão **"Abrir WhatsApp do adversário"** = `https://wa.me/55{phone}?text={mensagem URL-encoded}`.
-
-## 3. Perfil público do clube
-
-Rota nova `src/routes/times.$slug.tsx` (slug derivado de `short_name`, ex.: `/times/santos-fc`).
-
-**Layout (mobile-first, single column):**
-
-```text
-┌─────────────────────────────┐
-│  [Escudo grande]            │
-│  Nome do Time     [✓ Verif] │
-│  Sigla · Mandante           │
-├─────────────────────────────┤
-│  Contato                    │
-│  Diretor: João Silva        │
-│  [WhatsApp] [E-mail]        │  ← botões; só logado vê os dados
-├─────────────────────────────┤
-│  Elenco (12 atletas)        │
-│  grid de AthleteCard        │
-├─────────────────────────────┤
-│  Próximos jogos             │
-│  lista de 3 cards           │
-├─────────────────────────────┤
-│  Resultados                 │
-│  últimos 5                  │
-├─────────────────────────────┤
-│  Classificação              │
-│  posição na tabela do grupo │
-└─────────────────────────────┘
-```
-
-- Página renderiza para qualquer visitante (status='approved' já é público via RLS).
-- WhatsApp/e-mail do diretor: **escondidos para anônimos**, visíveis para qualquer logado (anti-scraping). Server fn `getTeamContact(slug)` exige `requireSupabaseAuth`.
-- Adicionar link "Ver perfil público" em `/times` (lista) e em `/minha-conta`.
+- **Autenticação base**: signup/login/reset, perfis com `full_name`, `phone`, `cpf` obrigatórios, trigger `handle_new_user`, RLS via `has_role()` + tabela `user_roles` separada (padrão seguro).
+- **Cadastro de time (Diretor)**: fluxo de inscrição, status `pending/approved/rejected/waitlist`, fila de espera com `promote_waitlist_for_type`, triagem admin.
+- **Elenco e atletas**: CRUD de atletas vinculados ao time, foto, posição, verificação por CPF (hash + last4), selo "verificado".
+- **Súmula**: fluxo Mandante preenche → Visitante confirma, com `host_filled_at` / `visitor_confirmed_at`, eventos em `match_events`, janela de confirmação configurável (`sumula_confirm_window_hours`).
+- **Melhor em campo do adversário**: tabela `match_best_opponent_votes` já modelada com identificação posterior.
+- **Mando de campo (Diretor)**: `teams.home_venue` e `teams.home_time` + painel + fallback no Matchday Flyer.
+- **Páginas públicas básicas**: home, agenda, resultados, ranking, atletas, locais, perfil de time (`/times/$slug`), página de partida (`/partidas/$id`) com share link.
+- **Admin**: dashboard, triagem, sorteio (fase de grupos M/V × A–H, 5+5 rodadas), súmulas, usuários.
+- **Matchday Flyer**: geração PNG client-side (`html2canvas`).
+- **Logo institucional** padronizado via `BrandLogo`.
 
 ---
 
-## Detalhes técnicos
+## [AJUSTAR] — Existe mas precisa mudar para V3
 
-**Migration**:
-- `ALTER TABLE teams ADD COLUMN slug text UNIQUE` + backfill (`lower(regexp_replace(short_name, '[^a-z0-9]', '-', 'gi'))`).
-- `CREATE TABLE notification_log (id, match_id, user_id, kind, sent_at)`.
-- Habilitar `pg_cron` + `pg_net`, agendar job a cada 15min.
+1. **Estrutura de competição (1 → 3 séries)**
+   - Hoje `competitions` é genérica e `registration_type` no time é só `host` / `visitor`. V3 exige **Série A, Série B, Série C** (cada uma com sub-divisão M/V em A e B, e formato livre em C).
+   - Ajustar: adicionar `division` (`A|B|C`) em `teams` e `competitions`, e em `groups`; o `team_role` (`host|visitor`) só se aplica a A e B.
 
-**Server functions** (novos arquivos):
-- `src/lib/notifications.functions.ts` — `sendMatchScheduledEmail`, `sendScoreRequestEmail`, `sendConfirmRequestEmail`.
-- `src/lib/team-profile.functions.ts` — `getTeamPublicProfile(slug)`, `getTeamContact(slug)` (auth).
-- `src/lib/wa.ts` — helper puro `buildWhatsAppLink(phone, message)`.
+2. **Sorteio / fase de grupos** (`src/lib/draw.functions.ts`)
+   - Hoje gera 16 grupos fixos (A–H × host/visitor) com 5 times cada — ou seja, foi desenhado para **uma divisão** (80 times). Precisa ser parametrizado **por divisão** (rodar 3 vezes: A, B, C) e a Série C precisa de regra própria: **livre, máx. 2 jogos contra o mesmo adversário, máx. 3 pontos/semana**.
 
-**E-mail**:
-- Infra Lovable Cloud (sem custo até 3k/mês, domínio compartilhado).
-- Template simples: header com escudo da liga, corpo com info do jogo, botão WhatsApp, botão "Abrir liga".
+3. **Perfis de usuário**
+   - Hoje só existe `team_manager` (Diretor) + `admin` + `athlete` (no enum mas sem fluxo). V3 exige **3 perfis autenticados distintos: Diretor, Jogador, Torcedor**, todos com Nome/Email/CPF/Telefone. Ajustar enum + fluxos de signup que escolhem o perfil + vínculos:
+     - Diretor → **1 time** (já é assim).
+     - Jogador → **N times** (precisa tabela de vínculo N:N e fluxo "aceitar indicação do diretor").
+     - Torcedor → **1 time** (precisa tabela `team_supporters`).
 
-**Edição em `/signup` e `/minha-conta`**:
-- Validação WhatsApp: `z.string().regex(/^\d{10,11}$/)` (só dígitos, DDD obrigatório).
-- Exibição formatada: `(11) 98765-4321`.
+4. **Súmula com indicação opcional**
+   - Hoje a súmula usa `athletes` cadastrados. V3 permite o Diretor indicar atleta **só com nome + idade + posição + foto opcional**, sem CPF. Ajustar: tornar `cpf_hash`/`cpf_last4` nullable OU criar tabela `match_lineup_guests` para escalações ad-hoc por partida.
 
----
+5. **Página pública / Dashboard**
+   - Hoje há `ranking`, `resultados`, `agenda` genéricos. V3 exige **3 tabelas separadas (A/B/C)**, **Artilharia Monoclub** (gols agrupados por time, isolando o maior artilheiro de cada) e **Torcedômetro**. Vai virar refatoração da home + novas seções.
 
-## Fora desta fase
-
-- Envio real via WhatsApp Business API (continua sendo só link `wa.me`).
-- Estatísticas individuais por atleta (gols, cartões).
-- Histórico de confrontos diretos no perfil.
-- Customização de avatar/banner do clube no perfil público.
+6. **Mata-mata** (já discutimos: não existe lógica)
+   - `matches.stage='knockout'`, `bracket_position`, `parent_match_id` existem mas **nenhum código lê/escreve**. Precisa virar implementação real seguindo V3 (ver abaixo).
 
 ---
 
-## Arquivos afetados
+## [CRIAR DO ZERO] — Ausente, precisa programar
 
-**Novos:**
-- `src/routes/times.$slug.tsx` — perfil público
-- `src/routes/api/public/hooks/match-notifications.ts` — cron handler
-- `src/lib/notifications.functions.ts`
-- `src/lib/team-profile.functions.ts`
-- `src/lib/wa.ts`
-- 1 migration (slug + notification_log + cron)
+1. **Sistema de Acesso/Degola entre semestres**
+   - Job/tela admin que, ao encerrar a temporada, rebaixa os 4 últimos de A→B e B→C, sobe os 4 primeiros de B→A e C→B, e cria o **Play-In** (jogo único): 5º e 6º da divisão inferior **na casa** do 15º e 16º da divisão superior.
 
-**Editados:**
-- `src/routes/signup.tsx` — label "WhatsApp"
-- `src/routes/_authenticated/minha-conta.tsx` — bloco contato editável + link "perfil público"
-- `src/routes/times.tsx` — cards linkam para `/times/:slug`
-- `src/lib/sumula.functions.ts` — dispara e-mail no lançamento de placar
-- `src/lib/draw.functions.ts` — dispara e-mail no sorteio
+2. **Mata-mata com chaves separadas Mandantes × Visitantes**
+   - Gerador de chaveamento por divisão e por papel (host bracket / visitor bracket), avanço automático do vencedor para `parent_match_id`, final da categoria na casa da melhor campanha, **Grande Finalíssima Geral em campo neutro** (campo `is_neutral_venue` + `venue` definido pelo admin).
+   - Tela pública de bracket + tela admin de avanço/W.O.
+
+3. **Final Anual: Campeão do 1º Semestre × Campeão do 2º Semestre**
+   - Modelo `seasons` (ano), `competition.season_half` (1|2), e uma "Super Final" anual cruzando os dois campeões.
+
+4. **Série C — regras próprias**
+   - Engine de agendamento que respeita: **máx. 2 jogos contra o mesmo adversário** e **máx. 3 pontos/semana por time** (cap de pontos contabilizados). Ranking absoluto por pontos.
+
+5. **Perfil Jogador (multi-time)**
+   - Signup com escolha de perfil; tabela `athlete_team_links` (athlete_user_id, team_id, status `invited|accepted|rejected`); fluxo "Diretor indica → Jogador aceita" (notificação + tela "Meus convites").
+   - Vinculação automática quando CPF do jogador bate com `athletes.cpf_hash`.
+
+6. **Perfil Torcedor + Torcedômetro**
+   - Tabela `team_supporters (user_id, team_id, created_at)` com unique em `user_id`; agregação pública (contagem por time, evolução semanal) e widget na home.
+
+7. **Artilharia Monoclub**
+   - View/server fn que pega o maior artilheiro de cada time e os ranqueia entre si (artilharia "monoclube" = um jogador por clube).
+
+8. **Auditoria de Arbitragem**
+   - Tabela `referee_ratings (match_id, visitor_team_id, rating 1-10, created_at)`; após súmula, visitante avalia o juiz do mandante; gatilho que detecta **3 notas consecutivas < 5 para o mesmo time mandante** → cria registro em `referee_audit_alerts` e notifica admin; tela admin de auditoria.
+
+9. **Notificações in-app**
+   - `notification_log` existe mas só registra envio; falta UI de inbox e os disparos para: convite de jogador, alerta de auditoria, súmula pendente, play-in agendado, etc.
+
+10. **Calendário com travas anti-conflito**
+    - Validação no agendamento para não violar "3 pts/semana" (Série C) e para respeitar mando/horário padrão do clube mandante.
+
+---
+
+## Ordem sugerida de implementação (próximos passos)
+
+1. Refatorar `competitions`/`teams` para **divisão A/B/C** + `season` + `season_half` (migration grande, base de tudo).
+2. Parametrizar o sorteio por divisão e implementar engine da Série C.
+3. Introduzir os perfis **Jogador** e **Torcedor** (enum + signup + vínculos N:N e 1:1).
+4. Mata-mata (chaves separadas, finais, finalíssima neutra) + Play-In + Super Final anual.
+5. Dashboard pública nova (3 tabelas + Artilharia Monoclub + Torcedômetro).
+6. Auditoria de Arbitragem.
+7. Polimento de notificações e travas de calendário.
+
+Confirma se quer que eu já gere o plano de implementação detalhado do passo 1 (refatoração para 3 divisões + temporadas) para começarmos?
