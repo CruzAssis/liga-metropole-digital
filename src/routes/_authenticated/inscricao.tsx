@@ -119,9 +119,12 @@ function InscricaoPage() {
         logo_url,
         manager_id: user.id,
         registration_type: data.registration_type,
+        lado: data.lado,
+        serie: data.serie,
         status,
       });
       if (insErr) throw insErr;
+
 
       if (isFull) {
         toast.warning(
