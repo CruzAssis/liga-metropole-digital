@@ -256,6 +256,10 @@ function TriagemPage() {
                     </div>
                   </div>
                   <TypeBadge type={t.registration_type} />
+                  <span className="text-[10px] font-semibold px-2 py-1 rounded bg-accent text-accent-foreground border border-border">
+                    LADO {t.lado} · SÉRIE {t.serie}
+                  </span>
+
                   <div className="text-xs text-muted-foreground">
                     {new Date(t.created_at).toLocaleString("pt-BR", {
                       day: "2-digit",
