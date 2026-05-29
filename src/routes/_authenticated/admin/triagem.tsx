@@ -193,6 +193,28 @@ function TriagemPage() {
                 </button>
               ))}
             </div>
+            <div className="inline-flex rounded-md border border-border bg-background overflow-hidden">
+              {(["all", "A", "B"] as const).map((v) => (
+                <button
+                  key={v}
+                  onClick={() => setLadoFilter(v)}
+                  className={`px-3 py-1.5 text-sm ${ladoFilter === v ? "bg-primary text-primary-foreground" : "text-muted-foreground"}`}
+                >
+                  {v === "all" ? "Todos lados" : `Lado ${v}`}
+                </button>
+              ))}
+            </div>
+            <div className="inline-flex rounded-md border border-border bg-background overflow-hidden">
+              {(["all", "A", "B"] as const).map((v) => (
+                <button
+                  key={v}
+                  onClick={() => setSerieFilter(v)}
+                  className={`px-3 py-1.5 text-sm ${serieFilter === v ? "bg-primary text-primary-foreground" : "text-muted-foreground"}`}
+                >
+                  {v === "all" ? "Todas séries" : `Série ${v}`}
+                </button>
+              ))}
+
             <Input
               placeholder="Buscar nome ou sigla..."
               value={search}
