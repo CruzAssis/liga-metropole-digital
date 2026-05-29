@@ -214,6 +214,9 @@ function TriagemPage() {
                   {v === "all" ? "Todas séries" : `Série ${v}`}
                 </button>
               ))}
+            </div>
+
+
 
             <Input
               placeholder="Buscar nome ou sigla..."
