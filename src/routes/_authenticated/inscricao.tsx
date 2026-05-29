@@ -24,6 +24,8 @@ const schema = z.object({
   cpf: z.string().regex(/^\d{11}$/, "CPF deve ter 11 dígitos"),
   phone: z.string().trim().min(10, "Telefone inválido").max(20),
   registration_type: z.enum(["host", "visitor"]),
+  lado: z.enum(["A", "B"]),
+  serie: z.enum(["A", "B"]),
 });
 
 type FormData = z.infer<typeof schema>;
@@ -42,8 +44,9 @@ function InscricaoPage() {
 
   const { register, handleSubmit, control, formState: { errors }, setValue } = useForm<FormData>({
     resolver: zodResolver(schema),
-    defaultValues: { registration_type: "host" },
+    defaultValues: { registration_type: "host", lado: "A", serie: "A" },
   });
+
 
   useEffect(() => {
     if (!user) return;
