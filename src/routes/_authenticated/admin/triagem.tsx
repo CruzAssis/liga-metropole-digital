@@ -33,7 +33,10 @@ type Team = {
   rejected_reason: string | null;
   logo_url: string | null;
   manager_id: string;
+  lado: "A" | "B";
+  serie: "A" | "B";
 };
+
 
 type Profile = { id: string; full_name: string; phone: string | null };
 
