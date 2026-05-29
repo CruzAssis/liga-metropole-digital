@@ -1,121 +1,127 @@
-import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
-import { useEffect, useState } from "react";
-import { z } from "zod";
-import { useForm } from "react-hook-form";
-import { zodResolver } from "@hookform/resolvers/zod";
-import { toast } from "sonner";
-import { supabase } from "@/integrations/supabase/client";
-import { useAuth } from "@/hooks/use-auth";
-import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
-import { BrandLogo } from "@/components/BrandLogo";
+import { createFileRoute, Link, useNavigate } from '@tanstack/react-router'
+import { useState } from 'react'
+import { supabase } from '~/integrations/supabase/client'
+import { Button } from '~/components/ui/button'
+import { Input } from '~/components/ui/input'
+import { Label } from '~/components/ui/label'
+import { Checkbox } from '~/components/ui/checkbox'
+import { useToast } from '~/hooks/use-toast'
 
-const schema = z.object({
-  full_name: z.string().trim().min(3, "Informe seu nome completo").max(120),
-  cpf: z.string().regex(/^\d{11}$/, "CPF deve ter 11 dígitos numéricos"),
-  phone: z.string().trim().regex(/^\d{10,11}$/, "WhatsApp deve ter DDD + número (só dígitos)"),
-  email: z.string().email("Email inválido").max(255),
-  password: z.string().min(6, "Mínimo 6 caracteres").max(72),
-});
-
-type FormData = z.infer<typeof schema>;
-
-export const Route = createFileRoute("/signup")({
+export const Route = createFileRoute('/signup')({
   component: SignupPage,
-});
+})
 
 function SignupPage() {
-  const { user, loading } = useAuth();
-  const navigate = useNavigate();
-  const [submitting, setSubmitting] = useState(false);
+  const navigate = useNavigate()
+  const { toast } = useToast()
+  const [loading, setLoading] = useState(false)
+  const [form, setForm] = useState({ full_name: '', cpf: '', phone: '', email: '', password: '' })
+  const [perfis, setPerfis] = useState({ is_diretor: false, is_jogador: false, is_torcedor: false })
 
-  useEffect(() => {
-    if (!loading && user) navigate({ to: "/minha-conta" });
-  }, [user, loading, navigate]);
+  function handleChange(e: React.ChangeEvent<HTMLInputElement>) {
+    const { name, value } = e.target
+    setForm(prev => ({ ...prev, [name]: value }))
+  }
 
-  const { register, handleSubmit, formState: { errors } } = useForm<FormData>({
-    resolver: zodResolver(schema),
-  });
+  function handlePerfil(key: keyof typeof perfis, val: boolean) {
+    setPerfis(prev => ({ ...prev, [key]: val }))
+  }
 
-  const onSubmit = async (data: FormData) => {
-    setSubmitting(true);
-    const { error } = await supabase.auth.signUp({
-      email: data.email,
-      password: data.password,
-      options: {
-        emailRedirectTo: `${window.location.origin}/minha-conta`,
-        data: {
-          full_name: data.full_name,
-          phone: data.phone,
-          cpf: data.cpf,
-        },
-      },
-    });
-    setSubmitting(false);
-    if (error) {
-      toast.error("Não foi possível criar a conta", { description: error.message });
-      return;
+  async function handleSubmit(e: React.FormEvent) {
+    e.preventDefault()
+    if (!perfis.is_diretor && !perfis.is_jogador && !perfis.is_torcedor) {
+      toast({ title: 'Selecione ao menos um perfil', variant: 'destructive' })
+      return
     }
-    toast.success("Conta criada!", { description: "Vamos para a inscrição do time." });
-    navigate({ to: "/inscricao" });
-  };
+    setLoading(true)
+    try {
+      const { data, error } = await supabase.auth.signUp({
+        email: form.email,
+        password: form.password,
+        options: { data: { full_name: form.full_name, cpf: form.cpf, phone: form.phone, ...perfis } },
+      })
+      if (error) throw error
+      if (data.user) {
+        await supabase.from('profiles').upsert({
+          id: data.user.id,
+          nome_completo: form.full_name,
+          cpf: form.cpf,
+          telefone: form.phone,
+          ...perfis,
+        })
+      }
+      toast({ title: 'Conta criada com sucesso!' })
+      navigate({ to: perfis.is_diretor ? '/inscricao' : '/' })
+    } catch (err: any) {
+      toast({ title: err.message || 'Erro ao criar conta', variant: 'destructive' })
+    } finally {
+      setLoading(false)
+    }
+  }
 
   return (
-    <div className="min-h-screen flex items-center justify-center px-4 py-10">
-      <div className="w-full max-w-md">
-        <Link to="/" className="flex items-center gap-2 justify-center mb-8">
-          <BrandLogo className="h-10 w-10" />
-          <span className="font-display text-2xl tracking-wider">Liga Metrópole Várzea</span>
-        </Link>
-
-        <div className="rounded-lg border border-border bg-card p-8">
-          <h1 className="font-display text-3xl tracking-wide mb-1">Criar conta</h1>
-          <p className="text-sm text-muted-foreground mb-6">
-            Cadastre-se como gestor para inscrever seu time.
-          </p>
-
-          <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
-            <div className="space-y-2">
-              <Label htmlFor="full_name">Nome completo</Label>
-              <Input id="full_name" {...register("full_name")} />
-              {errors.full_name && <p className="text-sm text-destructive">{errors.full_name.message}</p>}
-            </div>
-            <div className="grid grid-cols-2 gap-3">
-              <div className="space-y-2">
-                <Label htmlFor="cpf">CPF (apenas números)</Label>
-                <Input id="cpf" inputMode="numeric" maxLength={11} {...register("cpf")} />
-                {errors.cpf && <p className="text-sm text-destructive">{errors.cpf.message}</p>}
-              </div>
-              <div className="space-y-2">
-                <Label htmlFor="phone">WhatsApp (DDD + número)</Label>
-                <Input id="phone" inputMode="numeric" placeholder="11987654321" maxLength={11} {...register("phone")} />
-                {errors.phone && <p className="text-sm text-destructive">{errors.phone.message}</p>}
-              </div>
-            </div>
-            <div className="space-y-2">
-              <Label htmlFor="email">Email</Label>
-              <Input id="email" type="email" {...register("email")} />
-              {errors.email && <p className="text-sm text-destructive">{errors.email.message}</p>}
-            </div>
-            <div className="space-y-2">
-              <Label htmlFor="password">Senha</Label>
-              <Input id="password" type="password" {...register("password")} />
-              {errors.password && <p className="text-sm text-destructive">{errors.password.message}</p>}
-            </div>
-            <Button type="submit" className="w-full" disabled={submitting}>
-              {submitting ? "Criando conta..." : "Criar conta"}
-            </Button>
-          </form>
-
-          <p className="mt-6 text-sm text-muted-foreground text-center">
-            Já tem conta?{" "}
-            <Link to="/login" className="text-primary hover:underline">
-              Entrar
-            </Link>
-          </p>
+    <div className="min-h-screen bg-black flex items-center justify-center px-4 py-12">
+      <div className="w-full max-w-md space-y-8">
+        <div className="text-center">
+          <Link to="/" className="text-2xl font-bold text-white tracking-tight">Liga Metropole Varzea</Link>
+          <h2 className="mt-4 text-xl font-semibold text-white">Criar conta</h2>
+          <p className="mt-1 text-sm text-zinc-400">Preencha seus dados para comecar.</p>
         </div>
+        <form onSubmit={handleSubmit} className="space-y-5">
+          <div className="space-y-4">
+            <div>
+              <Label htmlFor="full_name" className="text-zinc-300">Nome completo</Label>
+              <Input id="full_name" name="full_name" type="text" required value={form.full_name} onChange={handleChange} className="mt-1 bg-zinc-900 border-zinc-700 text-white" placeholder="Seu nome completo" />
+            </div>
+            <div>
+              <Label htmlFor="cpf" className="text-zinc-300">CPF (apenas numeros)</Label>
+              <Input id="cpf" name="cpf" type="text" required maxLength={11} value={form.cpf} onChange={handleChange} className="mt-1 bg-zinc-900 border-zinc-700 text-white" placeholder="00000000000" />
+            </div>
+            <div>
+              <Label htmlFor="phone" className="text-zinc-300">WhatsApp (DDD + numero)</Label>
+              <Input id="phone" name="phone" type="text" required value={form.phone} onChange={handleChange} className="mt-1 bg-zinc-900 border-zinc-700 text-white" placeholder="11987654321" />
+            </div>
+            <div>
+              <Label htmlFor="email" className="text-zinc-300">Email</Label>
+              <Input id="email" name="email" type="email" required value={form.email} onChange={handleChange} className="mt-1 bg-zinc-900 border-zinc-700 text-white" />
+            </div>
+            <div>
+              <Label htmlFor="password" className="text-zinc-300">Senha</Label>
+              <Input id="password" name="password" type="password" required minLength={6} value={form.password} onChange={handleChange} className="mt-1 bg-zinc-900 border-zinc-700 text-white" />
+            </div>
+          </div>
+          <div className="border border-zinc-700 rounded-lg p-4 space-y-3">
+            <p className="text-sm font-medium text-zinc-300">Como voce vai usar o app? <span className="text-zinc-500 font-normal">(pode escolher mais de um)</span></p>
+            <div className="flex items-start gap-3">
+              <Checkbox id="is_diretor" checked={perfis.is_diretor} onCheckedChange={v => handlePerfil('is_diretor', !!v)} className="mt-0.5 border-zinc-600" />
+              <div>
+                <Label htmlFor="is_diretor" className="text-white cursor-pointer">Sou Diretor</Label>
+                <p className="text-xs text-zinc-500 mt-0.5">Quero inscrever e gerenciar um time na liga</p>
+              </div>
+            </div>
+            <div className="flex items-start gap-3">
+              <Checkbox id="is_jogador" checked={perfis.is_jogador} onCheckedChange={v => handlePerfil('is_jogador', !!v)} className="mt-0.5 border-zinc-600" />
+              <div>
+                <Label htmlFor="is_jogador" className="text-white cursor-pointer">Sou Jogador</Label>
+                <p className="text-xs text-zinc-500 mt-0.5">Quero ter meu ID Metropole e acompanhar minhas estatisticas</p>
+              </div>
+            </div>
+            <div className="flex items-start gap-3">
+              <Checkbox id="is_torcedor" checked={perfis.is_torcedor} onCheckedChange={v => handlePerfil('is_torcedor', !!v)} className="mt-0.5 border-zinc-600" />
+              <div>
+                <Label htmlFor="is_torcedor" className="text-white cursor-pointer">Sou Torcedor</Label>
+                <p className="text-xs text-zinc-500 mt-0.5">Quero acompanhar meu time favorito</p>
+              </div>
+            </div>
+          </div>
+          <Button type="submit" disabled={loading} className="w-full bg-[#1565F5] hover:bg-blue-600 text-white font-semibold py-2.5">
+            {loading ? 'Criando conta...' : 'Criar conta'}
+          </Button>
+        </form>
+        <p className="text-center text-sm text-zinc-500">
+          Ja tem conta? <Link to="/login" className="text-[#1565F5] hover:underline font-medium">Entrar</Link>
+        </p>
       </div>
     </div>
-  );
+  )
 }
