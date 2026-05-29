@@ -53,7 +53,10 @@ function TriagemPage() {
   const [profiles, setProfiles] = useState<Record<string, Profile>>({});
   const [statusTab, setStatusTab] = useState<(typeof STATUS_TABS)[number]["value"]>("pending");
   const [typeFilter, setTypeFilter] = useState<"all" | "host" | "visitor">("all");
+  const [ladoFilter, setLadoFilter] = useState<"all" | "A" | "B">("all");
+  const [serieFilter, setSerieFilter] = useState<"all" | "A" | "B">("all");
   const [search, setSearch] = useState("");
+
   const [rejectTarget, setRejectTarget] = useState<Team | null>(null);
   const [rejectReason, setRejectReason] = useState("");
   const [approveTarget, setApproveTarget] = useState<Team | null>(null);
