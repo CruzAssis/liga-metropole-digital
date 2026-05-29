@@ -105,13 +105,16 @@ function TriagemPage() {
     return teams.filter((t) => {
       if (statusTab !== "all" && t.status !== statusTab) return false;
       if (typeFilter !== "all" && t.registration_type !== typeFilter) return false;
+      if (ladoFilter !== "all" && t.lado !== ladoFilter) return false;
+      if (serieFilter !== "all" && t.serie !== serieFilter) return false;
       if (search) {
         const s = search.toLowerCase();
         if (!t.name.toLowerCase().includes(s) && !t.short_name.toLowerCase().includes(s)) return false;
       }
       return true;
     });
-  }, [teams, statusTab, typeFilter, search]);
+  }, [teams, statusTab, typeFilter, ladoFilter, serieFilter, search]);
+
 
   const slotFull = (type: "host" | "visitor") => counts[type] >= 40;
 
