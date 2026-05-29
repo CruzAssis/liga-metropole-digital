@@ -24,6 +24,8 @@ const schema = z.object({
   cpf: z.string().regex(/^\d{11}$/, "CPF deve ter 11 dígitos"),
   phone: z.string().trim().min(10, "Telefone inválido").max(20),
   registration_type: z.enum(["host", "visitor"]),
+  lado: z.enum(["A", "B"]),
+  serie: z.enum(["A", "B"]),
 });
 
 type FormData = z.infer<typeof schema>;
@@ -42,8 +44,9 @@ function InscricaoPage() {
 
   const { register, handleSubmit, control, formState: { errors }, setValue } = useForm<FormData>({
     resolver: zodResolver(schema),
-    defaultValues: { registration_type: "host" },
+    defaultValues: { registration_type: "host", lado: "A", serie: "A" },
   });
+
 
   useEffect(() => {
     if (!user) return;
@@ -116,9 +119,12 @@ function InscricaoPage() {
         logo_url,
         manager_id: user.id,
         registration_type: data.registration_type,
+        lado: data.lado,
+        serie: data.serie,
         status,
       });
       if (insErr) throw insErr;
+
 
       if (isFull) {
         toast.warning(
@@ -241,7 +247,45 @@ function InscricaoPage() {
           </RadioGroup>
         </div>
 
+        <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+          <div className="space-y-2">
+            <Label>Lado</Label>
+            <RadioGroup
+              defaultValue="A"
+              onValueChange={(v) => setValue("lado", v as "A" | "B")}
+              className="grid grid-cols-2 gap-3"
+            >
+              <label className="flex cursor-pointer items-center gap-3 rounded-md border border-border bg-background/50 p-3">
+                <RadioGroupItem value="A" id="lado-a" />
+                <div className="font-medium">Lado A</div>
+              </label>
+              <label className="flex cursor-pointer items-center gap-3 rounded-md border border-border bg-background/50 p-3">
+                <RadioGroupItem value="B" id="lado-b" />
+                <div className="font-medium">Lado B</div>
+              </label>
+            </RadioGroup>
+          </div>
+          <div className="space-y-2">
+            <Label>Série</Label>
+            <RadioGroup
+              defaultValue="A"
+              onValueChange={(v) => setValue("serie", v as "A" | "B")}
+              className="grid grid-cols-2 gap-3"
+            >
+              <label className="flex cursor-pointer items-center gap-3 rounded-md border border-border bg-background/50 p-3">
+                <RadioGroupItem value="A" id="serie-a" />
+                <div className="font-medium">Série A</div>
+              </label>
+              <label className="flex cursor-pointer items-center gap-3 rounded-md border border-border bg-background/50 p-3">
+                <RadioGroupItem value="B" id="serie-b" />
+                <div className="font-medium">Série B</div>
+              </label>
+            </RadioGroup>
+          </div>
+        </div>
+
         <Button type="submit" className="w-full" disabled={submitting}>
+
           {submitting ? "Enviando..." : "Enviar inscrição"}
         </Button>
       </form>

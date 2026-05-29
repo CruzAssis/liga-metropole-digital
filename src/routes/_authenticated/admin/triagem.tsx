@@ -33,7 +33,10 @@ type Team = {
   rejected_reason: string | null;
   logo_url: string | null;
   manager_id: string;
+  lado: "A" | "B";
+  serie: "A" | "B";
 };
+
 
 type Profile = { id: string; full_name: string; phone: string | null };
 
@@ -50,7 +53,10 @@ function TriagemPage() {
   const [profiles, setProfiles] = useState<Record<string, Profile>>({});
   const [statusTab, setStatusTab] = useState<(typeof STATUS_TABS)[number]["value"]>("pending");
   const [typeFilter, setTypeFilter] = useState<"all" | "host" | "visitor">("all");
+  const [ladoFilter, setLadoFilter] = useState<"all" | "A" | "B">("all");
+  const [serieFilter, setSerieFilter] = useState<"all" | "A" | "B">("all");
   const [search, setSearch] = useState("");
+
   const [rejectTarget, setRejectTarget] = useState<Team | null>(null);
   const [rejectReason, setRejectReason] = useState("");
   const [approveTarget, setApproveTarget] = useState<Team | null>(null);
@@ -99,13 +105,16 @@ function TriagemPage() {
     return teams.filter((t) => {
       if (statusTab !== "all" && t.status !== statusTab) return false;
       if (typeFilter !== "all" && t.registration_type !== typeFilter) return false;
+      if (ladoFilter !== "all" && t.lado !== ladoFilter) return false;
+      if (serieFilter !== "all" && t.serie !== serieFilter) return false;
       if (search) {
         const s = search.toLowerCase();
         if (!t.name.toLowerCase().includes(s) && !t.short_name.toLowerCase().includes(s)) return false;
       }
       return true;
     });
-  }, [teams, statusTab, typeFilter, search]);
+  }, [teams, statusTab, typeFilter, ladoFilter, serieFilter, search]);
+
 
   const slotFull = (type: "host" | "visitor") => counts[type] >= 40;
 
@@ -184,6 +193,31 @@ function TriagemPage() {
                 </button>
               ))}
             </div>
+            <div className="inline-flex rounded-md border border-border bg-background overflow-hidden">
+              {(["all", "A", "B"] as const).map((v) => (
+                <button
+                  key={v}
+                  onClick={() => setLadoFilter(v)}
+                  className={`px-3 py-1.5 text-sm ${ladoFilter === v ? "bg-primary text-primary-foreground" : "text-muted-foreground"}`}
+                >
+                  {v === "all" ? "Todos lados" : `Lado ${v}`}
+                </button>
+              ))}
+            </div>
+            <div className="inline-flex rounded-md border border-border bg-background overflow-hidden">
+              {(["all", "A", "B"] as const).map((v) => (
+                <button
+                  key={v}
+                  onClick={() => setSerieFilter(v)}
+                  className={`px-3 py-1.5 text-sm ${serieFilter === v ? "bg-primary text-primary-foreground" : "text-muted-foreground"}`}
+                >
+                  {v === "all" ? "Todas séries" : `Série ${v}`}
+                </button>
+              ))}
+            </div>
+
+
+
             <Input
               placeholder="Buscar nome ou sigla..."
               value={search}
@@ -222,6 +256,10 @@ function TriagemPage() {
                     </div>
                   </div>
                   <TypeBadge type={t.registration_type} />
+                  <span className="text-[10px] font-semibold px-2 py-1 rounded bg-accent text-accent-foreground border border-border">
+                    LADO {t.lado} · SÉRIE {t.serie}
+                  </span>
+
                   <div className="text-xs text-muted-foreground">
                     {new Date(t.created_at).toLocaleString("pt-BR", {
                       day: "2-digit",

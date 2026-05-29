@@ -492,12 +492,14 @@ export type Database = {
           home_time: string | null
           home_venue: string | null
           id: string
+          lado: Database["public"]["Enums"]["team_side"]
           logo_url: string | null
           manager_id: string
           name: string
           primary_color: string | null
           registration_type: string
           rejected_reason: string | null
+          serie: Database["public"]["Enums"]["team_serie"]
           short_name: string
           slug: string | null
           status: string
@@ -509,12 +511,14 @@ export type Database = {
           home_time?: string | null
           home_venue?: string | null
           id?: string
+          lado?: Database["public"]["Enums"]["team_side"]
           logo_url?: string | null
           manager_id: string
           name: string
           primary_color?: string | null
           registration_type: string
           rejected_reason?: string | null
+          serie?: Database["public"]["Enums"]["team_serie"]
           short_name: string
           slug?: string | null
           status?: string
@@ -526,12 +530,14 @@ export type Database = {
           home_time?: string | null
           home_venue?: string | null
           id?: string
+          lado?: Database["public"]["Enums"]["team_side"]
           logo_url?: string | null
           manager_id?: string
           name?: string
           primary_color?: string | null
           registration_type?: string
           rejected_reason?: string | null
+          serie?: Database["public"]["Enums"]["team_serie"]
           short_name?: string
           slug?: string | null
           status?: string
@@ -597,6 +603,8 @@ export type Database = {
         | "director"
         | "player"
         | "supporter"
+      team_serie: "A" | "B"
+      team_side: "A" | "B"
     }
     CompositeTypes: {
       [_ in never]: never
@@ -732,6 +740,8 @@ export const Constants = {
         "player",
         "supporter",
       ],
+      team_serie: ["A", "B"],
+      team_side: ["A", "B"],
     },
   },
 } as const
