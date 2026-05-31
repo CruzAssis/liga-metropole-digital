@@ -34,7 +34,7 @@ function UsuariosPage() {
   });
 
   const mutation = useMutation({
-    mutationFn: (vars: { user_id: string; role: "admin" | "team_manager"; enabled: boolean }) =>
+    mutationFn: (vars: { user_id: string; role: "admin" | "director"; enabled: boolean }) =>
       updateRole({ data: vars }),
     onSuccess: () => {
       toast.success("Papel atualizado");
@@ -100,7 +100,7 @@ function UsuariosPage() {
               )}
               {filtered.map((u: AdminUser) => {
                 const isA = u.roles.includes("admin");
-                const isM = u.roles.includes("team_manager");
+                const isM = u.roles.includes("director");
                 return (
                   <tr key={u.id} className="border-t border-border">
                     <td className="px-4 py-3">{u.full_name || "—"}</td>
@@ -127,7 +127,7 @@ function UsuariosPage() {
                         checked={isM}
                         disabled={mutation.isPending}
                         onCheckedChange={(v) =>
-                          mutation.mutate({ user_id: u.id, role: "team_manager", enabled: v })
+                          mutation.mutate({ user_id: u.id, role: "director", enabled: v })
                         }
                       />
                     </td>
