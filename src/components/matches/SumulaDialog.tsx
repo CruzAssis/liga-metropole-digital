@@ -21,7 +21,7 @@ type Kind = "goal" | "yellow_card" | "red_card";
 type EventDraft = {
   uid: string;
   team_id: string;
-  athlete_id: string;
+  athlete_id: string | null;
   kind: Kind;
   minute: string;
 };
