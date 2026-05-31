@@ -1,11 +1,11 @@
 // @ts-nocheck
 import { createFileRoute } from '@tanstack/react-router'
 import { useState, useEffect } from 'react'
-import { supabase } from '~/integrations/supabase/client'
-import { Button } from '~/components/ui/button'
-import { Badge } from '~/components/ui/badge'
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '~/components/ui/select'
-import { useToast } from '~/hooks/use-toast'
+import { supabase } from '@/integrations/supabase/client'
+import { Button } from '@/components/ui/button'
+import { Badge } from '@/components/ui/badge'
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
+import { useToast } from '@/hooks/use-toast'
 
 export const Route = createFileRoute('/_authenticated/admin/triagem')({
   component: TriagemPage,
