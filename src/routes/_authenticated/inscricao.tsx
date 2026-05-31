@@ -6,7 +6,7 @@ import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
 import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group'
-import { useToast } from '@/hooks/use-toast'
+import { toast } from 'sonner'
 
 export const Route = createFileRoute('/_authenticated/inscricao')({
   component: InscricaoPage,
@@ -14,7 +14,7 @@ export const Route = createFileRoute('/_authenticated/inscricao')({
 
 function InscricaoPage() {
   const navigate = useNavigate()
-  const { toast } = useToast()
+  
   const [loading, setLoading] = useState(false)
   const [submitted, setSubmitted] = useState(false)
   const [form, setForm] = useState({

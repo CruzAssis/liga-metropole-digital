@@ -5,14 +5,14 @@ import { supabase } from '@/integrations/supabase/client'
 import { Button } from '@/components/ui/button'
 import { Badge } from '@/components/ui/badge'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
-import { useToast } from '@/hooks/use-toast'
+import { toast } from 'sonner'
 
 export const Route = createFileRoute('/_authenticated/admin/triagem')({
   component: TriagemPage,
 })
 
 function TriagemPage() {
-  const { toast } = useToast()
+  
   const [teams, setTeams] = useState([])
   const [loading, setLoading] = useState(true)
   const [saving, setSaving] = useState(null)

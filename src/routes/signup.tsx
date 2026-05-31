@@ -5,7 +5,7 @@ import { supabase } from '@/integrations/supabase/client'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
-import { useToast } from '@/hooks/use-toast'
+import { toast } from 'sonner'
 
 export const Route = createFileRoute('/signup')({
   component: SignupPage,
@@ -13,7 +13,7 @@ export const Route = createFileRoute('/signup')({
 
 function SignupPage() {
   const navigate = useNavigate()
-  const { toast } = useToast()
+  
   const [loading, setLoading] = useState(false)
   const [form, setForm] = useState({ full_name: '', cpf: '', phone: '', email: '', password: '' })
   const [is_diretor, setIsDiretor] = useState(false)
