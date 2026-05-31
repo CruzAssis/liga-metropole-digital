@@ -1,4 +1,3 @@
-// @ts-nocheck
 import { createFileRoute } from '@tanstack/react-router'
 import { useState, useEffect } from 'react'
 import { supabase } from '@/integrations/supabase/client'
@@ -11,52 +10,86 @@ export const Route = createFileRoute('/_authenticated/admin/triagem')({
   component: TriagemPage,
 })
 
+type Director = { full_name: string | null; phone: string | null } | null
+type PendingTeam = {
+  id: string
+  name: string
+  short_name: string
+  registration_type: string
+  primary_color: string | null
+  home_venue: string | null
+  created_at: string
+  manager_id: string
+  director?: Director
+}
+type ApprovalConfig = { lado: 'A' | 'B'; serie: 'A' | 'B' }
+
 function TriagemPage() {
-  
-  const [teams, setTeams] = useState([])
+  const [teams, setTeams] = useState<PendingTeam[]>([])
   const [loading, setLoading] = useState(true)
-  const [saving, setSaving] = useState(null)
-  const [approvals, setApprovals] = useState({})
+  const [saving, setSaving] = useState<string | null>(null)
+  const [approvals, setApprovals] = useState<Record<string, ApprovalConfig>>({})
 
   useEffect(() => { loadPendingTeams() }, [])
 
   async function loadPendingTeams() {
     setLoading(true)
-    const { data } = await supabase
+    const { data, error } = await supabase
       .from('teams')
-      .select('*, diretor:profiles!profiles_time_diretor_id_fkey(nome_completo,telefone)')
-      .eq('mensalidade_paga', false)
+      .select('id,name,short_name,registration_type,primary_color,home_venue,created_at,manager_id')
+      .eq('status', 'pending')
       .order('created_at', { ascending: true })
-    if (data) {
-      setTeams(data)
-      const initial = {}
-      data.forEach(t => { initial[t.id] = { lado: 'A', grupo: 'A', serie: 'A' } })
-      setApprovals(initial)
+    if (error) {
+      toast.error(error.message)
+      setLoading(false)
+      return
     }
+    const list = (data ?? []) as PendingTeam[]
+    const managerIds = Array.from(new Set(list.map(t => t.manager_id)))
+    let dirMap = new Map<string, Director>()
+    if (managerIds.length) {
+      const { data: profs } = await supabase
+        .from('profiles')
+        .select('id,full_name,phone')
+        .in('id', managerIds)
+      dirMap = new Map((profs ?? []).map(p => [p.id, { full_name: p.full_name, phone: p.phone }]))
+    }
+    const enriched = list.map(t => ({ ...t, director: dirMap.get(t.manager_id) ?? null }))
+    setTeams(enriched)
+    const initial: Record<string, ApprovalConfig> = {}
+    enriched.forEach(t => { initial[t.id] = { lado: 'A', serie: 'A' } })
+    setApprovals(initial)
     setLoading(false)
   }
 
-  async function aprovarTime(teamId) {
+  async function aprovarTime(teamId: string) {
     const config = approvals[teamId]
-    if (!config?.lado || !config?.grupo) {
-      toast.error('Defina o Lado e o Grupo antes de aprovar')
-      return
-    }
+    if (!config) return
     setSaving(teamId)
     try {
-      const { error } = await supabase.from('teams').update({
-        lado: config.lado, grupo: config.grupo, serie: config.serie, mensalidade_paga: true
-      }).eq('id', teamId)
+      const { error } = await supabase
+        .from('teams')
+        .update({
+          status: 'approved',
+          lado: config.lado,
+          serie: config.serie,
+          approved_at: new Date().toISOString(),
+        })
+        .eq('id', teamId)
       if (error) throw error
       toast.success('Time aprovado!')
       setTeams(prev => prev.filter(t => t.id !== teamId))
     } catch (err) {
-      toast.error(err.message || 'Erro ao aprovar')
+      const msg = err instanceof Error ? err.message : 'Erro ao aprovar'
+      toast.error(msg)
     } finally { setSaving(null) }
   }
 
-  function updateApproval(teamId, field, value) {
-    setApprovals(prev => ({ ...prev, [teamId]: { ...prev[teamId], [field]: value } }))
+  function updateApproval(teamId: string, field: keyof ApprovalConfig, value: string) {
+    setApprovals(prev => ({
+      ...prev,
+      [teamId]: { ...prev[teamId], [field]: value as 'A' | 'B' },
+    }))
   }
 
   if (loading) return <div className="p-8 text-zinc-400">Carregando...</div>
@@ -72,10 +105,10 @@ function TriagemPage() {
       </div>
 
       <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-        {['mandante', 'visitante'].map(tipo => (
+        {(['host', 'visitor'] as const).map(tipo => (
           <div key={tipo} className="bg-zinc-900 border border-zinc-800 rounded-lg p-4">
-            <p className="text-zinc-500 text-xs uppercase tracking-wide">{tipo}s pendentes</p>
-            <p className="text-3xl font-bold text-white mt-1">{teams.filter(t => t.tipo === tipo).length}</p>
+            <p className="text-zinc-500 text-xs uppercase tracking-wide">{tipo === 'host' ? 'Mandantes' : 'Visitantes'} pendentes</p>
+            <p className="text-3xl font-bold text-white mt-1">{teams.filter(t => t.registration_type === tipo).length}</p>
           </div>
         ))}
         <div className="bg-zinc-900 border border-zinc-800 rounded-lg p-4">
@@ -96,52 +129,46 @@ function TriagemPage() {
 
       <div className="space-y-4">
         {teams.map(team => {
-          const config = approvals[team.id] || { lado: 'A', grupo: 'A', serie: 'A' }
+          const config = approvals[team.id] || { lado: 'A', serie: 'A' }
           return (
             <div key={team.id} className="bg-zinc-900 border border-zinc-800 rounded-xl p-5 space-y-4">
               <div className="flex items-center gap-3">
-                <div className="w-10 h-10 rounded-full flex items-center justify-center text-white font-bold text-sm" style={{ backgroundColor: team.cor_primaria || '#1565F5' }}>
-                  {team.nome?.[0]}
+                <div className="w-10 h-10 rounded-full flex items-center justify-center text-white font-bold text-sm" style={{ backgroundColor: team.primary_color || '#1565F5' }}>
+                  {team.short_name?.[0] || team.name?.[0]}
                 </div>
                 <div>
-                  <p className="text-white font-semibold">{team.nome}</p>
+                  <p className="text-white font-semibold">{team.name}</p>
                   <div className="flex items-center gap-2 mt-0.5">
-                    <Badge variant="outline" className={team.tipo === 'mandante' ? 'border-blue-600 text-blue-400 text-xs' : 'border-purple-600 text-purple-400 text-xs'}>
-                      {team.tipo}
+                    <Badge variant="outline" className={team.registration_type === 'host' ? 'border-blue-600 text-blue-400 text-xs' : 'border-purple-600 text-purple-400 text-xs'}>
+                      {team.registration_type === 'host' ? 'mandante' : 'visitante'}
                     </Badge>
                     <span className="text-zinc-500 text-xs">{new Date(team.created_at).toLocaleDateString('pt-BR')}</span>
                   </div>
                 </div>
               </div>
 
-              {team.diretor && (
+              {team.director && (
                 <div className="bg-zinc-800 rounded-lg p-3 text-sm">
-                  <p className="text-zinc-300"><span className="text-zinc-500">Diretor: </span>{team.diretor.nome_completo}</p>
-                  {team.diretor.telefone && (
+                  <p className="text-zinc-300"><span className="text-zinc-500">Diretor: </span>{team.director.full_name}</p>
+                  {team.director.phone && (
                     <p className="text-zinc-300 mt-1">
                       <span className="text-zinc-500">WhatsApp: </span>
-                      <a href={'https://wa.me/55' + team.diretor.telefone} target="_blank" rel="noopener noreferrer" className="text-green-400 hover:underline">{team.diretor.telefone}</a>
+                      <a href={'https://wa.me/55' + team.director.phone} target="_blank" rel="noopener noreferrer" className="text-green-400 hover:underline">{team.director.phone}</a>
                     </p>
                   )}
                 </div>
               )}
 
-              <div className="grid grid-cols-3 gap-3">
+              {team.home_venue && (
+                <p className="text-zinc-400 text-xs"><span className="text-zinc-500">Campo: </span>{team.home_venue}</p>
+              )}
+
+              <div className="grid grid-cols-2 gap-3">
                 <div>
                   <label className="text-zinc-400 text-xs block mb-1">Lado</label>
                   <Select value={config.lado} onValueChange={v => updateApproval(team.id, 'lado', v)}>
                     <SelectTrigger className="bg-zinc-800 border-zinc-700 text-white"><SelectValue /></SelectTrigger>
                     <SelectContent><SelectItem value="A">Lado A</SelectItem><SelectItem value="B">Lado B</SelectItem></SelectContent>
-                  </Select>
-                </div>
-                <div>
-                  <label className="text-zinc-400 text-xs block mb-1">Grupo</label>
-                  <Select value={config.grupo} onValueChange={v => updateApproval(team.id, 'grupo', v)}>
-                    <SelectTrigger className="bg-zinc-800 border-zinc-700 text-white"><SelectValue /></SelectTrigger>
-                    <SelectContent>
-                      <SelectItem value="A">Grupo A</SelectItem><SelectItem value="B">Grupo B</SelectItem>
-                      <SelectItem value="C">Grupo C</SelectItem><SelectItem value="D">Grupo D</SelectItem>
-                    </SelectContent>
                   </Select>
                 </div>
                 <div>
