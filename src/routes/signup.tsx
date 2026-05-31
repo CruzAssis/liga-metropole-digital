@@ -5,7 +5,7 @@ import { supabase } from '@/integrations/supabase/client'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
-import { useToast } from '@/hooks/use-toast'
+import { toast } from 'sonner'
 
 export const Route = createFileRoute('/signup')({
   component: SignupPage,
@@ -13,7 +13,7 @@ export const Route = createFileRoute('/signup')({
 
 function SignupPage() {
   const navigate = useNavigate()
-  const { toast } = useToast()
+  
   const [loading, setLoading] = useState(false)
   const [form, setForm] = useState({ full_name: '', cpf: '', phone: '', email: '', password: '' })
   const [is_diretor, setIsDiretor] = useState(false)
@@ -28,7 +28,7 @@ function SignupPage() {
   async function handleSubmit(e) {
     e.preventDefault()
     if (!is_diretor && !is_jogador && !is_torcedor) {
-      toast({ title: 'Selecione ao menos um perfil', variant: 'destructive' })
+      toast.error('Selecione ao menos um perfil')
       return
     }
     setLoading(true)
@@ -42,10 +42,10 @@ function SignupPage() {
       if (data.user) {
         await supabase.from('profiles').upsert({ id: data.user.id, nome_completo: form.full_name, cpf: form.cpf, telefone: form.phone, is_diretor, is_jogador, is_torcedor })
       }
-      toast({ title: 'Conta criada com sucesso!' })
+      toast.success('Conta criada com sucesso!')
       navigate({ to: is_diretor ? '/inscricao' : '/' })
     } catch (err) {
-      toast({ title: err.message || 'Erro ao criar conta', variant: 'destructive' })
+      toast.error(err.message || 'Erro ao criar conta')
     } finally { setLoading(false) }
   }
 
