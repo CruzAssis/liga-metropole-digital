@@ -33,7 +33,7 @@ function AtletasPage() {
     (async () => {
       const { data: athletes } = await supabase
         .from("athletes")
-        .select("id, full_name, nickname, position, photo_url, verified, team_id, whatsapp, instagram_handle")
+        .select("id, full_name, nickname, position, photo_url, verified, team_id")
         .order("verified", { ascending: false })
         .order("created_at", { ascending: false })
         .limit(200);
