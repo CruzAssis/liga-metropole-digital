@@ -1,0 +1,1 @@
+ALTER TABLE public.match_events ALTER COLUMN athlete_id DROP NOT NULL;
