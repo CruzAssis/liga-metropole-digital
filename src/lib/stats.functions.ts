@@ -29,12 +29,13 @@ export const getAthleteRankings = createServerFn({ method: "GET" }).handler(asyn
   const gamesBy = new Map<string, Set<string>>();
   for (const ev of events ?? []) {
     if (!confirmedIds.has(ev.match_id)) continue;
-    if (ev.kind === "goal") goalsBy.set(ev.athlete_id, (goalsBy.get(ev.athlete_id) ?? 0) + 1);
-    if (ev.kind === "yellow_card")
-      yellowBy.set(ev.athlete_id, (yellowBy.get(ev.athlete_id) ?? 0) + 1);
-    if (ev.kind === "red_card") redBy.set(ev.athlete_id, (redBy.get(ev.athlete_id) ?? 0) + 1);
-    if (!gamesBy.has(ev.athlete_id)) gamesBy.set(ev.athlete_id, new Set());
-    gamesBy.get(ev.athlete_id)!.add(ev.match_id);
+    if (!ev.athlete_id) continue;
+    const aid = ev.athlete_id;
+    if (ev.kind === "goal") goalsBy.set(aid, (goalsBy.get(aid) ?? 0) + 1);
+    if (ev.kind === "yellow_card") yellowBy.set(aid, (yellowBy.get(aid) ?? 0) + 1);
+    if (ev.kind === "red_card") redBy.set(aid, (redBy.get(aid) ?? 0) + 1);
+    if (!gamesBy.has(aid)) gamesBy.set(aid, new Set());
+    gamesBy.get(aid)!.add(ev.match_id);
   }
 
   // Votos de melhor jogador adversário identificados

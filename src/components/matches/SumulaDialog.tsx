@@ -21,7 +21,7 @@ type Kind = "goal" | "yellow_card" | "red_card";
 type EventDraft = {
   uid: string;
   team_id: string;
-  athlete_id: string;
+  athlete_id: string | null;
   kind: Kind;
   minute: string;
 };
@@ -148,7 +148,7 @@ export function SumulaDialog({
           visitorScore: vScoreNum,
           events: validEvents.map((e) => ({
             team_id: e.team_id,
-            athlete_id: e.athlete_id,
+            athlete_id: e.athlete_id!,
             kind: e.kind,
             minute: e.minute === "" ? null : parseInt(e.minute, 10),
           })),

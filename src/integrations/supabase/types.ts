@@ -227,7 +227,7 @@ export type Database = {
       }
       match_events: {
         Row: {
-          athlete_id: string
+          athlete_id: string | null
           created_at: string
           id: string
           kind: string
@@ -236,7 +236,7 @@ export type Database = {
           team_id: string
         }
         Insert: {
-          athlete_id: string
+          athlete_id?: string | null
           created_at?: string
           id?: string
           kind: string
@@ -245,7 +245,7 @@ export type Database = {
           team_id: string
         }
         Update: {
-          athlete_id?: string
+          athlete_id?: string | null
           created_at?: string
           id?: string
           kind?: string

@@ -20,7 +20,7 @@ export type AdminUser = {
   full_name: string | null;
   cpf_masked: string | null;
   created_at: string;
-  roles: ("admin" | "team_manager")[];
+  roles: ("admin" | "director")[];
 };
 
 export const listUsers = createServerFn({ method: "GET" })
@@ -45,10 +45,10 @@ export const listUsers = createServerFn({ method: "GET" })
       .in("user_id", ids.length ? ids : ["00000000-0000-0000-0000-000000000000"]);
 
     const profileMap = new Map(profiles?.map((p) => [p.id, p]) ?? []);
-    const rolesMap = new Map<string, ("admin" | "team_manager")[]>();
+    const rolesMap = new Map<string, ("admin" | "director")[]>();
     for (const r of roles ?? []) {
       const arr = rolesMap.get(r.user_id) ?? [];
-      arr.push(r.role as "admin" | "team_manager");
+      arr.push(r.role as "admin" | "director");
       rolesMap.set(r.user_id, arr);
     }
 
@@ -74,7 +74,7 @@ export const listUsers = createServerFn({ method: "GET" })
 
 const setRoleSchema = z.object({
   user_id: z.string().uuid(),
-  role: z.enum(["admin", "team_manager"]),
+  role: z.enum(["admin", "director"]),
   enabled: z.boolean(),
 });
 

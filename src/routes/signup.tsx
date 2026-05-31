@@ -1,6 +1,5 @@
-// @ts-nocheck
 import { createFileRoute, Link, useNavigate } from '@tanstack/react-router'
-import { useState } from 'react'
+import { useState, type ChangeEvent, type FormEvent } from 'react'
 import { supabase } from '@/integrations/supabase/client'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
@@ -13,19 +12,18 @@ export const Route = createFileRoute('/signup')({
 
 function SignupPage() {
   const navigate = useNavigate()
-  
   const [loading, setLoading] = useState(false)
   const [form, setForm] = useState({ full_name: '', cpf: '', phone: '', email: '', password: '' })
   const [is_diretor, setIsDiretor] = useState(false)
   const [is_jogador, setIsJogador] = useState(false)
   const [is_torcedor, setIsTorcedor] = useState(false)
 
-  function handleChange(e) {
+  function handleChange(e: ChangeEvent<HTMLInputElement>) {
     const { name, value } = e.target
     setForm(prev => ({ ...prev, [name]: value }))
   }
 
-  async function handleSubmit(e) {
+  async function handleSubmit(e: FormEvent<HTMLFormElement>) {
     e.preventDefault()
     if (!is_diretor && !is_jogador && !is_torcedor) {
       toast.error('Selecione ao menos um perfil')
@@ -33,20 +31,27 @@ function SignupPage() {
     }
     setLoading(true)
     try {
-      const { data, error } = await supabase.auth.signUp({
+      const { error } = await supabase.auth.signUp({
         email: form.email,
         password: form.password,
-        options: { data: { full_name: form.full_name, cpf: form.cpf, phone: form.phone, is_diretor, is_jogador, is_torcedor } },
+        options: {
+          emailRedirectTo: `${window.location.origin}/`,
+          data: {
+            full_name: form.full_name,
+            cpf: form.cpf,
+            phone: form.phone,
+          },
+        },
       })
       if (error) throw error
-      if (data.user) {
-        await supabase.from('profiles').upsert({ id: data.user.id, nome_completo: form.full_name, cpf: form.cpf, telefone: form.phone, is_diretor, is_jogador, is_torcedor })
-      }
       toast.success('Conta criada com sucesso!')
-      navigate({ to: is_diretor ? '/inscricao' : '/' })
+      navigate({ to: is_diretor ? '/inscricao' : '/minha-conta' })
     } catch (err) {
-      toast.error(err.message || 'Erro ao criar conta')
-    } finally { setLoading(false) }
+      const msg = err instanceof Error ? err.message : 'Erro ao criar conta'
+      toast.error(msg)
+    } finally {
+      setLoading(false)
+    }
   }
 
   return (

@@ -1,27 +1,47 @@
-// @ts-nocheck
 import { createFileRoute, useParams, Link } from '@tanstack/react-router'
 import { useEffect, useState } from 'react'
+import { useServerFn } from '@tanstack/react-start'
 import { supabase } from '@/integrations/supabase/client'
 import { useAuth } from '@/hooks/use-auth'
 import { Button } from '@/components/ui/button'
 import { Badge } from '@/components/ui/badge'
 import { ArrowLeft, Clock, CheckCircle, AlertCircle, Trophy } from 'lucide-react'
+import {
+  submitScore,
+  confirmScore,
+  disputeScore,
+  saveGoals,
+  rateOpponentBest,
+} from '@/lib/match-sumula.functions'
 
 export const Route = createFileRoute('/partidas/$id')({
   component: PartidaPage,
 })
 
+type Team = { id: string; name: string; short_name: string; primary_color: string | null }
 type Match = {
-  id: string; status: string; scheduled_at: string | null
-  host_score: number | null; visitor_score: number | null
-  host_filled_at: string | null; visitor_confirmed_at: string | null
-  stage: string; round: number
-  host_team: { id: string; name: string; short_name: string; primary_color: string | null }
-  visitor_team: { id: string; name: string; short_name: string; primary_color: string | null }
-  competition: { sumula_confirm_window_hours: number | null }
+  id: string
+  status: string
+  scheduled_at: string | null
+  host_score: number | null
+  visitor_score: number | null
+  host_filled_at: string | null
+  visitor_confirmed_at: string | null
+  stage: string
+  round: number
+  host_team: Team
+  visitor_team: Team
+  competition: { sumula_confirm_window_hours: number | null } | null
 }
 type Athlete = { id: string; full_name: string | null; nickname: string | null }
-type BestVote = { id: string; voter_team_id: string; opponent_team_id: string; jersey_number: number; identified_name: string | null; rating: number }
+type BestVote = {
+  id: string
+  voter_team_id: string
+  opponent_team_id: string
+  jersey_number: number
+  identified_name: string | null
+  rating: number
+}
 
 function horasRestantes(s: string | null, h: number | null) {
   if (!s) return 72
@@ -38,22 +58,29 @@ function EtapaPlacar({ match, myTeamId, onRefresh }: { match: Match; myTeamId: s
   const lancado = !!match.host_filled_at
   const confirmado = !!match.visitor_confirmed_at
 
+  const submitFn = useServerFn(submitScore)
+  const confirmFn = useServerFn(confirmScore)
+  const disputeFn = useServerFn(disputeScore)
+
   async function lancar() {
-    setLoading(true)
-    const { error } = await supabase.from('matches').update({ host_score: hScore, visitor_score: vScore, host_filled_at: new Date().toISOString(), status: 'placar_lancado' }).eq('id', match.id)
-    if (error) setErro(error.message); else onRefresh()
-    setLoading(false)
+    setLoading(true); setErro('')
+    try {
+      await submitFn({ data: { match_id: match.id, host_score: hScore, visitor_score: vScore } })
+      onRefresh()
+    } catch (e) { setErro(e instanceof Error ? e.message : 'Erro') }
+    finally { setLoading(false) }
   }
   async function confirmar() {
-    setLoading(true)
-    const { error } = await supabase.from('matches').update({ visitor_confirmed_at: new Date().toISOString(), status: 'placar_confirmado' }).eq('id', match.id)
-    if (error) setErro(error.message); else onRefresh()
-    setLoading(false)
+    setLoading(true); setErro('')
+    try { await confirmFn({ data: { match_id: match.id } }); onRefresh() }
+    catch (e) { setErro(e instanceof Error ? e.message : 'Erro') }
+    finally { setLoading(false) }
   }
   async function contestar() {
-    setLoading(true)
-    await supabase.from('matches').update({ host_score: null, visitor_score: null, host_filled_at: null, status: 'agendada' }).eq('id', match.id)
-    onRefresh(); setLoading(false)
+    setLoading(true); setErro('')
+    try { await disputeFn({ data: { match_id: match.id } }); onRefresh() }
+    catch (e) { setErro(e instanceof Error ? e.message : 'Erro') }
+    finally { setLoading(false) }
   }
 
   return (
@@ -76,6 +103,7 @@ function EtapaPlacar({ match, myTeamId, onRefresh }: { match: Match; myTeamId: s
           <div className="bg-zinc-800 rounded-lg p-4 text-center"><p className="text-zinc-400 text-xs mb-1">Placar lancado:</p><p className="text-white text-3xl font-bold">{match.host_score} x {match.visitor_score}</p></div>
           {isHost ? <div className="grid grid-cols-2 gap-3"><Button variant="outline" onClick={contestar} disabled={loading} className="border-red-800 text-red-400">Contestar</Button><Button onClick={confirmar} disabled={loading} className="bg-[#1565F5] text-white">{loading ? '...' : 'Confirmar'}</Button></div>
             : <p className="text-zinc-400 text-sm text-center">Aguardando confirmacao do Mandante.</p>}
+          {erro && <p className="text-red-400 text-sm">{erro}</p>}
         </div>
       )}
       {lancado && confirmado && <div className="flex items-center gap-2 text-green-400"><CheckCircle className="h-5 w-5" /><span>Placar confirmado: {match.host_score} x {match.visitor_score}</span></div>}
@@ -84,23 +112,41 @@ function EtapaPlacar({ match, myTeamId, onRefresh }: { match: Match; myTeamId: s
 }
 
 function EtapaGols({ match, myTeamId, athletes, onRefresh }: { match: Match; myTeamId: string; athletes: Athlete[]; onRefresh: () => void }) {
-  const [goals, setGoals] = useState<Array<{ aid: string; nome: string; min: string }>>([])
+  const [goals, setGoals] = useState<Array<{ aid: string; min: string }>>([])
   const [loading, setLoading] = useState(false)
   const [saved, setSaved] = useState(false)
+  const [erro, setErro] = useState('')
   const myTeam = myTeamId === match.host_team.id ? match.host_team : match.visitor_team
   const myScore = myTeamId === match.host_team.id ? (match.host_score ?? 0) : (match.visitor_score ?? 0)
+  const saveFn = useServerFn(saveGoals)
 
   useEffect(() => {
     supabase.from('match_events').select('*').eq('match_id', match.id).eq('team_id', myTeamId).eq('kind', 'goal')
-      .then(({ data }) => { if (data?.length) { setSaved(true); setGoals(data.map(e => ({ aid: e.athlete_id, nome: '', min: String(e.minute ?? '') }))) } })
+      .then(({ data }) => {
+        if (data?.length) {
+          setSaved(true)
+          setGoals(data.map(e => ({ aid: e.athlete_id ?? '', min: String(e.minute ?? '') })))
+        }
+      })
   }, [match.id, myTeamId])
 
   async function salvar() {
-    setLoading(true)
-    await supabase.from('match_events').delete().eq('match_id', match.id).eq('team_id', myTeamId).eq('kind', 'goal')
-    const rows = goals.filter(g => g.aid || g.nome).map(g => ({ match_id: match.id, team_id: myTeamId, athlete_id: g.aid || '', kind: 'goal', minute: g.min ? +g.min : null }))
-    if (rows.length) await supabase.from('match_events').insert(rows)
-    setSaved(true); onRefresh(); setLoading(false)
+    setLoading(true); setErro('')
+    try {
+      await saveFn({
+        data: {
+          match_id: match.id,
+          team_id: myTeamId,
+          goals: goals.map(g => ({
+            athlete_id: g.aid || null,
+            minute: g.min ? parseInt(g.min, 10) : null,
+          })),
+        },
+      })
+      setSaved(true); onRefresh()
+    } catch (e) {
+      setErro(e instanceof Error ? e.message : 'Erro')
+    } finally { setLoading(false) }
   }
 
   if (saved) return (
@@ -117,48 +163,55 @@ function EtapaGols({ match, myTeamId, athletes, onRefresh }: { match: Match; myT
       <div className="space-y-2">
         {goals.map((g, i) => (
           <div key={i} className="grid grid-cols-[1fr_70px_30px] gap-2">
-            {athletes.length ? (
-              <select value={g.aid} onChange={e => setGoals(p => p.map((x, j) => j === i ? { ...x, aid: e.target.value } : x))} className="bg-zinc-800 border border-zinc-700 text-white rounded px-2 py-1 text-sm">
-                <option value="">Jogador...</option>{athletes.map(a => <option key={a.id} value={a.id}>{a.nickname || a.full_name}</option>)}
-              </select>
-            ) : <input placeholder="Nome" value={g.nome} onChange={e => setGoals(p => p.map((x, j) => j === i ? { ...x, nome: e.target.value } : x))} className="bg-zinc-800 border border-zinc-700 text-white rounded px-2 py-1 text-sm" />}
+            <select value={g.aid} onChange={e => setGoals(p => p.map((x, j) => j === i ? { ...x, aid: e.target.value } : x))} className="bg-zinc-800 border border-zinc-700 text-white rounded px-2 py-1 text-sm">
+              <option value="">Sem atleta</option>
+              {athletes.map(a => <option key={a.id} value={a.id}>{a.nickname || a.full_name}</option>)}
+            </select>
             <input type="number" placeholder="Min" value={g.min} onChange={e => setGoals(p => p.map((x, j) => j === i ? { ...x, min: e.target.value } : x))} className="bg-zinc-800 border border-zinc-700 text-white rounded px-2 py-1 text-sm text-center" />
             <button onClick={() => setGoals(p => p.filter((_, j) => j !== i))} className="text-red-400 font-bold">x</button>
           </div>
         ))}
-        {goals.length < myScore && <button onClick={() => setGoals(p => [...p, { aid: '', nome: '', min: '' }])} className="text-sm text-[#1565F5]">+ Gol</button>}
+        {goals.length < myScore && <button onClick={() => setGoals(p => [...p, { aid: '', min: '' }])} className="text-sm text-[#1565F5]">+ Gol</button>}
         {!goals.length && <p className="text-zinc-500 text-sm italic">Nenhum gol — confirme com 0.</p>}
       </div>
+      {erro && <p className="text-red-400 text-sm">{erro}</p>}
       <Button onClick={salvar} disabled={loading} className="w-full bg-[#1565F5] text-white">{loading ? 'Salvando...' : 'Confirmar Gols'}</Button>
     </div>
   )
 }
 
 function EtapaDestaque({ match, myTeamId, onRefresh }: { match: Match; myTeamId: string; onRefresh: () => void }) {
-  const oppId = myTeamId === match.host_team.id ? match.visitor_team.id : match.host_team.id
   const oppTeam = myTeamId === match.host_team.id ? match.visitor_team : match.host_team
-  const [vote, setVote] = useState<BestVote | null>(null)
   const [jersey, setJersey] = useState('')
   const [name, setName] = useState('')
   const [rating, setRating] = useState(7)
   const [loading, setLoading] = useState(false)
   const [erro, setErro] = useState('')
   const [done, setDone] = useState(false)
+  const rateFn = useServerFn(rateOpponentBest)
 
   useEffect(() => {
     supabase.from('match_best_opponent_votes').select('*').eq('match_id', match.id).eq('voter_team_id', myTeamId).maybeSingle()
-      .then(({ data }) => { if (data) { setVote(data); setJersey(String(data.jersey_number)); setName(data.identified_name ?? ''); setRating(data.rating); setDone(true) } })
+      .then(({ data }) => { if (data) { setJersey(String(data.jersey_number)); setName(data.identified_name ?? ''); setRating(Number(data.rating)); setDone(true) } })
   }, [match.id, myTeamId])
 
   async function salvar() {
     if (!jersey) { setErro('Informe o numero da camisa.'); return }
     setLoading(true); setErro('')
-    const payload = { match_id: match.id, voter_team_id: myTeamId, opponent_team_id: oppId, jersey_number: +jersey, identified_name: name || null, rating }
-    const { error } = vote ? await supabase.from('match_best_opponent_votes').update(payload).eq('id', vote.id) : await supabase.from('match_best_opponent_votes').insert(payload)
-    if (error) { setErro(error.message); setLoading(false); return }
-    const { data: all } = await supabase.from('match_best_opponent_votes').select('id').eq('match_id', match.id)
-    if ((all?.length ?? 0) >= 2) await supabase.from('matches').update({ status: 'encerrada' }).eq('id', match.id)
-    setDone(true); onRefresh(); setLoading(false)
+    try {
+      await rateFn({
+        data: {
+          match_id: match.id,
+          voter_team_id: myTeamId,
+          jersey_number: parseInt(jersey, 10),
+          identified_name: name || null,
+          rating,
+        },
+      })
+      setDone(true); onRefresh()
+    } catch (e) {
+      setErro(e instanceof Error ? e.message : 'Erro')
+    } finally { setLoading(false) }
   }
 
   if (done) return (
@@ -202,13 +255,30 @@ function PartidaPage() {
       .select('*, host_team:teams!matches_host_team_id_fkey(id,name,short_name,primary_color), visitor_team:teams!matches_visitor_team_id_fkey(id,name,short_name,primary_color), competition:competitions(sumula_confirm_window_hours)')
       .eq('id', id).single()
     if (error || !data) { setErro('Partida nao encontrada.'); setLoading(false); return }
-    setMatch(data as any)
+    setMatch(data as unknown as Match)
     if (user) {
-      const { data: team } = await supabase.from('teams').select('id').eq('manager_id', user.id).maybeSingle()
-      if (team) { setMyTeamId(team.id); const { data: ats } = await supabase.from('athletes').select('id,full_name,nickname').eq('team_id', team.id); setAthletes(ats ?? []) }
+      // Procura time em que o usuário é diretor (manager_id legado ou team_members)
+      const { data: managed } = await supabase.from('teams').select('id').eq('manager_id', user.id).maybeSingle()
+      let teamId = managed?.id ?? null
+      if (!teamId) {
+        const { data: member } = await supabase
+          .from('team_members')
+          .select('team_id')
+          .eq('user_id', user.id)
+          .eq('role', 'director')
+          .not('accepted_at', 'is', null)
+          .maybeSingle()
+        teamId = member?.team_id ?? null
+      }
+      if (teamId) {
+        setMyTeamId(teamId)
+        const { data: ats } = await supabase.from('athletes').select('id,full_name,nickname').eq('team_id', teamId)
+        setAthletes(ats ?? [])
+      }
     }
     const { data: vs } = await supabase.from('match_best_opponent_votes').select('*').eq('match_id', id)
-    setVotes(vs ?? []); setLoading(false)
+    setVotes((vs ?? []) as unknown as BestVote[])
+    setLoading(false)
   }
 
   useEffect(() => { load() }, [id, user])
@@ -220,7 +290,7 @@ function PartidaPage() {
     </div>
   )
 
-  const encerrada = match.status === 'encerrada'
+  const encerrada = match.status === 'closed'
   const meuJogo = myTeamId && (myTeamId === match.host_team.id || myTeamId === match.visitor_team.id)
   const horas = horasRestantes(match.scheduled_at, match.competition?.sumula_confirm_window_hours ?? null)
   const etapa1ok = !!match.host_filled_at && !!match.visitor_confirmed_at
@@ -285,4 +355,4 @@ function PartidaPage() {
       </div>
     </div>
   )
-      }
+}
