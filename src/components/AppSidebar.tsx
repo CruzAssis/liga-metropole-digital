@@ -17,7 +17,7 @@ import {
 import { useAuth } from "@/hooks/use-auth";
 
 const items = [
-  { title: "Início", url: "/", icon: Home },
+  { title: "Início", url: "/minha-conta", icon: Home },
   { title: "Atletas", url: "/atletas", icon: Users },
   { title: "Verificar ID", url: "/verificar", icon: BadgeCheck },
   { title: "Inscrição", url: "/inscricao", icon: ClipboardList },
