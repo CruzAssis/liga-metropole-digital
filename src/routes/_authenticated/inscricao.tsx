@@ -33,7 +33,7 @@ function InscricaoPage() {
   async function handleSubmit(e) {
     e.preventDefault()
     if (form.tipo === 'mandante' && !form.endereco_campo.trim()) {
-      toast({ title: 'Informe o endereco do campo', variant: 'destructive' })
+      toast.error('Informe o endereco do campo')
       return
     }
     setLoading(true)
@@ -55,7 +55,7 @@ function InscricaoPage() {
       }
       setSubmitted(true)
     } catch (err) {
-      toast({ title: err.message || 'Erro ao enviar inscricao', variant: 'destructive' })
+      toast.error(err.message || 'Erro ao enviar inscricao')
     } finally {
       setLoading(false)
     }

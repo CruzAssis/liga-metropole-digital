@@ -28,7 +28,7 @@ function SignupPage() {
   async function handleSubmit(e) {
     e.preventDefault()
     if (!is_diretor && !is_jogador && !is_torcedor) {
-      toast({ title: 'Selecione ao menos um perfil', variant: 'destructive' })
+      toast.error('Selecione ao menos um perfil')
       return
     }
     setLoading(true)
@@ -42,10 +42,10 @@ function SignupPage() {
       if (data.user) {
         await supabase.from('profiles').upsert({ id: data.user.id, nome_completo: form.full_name, cpf: form.cpf, telefone: form.phone, is_diretor, is_jogador, is_torcedor })
       }
-      toast({ title: 'Conta criada com sucesso!' })
+      toast.success('Conta criada com sucesso!')
       navigate({ to: is_diretor ? '/inscricao' : '/' })
     } catch (err) {
-      toast({ title: err.message || 'Erro ao criar conta', variant: 'destructive' })
+      toast.error(err.message || 'Erro ao criar conta')
     } finally { setLoading(false) }
   }
 

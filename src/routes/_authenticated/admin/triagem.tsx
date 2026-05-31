@@ -39,7 +39,7 @@ function TriagemPage() {
   async function aprovarTime(teamId) {
     const config = approvals[teamId]
     if (!config?.lado || !config?.grupo) {
-      toast({ title: 'Defina o Lado e o Grupo antes de aprovar', variant: 'destructive' })
+      toast.error('Defina o Lado e o Grupo antes de aprovar')
       return
     }
     setSaving(teamId)
@@ -48,10 +48,10 @@ function TriagemPage() {
         lado: config.lado, grupo: config.grupo, serie: config.serie, mensalidade_paga: true
       }).eq('id', teamId)
       if (error) throw error
-      toast({ title: 'Time aprovado!' })
+      toast.success('Time aprovado!')
       setTeams(prev => prev.filter(t => t.id !== teamId))
     } catch (err) {
-      toast({ title: err.message || 'Erro ao aprovar', variant: 'destructive' })
+      toast.error(err.message || 'Erro ao aprovar')
     } finally { setSaving(null) }
   }
 
