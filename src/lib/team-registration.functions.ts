@@ -8,6 +8,11 @@ const schema = z.object({
   short_name: z.string().min(1).max(8).optional(),
   registration_type: z.enum(["host", "visitor"]),
   home_venue: z.string().max(255).optional().nullable(),
+  home_time: z
+    .string()
+    .regex(/^\d{2}:\d{2}(:\d{2})?$/)
+    .optional()
+    .nullable(),
   primary_color: z
     .string()
     .regex(/^#[0-9a-fA-F]{6}$/)
@@ -49,6 +54,7 @@ export const createTeamRegistration = createServerFn({ method: "POST" })
         lado: "A",
         serie: "A",
         home_venue: data.home_venue?.trim() || null,
+        home_time: data.registration_type === "host" ? data.home_time || null : null,
         primary_color: data.primary_color || null,
       })
       .select("id")

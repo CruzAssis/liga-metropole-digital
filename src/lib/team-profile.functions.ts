@@ -11,12 +11,17 @@ export const getTeamPublicProfile = createServerFn({ method: "GET" })
   .handler(async ({ data }) => {
     const { data: team, error } = await supabaseAdmin
       .from("teams")
-      .select("id, name, short_name, slug, logo_url, banner_url, primary_color, registration_type, status, created_at")
+      .select("id, name, short_name, slug, logo_url, banner_url, primary_color, registration_type, status, lado, serie, home_venue, home_time, created_at")
       .eq("slug", data.slug)
       .eq("status", "approved")
       .maybeSingle();
     if (error) throw new Error(error.message);
     if (!team) return null;
+
+    const { count: supporterCount } = await supabaseAdmin
+      .from("team_supporters")
+      .select("user_id", { count: "exact", head: true })
+      .eq("team_id", team.id);
 
     const [{ data: athletes }, { data: matches }, { data: groupTeams }] = await Promise.all([
       supabaseAdmin
@@ -56,6 +61,7 @@ export const getTeamPublicProfile = createServerFn({ method: "GET" })
     return {
       team,
       groupLabel,
+      supporterCount: supporterCount ?? 0,
       athletes: athletes ?? [],
       matches: (matches ?? []).map((m) => ({
         ...m,
