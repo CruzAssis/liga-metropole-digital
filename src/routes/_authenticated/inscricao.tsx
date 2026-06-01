@@ -22,6 +22,7 @@ function InscricaoPage() {
     name: '',
     registration_type: 'host' as 'host' | 'visitor',
     home_venue: '',
+    home_time: '15:00',
     primary_color: '#1565F5',
   })
 
@@ -43,6 +44,7 @@ function InscricaoPage() {
           name: form.name,
           registration_type: form.registration_type,
           home_venue: form.home_venue || null,
+          home_time: form.registration_type === 'host' ? form.home_time || null : null,
           primary_color: form.primary_color || null,
         },
       })
@@ -107,10 +109,18 @@ function InscricaoPage() {
             </RadioGroup>
           </div>
           {form.registration_type === 'host' && (
-            <div>
-              <Label htmlFor="home_venue" className="text-zinc-300">Endereco do campo</Label>
-              <Input id="home_venue" name="home_venue" type="text" required value={form.home_venue} onChange={handleChange} className="mt-1 bg-zinc-900 border-zinc-700 text-white" placeholder="Rua, numero, bairro - Zona Norte, SP" />
-            </div>
+            <>
+              <div>
+                <Label htmlFor="home_venue" className="text-zinc-300">Endereço do campo</Label>
+                <Input id="home_venue" name="home_venue" type="text" required value={form.home_venue} onChange={handleChange} className="mt-1 bg-zinc-900 border-zinc-700 text-white" placeholder="Rua, número, bairro - Zona Norte, SP" />
+                <p className="text-xs text-zinc-500 mt-1">Obrigatório para mandantes — é onde você vai mandar seus jogos.</p>
+              </div>
+              <div>
+                <Label htmlFor="home_time" className="text-zinc-300">Horário preferencial</Label>
+                <Input id="home_time" name="home_time" type="time" value={form.home_time} onChange={handleChange} className="mt-1 bg-zinc-900 border-zinc-700 text-white" />
+                <p className="text-xs text-zinc-500 mt-1">Horário em que seu time costuma jogar em casa.</p>
+              </div>
+            </>
           )}
           <div>
             <Label className="text-zinc-300">Cor primaria</Label>
