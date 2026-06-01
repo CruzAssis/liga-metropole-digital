@@ -45,7 +45,7 @@ type Athlete = LoaderData["athletes"][number];
 
 function TeamProfilePage() {
   const data = Route.useLoaderData() as LoaderData;
-  const { team, groupLabel, athletes, matches } = data;
+  const { team, groupLabel, athletes, matches, supporterCount } = data;
 
   const upcoming = matches.filter((m: Match) => ["scheduled", "awaiting_confirmation"].includes(m.status)).slice(0, 5);
   const results = matches.filter((m: Match) => ["confirmed", "wo"].includes(m.status)).slice(-5).reverse();
@@ -86,13 +86,23 @@ function TeamProfilePage() {
             </h1>
             <div className="flex flex-wrap items-center gap-2 mt-2">
               <Badge variant="outline" className="font-mono">{team.short_name}</Badge>
-              <Badge variant={team.registration_type === "host" ? "default" : "secondary"}>
-                {team.registration_type === "host" ? "Mandante" : "Visitante"}
+              <Badge variant={team.registration_type === "host" ? "default" : "secondary"} className="uppercase">
+                {team.registration_type === "host" ? "Mandante" : "Visitante"} · Lado {team.lado}
               </Badge>
               {groupLabel && <Badge variant="outline">Grupo {groupLabel}</Badge>}
+              <Badge variant="outline" className="gap-1">
+                <span className="text-primary">●</span> {supporterCount} torcedor{supporterCount === 1 ? "" : "es"}
+              </Badge>
             </div>
+            {team.registration_type === "host" && team.home_venue && (
+              <p className="text-sm text-muted-foreground mt-2 flex items-center gap-1">
+                <MapPin className="h-3.5 w-3.5" /> {team.home_venue}
+                {team.home_time && <span> · {team.home_time.slice(0, 5)}</span>}
+              </p>
+            )}
           </div>
         </header>
+
 
 
       {/* Contact */}
