@@ -81,7 +81,7 @@ function SorteioPage() {
     try {
       const result = await drawFn({ data: { competitionId: id } });
       toast.success("Sorteio executado!", {
-        description: `${result.groups_created} grupos · ${result.matches_created} partidas`,
+        description: `${result.matches_created} partidas · ${result.matches_per_lado}/Lado (A e B)`,
       });
       void load();
     } catch (err) {
@@ -117,7 +117,9 @@ function SorteioPage() {
       <div>
         <h1 className="font-display text-4xl tracking-wide">Sorteio</h1>
         <p className="text-muted-foreground">
-          Gere os grupos e o calendário das 400 partidas a partir dos times aprovados.
+          Sorteio oficial Liga Metrópole Várzea: Mandantes × Visitantes só dentro do mesmo Lado
+          (A com A, B com B). 20 rodadas por Lado, 400 partidas por Lado, 800 partidas no total.
+          Exige 20 times aprovados em cada uma das 4 categorias.
         </p>
       </div>
 
@@ -179,7 +181,8 @@ function SorteioPage() {
                       <AlertDialogHeader>
                         <AlertDialogTitle>Confirmar sorteio</AlertDialogTitle>
                         <AlertDialogDescription>
-                          Esta ação é definitiva e não pode ser desfeita. Serão criados 16 grupos e 400 partidas.
+                          Esta ação é definitiva e não pode ser desfeita. Serão criadas 800 partidas
+                          (400 por Lado, Mandantes × Visitantes do mesmo Lado).
                         </AlertDialogDescription>
                       </AlertDialogHeader>
                       <AlertDialogFooter>

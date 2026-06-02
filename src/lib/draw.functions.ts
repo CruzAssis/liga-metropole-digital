@@ -5,12 +5,7 @@ import { supabaseAdmin } from "@/integrations/supabase/client.server";
 
 const inputSchema = z.object({ competitionId: z.string().uuid() });
 
-const LETTERS = ["A", "B", "C", "D", "E", "F", "G", "H"] as const;
-// shadow group mapping (mirror): A↔E, B↔F, C↔G, D↔H
-const SHADOW: Record<string, string> = {
-  A: "E", B: "F", C: "G", D: "H",
-  E: "A", F: "B", G: "C", H: "D",
-};
+const ROUNDS_PER_SIDE = 20; // cada Mandante enfrenta cada Visitante do mesmo Lado uma vez
 
 function secureShuffle<T>(array: T[]): T[] {
   const a = array.slice();
@@ -23,13 +18,25 @@ function secureShuffle<T>(array: T[]): T[] {
   return a;
 }
 
+type TeamRow = {
+  id: string;
+  registration_type: "host" | "visitor";
+  lado: "A" | "B";
+};
+
+/**
+ * Sorteio oficial Liga Metrópole Várzea (V6):
+ *  - 40 Mandantes + 40 Visitantes, divididos em Lado A e Lado B (20 cada).
+ *  - Confrontos APENAS Mandante × Visitante e SOMENTE dentro do mesmo Lado.
+ *  - Cada Mandante joga uma vez contra cada Visitante do seu Lado (20 rodadas).
+ *  - 20 partidas por rodada por Lado → 400 partidas por Lado → 800 totais.
+ */
 export const executeDraw = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
   .inputValidator((input) => inputSchema.parse(input))
   .handler(async ({ data, context }) => {
     const { userId } = context;
 
-    // a) admin check
     const { data: isAdmin, error: roleErr } = await supabaseAdmin.rpc("has_role", {
       _user_id: userId,
       _role: "admin",
@@ -39,7 +46,6 @@ export const executeDraw = createServerFn({ method: "POST" })
       throw new Response(JSON.stringify({ error: "Forbidden" }), { status: 403 });
     }
 
-    // b) competition exists & not yet drawn
     const { data: comp, error: compErr } = await supabaseAdmin
       .from("competitions")
       .select("id, draw_executed_at")
@@ -52,68 +58,38 @@ export const executeDraw = createServerFn({ method: "POST" })
       throw new Response(JSON.stringify({ error: "Sorteio já executado" }), { status: 400 });
     }
 
-    // c) load approved teams
     const { data: teams, error: teamsErr } = await supabaseAdmin
       .from("teams")
-      .select("id, registration_type, status")
+      .select("id, registration_type, status, lado")
       .eq("status", "approved");
     if (teamsErr) throw new Error(teamsErr.message);
 
-    const hostsAll = (teams ?? []).filter((t) => t.registration_type === "host");
-    const visitorsAll = (teams ?? []).filter((t) => t.registration_type === "visitor");
+    const approved = (teams ?? []) as TeamRow[];
+    const buckets = {
+      "host-A": approved.filter((t) => t.registration_type === "host" && t.lado === "A"),
+      "host-B": approved.filter((t) => t.registration_type === "host" && t.lado === "B"),
+      "visitor-A": approved.filter((t) => t.registration_type === "visitor" && t.lado === "A"),
+      "visitor-B": approved.filter((t) => t.registration_type === "visitor" && t.lado === "B"),
+    };
 
-    if (hostsAll.length !== 40 || visitorsAll.length !== 40) {
+    const expected = 20;
+    const counts = {
+      "host-A": buckets["host-A"].length,
+      "host-B": buckets["host-B"].length,
+      "visitor-A": buckets["visitor-A"].length,
+      "visitor-B": buckets["visitor-B"].length,
+    };
+    const wrong = Object.entries(counts).filter(([, n]) => n !== expected);
+    if (wrong.length > 0) {
       throw new Response(
         JSON.stringify({
-          error: "Aguardando 40 times de cada tipo",
-          hosts: hostsAll.length,
-          visitors: visitorsAll.length,
+          error: "Cada categoria/lado precisa de exatamente 20 times aprovados",
+          counts,
         }),
         { status: 400 },
       );
     }
 
-    // d) shuffle
-    const hosts = secureShuffle(hostsAll);
-    const visitors = secureShuffle(visitorsAll);
-
-    // e) create 16 groups
-    const groupRows = LETTERS.flatMap((label) => [
-      { competition_id: data.competitionId, label, team_role: "host" },
-      { competition_id: data.competitionId, label, team_role: "visitor" },
-    ]);
-    const { data: groups, error: groupsErr } = await supabaseAdmin
-      .from("groups")
-      .insert(groupRows)
-      .select("id, label, team_role");
-    if (groupsErr) throw new Error(groupsErr.message);
-
-    const groupHostByLetter: Record<string, string> = {};
-    const groupVisitorByLetter: Record<string, string> = {};
-    for (const g of groups!) {
-      if (g.team_role === "host") groupHostByLetter[g.label] = g.id;
-      else groupVisitorByLetter[g.label] = g.id;
-    }
-
-    // f) assign teams (5 per group)
-    const groupTeamRows: { group_id: string; team_id: string }[] = [];
-    const hostsByLetter: Record<string, typeof hosts> = {};
-    const visitorsByLetter: Record<string, typeof visitors> = {};
-    for (const l of LETTERS) {
-      hostsByLetter[l] = [];
-      visitorsByLetter[l] = [];
-    }
-    for (let i = 0; i < 40; i++) {
-      const letter = LETTERS[Math.floor(i / 5)];
-      groupTeamRows.push({ group_id: groupHostByLetter[letter], team_id: hosts[i].id });
-      groupTeamRows.push({ group_id: groupVisitorByLetter[letter], team_id: visitors[i].id });
-      hostsByLetter[letter].push(hosts[i]);
-      visitorsByLetter[letter].push(visitors[i]);
-    }
-    const { error: gtErr } = await supabaseAdmin.from("group_teams").insert(groupTeamRows);
-    if (gtErr) throw new Error(gtErr.message);
-
-    // g) generate matches: round-robin cyclic
     type MatchInsert = {
       competition_id: string;
       stage: "group";
@@ -125,42 +101,26 @@ export const executeDraw = createServerFn({ method: "POST" })
     };
     const matchRows: MatchInsert[] = [];
 
-    const buildPairings = (
-      M: typeof hosts,
-      V: typeof visitors,
-      letter: string,
-      roundOffset: number,
-    ) => {
-      for (let r = 0; r < 5; r++) {
-        for (let i = 0; i < 5; i++) {
+    for (const lado of ["A", "B"] as const) {
+      const hosts = secureShuffle(buckets[`host-${lado}`]);
+      const visitors = secureShuffle(buckets[`visitor-${lado}`]);
+
+      // Round-robin cíclico: na rodada r, host[i] joga contra visitor[(i+r-1) % 20]
+      for (let r = 1; r <= ROUNDS_PER_SIDE; r++) {
+        for (let i = 0; i < expected; i++) {
           matchRows.push({
             competition_id: data.competitionId,
             stage: "group",
-            round: r + 1 + roundOffset,
-            group_label: letter,
-            host_team_id: M[i].id,
-            visitor_team_id: V[(i + r) % 5].id,
+            round: r,
+            group_label: lado,
+            host_team_id: hosts[i].id,
+            visitor_team_id: visitors[(i + r - 1) % expected].id,
             status: "scheduled",
           });
         }
       }
-    };
-
-    // own group: rounds 1-5
-    for (const letter of LETTERS) {
-      buildPairings(hostsByLetter[letter], visitorsByLetter[letter], letter, 0);
-    }
-    // shadow group: rounds 6-10
-    for (const letter of LETTERS) {
-      buildPairings(
-        hostsByLetter[letter],
-        visitorsByLetter[SHADOW[letter]],
-        letter,
-        5,
-      );
     }
 
-    // chunk insert (matches table)
     const CHUNK = 200;
     for (let i = 0; i < matchRows.length; i += CHUNK) {
       const { error: mErr } = await supabaseAdmin
@@ -169,17 +129,16 @@ export const executeDraw = createServerFn({ method: "POST" })
       if (mErr) throw new Error(mErr.message);
     }
 
-    // h) update competition
     const { error: updErr } = await supabaseAdmin
       .from("competitions")
       .update({ status: "group_stage", draw_executed_at: new Date().toISOString() })
       .eq("id", data.competitionId);
     if (updErr) throw new Error(updErr.message);
 
-    // i) result
     return {
       success: true,
-      groups_created: groups!.length,
+      lados: 2,
       matches_created: matchRows.length,
+      matches_per_lado: matchRows.length / 2,
     };
   });

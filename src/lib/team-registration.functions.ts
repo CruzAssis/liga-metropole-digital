@@ -3,6 +3,12 @@ import { z } from "zod";
 import { requireSupabaseAuth } from "@/integrations/supabase/auth-middleware";
 import { supabaseAdmin } from "@/integrations/supabase/client.server";
 
+const hex = z
+  .string()
+  .regex(/^#[0-9a-fA-F]{6}$/)
+  .optional()
+  .nullable();
+
 const schema = z.object({
   name: z.string().min(2).max(80),
   short_name: z.string().min(1).max(8).optional(),
@@ -13,11 +19,9 @@ const schema = z.object({
     .regex(/^\d{2}:\d{2}(:\d{2})?$/)
     .optional()
     .nullable(),
-  primary_color: z
-    .string()
-    .regex(/^#[0-9a-fA-F]{6}$/)
-    .optional()
-    .nullable(),
+  primary_color: hex,
+  secondary_color: hex,
+  tertiary_color: hex,
 });
 
 function makeShortName(name: string) {
@@ -56,7 +60,9 @@ export const createTeamRegistration = createServerFn({ method: "POST" })
         home_venue: data.home_venue?.trim() || null,
         home_time: data.registration_type === "host" ? data.home_time || null : null,
         primary_color: data.primary_color || null,
-      })
+        secondary_color: data.secondary_color || null,
+        tertiary_color: data.tertiary_color || null,
+      } as never)
       .select("id")
       .single();
     if (teamErr || !team) {

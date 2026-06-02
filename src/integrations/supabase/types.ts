@@ -499,10 +499,12 @@ export type Database = {
           primary_color: string | null
           registration_type: string
           rejected_reason: string | null
+          secondary_color: string | null
           serie: Database["public"]["Enums"]["team_serie"]
           short_name: string
           slug: string | null
           status: string
+          tertiary_color: string | null
         }
         Insert: {
           approved_at?: string | null
@@ -518,10 +520,12 @@ export type Database = {
           primary_color?: string | null
           registration_type: string
           rejected_reason?: string | null
+          secondary_color?: string | null
           serie?: Database["public"]["Enums"]["team_serie"]
           short_name: string
           slug?: string | null
           status?: string
+          tertiary_color?: string | null
         }
         Update: {
           approved_at?: string | null
@@ -537,10 +541,12 @@ export type Database = {
           primary_color?: string | null
           registration_type?: string
           rejected_reason?: string | null
+          secondary_color?: string | null
           serie?: Database["public"]["Enums"]["team_serie"]
           short_name?: string
           slug?: string | null
           status?: string
+          tertiary_color?: string | null
         }
         Relationships: [
           {
