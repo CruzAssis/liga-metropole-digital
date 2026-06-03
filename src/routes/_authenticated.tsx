@@ -1,5 +1,4 @@
-import { createFileRoute, Outlet, useNavigate } from "@tanstack/react-router";
-import { useEffect } from "react";
+import { createFileRoute, Outlet, redirect } from "@tanstack/react-router";
 import { useAuth } from "@/hooks/use-auth";
 import { AppShell } from "@/components/AppShell";
 
@@ -9,18 +8,15 @@ export const Route = createFileRoute("/_authenticated")({
 
 function AuthenticatedLayout() {
   const { user, loading } = useAuth();
-  const navigate = useNavigate();
 
-  useEffect(() => {
-    if (!loading && !user) navigate({ to: "/login" });
-  }, [loading, user, navigate]);
+  // Enquanto o estado de auth carrega, nao renderiza nada (evita flash de conteudo protegido)
+  if (loading) {
+    return null;
+  }
 
-  if (loading || !user) {
-    return (
-      <div className="min-h-screen flex items-center justify-center text-muted-foreground">
-        Carregando...
-      </div>
-    );
+  // Se nao autenticado, redireciona para /login substituindo o historico (sem volta)
+  if (!user) {
+    throw redirect({ to: "/login", replace: true });
   }
 
   return (
