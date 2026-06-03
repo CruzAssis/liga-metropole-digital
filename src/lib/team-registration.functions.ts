@@ -22,12 +22,14 @@ const schema = z.object({
   primary_color: hex,
   secondary_color: hex,
   tertiary_color: hex,
+  // Optional: link to a competition (league) at inscription time
+  competition_id: z.string().uuid().optional().nullable(),
 });
 
 function makeShortName(name: string) {
   const clean = name
     .trim()
-    .replace(/[^a-zA-ZÀ-ÿ\s]/g, "")
+    .replace(/[^a-zA-ZA-z\s]/g, "")
     .toUpperCase();
   const words = clean.split(/\s+/).filter(Boolean);
   if (words.length >= 2) {
@@ -44,7 +46,34 @@ export const createTeamRegistration = createServerFn({ method: "POST" })
     const short_name = data.short_name?.trim() || makeShortName(data.name);
 
     if (data.registration_type === "host" && !data.home_venue?.trim()) {
-      throw new Error("Mandante precisa informar o endereço do campo");
+      throw new Error("Mandante precisa informar o endereco do campo");
+    }
+
+    // If a competition_id was provided, verify it is open for registration
+    if (data.competition_id) {
+      const { data: comp, error: compErr } = await supabaseAdmin
+        .from("competitions")
+        .select("id, registration_status, max_teams")
+        .eq("id", data.competition_id)
+        .single();
+
+      if (compErr || !comp) {
+        throw new Error("Liga nao encontrada");
+      }
+      if (comp.registration_status !== "open") {
+        throw new Error("Esta liga nao esta aceitando novas inscricoes");
+      }
+
+      // Count approved teams to enforce max_teams at application level as well
+      const { count } = await supabaseAdmin
+        .from("teams")
+        .select("id", { count: "exact", head: true })
+        .eq("competition_id", data.competition_id)
+        .eq("status", "approved");
+
+      if ((count ?? 0) >= comp.max_teams) {
+        throw new Error("Liga lotada. O numero maximo de equipes foi atingido");
+      }
     }
 
     const { data: team, error: teamErr } = await supabaseAdmin
@@ -62,9 +91,11 @@ export const createTeamRegistration = createServerFn({ method: "POST" })
         primary_color: data.primary_color || null,
         secondary_color: data.secondary_color || null,
         tertiary_color: data.tertiary_color || null,
+        competition_id: data.competition_id || null,
       } as never)
       .select("id")
       .single();
+
     if (teamErr || !team) {
       throw new Error(teamErr?.message ?? "Erro ao criar time");
     }
