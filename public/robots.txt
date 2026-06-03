@@ -1,0 +1,8 @@
+User-agent: *
+Disallow: /admin/
+Disallow: /dashboard/
+Disallow: /perfil/
+Disallow: /sumula/
+Disallow: /api/
+
+Allow: /
