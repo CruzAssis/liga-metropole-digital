@@ -298,7 +298,6 @@ function PartidaPage() {
 
   const encerrada = match.status === 'closed' || match.status === 'wo'
   const meuJogo = myTeamId && (myTeamId === match.host_team.id || myTeamId === match.visitor_team.id)
-  const horas = horasRestantes(match.scheduled_at, match.competition?.sumula_confirm_window_hours ?? null)
   const woHoras = horasParaWO(match.scheduled_at)
   const pendente = !encerrada && (match.status === 'scheduled' || match.status === 'awaiting_confirmation')
   const etapa1ok = !!match.host_filled_at && !!match.visitor_confirmed_at
