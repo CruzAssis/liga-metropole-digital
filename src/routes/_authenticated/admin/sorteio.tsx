@@ -160,6 +160,33 @@ function SorteioPage() {
         </CardContent>
       </Card>
 
+      <Card>
+        <CardHeader>
+          <CardTitle className="text-base">Calendário do sorteio</CardTitle>
+          <CardDescription>
+            Data da rodada 1 e intervalo entre rodadas (mesmas regras para Lado A e B).
+            Cada jogo herda o horário e o local do mandante.
+          </CardDescription>
+        </CardHeader>
+        <CardContent className="flex flex-col gap-2 sm:flex-row">
+          <Input
+            type="date"
+            value={firstRoundDate}
+            onChange={(e) => setFirstRoundDate(e.target.value)}
+            className="sm:flex-1"
+          />
+          <Input
+            type="number"
+            min={1}
+            max={60}
+            placeholder="Intervalo (dias)"
+            className="sm:w-40"
+            value={intervalDays}
+            onChange={(e) => setIntervalDays(e.target.value)}
+          />
+        </CardContent>
+      </Card>
+
       <div className="space-y-3">
         <h2 className="font-display text-2xl tracking-wide">Competições</h2>
         {loading ? (
