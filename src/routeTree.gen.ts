@@ -30,6 +30,7 @@ import { Route as AuthenticatedAdminTriagemRouteImport } from './routes/_authent
 import { Route as AuthenticatedAdminSumulasRouteImport } from './routes/_authenticated/admin/sumulas'
 import { Route as AuthenticatedAdminSorteioRouteImport } from './routes/_authenticated/admin/sorteio'
 import { Route as AuthenticatedAdminDashboardRouteImport } from './routes/_authenticated/admin/dashboard'
+import { Route as ApiPublicHooksWoCheckerRouteImport } from './routes/api/public/hooks/wo-checker'
 
 const VerificarRoute = VerificarRouteImport.update({
   id: '/verificar',
@@ -140,6 +141,11 @@ const AuthenticatedAdminDashboardRoute =
     path: '/dashboard',
     getParentRoute: () => AuthenticatedAdminRoute,
   } as any)
+const ApiPublicHooksWoCheckerRoute = ApiPublicHooksWoCheckerRouteImport.update({
+  id: '/api/public/hooks/wo-checker',
+  path: '/api/public/hooks/wo-checker',
+  getParentRoute: () => rootRouteImport,
+} as any)
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
@@ -162,6 +168,7 @@ export interface FileRoutesByFullPath {
   '/admin/sumulas': typeof AuthenticatedAdminSumulasRoute
   '/admin/triagem': typeof AuthenticatedAdminTriagemRoute
   '/admin/usuarios': typeof AuthenticatedAdminUsuariosRoute
+  '/api/public/hooks/wo-checker': typeof ApiPublicHooksWoCheckerRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
@@ -184,6 +191,7 @@ export interface FileRoutesByTo {
   '/admin/sumulas': typeof AuthenticatedAdminSumulasRoute
   '/admin/triagem': typeof AuthenticatedAdminTriagemRoute
   '/admin/usuarios': typeof AuthenticatedAdminUsuariosRoute
+  '/api/public/hooks/wo-checker': typeof ApiPublicHooksWoCheckerRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
@@ -208,6 +216,7 @@ export interface FileRoutesById {
   '/_authenticated/admin/sumulas': typeof AuthenticatedAdminSumulasRoute
   '/_authenticated/admin/triagem': typeof AuthenticatedAdminTriagemRoute
   '/_authenticated/admin/usuarios': typeof AuthenticatedAdminUsuariosRoute
+  '/api/public/hooks/wo-checker': typeof ApiPublicHooksWoCheckerRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
@@ -232,6 +241,7 @@ export interface FileRouteTypes {
     | '/admin/sumulas'
     | '/admin/triagem'
     | '/admin/usuarios'
+    | '/api/public/hooks/wo-checker'
   fileRoutesByTo: FileRoutesByTo
   to:
     | '/'
@@ -254,6 +264,7 @@ export interface FileRouteTypes {
     | '/admin/sumulas'
     | '/admin/triagem'
     | '/admin/usuarios'
+    | '/api/public/hooks/wo-checker'
   id:
     | '__root__'
     | '/'
@@ -277,6 +288,7 @@ export interface FileRouteTypes {
     | '/_authenticated/admin/sumulas'
     | '/_authenticated/admin/triagem'
     | '/_authenticated/admin/usuarios'
+    | '/api/public/hooks/wo-checker'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
@@ -292,6 +304,7 @@ export interface RootRouteChildren {
   TimesRoute: typeof TimesRouteWithChildren
   VerificarRoute: typeof VerificarRoute
   PartidasIdRoute: typeof PartidasIdRoute
+  ApiPublicHooksWoCheckerRoute: typeof ApiPublicHooksWoCheckerRoute
 }
 
 declare module '@tanstack/react-router' {
@@ -443,6 +456,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedAdminDashboardRouteImport
       parentRoute: typeof AuthenticatedAdminRoute
     }
+    '/api/public/hooks/wo-checker': {
+      id: '/api/public/hooks/wo-checker'
+      path: '/api/public/hooks/wo-checker'
+      fullPath: '/api/public/hooks/wo-checker'
+      preLoaderRoute: typeof ApiPublicHooksWoCheckerRouteImport
+      parentRoute: typeof rootRouteImport
+    }
   }
 }
 
@@ -504,7 +524,18 @@ const rootRouteChildren: RootRouteChildren = {
   TimesRoute: TimesRouteWithChildren,
   VerificarRoute: VerificarRoute,
   PartidasIdRoute: PartidasIdRoute,
+  ApiPublicHooksWoCheckerRoute: ApiPublicHooksWoCheckerRoute,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)
   ._addFileTypes<FileRouteTypes>()
+
+import type { getRouter } from './router.tsx'
+import type { startInstance } from './start.ts'
+declare module '@tanstack/react-start' {
+  interface Register {
+    ssr: true
+    router: Awaited<ReturnType<typeof getRouter>>
+    config: Awaited<ReturnType<typeof startInstance.getOptions>>
+  }
+}
