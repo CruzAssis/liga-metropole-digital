@@ -35,7 +35,7 @@ type Standing = {
   supporters: number;
 };
 
-const FINISHED = ["confirmed", "wo"];
+const FINISHED = ["confirmed", "closed", "wo"];
 
 export const Route = createFileRoute("/ranking")({
   component: RankingPage,

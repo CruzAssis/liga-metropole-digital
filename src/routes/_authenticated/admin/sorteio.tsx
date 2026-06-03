@@ -40,6 +40,8 @@ function SorteioPage() {
   const [newName, setNewName] = useState("");
   const [newSeason, setNewSeason] = useState<string>(String(new Date().getFullYear()));
   const [creating, setCreating] = useState(false);
+  const [firstRoundDate, setFirstRoundDate] = useState<string>("");
+  const [intervalDays, setIntervalDays] = useState<string>("7");
   const drawFn = useServerFn(executeDraw);
 
   const load = async () => {
@@ -77,9 +79,20 @@ function SorteioPage() {
   };
 
   const handleDraw = async (id: string) => {
+    if (!firstRoundDate) {
+      toast.error("Informe a data da primeira rodada");
+      return;
+    }
+    const interval = parseInt(intervalDays, 10);
+    if (!Number.isFinite(interval) || interval < 1) {
+      toast.error("Intervalo inválido");
+      return;
+    }
     setRunning(id);
     try {
-      const result = await drawFn({ data: { competitionId: id } });
+      const result = await drawFn({
+        data: { competitionId: id, firstRoundDate, intervalDays: interval },
+      });
       toast.success("Sorteio executado!", {
         description: `${result.matches_created} partidas · ${result.matches_per_lado}/Lado (A e B)`,
       });
@@ -90,7 +103,7 @@ function SorteioPage() {
         try {
           const body = await err.json();
           msg = body.error ?? msg;
-          if (body.hosts !== undefined) msg += ` (mandantes: ${body.hosts}, visitantes: ${body.visitors})`;
+          if (body.counts) msg += ` (${JSON.stringify(body.counts)})`;
         } catch { /* noop */ }
       } else if (err instanceof Error) {
         msg = err.message;
@@ -144,6 +157,33 @@ function SorteioPage() {
           <Button onClick={handleCreate} disabled={creating || !newName.trim() || !newSeason.trim()}>
             <Plus className="h-4 w-4 mr-1" /> Criar
           </Button>
+        </CardContent>
+      </Card>
+
+      <Card>
+        <CardHeader>
+          <CardTitle className="text-base">Calendário do sorteio</CardTitle>
+          <CardDescription>
+            Data da rodada 1 e intervalo entre rodadas (mesmas regras para Lado A e B).
+            Cada jogo herda o horário e o local do mandante.
+          </CardDescription>
+        </CardHeader>
+        <CardContent className="flex flex-col gap-2 sm:flex-row">
+          <Input
+            type="date"
+            value={firstRoundDate}
+            onChange={(e) => setFirstRoundDate(e.target.value)}
+            className="sm:flex-1"
+          />
+          <Input
+            type="number"
+            min={1}
+            max={60}
+            placeholder="Intervalo (dias)"
+            className="sm:w-40"
+            value={intervalDays}
+            onChange={(e) => setIntervalDays(e.target.value)}
+          />
         </CardContent>
       </Card>
 

@@ -3,9 +3,14 @@ import { z } from "zod";
 import { requireSupabaseAuth } from "@/integrations/supabase/auth-middleware";
 import { supabaseAdmin } from "@/integrations/supabase/client.server";
 
-const inputSchema = z.object({ competitionId: z.string().uuid() });
+const inputSchema = z.object({
+  competitionId: z.string().uuid(),
+  firstRoundDate: z.string().regex(/^\d{4}-\d{2}-\d{2}$/), // YYYY-MM-DD
+  intervalDays: z.number().int().min(1).max(60).default(7),
+});
 
-const ROUNDS_PER_SIDE = 20; // cada Mandante enfrenta cada Visitante do mesmo Lado uma vez
+const ROUNDS_PER_SIDE = 20;
+const DEFAULT_HOME_TIME = "15:00:00";
 
 function secureShuffle<T>(array: T[]): T[] {
   const a = array.slice();
@@ -22,14 +27,17 @@ type TeamRow = {
   id: string;
   registration_type: "host" | "visitor";
   lado: "A" | "B";
+  home_time: string | null;
+  home_venue: string | null;
 };
 
 /**
  * Sorteio oficial Liga Metrópole Várzea (V6):
  *  - 40 Mandantes + 40 Visitantes, divididos em Lado A e Lado B (20 cada).
  *  - Confrontos APENAS Mandante × Visitante e SOMENTE dentro do mesmo Lado.
- *  - Cada Mandante joga uma vez contra cada Visitante do seu Lado (20 rodadas).
- *  - 20 partidas por rodada por Lado → 400 partidas por Lado → 800 totais.
+ *  - 20 rodadas (round-robin cíclico) → 400 partidas por Lado → 800 totais.
+ *  - Data de cada rodada = firstRoundDate + (round - 1) * intervalDays.
+ *  - Hora e local de cada jogo = home_time/home_venue do Mandante.
  */
 export const executeDraw = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
@@ -60,7 +68,7 @@ export const executeDraw = createServerFn({ method: "POST" })
 
     const { data: teams, error: teamsErr } = await supabaseAdmin
       .from("teams")
-      .select("id, registration_type, status, lado")
+      .select("id, registration_type, status, lado, home_time, home_venue")
       .eq("status", "approved");
     if (teamsErr) throw new Error(teamsErr.message);
 
@@ -98,24 +106,42 @@ export const executeDraw = createServerFn({ method: "POST" })
       host_team_id: string;
       visitor_team_id: string;
       status: "scheduled";
+      scheduled_at: string;
+      venue: string | null;
     };
     const matchRows: MatchInsert[] = [];
+
+    const baseTime = new Date(`${data.firstRoundDate}T12:00:00Z`).getTime();
+    if (!Number.isFinite(baseTime)) {
+      throw new Response(JSON.stringify({ error: "Data inicial inválida" }), { status: 400 });
+    }
+    const dayMs = 86400000;
 
     for (const lado of ["A", "B"] as const) {
       const hosts = secureShuffle(buckets[`host-${lado}`]);
       const visitors = secureShuffle(buckets[`visitor-${lado}`]);
 
-      // Round-robin cíclico: na rodada r, host[i] joga contra visitor[(i+r-1) % 20]
       for (let r = 1; r <= ROUNDS_PER_SIDE; r++) {
+        const roundDate = new Date(baseTime + (r - 1) * data.intervalDays * dayMs);
+        const dateStr = roundDate.toISOString().slice(0, 10); // YYYY-MM-DD
+
         for (let i = 0; i < expected; i++) {
+          const host = hosts[i];
+          const visitor = visitors[(i + r - 1) % expected];
+          const time = (host.home_time ?? DEFAULT_HOME_TIME).slice(0, 8);
+          // Constrói ISO local. Postgres com timestamp with time zone aceita.
+          const scheduled = new Date(`${dateStr}T${time}`).toISOString();
+
           matchRows.push({
             competition_id: data.competitionId,
             stage: "group",
             round: r,
             group_label: lado,
-            host_team_id: hosts[i].id,
-            visitor_team_id: visitors[(i + r - 1) % expected].id,
+            host_team_id: host.id,
+            visitor_team_id: visitor.id,
             status: "scheduled",
+            scheduled_at: scheduled,
+            venue: host.home_venue,
           });
         }
       }

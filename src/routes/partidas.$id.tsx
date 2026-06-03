@@ -48,6 +48,12 @@ function horasRestantes(s: string | null, h: number | null) {
   return Math.max(0, (new Date(s).getTime() + (h ?? 72) * 3600000 - Date.now()) / 3600000)
 }
 
+function horasParaWO(scheduledAt: string | null) {
+  if (!scheduledAt) return null
+  const ms = new Date(scheduledAt).getTime() + 72 * 3600000 - Date.now()
+  return ms / 3600000
+}
+
 function EtapaPlacar({ match, myTeamId, onRefresh }: { match: Match; myTeamId: string; onRefresh: () => void }) {
   const isVisitor = myTeamId === match.visitor_team.id
   const isHost = myTeamId === match.host_team.id
@@ -290,9 +296,10 @@ function PartidaPage() {
     </div>
   )
 
-  const encerrada = match.status === 'closed'
+  const encerrada = match.status === 'closed' || match.status === 'wo'
   const meuJogo = myTeamId && (myTeamId === match.host_team.id || myTeamId === match.visitor_team.id)
-  const horas = horasRestantes(match.scheduled_at, match.competition?.sumula_confirm_window_hours ?? null)
+  const woHoras = horasParaWO(match.scheduled_at)
+  const pendente = !encerrada && (match.status === 'scheduled' || match.status === 'awaiting_confirmation')
   const etapa1ok = !!match.host_filled_at && !!match.visitor_confirmed_at
 
   return (
@@ -303,9 +310,17 @@ function PartidaPage() {
         <div className="rounded-xl border border-zinc-800 bg-zinc-900 p-5">
           <div className="flex items-center gap-2 mb-4 flex-wrap">
             <Badge variant="outline" className="text-zinc-400 border-zinc-700 text-xs">{match.stage} . Rodada {match.round}</Badge>
-            {encerrada ? <Badge className="bg-green-900/30 text-green-400 border-green-800/40 text-xs">Encerrada</Badge>
-              : horas === 0 ? <Badge className="bg-red-900/30 text-red-400 border-red-800/40 text-xs">Prazo expirado</Badge>
-              : <Badge className="bg-blue-900/30 text-blue-400 border-blue-800/40 text-xs"><Clock className="h-3 w-3 mr-1 inline" />{Math.floor(horas)}h restantes</Badge>}
+            {match.status === 'wo' && <Badge className="bg-red-900/30 text-red-400 border-red-800/40 text-xs">WO automático</Badge>}
+            {match.status === 'closed' && <Badge className="bg-green-900/30 text-green-400 border-green-800/40 text-xs">Encerrada</Badge>}
+            {pendente && woHoras !== null && woHoras > 0 && (
+              <Badge className="bg-amber-900/30 text-amber-400 border-amber-800/40 text-xs">
+                <Clock className="h-3 w-3 mr-1 inline" />
+                Faltam {Math.floor(woHoras)}h para WO
+              </Badge>
+            )}
+            {pendente && woHoras !== null && woHoras <= 0 && (
+              <Badge className="bg-red-900/30 text-red-400 border-red-800/40 text-xs">Prazo expirado</Badge>
+            )}
           </div>
           <div className="grid grid-cols-3 items-center gap-4 text-center">
             <div>
