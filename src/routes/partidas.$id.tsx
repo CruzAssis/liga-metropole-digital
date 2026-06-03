@@ -311,9 +311,17 @@ function PartidaPage() {
         <div className="rounded-xl border border-zinc-800 bg-zinc-900 p-5">
           <div className="flex items-center gap-2 mb-4 flex-wrap">
             <Badge variant="outline" className="text-zinc-400 border-zinc-700 text-xs">{match.stage} . Rodada {match.round}</Badge>
-            {encerrada ? <Badge className="bg-green-900/30 text-green-400 border-green-800/40 text-xs">Encerrada</Badge>
-              : horas === 0 ? <Badge className="bg-red-900/30 text-red-400 border-red-800/40 text-xs">Prazo expirado</Badge>
-              : <Badge className="bg-blue-900/30 text-blue-400 border-blue-800/40 text-xs"><Clock className="h-3 w-3 mr-1 inline" />{Math.floor(horas)}h restantes</Badge>}
+            {match.status === 'wo' && <Badge className="bg-red-900/30 text-red-400 border-red-800/40 text-xs">WO automático</Badge>}
+            {match.status === 'closed' && <Badge className="bg-green-900/30 text-green-400 border-green-800/40 text-xs">Encerrada</Badge>}
+            {pendente && woHoras !== null && woHoras > 0 && (
+              <Badge className="bg-amber-900/30 text-amber-400 border-amber-800/40 text-xs">
+                <Clock className="h-3 w-3 mr-1 inline" />
+                Faltam {Math.floor(woHoras)}h para WO
+              </Badge>
+            )}
+            {pendente && woHoras !== null && woHoras <= 0 && (
+              <Badge className="bg-red-900/30 text-red-400 border-red-800/40 text-xs">Prazo expirado</Badge>
+            )}
           </div>
           <div className="grid grid-cols-3 items-center gap-4 text-center">
             <div>
