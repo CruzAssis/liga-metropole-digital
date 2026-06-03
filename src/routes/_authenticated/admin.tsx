@@ -1,5 +1,6 @@
-import { createFileRoute, Outlet, useNavigate, useRouterState } from "@tanstack/react-router";
+import { createFileRoute, Outlet, redirect, useRouterState } from "@tanstack/react-router";
 import { useEffect } from "react";
+import { useNavigate } from "@tanstack/react-router";
 import { useIsAdmin } from "@/hooks/use-is-admin";
 
 export const Route = createFileRoute("/_authenticated/admin")({
@@ -11,23 +12,21 @@ function AdminLayout() {
   const navigate = useNavigate();
   const pathname = useRouterState({ select: (s) => s.location.pathname });
 
+  // Redireciona /admin para /admin/dashboard quando usuario e admin confirmado
   useEffect(() => {
-    if (loading) return;
-    if (!isAdmin) {
-      navigate({ to: "/minha-conta" });
-      return;
-    }
-    if (pathname === "/admin") {
+    if (!loading && isAdmin && pathname === "/admin") {
       navigate({ to: "/admin/dashboard" });
     }
   }, [isAdmin, loading, pathname, navigate]);
 
-  if (loading || !isAdmin) {
-    return (
-      <div className="flex items-center justify-center py-20 text-muted-foreground">
-        Verificando acesso...
-      </div>
-    );
+  // Enquanto verifica permissao, nao renderiza nada (sem flash de conteudo protegido)
+  if (loading) {
+    return null;
+  }
+
+  // Se nao for admin, redireciona para minha-conta (sem historico de volta)
+  if (!isAdmin) {
+    throw redirect({ to: "/minha-conta", replace: true });
   }
 
   return <Outlet />;
