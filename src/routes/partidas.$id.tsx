@@ -48,6 +48,12 @@ function horasRestantes(s: string | null, h: number | null) {
   return Math.max(0, (new Date(s).getTime() + (h ?? 72) * 3600000 - Date.now()) / 3600000)
 }
 
+function horasParaWO(scheduledAt: string | null) {
+  if (!scheduledAt) return null
+  const ms = new Date(scheduledAt).getTime() + 72 * 3600000 - Date.now()
+  return ms / 3600000
+}
+
 function EtapaPlacar({ match, myTeamId, onRefresh }: { match: Match; myTeamId: string; onRefresh: () => void }) {
   const isVisitor = myTeamId === match.visitor_team.id
   const isHost = myTeamId === match.host_team.id
