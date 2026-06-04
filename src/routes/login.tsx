@@ -1,4 +1,4 @@
-import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
+import { createFileRoute, Link, useNavigate, useSearch } from "@tanstack/react-router";
 import { useEffect, useState } from "react";
 import { z } from "zod";
 import { useForm } from "react-hook-form";
@@ -18,18 +18,28 @@ const schema = z.object({
 
 type FormData = z.infer<typeof schema>;
 
+// Aceita ?redirect=/inscricao para voltar ao destino apos o login
+const searchSchema = z.object({
+  redirect: z.string().optional(),
+});
+
 export const Route = createFileRoute("/login")({
+  validateSearch: searchSchema,
   component: LoginPage,
 });
 
 function LoginPage() {
   const { user, loading } = useAuth();
   const navigate = useNavigate();
+  const { redirect: redirectTo } = useSearch({ from: "/login" });
   const [submitting, setSubmitting] = useState(false);
 
+  // Se ja esta autenticado, vai para redirect ou minha-conta
   useEffect(() => {
-    if (!loading && user) navigate({ to: "/minha-conta" });
-  }, [user, loading, navigate]);
+    if (!loading && user) {
+      navigate({ to: redirectTo ?? "/minha-conta", replace: true });
+    }
+  }, [user, loading, navigate, redirectTo]);
 
   const { register, handleSubmit, formState: { errors } } = useForm<FormData>({
     resolver: zodResolver(schema),
@@ -44,7 +54,8 @@ function LoginPage() {
       return;
     }
     toast.success("Bem-vindo de volta!");
-    navigate({ to: "/minha-conta" });
+    // Redireciona para o destino original (ex: /inscricao) ou para minha-conta
+    navigate({ to: redirectTo ?? "/minha-conta", replace: true });
   };
 
   return (
@@ -57,7 +68,11 @@ function LoginPage() {
 
         <div className="rounded-lg border border-border bg-card p-8">
           <h1 className="font-display text-3xl tracking-wide mb-1">Entrar</h1>
-          <p className="text-sm text-muted-foreground mb-6">Acesse sua conta de gestor.</p>
+          <p className="text-sm text-muted-foreground mb-6">
+            {redirectTo === "/inscricao"
+              ? "Entre na sua conta para inscrever seu time."
+              : "Acesse sua conta de gestor."}
+          </p>
 
           <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
             <div className="space-y-2">
