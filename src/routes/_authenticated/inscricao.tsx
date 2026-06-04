@@ -19,7 +19,7 @@ type ColorKey = 'primary_color' | 'secondary_color' | 'tertiary_color'
 type OpenLeague = {
   id: string;
   name: string;
-  season: string | null;
+  season: number | null;
   host_slots: number;
   visitor_slots: number;
   max_teams: number;

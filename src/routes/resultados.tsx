@@ -26,7 +26,7 @@ type Match = {
 type Competition = {
   id: string;
   name: string;
-  season: string | null;
+  season: number | null;
   status: string;
 };
 
