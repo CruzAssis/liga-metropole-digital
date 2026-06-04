@@ -31,7 +31,7 @@ function SignupPage() {
     }
     setLoading(true)
     try {
-      const { error } = await supabase.auth.signUp({
+      const { data, error } = await supabase.auth.signUp({
         email: form.email,
         password: form.password,
         options: {
@@ -44,8 +44,24 @@ function SignupPage() {
         },
       })
       if (error) throw error
-      toast.success('Conta criada com sucesso!')
-      navigate({ to: is_diretor ? '/inscricao' : '/minha-conta' })
+
+      // Supabase pode exigir confirmacao de email antes de criar sessao.
+      // Nunca redirecionamos direto para /inscricao aqui pois a sessao pode
+      // nao estar ativa ainda — isso causaria um loop login → signup.
+      // Em vez disso, sempre vamos para /minha-conta (ou login se sem sessao)
+      // e orientamos o usuario a inscrever o time pelo menu apos confirmar o email.
+      if (data.session) {
+        // Sessao ativa imediatamente (email confirmation desativado no projeto)
+        toast.success('Conta criada com sucesso!')
+        if (is_diretor) {
+          toast.info('Acesse "Inscrição" no menu lateral para cadastrar seu time.')
+        }
+        navigate({ to: '/minha-conta', replace: true })
+      } else {
+        // Sessao pendente — usuario precisa confirmar email
+        toast.success('Conta criada! Verifique seu email para confirmar o cadastro.')
+        navigate({ to: '/login', replace: true })
+      }
     } catch (err) {
       const msg = err instanceof Error ? err.message : 'Erro ao criar conta'
       toast.error(msg)
@@ -58,7 +74,7 @@ function SignupPage() {
     <div className="min-h-screen bg-black flex items-center justify-center px-4 py-12">
       <div className="w-full max-w-md space-y-8">
         <div className="text-center">
-          <Link to="/" className="text-2xl font-bold text-white tracking-tight">Liga Metropole</Link>
+          <Link to="/" className="text-2xl font-bold text-white tracking-tight">Liga Metrópole</Link>
           <h2 className="mt-4 text-xl font-semibold text-white">Criar conta</h2>
         </div>
         <form onSubmit={handleSubmit} className="space-y-5">
@@ -68,7 +84,7 @@ function SignupPage() {
               <Input id="full_name" name="full_name" type="text" required value={form.full_name} onChange={handleChange} className="mt-1 bg-zinc-900 border-zinc-700 text-white" placeholder="Seu nome completo" />
             </div>
             <div>
-              <Label htmlFor="cpf" className="text-zinc-300">CPF (apenas numeros)</Label>
+              <Label htmlFor="cpf" className="text-zinc-300">CPF (apenas números)</Label>
               <Input id="cpf" name="cpf" type="text" required maxLength={11} value={form.cpf} onChange={handleChange} className="mt-1 bg-zinc-900 border-zinc-700 text-white" placeholder="00000000000" />
             </div>
             <div>
@@ -85,7 +101,7 @@ function SignupPage() {
             </div>
           </div>
           <div className="border border-zinc-700 rounded-lg p-4 space-y-3">
-            <p className="text-sm font-medium text-zinc-300">Como voce vai usar o app?</p>
+            <p className="text-sm font-medium text-zinc-300">Como você vai usar o app?</p>
             <label className="flex items-center gap-3 cursor-pointer">
               <input type="checkbox" checked={is_diretor} onChange={e => setIsDiretor(e.target.checked)} className="w-4 h-4 accent-blue-500" />
               <div>
@@ -97,7 +113,7 @@ function SignupPage() {
               <input type="checkbox" checked={is_jogador} onChange={e => setIsJogador(e.target.checked)} className="w-4 h-4 accent-blue-500" />
               <div>
                 <span className="text-white text-sm">Sou Jogador</span>
-                <p className="text-xs text-zinc-500">Quero ter meu ID Metropole</p>
+                <p className="text-xs text-zinc-500">Quero ter meu ID Metrópole</p>
               </div>
             </label>
             <label className="flex items-center gap-3 cursor-pointer">
@@ -108,14 +124,19 @@ function SignupPage() {
               </div>
             </label>
           </div>
+          {is_diretor && (
+            <div className="rounded-lg bg-blue-500/10 border border-blue-500/30 px-4 py-3 text-sm text-blue-300">
+              Após criar a conta, vá em <strong>Inscrição</strong> no menu lateral para cadastrar seu time.
+            </div>
+          )}
           <Button type="submit" disabled={loading} className="w-full bg-[#1565F5] hover:bg-blue-600 text-white font-semibold py-2.5">
             {loading ? 'Criando conta...' : 'Criar conta'}
           </Button>
         </form>
         <p className="text-center text-sm text-zinc-500">
-          Ja tem conta? <Link to="/login" className="text-[#1565F5] hover:underline">Entrar</Link>
+          Já tem conta? <Link to="/login" className="text-[#1565F5] hover:underline">Entrar</Link>
         </p>
       </div>
     </div>
   )
-}
+    }
