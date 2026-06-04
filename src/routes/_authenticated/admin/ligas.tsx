@@ -16,7 +16,7 @@ export const Route = createFileRoute("/_authenticated/admin/ligas")({
 type Competition = {
   id: string;
   name: string;
-  season: string | null;
+  season: number | null;
   status: string;
   registration_status: string;
   max_teams: number;
@@ -96,7 +96,7 @@ function LigasPage() {
     setEditId(c.id);
     setForm({
       name: c.name,
-      season: c.season ?? "",
+      season: c.season != null ? String(c.season) : "",
       max_teams: String(c.max_teams),
       host_slots: String(c.host_slots),
       visitor_slots: String(c.visitor_slots),
@@ -121,7 +121,7 @@ function LigasPage() {
     setSaving(true);
     const payload = {
       name: form.name.trim(),
-      season: form.season.trim() || null,
+      season: form.season.trim() ? parseInt(form.season.trim(), 10) : new Date().getFullYear(),
       max_teams: max,
       host_slots: host,
       visitor_slots: visitor,
