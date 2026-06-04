@@ -7,11 +7,67 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
-import { Plus, Settings, Users, CheckCircle, AlertTriangle } from "lucide-react";
+import { Plus, Settings, Users, CheckCircle, AlertTriangle, MapPin } from "lucide-react";
 
 export const Route = createFileRoute("/_authenticated/admin/ligas")({
   component: LigasPage,
 });
+
+// ── Subprefeituras de SP mapeadas para conferências ──────────────────────────
+type Subprefeitura = {
+  label: string;
+  zona: "norte" | "sul" | "leste" | "oeste" | "centro";
+  conference_number: number;
+  conference_name: string;
+};
+
+const SUBPREFEITURAS: Subprefeitura[] = [
+  // Zona Norte
+  { label: "Vila Maria/Vila Guilherme", zona: "norte", conference_number: 1, conference_name: "Conferência Norte 1" },
+  { label: "Santana/Tucuruvi",          zona: "norte", conference_number: 2, conference_name: "Conferência Norte 2" },
+  { label: "Casa Verde",                zona: "norte", conference_number: 3, conference_name: "Conferência Norte 3" },
+  { label: "Jaçanã/Tremembé",           zona: "norte", conference_number: 4, conference_name: "Conferência Norte 4" },
+  { label: "Perus/Anhanguera",          zona: "norte", conference_number: 5, conference_name: "Conferência Norte 5" },
+  { label: "Pirituba/Jaraguá",          zona: "norte", conference_number: 6, conference_name: "Conferência Norte 6" },
+  { label: "Freguesia/Brasilândia",     zona: "norte", conference_number: 7, conference_name: "Conferência Norte 7" },
+  // Zona Leste
+  { label: "Penha",                     zona: "leste", conference_number: 1,  conference_name: "Conferência Leste 1" },
+  { label: "Mooca",                     zona: "leste", conference_number: 2,  conference_name: "Conferência Leste 2" },
+  { label: "Vila Prudente",             zona: "leste", conference_number: 3,  conference_name: "Conferência Leste 3" },
+  { label: "Aricanduva",                zona: "leste", conference_number: 4,  conference_name: "Conferência Leste 4" },
+  { label: "Sapopemba",                 zona: "leste", conference_number: 5,  conference_name: "Conferência Leste 5" },
+  { label: "São Mateus",                zona: "leste", conference_number: 6,  conference_name: "Conferência Leste 6" },
+  { label: "Itaquera",                  zona: "leste", conference_number: 7,  conference_name: "Conferência Leste 7" },
+  { label: "Guaianases",                zona: "leste", conference_number: 8,  conference_name: "Conferência Leste 8" },
+  { label: "Cidade Tiradentes",         zona: "leste", conference_number: 9,  conference_name: "Conferência Leste 9" },
+  { label: "Ermelino Matarazzo",        zona: "leste", conference_number: 10, conference_name: "Conferência Leste 10" },
+  { label: "Itaim Paulista",            zona: "leste", conference_number: 11, conference_name: "Conferência Leste 11" },
+  { label: "São Miguel",                zona: "leste", conference_number: 12, conference_name: "Conferência Leste 12" },
+  // Zona Sul
+  { label: "Ipiranga",                  zona: "sul", conference_number: 1, conference_name: "Conferência Sul 1" },
+  { label: "Vila Mariana",              zona: "sul", conference_number: 2, conference_name: "Conferência Sul 2" },
+  { label: "Jabaquara",                 zona: "sul", conference_number: 3, conference_name: "Conferência Sul 3" },
+  { label: "Cidade Ademar",             zona: "sul", conference_number: 4, conference_name: "Conferência Sul 4" },
+  { label: "Santo Amaro",               zona: "sul", conference_number: 5, conference_name: "Conferência Sul 5" },
+  { label: "Campo Limpo",               zona: "sul", conference_number: 6, conference_name: "Conferência Sul 6" },
+  { label: "M'Boi Mirim",               zona: "sul", conference_number: 7, conference_name: "Conferência Sul 7" },
+  { label: "Parelheiros",               zona: "sul", conference_number: 8, conference_name: "Conferência Sul 8" },
+  { label: "Capela do Socorro",         zona: "sul", conference_number: 9, conference_name: "Conferência Sul 9" },
+  // Zona Oeste
+  { label: "Lapa",                      zona: "oeste", conference_number: 1, conference_name: "Conferência Oeste 1" },
+  { label: "Pinheiros",                 zona: "oeste", conference_number: 2, conference_name: "Conferência Oeste 2" },
+  { label: "Butantã",                   zona: "oeste", conference_number: 3, conference_name: "Conferência Oeste 3" },
+  // Centro
+  { label: "Sé",                        zona: "centro", conference_number: 1, conference_name: "Conferência Centro" },
+];
+
+const ZONA_LABELS: Record<string, string> = {
+  norte: "Zona Norte",
+  sul: "Zona Sul",
+  leste: "Zona Leste",
+  oeste: "Zona Oeste",
+  centro: "Centro",
+};
 
 type Competition = {
   id: string;
@@ -26,6 +82,10 @@ type Competition = {
   draw_executed_at: string | null;
   full_notified_at: string | null;
   created_at: string;
+  conference_name: string | null;
+  subprefeitura: string | null;
+  zona: string | null;
+  conference_number: number | null;
 };
 
 type FillStats = {
@@ -42,14 +102,15 @@ type FillStats = {
 };
 
 const REG_STATUS_LABELS: Record<string, { label: string; cls: string }> = {
-  open:       { label: "Aberta",      cls: "bg-emerald-500/20 text-emerald-400 border-emerald-500/30" },
-  closed:     { label: "Fechada",     cls: "bg-zinc-500/20 text-zinc-400 border-zinc-500/30" },
-  draw_ready: { label: "Sorteio OK!", cls: "bg-yellow-500/20 text-yellow-300 border-yellow-500/30" },
-  active:     { label: "Em andamento",cls: "bg-blue-500/20 text-blue-400 border-blue-500/30" },
-  finished:   { label: "Encerrada",  cls: "bg-muted text-muted-foreground border-border" },
+  open:      { label: "Aberta",         cls: "bg-emerald-500/20 text-emerald-400 border-emerald-500/30" },
+  closed:    { label: "Fechada",        cls: "bg-zinc-500/20 text-zinc-400 border-zinc-500/30" },
+  draw_ready:{ label: "Sorteio OK!",    cls: "bg-yellow-500/20 text-yellow-300 border-yellow-500/30" },
+  active:    { label: "Em andamento",   cls: "bg-blue-500/20 text-blue-400 border-blue-500/30" },
+  finished:  { label: "Encerrada",      cls: "bg-muted text-muted-foreground border-border" },
 };
 
 const emptyForm = {
+  subprefeitura: "",
   name: "",
   season: String(new Date().getFullYear()),
   max_teams: "80",
@@ -71,13 +132,12 @@ function LigasPage() {
     setLoading(true);
     const { data, error } = await supabase
       .from("competitions")
-      .select("id,name,season,status,registration_status,max_teams,host_slots,visitor_slots,starts_at,draw_executed_at,full_notified_at,created_at")
+      .select("id,name,season,status,registration_status,max_teams,host_slots,visitor_slots,starts_at,draw_executed_at,full_notified_at,created_at,conference_name,subprefeitura,zona,conference_number")
       .order("created_at", { ascending: false });
     if (error) toast.error("Erro ao carregar ligas");
     else {
       const list = (data ?? []) as Competition[];
       setCompetitions(list);
-      // Load fill stats for each
       const statsMap: Record<string, FillStats> = {};
       await Promise.all(
         list.map(async (c) => {
@@ -92,9 +152,24 @@ function LigasPage() {
 
   useEffect(() => { void load(); }, []);
 
+  // When subprefeitura is selected, auto-fill conference fields
+  const handleSubprefeituraChange = (label: string) => {
+    const sp = SUBPREFEITURAS.find((s) => s.label === label);
+    if (sp) {
+      setForm((f) => ({
+        ...f,
+        subprefeitura: label,
+        name: sp.conference_name,
+      }));
+    } else {
+      setForm((f) => ({ ...f, subprefeitura: label }));
+    }
+  };
+
   const handleEdit = (c: Competition) => {
     setEditId(c.id);
     setForm({
+      subprefeitura: c.subprefeitura ?? "",
       name: c.name,
       season: c.season != null ? String(c.season) : "",
       max_teams: String(c.max_teams),
@@ -115,10 +190,11 @@ function LigasPage() {
     const max = parseInt(form.max_teams, 10);
     const host = parseInt(form.host_slots, 10);
     const visitor = parseInt(form.visitor_slots, 10);
-    if (!max || !host || !visitor) { toast.error("Numeros de vagas invalidos"); return; }
+    if (!max || !host || !visitor) { toast.error("Números de vagas inválidos"); return; }
     if (host + visitor !== max) { toast.error(`Vagas Mandante (${host}) + Visitante (${visitor}) deve somar ${max}`); return; }
 
     setSaving(true);
+    const sp = SUBPREFEITURAS.find((s) => s.label === form.subprefeitura);
     const payload = {
       name: form.name.trim(),
       season: form.season.trim() ? parseInt(form.season.trim(), 10) : new Date().getFullYear(),
@@ -127,6 +203,10 @@ function LigasPage() {
       visitor_slots: visitor,
       starts_at: form.starts_at || null,
       registration_status: form.registration_status,
+      subprefeitura: form.subprefeitura || null,
+      conference_name: sp?.conference_name ?? form.name.trim(),
+      zona: sp?.zona ?? null,
+      conference_number: sp?.conference_number ?? null,
     };
 
     if (editId) {
@@ -143,20 +223,20 @@ function LigasPage() {
 
   const handleToggleStatus = async (c: Competition) => {
     const next = c.registration_status === "open" ? "closed" : "open";
-    const { error } = await supabase
-      .from("competitions")
-      .update({ registration_status: next })
-      .eq("id", c.id);
+    const { error } = await supabase.from("competitions").update({ registration_status: next }).eq("id", c.id);
     if (error) toast.error("Erro ao alterar status");
-    else { toast.success(`Liga ${next === "open" ? "reaberta" : "fechada"} para inscricoes`); void load(); }
+    else { toast.success(`Liga ${next === "open" ? "reaberta" : "fechada"} para inscrições`); void load(); }
   };
+
+  // Group subprefeituras by zona for the dropdown optgroups
+  const zonas = ["norte", "leste", "sul", "oeste", "centro"] as const;
 
   return (
     <div className="space-y-6 p-6">
       <div>
-        <h1 className="font-display text-4xl tracking-wide">Configuracao de Ligas</h1>
+        <h1 className="font-display text-4xl tracking-wide">Configuração de Conferências</h1>
         <p className="text-muted-foreground">
-          Crie e configure ligas. Defina vagas, formato e status de inscricoes.
+          Crie e configure conferências por subprefeitura. A Liga Metrópole cobre 32 subprefeituras de SP.
         </p>
       </div>
 
@@ -165,22 +245,53 @@ function LigasPage() {
         <CardHeader>
           <CardTitle className="text-base flex items-center gap-2">
             {editId ? <Settings className="h-4 w-4" /> : <Plus className="h-4 w-4" />}
-            {editId ? "Editar liga" : "Nova liga"}
+            {editId ? "Editar conferência" : "Nova conferência"}
           </CardTitle>
           <CardDescription>
-            Vagas Mandante + Visitante devem somar o total maximo de equipes.
+            Selecione a subprefeitura — o nome da conferência é preenchido automaticamente.
           </CardDescription>
         </CardHeader>
         <CardContent className="space-y-4">
           <div className="grid gap-3 sm:grid-cols-2">
+
+            {/* Subprefeitura dropdown */}
             <div className="sm:col-span-2">
-              <Label>Nome da liga</Label>
+              <Label className="flex items-center gap-1"><MapPin className="h-3 w-3" /> Subprefeitura</Label>
+              <select
+                value={form.subprefeitura}
+                onChange={(e) => handleSubprefeituraChange(e.target.value)}
+                className="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm mt-1"
+              >
+                <option value="">— Selecione a subprefeitura —</option>
+                {zonas.map((zona) => (
+                  <optgroup key={zona} label={ZONA_LABELS[zona]}>
+                    {SUBPREFEITURAS.filter((s) => s.zona === zona).map((s) => (
+                      <option key={s.label} value={s.label}>
+                        {s.conference_name} — {s.label}
+                      </option>
+                    ))}
+                  </optgroup>
+                ))}
+              </select>
+              {form.subprefeitura && (() => {
+                const sp = SUBPREFEITURAS.find((s) => s.label === form.subprefeitura);
+                return sp ? (
+                  <p className="text-xs text-muted-foreground mt-1">
+                    {sp.conference_name} · {ZONA_LABELS[sp.zona]}
+                  </p>
+                ) : null;
+              })()}
+            </div>
+
+            <div className="sm:col-span-2">
+              <Label>Nome da conferência / liga</Label>
               <Input
-                placeholder="Ex: Liga Metropole Varzea 2026"
+                placeholder="Preenchido automaticamente pela subprefeitura"
                 value={form.name}
                 onChange={(e) => setForm((f) => ({ ...f, name: e.target.value }))}
               />
             </div>
+
             <div>
               <Label>Temporada</Label>
               <Input
@@ -190,7 +301,7 @@ function LigasPage() {
               />
             </div>
             <div>
-              <Label>Data de inicio prevista</Label>
+              <Label>Data de início prevista</Label>
               <Input
                 type="date"
                 value={form.starts_at}
@@ -198,7 +309,7 @@ function LigasPage() {
               />
             </div>
             <div>
-              <Label>Total maximo de equipes</Label>
+              <Label>Total máximo de equipes</Label>
               <Input
                 type="number"
                 min={2}
@@ -207,13 +318,13 @@ function LigasPage() {
               />
             </div>
             <div>
-              <Label>Status de inscricoes</Label>
+              <Label>Status de inscrições</Label>
               <select
                 value={form.registration_status}
                 onChange={(e) => setForm((f) => ({ ...f, registration_status: e.target.value }))}
                 className="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm"
               >
-                <option value="open">Aberta para inscricoes</option>
+                <option value="open">Aberta para inscrições</option>
                 <option value="closed">Fechada</option>
                 <option value="draw_ready">Pronta para sorteio</option>
                 <option value="active">Em andamento</option>
@@ -243,7 +354,7 @@ function LigasPage() {
           </div>
           <div className="flex gap-2">
             <Button onClick={handleSave} disabled={saving}>
-              {saving ? "Salvando..." : editId ? "Salvar alteracoes" : "Criar liga"}
+              {saving ? "Salvando..." : editId ? "Salvar alterações" : "Criar conferência"}
             </Button>
             {editId && (
               <Button variant="outline" onClick={handleCancel}>Cancelar</Button>
@@ -252,13 +363,13 @@ function LigasPage() {
         </CardContent>
       </Card>
 
-      {/* League list */}
+      {/* Conference list */}
       <div className="space-y-3">
-        <h2 className="font-display text-2xl tracking-wide">Ligas cadastradas</h2>
+        <h2 className="font-display text-2xl tracking-wide">Conferências cadastradas</h2>
         {loading ? (
           <p className="text-muted-foreground">Carregando...</p>
         ) : competitions.length === 0 ? (
-          <p className="text-muted-foreground">Nenhuma liga criada ainda.</p>
+          <p className="text-muted-foreground">Nenhuma conferência criada ainda.</p>
         ) : (
           competitions.map((c) => {
             const s = stats[c.id];
@@ -270,7 +381,9 @@ function LigasPage() {
                   <div className="flex flex-wrap items-start justify-between gap-3">
                     <div>
                       <div className="flex items-center gap-2 flex-wrap">
-                        <span className="font-semibold text-lg">{c.name}</span>
+                        <span className="font-semibold text-lg">
+                          {c.conference_name ?? c.name}
+                        </span>
                         {c.season && <span className="text-muted-foreground text-sm">{c.season}</span>}
                         <Badge className={`border ${rs.cls}`}>{rs.label}</Badge>
                         {c.full_notified_at && (
@@ -279,9 +392,16 @@ function LigasPage() {
                           </Badge>
                         )}
                       </div>
+                      {c.subprefeitura && (
+                        <p className="text-xs text-muted-foreground mt-0.5 flex items-center gap-1">
+                          <MapPin className="h-3 w-3" />
+                          {c.subprefeitura}
+                          {c.zona && ` · ${ZONA_LABELS[c.zona] ?? c.zona}`}
+                        </p>
+                      )}
                       {c.starts_at && (
                         <p className="text-xs text-muted-foreground mt-0.5">
-                          Inicio previsto: {new Date(c.starts_at).toLocaleDateString("pt-BR")}
+                          Início previsto: {new Date(c.starts_at).toLocaleDateString("pt-BR")}
                         </p>
                       )}
                     </div>
@@ -290,18 +410,13 @@ function LigasPage() {
                         <Settings className="h-4 w-4 mr-1" /> Editar
                       </Button>
                       {(c.registration_status === "open" || c.registration_status === "closed") && (
-                        <Button
-                          variant="outline"
-                          size="sm"
-                          onClick={() => handleToggleStatus(c)}
-                        >
-                          {c.registration_status === "open" ? "Fechar inscricoes" : "Reabrir inscricoes"}
+                        <Button variant="outline" size="sm" onClick={() => handleToggleStatus(c)}>
+                          {c.registration_status === "open" ? "Fechar inscrições" : "Reabrir inscrições"}
                         </Button>
                       )}
                     </div>
                   </div>
 
-                  {/* Fill progress */}
                   {s && (
                     <div className="space-y-2">
                       <div className="flex items-center justify-between text-sm">
@@ -335,4 +450,4 @@ function LigasPage() {
       </div>
     </div>
   );
-}
+  }
