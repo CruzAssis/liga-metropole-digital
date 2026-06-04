@@ -121,7 +121,7 @@ function LigasPage() {
     setSaving(true);
     const payload = {
       name: form.name.trim(),
-      season: form.season.trim() || null,
+      season: form.season.trim() ? parseInt(form.season.trim(), 10) : null,
       max_teams: max,
       host_slots: host,
       visitor_slots: visitor,
