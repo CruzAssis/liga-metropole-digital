@@ -80,36 +80,54 @@ export type Database = {
         Row: {
           created_at: string
           draw_executed_at: string | null
+          full_notified_at: string | null
+          host_slots: number
           id: string
+          max_teams: number
           monthly_fee_brl: number | null
           name: string
+          registration_status: string
           season: number
+          starts_at: string | null
           status: string
           sumula_confirm_window_hours: number | null
+          visitor_slots: number
           wo_fine_brl: number | null
           wo_tolerance_minutes: number | null
         }
         Insert: {
           created_at?: string
           draw_executed_at?: string | null
+          full_notified_at?: string | null
+          host_slots?: number
           id?: string
+          max_teams?: number
           monthly_fee_brl?: number | null
           name: string
+          registration_status?: string
           season: number
+          starts_at?: string | null
           status?: string
           sumula_confirm_window_hours?: number | null
+          visitor_slots?: number
           wo_fine_brl?: number | null
           wo_tolerance_minutes?: number | null
         }
         Update: {
           created_at?: string
           draw_executed_at?: string | null
+          full_notified_at?: string | null
+          host_slots?: number
           id?: string
+          max_teams?: number
           monthly_fee_brl?: number | null
           name?: string
+          registration_status?: string
           season?: number
+          starts_at?: string | null
           status?: string
           sumula_confirm_window_hours?: number | null
+          visitor_slots?: number
           wo_fine_brl?: number | null
           wo_tolerance_minutes?: number | null
         }
@@ -488,6 +506,7 @@ export type Database = {
         Row: {
           approved_at: string | null
           banner_url: string | null
+          competition_id: string | null
           created_at: string
           home_time: string | null
           home_venue: string | null
@@ -509,6 +528,7 @@ export type Database = {
         Insert: {
           approved_at?: string | null
           banner_url?: string | null
+          competition_id?: string | null
           created_at?: string
           home_time?: string | null
           home_venue?: string | null
@@ -530,6 +550,7 @@ export type Database = {
         Update: {
           approved_at?: string | null
           banner_url?: string | null
+          competition_id?: string | null
           created_at?: string
           home_time?: string | null
           home_venue?: string | null
@@ -549,6 +570,13 @@ export type Database = {
           tertiary_color?: string | null
         }
         Relationships: [
+          {
+            foreignKeyName: "teams_competition_id_fkey"
+            columns: ["competition_id"]
+            isOneToOne: false
+            referencedRelation: "competitions"
+            referencedColumns: ["id"]
+          },
           {
             foreignKeyName: "teams_manager_id_fkey"
             columns: ["manager_id"]
@@ -584,6 +612,21 @@ export type Database = {
       [_ in never]: never
     }
     Functions: {
+      competition_fill_stats: {
+        Args: { _competition_id: string }
+        Returns: {
+          host_a_approved: number
+          host_b_approved: number
+          host_slots: number
+          is_full: boolean
+          max_teams: number
+          registration_status: string
+          total_approved: number
+          visitor_a_approved: number
+          visitor_b_approved: number
+          visitor_slots: number
+        }[]
+      }
       has_role: {
         Args: {
           _role: Database["public"]["Enums"]["app_role"]
