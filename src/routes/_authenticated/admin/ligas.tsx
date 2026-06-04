@@ -96,7 +96,7 @@ function LigasPage() {
     setEditId(c.id);
     setForm({
       name: c.name,
-      season: c.season ?? "",
+      season: c.season != null ? String(c.season) : "",
       max_teams: String(c.max_teams),
       host_slots: String(c.host_slots),
       visitor_slots: String(c.visitor_slots),
