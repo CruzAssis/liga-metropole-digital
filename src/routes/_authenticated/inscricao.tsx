@@ -5,7 +5,7 @@ import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
 import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group'
-import { Upload, Shield, X } from 'lucide-react'
+import { Upload, Shield, X, MapPin } from 'lucide-react'
 import { toast } from 'sonner'
 import { supabase } from '@/integrations/supabase/client'
 import { createTeamRegistration } from '@/lib/team-registration.functions'
@@ -16,9 +16,58 @@ export const Route = createFileRoute('/_authenticated/inscricao')({
 
 type ColorKey = 'primary_color' | 'secondary_color' | 'tertiary_color'
 
+// ── Subprefeituras de SP (mesma lista do admin/ligas.tsx) ──────────────────
+type SubprefeituraOption = {
+  label: string;
+  zona: string;
+  conference_name: string;
+};
+
+const SUBPREFEITURAS: SubprefeituraOption[] = [
+  { label: "Vila Maria/Vila Guilherme", zona: "norte", conference_name: "Conferência Norte 1" },
+  { label: "Santana/Tucuruvi",          zona: "norte", conference_name: "Conferência Norte 2" },
+  { label: "Casa Verde",                zona: "norte", conference_name: "Conferência Norte 3" },
+  { label: "Jaçanã/Tremembé",           zona: "norte", conference_name: "Conferência Norte 4" },
+  { label: "Perus/Anhanguera",          zona: "norte", conference_name: "Conferência Norte 5" },
+  { label: "Pirituba/Jaraguá",          zona: "norte", conference_name: "Conferência Norte 6" },
+  { label: "Freguesia/Brasilândia",     zona: "norte", conference_name: "Conferência Norte 7" },
+  { label: "Penha",                     zona: "leste", conference_name: "Conferência Leste 1" },
+  { label: "Mooca",                     zona: "leste", conference_name: "Conferência Leste 2" },
+  { label: "Vila Prudente",             zona: "leste", conference_name: "Conferência Leste 3" },
+  { label: "Aricanduva",                zona: "leste", conference_name: "Conferência Leste 4" },
+  { label: "Sapopemba",                 zona: "leste", conference_name: "Conferência Leste 5" },
+  { label: "São Mateus",                zona: "leste", conference_name: "Conferência Leste 6" },
+  { label: "Itaquera",                  zona: "leste", conference_name: "Conferência Leste 7" },
+  { label: "Guaianases",                zona: "leste", conference_name: "Conferência Leste 8" },
+  { label: "Cidade Tiradentes",         zona: "leste", conference_name: "Conferência Leste 9" },
+  { label: "Ermelino Matarazzo",        zona: "leste", conference_name: "Conferência Leste 10" },
+  { label: "Itaim Paulista",            zona: "leste", conference_name: "Conferência Leste 11" },
+  { label: "São Miguel",                zona: "leste", conference_name: "Conferência Leste 12" },
+  { label: "Ipiranga",                  zona: "sul",   conference_name: "Conferência Sul 1" },
+  { label: "Vila Mariana",              zona: "sul",   conference_name: "Conferência Sul 2" },
+  { label: "Jabaquara",                 zona: "sul",   conference_name: "Conferência Sul 3" },
+  { label: "Cidade Ademar",             zona: "sul",   conference_name: "Conferência Sul 4" },
+  { label: "Santo Amaro",               zona: "sul",   conference_name: "Conferência Sul 5" },
+  { label: "Campo Limpo",               zona: "sul",   conference_name: "Conferência Sul 6" },
+  { label: "M'Boi Mirim",               zona: "sul",   conference_name: "Conferência Sul 7" },
+  { label: "Parelheiros",               zona: "sul",   conference_name: "Conferência Sul 8" },
+  { label: "Capela do Socorro",         zona: "sul",   conference_name: "Conferência Sul 9" },
+  { label: "Lapa",                      zona: "oeste", conference_name: "Conferência Oeste 1" },
+  { label: "Pinheiros",                 zona: "oeste", conference_name: "Conferência Oeste 2" },
+  { label: "Butantã",                   zona: "oeste", conference_name: "Conferência Oeste 3" },
+  { label: "Sé",                        zona: "centro",conference_name: "Conferência Centro" },
+];
+
+const ZONA_LABELS: Record<string, string> = {
+  norte: "Zona Norte", sul: "Zona Sul", leste: "Zona Leste", oeste: "Zona Oeste", centro: "Centro",
+};
+
 type OpenLeague = {
   id: string;
   name: string;
+  conference_name: string | null;
+  subprefeitura: string | null;
+  zona: string | null;
   season: number | null;
   host_slots: number;
   visitor_slots: number;
@@ -38,7 +87,8 @@ function InscricaoPage() {
   const [useSecondary, setUseSecondary] = useState(false)
   const [useTertiary, setUseTertiary] = useState(false)
 
-  const [leagues, setLeagues] = useState<OpenLeague[]>([])
+  const [selectedSubprefeitura, setSelectedSubprefeitura] = useState<string>('')
+  const [allLeagues, setAllLeagues] = useState<OpenLeague[]>([])
   const [leaguesLoading, setLeaguesLoading] = useState(true)
   const [selectedLeagueId, setSelectedLeagueId] = useState<string>('')
 
@@ -52,21 +102,34 @@ function InscricaoPage() {
     tertiary_color: '#000000',
   })
 
-  // Load open leagues
+  // Load all open leagues (with conference info)
   useEffect(() => {
     (async () => {
       setLeaguesLoading(true)
       const { data } = await supabase
         .from('competitions')
-        .select('id, name, season, host_slots, visitor_slots, max_teams, starts_at')
+        .select('id, name, conference_name, subprefeitura, zona, season, host_slots, visitor_slots, max_teams, starts_at')
         .eq('registration_status', 'open')
         .order('created_at', { ascending: false })
       const list = (data ?? []) as OpenLeague[]
-      setLeagues(list)
-      if (list.length > 0) setSelectedLeagueId(list[0].id)
+      setAllLeagues(list)
       setLeaguesLoading(false)
     })()
   }, [])
+
+  // Filter leagues by selected subprefeitura
+  const filteredLeagues = selectedSubprefeitura
+    ? allLeagues.filter((l) => l.subprefeitura === selectedSubprefeitura)
+    : allLeagues
+
+  // Auto-select first league when subprefeitura changes
+  useEffect(() => {
+    if (filteredLeagues.length > 0) {
+      setSelectedLeagueId(filteredLeagues[0].id)
+    } else {
+      setSelectedLeagueId('')
+    }
+  }, [selectedSubprefeitura, allLeagues.length])
 
   function handleChange(e: ChangeEvent<HTMLInputElement>) {
     const { name, value } = e.target
@@ -81,7 +144,7 @@ function InscricaoPage() {
     const file = e.target.files?.[0]
     if (!file) return
     if (!file.type.startsWith('image/')) { toast.error('Envie um arquivo de imagem.'); return }
-    if (file.size > 5 * 1024 * 1024) { toast.error('O escudo deve ter no maximo 5MB.'); return }
+    if (file.size > 5 * 1024 * 1024) { toast.error('O escudo deve ter no máximo 5MB.'); return }
     setLogoFile(file)
     setLogoPreview(URL.createObjectURL(file))
   }
@@ -105,9 +168,9 @@ function InscricaoPage() {
 
   async function handleSubmit(e: FormEvent<HTMLFormElement>) {
     e.preventDefault()
-    if (!selectedLeagueId) { toast.error('Selecione uma liga para se inscrever'); return }
+    if (!selectedLeagueId) { toast.error('Selecione uma conferência para se inscrever'); return }
     if (form.registration_type === 'host' && !form.home_venue.trim()) {
-      toast.error('Informe o endereco do campo')
+      toast.error('Informe o endereço do campo')
       return
     }
     setLoading(true)
@@ -131,7 +194,7 @@ function InscricaoPage() {
       }
       setSubmitted(true)
     } catch (err) {
-      toast.error(err instanceof Error ? err.message : 'Erro ao enviar inscricao')
+      toast.error(err instanceof Error ? err.message : 'Erro ao enviar inscrição')
     } finally {
       setLoading(false)
     }
@@ -141,11 +204,11 @@ function InscricaoPage() {
     return (
       <div className="min-h-screen bg-black flex items-center justify-center px-4">
         <div className="text-center max-w-md space-y-6">
-          <div className="text-5xl">OK</div>
-          <h2 className="text-2xl font-bold text-white">Inscricao enviada!</h2>
+          <div className="text-5xl">✓</div>
+          <h2 className="text-2xl font-bold text-white">Inscrição enviada!</h2>
           <p className="text-zinc-400">
-            A Liga Metropole entrara em contato via WhatsApp em ate 48h para confirmar
-            sua participacao e orientar sobre o pagamento da taxa de inscricao de{' '}
+            A Liga Metrópole entrará em contato via WhatsApp em até 48h para confirmar
+            sua participação e orientar sobre o pagamento da taxa de inscrição de{' '}
             <span className="text-[#1565F5] font-semibold">R$ 50,00</span>.
           </p>
           <Button onClick={() => navigate({ to: '/minha-conta' })} className="bg-[#1565F5] hover:bg-blue-600 text-white">
@@ -156,42 +219,73 @@ function InscricaoPage() {
     )
   }
 
-  // No open leagues
-  if (!leaguesLoading && leagues.length === 0) {
+  if (!leaguesLoading && allLeagues.length === 0) {
     return (
       <div className="min-h-screen bg-black flex items-center justify-center px-4">
         <div className="text-center max-w-md space-y-4">
-          <div className="text-4xl">Aviso</div>
-          <h2 className="text-xl font-bold text-white">Inscricoes encerradas</h2>
+          <div className="text-4xl">⚠</div>
+          <h2 className="text-xl font-bold text-white">Inscrições encerradas</h2>
           <p className="text-zinc-400">
-            Nenhuma liga esta com inscricoes abertas no momento.
-            Acompanhe nossas redes sociais para saber quando a proxima temporada comecar.
+            Nenhuma conferência está com inscrições abertas no momento.
+            Acompanhe nossas redes sociais para saber quando a próxima temporada começar.
           </p>
-          <Button variant="outline" onClick={() => navigate({ to: '/' })}>Voltar ao inicio</Button>
+          <Button variant="outline" onClick={() => navigate({ to: '/' })}>Voltar ao início</Button>
         </div>
       </div>
     )
   }
 
+  const zonas = ["norte", "leste", "sul", "oeste", "centro"] as const;
+
   return (
     <div className="min-h-screen bg-black px-4 py-12">
       <div className="max-w-lg mx-auto space-y-8">
         <div>
-          <h1 className="text-2xl font-bold text-white">Inscricao do time</h1>
-          <p className="mt-1 text-zinc-400 text-sm">Preencha os dados do seu time para participar da Liga Metropole.</p>
+          <h1 className="text-2xl font-bold text-white">Inscrição do time</h1>
+          <p className="mt-1 text-zinc-400 text-sm">Selecione sua subprefeitura e preencha os dados do seu time.</p>
         </div>
 
         <form onSubmit={handleSubmit} className="space-y-6">
 
-          {/* League selector */}
+          {/* Step 1: Subprefeitura */}
           <div>
-            <Label className="text-zinc-300">Selecione a liga</Label>
-            <p className="text-xs text-zinc-500 mt-0.5 mb-2">Ligas abertas para inscricoes neste momento.</p>
+            <Label className="text-zinc-300 flex items-center gap-1">
+              <MapPin className="h-3.5 w-3.5" /> Sua subprefeitura
+            </Label>
+            <p className="text-xs text-zinc-500 mt-0.5 mb-2">Selecione a subprefeitura onde seu time atua.</p>
+            <select
+              value={selectedSubprefeitura}
+              onChange={(e) => setSelectedSubprefeitura(e.target.value)}
+              className="flex h-10 w-full rounded-md border border-zinc-700 bg-zinc-900 px-3 py-2 text-sm text-white"
+            >
+              <option value="">— Todas as conferências abertas —</option>
+              {zonas.map((zona) => (
+                <optgroup key={zona} label={ZONA_LABELS[zona]}>
+                  {SUBPREFEITURAS.filter((s) => s.zona === zona).map((s) => (
+                    <option key={s.label} value={s.label}>
+                      {s.conference_name} — {s.label}
+                    </option>
+                  ))}
+                </optgroup>
+              ))}
+            </select>
+          </div>
+
+          {/* Step 2: Conference picker (filtered) */}
+          <div>
+            <Label className="text-zinc-300">Selecione a conferência</Label>
+            <p className="text-xs text-zinc-500 mt-0.5 mb-2">Conferências abertas para inscrições.</p>
             {leaguesLoading ? (
-              <p className="text-zinc-500 text-sm">Carregando ligas...</p>
+              <p className="text-zinc-500 text-sm">Carregando conferências...</p>
+            ) : filteredLeagues.length === 0 ? (
+              <p className="text-zinc-500 text-sm">
+                {selectedSubprefeitura
+                  ? `Nenhuma conferência aberta para ${selectedSubprefeitura} no momento.`
+                  : 'Nenhuma conferência aberta no momento.'}
+              </p>
             ) : (
               <div className="space-y-2">
-                {leagues.map((league) => (
+                {filteredLeagues.map((league) => (
                   <button
                     key={league.id}
                     type="button"
@@ -204,11 +298,15 @@ function InscricaoPage() {
                     ].join(' ')}
                   >
                     <div className="font-medium text-white">
-                      {league.name}{league.season ? ` ${league.season}` : ''}
+                      {league.conference_name ?? league.name}
+                      {league.season ? ` ${league.season}` : ''}
                     </div>
-                    <div className="text-xs text-zinc-400 mt-0.5">
+                    <div className="text-xs text-zinc-400 mt-0.5 flex items-center gap-1">
+                      {league.subprefeitura && (
+                        <><MapPin className="h-3 w-3" /> {league.subprefeitura} ·{' '}</>
+                      )}
                       {league.host_slots} Mandantes + {league.visitor_slots} Visitantes
-                      {league.starts_at && ` · Inicio: ${new Date(league.starts_at).toLocaleDateString('pt-BR')}`}
+                      {league.starts_at && ` · Início: ${new Date(league.starts_at).toLocaleDateString('pt-BR')}`}
                     </div>
                   </button>
                 ))}
@@ -218,13 +316,18 @@ function InscricaoPage() {
 
           <div>
             <Label htmlFor="name" className="text-zinc-300">Nome do time</Label>
-            <Input id="name" name="name" type="text" required value={form.name} onChange={handleChange} className="mt-1 bg-zinc-900 border-zinc-700 text-white" placeholder="Ex: Vila Nova FC" />
+            <Input id="name" name="name" type="text" required value={form.name} onChange={handleChange}
+              className="mt-1 bg-zinc-900 border-zinc-700 text-white" placeholder="Ex: Vila Nova FC" />
           </div>
 
           <div>
             <Label className="text-zinc-300">Tipo de time</Label>
             <p className="text-xs text-zinc-500 mt-0.5 mb-3">Mandante tem campo fixo. Visitante joga fora.</p>
-            <RadioGroup value={form.registration_type} onValueChange={(v) => setForm(prev => ({ ...prev, registration_type: v as 'host' | 'visitor' }))} className="space-y-3">
+            <RadioGroup
+              value={form.registration_type}
+              onValueChange={(v) => setForm(prev => ({ ...prev, registration_type: v as 'host' | 'visitor' }))}
+              className="space-y-3"
+            >
               <div className="flex items-start gap-3 bg-zinc-900 border border-zinc-700 rounded-lg p-3">
                 <RadioGroupItem value="host" id="host" className="mt-0.5" />
                 <div>
@@ -236,7 +339,7 @@ function InscricaoPage() {
                 <RadioGroupItem value="visitor" id="visitor" className="mt-0.5" />
                 <div>
                   <Label htmlFor="visitor" className="text-white cursor-pointer font-medium">Visitante</Label>
-                  <p className="text-xs text-zinc-500 mt-0.5">Meu time nao tem campo fixo - joga sempre como visitante</p>
+                  <p className="text-xs text-zinc-500 mt-0.5">Meu time não tem campo fixo — joga sempre como visitante</p>
                 </div>
               </div>
             </RadioGroup>
@@ -245,30 +348,38 @@ function InscricaoPage() {
           {form.registration_type === 'host' && (
             <>
               <div>
-                <Label htmlFor="home_venue" className="text-zinc-300">Endereco do campo</Label>
-                <Input id="home_venue" name="home_venue" type="text" required value={form.home_venue} onChange={handleChange} className="mt-1 bg-zinc-900 border-zinc-700 text-white" placeholder="Rua, numero, bairro - Zona Norte, SP" />
+                <Label htmlFor="home_venue" className="text-zinc-300">Endereço do campo</Label>
+                <Input id="home_venue" name="home_venue" type="text" required value={form.home_venue}
+                  onChange={handleChange} className="mt-1 bg-zinc-900 border-zinc-700 text-white"
+                  placeholder="Rua, número, bairro - São Paulo, SP" />
               </div>
               <div>
-                <Label htmlFor="home_time" className="text-zinc-300">Horario preferencial</Label>
-                <Input id="home_time" name="home_time" type="time" value={form.home_time} onChange={handleChange} className="mt-1 bg-zinc-900 border-zinc-700 text-white" />
+                <Label htmlFor="home_time" className="text-zinc-300">Horário preferencial</Label>
+                <Input id="home_time" name="home_time" type="time" value={form.home_time}
+                  onChange={handleChange} className="mt-1 bg-zinc-900 border-zinc-700 text-white" />
               </div>
             </>
           )}
 
           <div>
             <Label className="text-zinc-300 flex items-center gap-2"><Shield className="h-4 w-4" /> Escudo do time</Label>
-            <p className="text-xs text-zinc-500 mt-0.5 mb-2">PNG ou JPG, ate 5MB.</p>
+            <p className="text-xs text-zinc-500 mt-0.5 mb-2">PNG ou JPG, até 5MB.</p>
             <div className="flex items-center gap-4">
               <div className="h-20 w-20 rounded-md border border-zinc-700 bg-zinc-900 overflow-hidden flex items-center justify-center shrink-0">
-                {logoPreview ? <img src={logoPreview} alt="Escudo" className="h-full w-full object-cover" /> : <Shield className="h-7 w-7 text-zinc-600" />}
+                {logoPreview
+                  ? <img src={logoPreview} alt="Escudo" className="h-full w-full object-cover" />
+                  : <Shield className="h-7 w-7 text-zinc-600" />}
               </div>
               <input ref={logoInput} type="file" accept="image/*" className="hidden" onChange={handleLogoPick} />
               <div className="flex flex-col gap-2">
-                <Button type="button" variant="outline" size="sm" onClick={() => logoInput.current?.click()} className="gap-2 border-zinc-700 bg-zinc-900 text-white hover:bg-zinc-800">
+                <Button type="button" variant="outline" size="sm"
+                  onClick={() => logoInput.current?.click()}
+                  className="gap-2 border-zinc-700 bg-zinc-900 text-white hover:bg-zinc-800">
                   <Upload className="h-4 w-4" />{logoFile ? 'Trocar escudo' : 'Enviar escudo'}
                 </Button>
                 {logoFile && (
-                  <Button type="button" variant="ghost" size="sm" onClick={clearLogo} className="gap-2 text-zinc-400 hover:text-white">
+                  <Button type="button" variant="ghost" size="sm" onClick={clearLogo}
+                    className="gap-2 text-zinc-400 hover:text-white">
                     <X className="h-4 w-4" /> Remover
                   </Button>
                 )}
@@ -279,25 +390,36 @@ function InscricaoPage() {
           <div className="space-y-3">
             <div>
               <Label className="text-zinc-300">Cores do uniforme</Label>
-              <p className="text-xs text-zinc-500 mt-0.5">Escolha ate 3 cores. A cor primaria e obrigatoria.</p>
+              <p className="text-xs text-zinc-500 mt-0.5">Escolha até 3 cores. A cor primária é obrigatória.</p>
             </div>
-            <ColorRow label="Cor primaria" value={form.primary_color} onChange={(v) => setColor('primary_color', v)} />
+            <ColorRow label="Cor primária" value={form.primary_color} onChange={(v) => setColor('primary_color', v)} />
             {useSecondary ? (
-              <ColorRow label="Cor secundaria" value={form.secondary_color} onChange={(v) => setColor('secondary_color', v)} onRemove={() => { setUseSecondary(false); setUseTertiary(false) }} />
+              <ColorRow label="Cor secundária" value={form.secondary_color}
+                onChange={(v) => setColor('secondary_color', v)}
+                onRemove={() => { setUseSecondary(false); setUseTertiary(false) }} />
             ) : (
-              <Button type="button" variant="outline" size="sm" onClick={() => setUseSecondary(true)} className="border-zinc-700 bg-zinc-900 text-white hover:bg-zinc-800">+ Adicionar cor secundaria</Button>
+              <Button type="button" variant="outline" size="sm" onClick={() => setUseSecondary(true)}
+                className="border-zinc-700 bg-zinc-900 text-white hover:bg-zinc-800">
+                + Adicionar cor secundária
+              </Button>
             )}
             {useSecondary && (
               useTertiary ? (
-                <ColorRow label="Cor terciaria" value={form.tertiary_color} onChange={(v) => setColor('tertiary_color', v)} onRemove={() => setUseTertiary(false)} />
+                <ColorRow label="Cor terciária" value={form.tertiary_color}
+                  onChange={(v) => setColor('tertiary_color', v)}
+                  onRemove={() => setUseTertiary(false)} />
               ) : (
-                <Button type="button" variant="outline" size="sm" onClick={() => setUseTertiary(true)} className="border-zinc-700 bg-zinc-900 text-white hover:bg-zinc-800">+ Adicionar cor terciaria</Button>
+                <Button type="button" variant="outline" size="sm" onClick={() => setUseTertiary(true)}
+                  className="border-zinc-700 bg-zinc-900 text-white hover:bg-zinc-800">
+                  + Adicionar cor terciária
+                </Button>
               )
             )}
           </div>
 
-          <Button type="submit" disabled={loading || !selectedLeagueId} className="w-full bg-[#1565F5] hover:bg-blue-600 text-white font-semibold py-2.5">
-            {loading ? 'Enviando inscricao...' : 'Enviar inscricao'}
+          <Button type="submit" disabled={loading || !selectedLeagueId}
+            className="w-full bg-[#1565F5] hover:bg-blue-600 text-white font-semibold py-2.5">
+            {loading ? 'Enviando inscrição...' : 'Enviar inscrição'}
           </Button>
         </form>
       </div>
@@ -305,21 +427,27 @@ function InscricaoPage() {
   )
 }
 
-function ColorRow({ label, value, onChange, onRemove }: { label: string; value: string; onChange: (v: string) => void; onRemove?: () => void }) {
+function ColorRow({ label, value, onChange, onRemove }: {
+  label: string; value: string; onChange: (v: string) => void; onRemove?: () => void
+}) {
   return (
     <div className="flex items-center gap-2">
       <div className="flex-1">
         <Label className="text-zinc-400 text-xs">{label}</Label>
         <div className="flex items-center gap-2 mt-1">
-          <input type="color" value={value} onChange={(e) => onChange(e.target.value)} className="h-10 w-12 rounded cursor-pointer bg-transparent border-0" />
-          <Input value={value} onChange={(e) => onChange(e.target.value)} maxLength={7} className="bg-zinc-900 border-zinc-700 text-white font-mono text-sm uppercase max-w-[120px]" />
+          <input type="color" value={value} onChange={(e) => onChange(e.target.value)}
+            className="h-10 w-12 rounded cursor-pointer bg-transparent border-0" />
+          <Input value={value} onChange={(e) => onChange(e.target.value)}
+            maxLength={7}
+            className="bg-zinc-900 border-zinc-700 text-white font-mono text-sm uppercase max-w-[120px]" />
         </div>
       </div>
       {onRemove && (
-        <Button type="button" variant="ghost" size="icon" onClick={onRemove} className="text-zinc-400 hover:text-white mt-5">
+        <Button type="button" variant="ghost" size="icon" onClick={onRemove}
+          className="text-zinc-400 hover:text-white mt-5">
           <X className="h-4 w-4" />
         </Button>
       )}
     </div>
   )
-    }
+  }
