@@ -4,7 +4,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { PublicShell } from "@/components/PublicShell";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import { ChevronLeft, ChevronRight } from "lucide-react";
+import { ChevronLeft, ChevronRight, MapPin } from "lucide-react";
 
 const TOTAL_ROUNDS = 20;
 
@@ -23,16 +23,23 @@ type Match = {
 type Competition = {
   id: string;
   name: string;
+  conference_name: string | null;
+  subprefeitura: string | null;
+  zona: string | null;
   season: number | null;
   status: string;
+};
+
+const ZONA_LABELS: Record<string, string> = {
+  norte: "Zona Norte", sul: "Zona Sul", leste: "Zona Leste", oeste: "Zona Oeste", centro: "Centro",
 };
 
 export const Route = createFileRoute("/agenda")({
   component: AgendaPage,
   head: () => ({
     meta: [
-      { title: "Agenda · Liga Metropole Varzea" },
-      { name: "description", content: "Proximos jogos da Liga Metropole Varzea." },
+      { title: "Agenda · Liga Metrópole Várzea" },
+      { name: "description", content: "Próximos jogos da Liga Metrópole Várzea." },
     ],
   }),
 });
@@ -46,13 +53,13 @@ function AgendaPage() {
   const [loadingMatches, setLoadingMatches] = useState(false);
   const navRef = useRef<HTMLDivElement>(null);
 
-  // Load active competitions
+  // Load competitions (active or upcoming)
   useEffect(() => {
     (async () => {
       const { data } = await supabase
         .from("competitions")
-        .select("id, name, season, status")
-        .in("status", ["group_stage", "knockout", "finished"])
+        .select("id, name, conference_name, subprefeitura, zona, season, status")
+        .in("status", ["registration", "group_stage", "knockout", "finished"])
         .order("created_at", { ascending: false });
       const list = (data ?? []) as Competition[];
       setCompetitions(list);
@@ -101,30 +108,44 @@ function AgendaPage() {
   const prevRound = () => setSelectedRound((r) => Math.max(1, r - 1));
   const nextRound = () => setSelectedRound((r) => Math.min(TOTAL_ROUNDS, r + 1));
 
+  const activeComp = competitions.find((c) => c.id === selectedComp);
+
   return (
     <PublicShell>
       <header className="mb-6">
         <h1 className="font-display text-5xl tracking-wide">Agenda</h1>
-        <p className="text-muted-foreground mt-1">Proximos jogos.</p>
+        <p className="text-muted-foreground mt-1">Próximos jogos.</p>
       </header>
 
-      {/* Competition selector */}
-      {competitions.length > 1 && (
-        <div className="flex flex-wrap gap-2 mb-4">
-          {competitions.map((c) => (
-            <button
-              key={c.id}
-              onClick={() => { setSelectedComp(c.id); setSelectedRound(1); }}
-              className={[
-                "text-sm px-3 py-1.5 rounded-md border transition-colors",
-                selectedComp === c.id
-                  ? "bg-primary text-primary-foreground border-primary"
-                  : "border-border text-muted-foreground hover:text-foreground",
-              ].join(" ")}
-            >
-              {c.name}{c.season ? ` ${c.season}` : ""}
-            </button>
-          ))}
+      {/* Conference filter */}
+      {competitions.length > 0 && (
+        <div className="mb-4 space-y-2">
+          <label className="text-xs uppercase tracking-wider text-muted-foreground flex items-center gap-1">
+            <MapPin className="h-3 w-3" /> Conferência
+          </label>
+          <div className="flex flex-wrap gap-2">
+            {competitions.map((c) => (
+              <button
+                key={c.id}
+                onClick={() => { setSelectedComp(c.id); setSelectedRound(1); }}
+                className={[
+                  "text-sm px-3 py-1.5 rounded-md border transition-colors",
+                  selectedComp === c.id
+                    ? "bg-primary text-primary-foreground border-primary"
+                    : "border-border text-muted-foreground hover:text-foreground",
+                ].join(" ")}
+              >
+                {c.conference_name ?? c.name}{c.season ? ` ${c.season}` : ""}
+              </button>
+            ))}
+          </div>
+          {activeComp?.subprefeitura && (
+            <p className="text-xs text-muted-foreground flex items-center gap-1">
+              <MapPin className="h-3 w-3" />
+              {activeComp.subprefeitura}
+              {activeComp.zona && ` · ${ZONA_LABELS[activeComp.zona] ?? activeComp.zona}`}
+            </p>
+          )}
         </div>
       )}
 
@@ -167,7 +188,7 @@ function AgendaPage() {
       {/* No active competition */}
       {!selectedComp && competitions.length === 0 && (
         <div className="rounded-lg border border-border bg-card p-8 text-center text-muted-foreground">
-          Nenhuma competicao em andamento.
+          Nenhuma competição em andamento.
         </div>
       )}
 
@@ -215,4 +236,4 @@ function AgendaPage() {
       </div>
     </PublicShell>
   );
-}
+  }
