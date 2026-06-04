@@ -1,5 +1,5 @@
 import { Link, useRouterState, useNavigate } from "@tanstack/react-router";
-import { Home, ClipboardList, UserCircle, LogOut, Shuffle, LayoutDashboard, ListChecks, Users, BadgeCheck, Shield, FileText } from "lucide-react";
+import { Home, ClipboardList, UserCircle, LogOut, Shuffle, LayoutDashboard, ListChecks, Users, BadgeCheck, Shield, FileText, Trophy } from "lucide-react";
 import { BrandLogo } from "@/components/BrandLogo";
 import { useIsAdmin } from "@/hooks/use-is-admin";
 import {
@@ -35,6 +35,7 @@ export function AppSidebar() {
   const adminItems = [
     { title: "Dashboard", url: "/admin/dashboard", icon: LayoutDashboard },
     { title: "Triagem", url: "/admin/triagem", icon: ListChecks },
+    { title: "Ligas", url: "/admin/ligas", icon: Trophy },
     { title: "Sorteio", url: "/admin/sorteio", icon: Shuffle },
     { title: "Súmulas", url: "/admin/sumulas", icon: FileText },
     { title: "Usuários", url: "/admin/usuarios", icon: Shield },
