@@ -29,6 +29,7 @@ import { Route as AuthenticatedAdminUsuariosRouteImport } from './routes/_authen
 import { Route as AuthenticatedAdminTriagemRouteImport } from './routes/_authenticated/admin/triagem'
 import { Route as AuthenticatedAdminSumulasRouteImport } from './routes/_authenticated/admin/sumulas'
 import { Route as AuthenticatedAdminSorteioRouteImport } from './routes/_authenticated/admin/sorteio'
+import { Route as AuthenticatedAdminLigasRouteImport } from './routes/_authenticated/admin/ligas'
 import { Route as AuthenticatedAdminDashboardRouteImport } from './routes/_authenticated/admin/dashboard'
 import { Route as ApiPublicHooksWoCheckerRouteImport } from './routes/api/public/hooks/wo-checker'
 
@@ -135,6 +136,11 @@ const AuthenticatedAdminSorteioRoute =
     path: '/sorteio',
     getParentRoute: () => AuthenticatedAdminRoute,
   } as any)
+const AuthenticatedAdminLigasRoute = AuthenticatedAdminLigasRouteImport.update({
+  id: '/ligas',
+  path: '/ligas',
+  getParentRoute: () => AuthenticatedAdminRoute,
+} as any)
 const AuthenticatedAdminDashboardRoute =
   AuthenticatedAdminDashboardRouteImport.update({
     id: '/dashboard',
@@ -164,6 +170,7 @@ export interface FileRoutesByFullPath {
   '/partidas/$id': typeof PartidasIdRoute
   '/times/$slug': typeof TimesSlugRoute
   '/admin/dashboard': typeof AuthenticatedAdminDashboardRoute
+  '/admin/ligas': typeof AuthenticatedAdminLigasRoute
   '/admin/sorteio': typeof AuthenticatedAdminSorteioRoute
   '/admin/sumulas': typeof AuthenticatedAdminSumulasRoute
   '/admin/triagem': typeof AuthenticatedAdminTriagemRoute
@@ -187,6 +194,7 @@ export interface FileRoutesByTo {
   '/partidas/$id': typeof PartidasIdRoute
   '/times/$slug': typeof TimesSlugRoute
   '/admin/dashboard': typeof AuthenticatedAdminDashboardRoute
+  '/admin/ligas': typeof AuthenticatedAdminLigasRoute
   '/admin/sorteio': typeof AuthenticatedAdminSorteioRoute
   '/admin/sumulas': typeof AuthenticatedAdminSumulasRoute
   '/admin/triagem': typeof AuthenticatedAdminTriagemRoute
@@ -212,6 +220,7 @@ export interface FileRoutesById {
   '/partidas/$id': typeof PartidasIdRoute
   '/times/$slug': typeof TimesSlugRoute
   '/_authenticated/admin/dashboard': typeof AuthenticatedAdminDashboardRoute
+  '/_authenticated/admin/ligas': typeof AuthenticatedAdminLigasRoute
   '/_authenticated/admin/sorteio': typeof AuthenticatedAdminSorteioRoute
   '/_authenticated/admin/sumulas': typeof AuthenticatedAdminSumulasRoute
   '/_authenticated/admin/triagem': typeof AuthenticatedAdminTriagemRoute
@@ -237,6 +246,7 @@ export interface FileRouteTypes {
     | '/partidas/$id'
     | '/times/$slug'
     | '/admin/dashboard'
+    | '/admin/ligas'
     | '/admin/sorteio'
     | '/admin/sumulas'
     | '/admin/triagem'
@@ -260,6 +270,7 @@ export interface FileRouteTypes {
     | '/partidas/$id'
     | '/times/$slug'
     | '/admin/dashboard'
+    | '/admin/ligas'
     | '/admin/sorteio'
     | '/admin/sumulas'
     | '/admin/triagem'
@@ -284,6 +295,7 @@ export interface FileRouteTypes {
     | '/partidas/$id'
     | '/times/$slug'
     | '/_authenticated/admin/dashboard'
+    | '/_authenticated/admin/ligas'
     | '/_authenticated/admin/sorteio'
     | '/_authenticated/admin/sumulas'
     | '/_authenticated/admin/triagem'
@@ -449,6 +461,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedAdminSorteioRouteImport
       parentRoute: typeof AuthenticatedAdminRoute
     }
+    '/_authenticated/admin/ligas': {
+      id: '/_authenticated/admin/ligas'
+      path: '/ligas'
+      fullPath: '/admin/ligas'
+      preLoaderRoute: typeof AuthenticatedAdminLigasRouteImport
+      parentRoute: typeof AuthenticatedAdminRoute
+    }
     '/_authenticated/admin/dashboard': {
       id: '/_authenticated/admin/dashboard'
       path: '/dashboard'
@@ -468,6 +487,7 @@ declare module '@tanstack/react-router' {
 
 interface AuthenticatedAdminRouteChildren {
   AuthenticatedAdminDashboardRoute: typeof AuthenticatedAdminDashboardRoute
+  AuthenticatedAdminLigasRoute: typeof AuthenticatedAdminLigasRoute
   AuthenticatedAdminSorteioRoute: typeof AuthenticatedAdminSorteioRoute
   AuthenticatedAdminSumulasRoute: typeof AuthenticatedAdminSumulasRoute
   AuthenticatedAdminTriagemRoute: typeof AuthenticatedAdminTriagemRoute
@@ -476,6 +496,7 @@ interface AuthenticatedAdminRouteChildren {
 
 const AuthenticatedAdminRouteChildren: AuthenticatedAdminRouteChildren = {
   AuthenticatedAdminDashboardRoute: AuthenticatedAdminDashboardRoute,
+  AuthenticatedAdminLigasRoute: AuthenticatedAdminLigasRoute,
   AuthenticatedAdminSorteioRoute: AuthenticatedAdminSorteioRoute,
   AuthenticatedAdminSumulasRoute: AuthenticatedAdminSumulasRoute,
   AuthenticatedAdminTriagemRoute: AuthenticatedAdminTriagemRoute,
@@ -529,3 +550,13 @@ const rootRouteChildren: RootRouteChildren = {
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)
   ._addFileTypes<FileRouteTypes>()
+
+import type { getRouter } from './router.tsx'
+import type { startInstance } from './start.ts'
+declare module '@tanstack/react-start' {
+  interface Register {
+    ssr: true
+    router: Awaited<ReturnType<typeof getRouter>>
+    config: Awaited<ReturnType<typeof startInstance.getOptions>>
+  }
+}
