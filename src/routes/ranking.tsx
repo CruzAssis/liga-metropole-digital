@@ -4,6 +4,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { PublicShell } from "@/components/PublicShell";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Badge } from "@/components/ui/badge";
+import { MapPin } from "lucide-react";
 
 type Match = {
   host_team_id: string;
@@ -11,6 +12,7 @@ type Match = {
   host_score: number | null;
   visitor_score: number | null;
   status: string;
+  competition_id: string | null;
 };
 
 type Team = {
@@ -20,6 +22,16 @@ type Team = {
   logo_url: string | null;
   registration_type: "host" | "visitor";
   lado: "A" | "B";
+  competition_id: string | null;
+};
+
+type Competition = {
+  id: string;
+  name: string;
+  conference_name: string | null;
+  subprefeitura: string | null;
+  zona: string | null;
+  season: number | null;
 };
 
 type Standing = {
@@ -36,6 +48,10 @@ type Standing = {
 };
 
 const FINISHED = ["confirmed", "closed", "wo"];
+
+const ZONA_LABELS: Record<string, string> = {
+  norte: "Zona Norte", sul: "Zona Sul", leste: "Zona Leste", oeste: "Zona Oeste", centro: "Centro",
+};
 
 export const Route = createFileRoute("/ranking")({
   component: RankingPage,
@@ -130,8 +146,8 @@ function StandingsTable({ rows }: { rows: Standing[] }) {
             const rowCls = isTop8
               ? "bg-emerald-500/5 border-l-2 border-emerald-500"
               : isRelegation
-                ? "bg-red-500/5 border-l-2 border-red-500"
-                : "";
+              ? "bg-red-500/5 border-l-2 border-red-500"
+              : "";
             return (
               <tr key={r.team.id} className={`border-b border-border last:border-0 ${rowCls}`}>
                 <td className="p-3 text-muted-foreground tabular-nums font-mono">{pos}</td>
@@ -181,20 +197,40 @@ function Legend() {
 }
 
 function RankingPage() {
+  const [competitions, setCompetitions] = useState<Competition[]>([]);
+  const [selectedComp, setSelectedComp] = useState<string | null>(null);
   const [matches, setMatches] = useState<Match[] | null>(null);
   const [teams, setTeams] = useState<Team[]>([]);
   const [supporters, setSupporters] = useState<Map<string, number>>(new Map());
 
+  // Load competitions that have active/finished status
   useEffect(() => {
+    (async () => {
+      const { data } = await supabase
+        .from("competitions")
+        .select("id, name, conference_name, subprefeitura, zona, season")
+        .in("registration_status", ["active", "finished", "draw_ready", "open"])
+        .order("created_at", { ascending: false });
+      const list = (data ?? []) as Competition[];
+      setCompetitions(list);
+      if (list.length > 0) setSelectedComp(list[0].id);
+    })();
+  }, []);
+
+  // Load teams + matches for selected competition
+  useEffect(() => {
+    if (!selectedComp) return;
     (async () => {
       const [{ data: tdata }, { data: mdata }, { data: sdata }] = await Promise.all([
         supabase
           .from("teams")
-          .select("id, name, short_name, logo_url, registration_type, lado")
-          .eq("status", "approved"),
+          .select("id, name, short_name, logo_url, registration_type, lado, competition_id")
+          .eq("status", "approved")
+          .eq("competition_id", selectedComp),
         supabase
           .from("matches")
-          .select("host_team_id, visitor_team_id, host_score, visitor_score, status")
+          .select("host_team_id, visitor_team_id, host_score, visitor_score, status, competition_id")
+          .eq("competition_id", selectedComp)
           .in("status", FINISHED),
         supabase.from("team_supporters").select("team_id"),
       ]);
@@ -206,7 +242,7 @@ function RankingPage() {
       }
       setSupporters(sup);
     })();
-  }, []);
+  }, [selectedComp]);
 
   const hosts = useMemo(() => teams.filter((t) => t.registration_type === "host"), [teams]);
   const visitors = useMemo(() => teams.filter((t) => t.registration_type === "visitor"), [teams]);
@@ -220,15 +256,49 @@ function RankingPage() {
     [visitors, matches, supporters],
   );
 
+  const activeComp = competitions.find((c) => c.id === selectedComp);
+
   return (
     <PublicShell>
       <header className="mb-6">
         <h1 className="font-display text-5xl tracking-wide">Classificação</h1>
         <p className="text-muted-foreground mt-1">
           Fase regular · 20 rodadas · pontos corridos. Vitória 3 · Empate 1 · Derrota 0.
-          Mandantes enfrentam apenas Visitantes (Lado A × Lado A, Lado B × Lado B).
         </p>
       </header>
+
+      {/* Conference filter */}
+      {competitions.length > 0 && (
+        <div className="mb-6 space-y-2">
+          <label className="text-xs uppercase tracking-wider text-muted-foreground flex items-center gap-1">
+            <MapPin className="h-3 w-3" /> Conferência
+          </label>
+          <div className="flex flex-wrap gap-2">
+            {competitions.map((c) => (
+              <button
+                key={c.id}
+                onClick={() => { setSelectedComp(c.id); setMatches(null); }}
+                className={[
+                  "text-sm px-3 py-1.5 rounded-md border transition-colors",
+                  selectedComp === c.id
+                    ? "bg-primary text-primary-foreground border-primary"
+                    : "border-border text-muted-foreground hover:text-foreground",
+                ].join(" ")}
+              >
+                {c.conference_name ?? c.name}
+                {c.season ? ` ${c.season}` : ""}
+              </button>
+            ))}
+          </div>
+          {activeComp?.subprefeitura && (
+            <p className="text-xs text-muted-foreground flex items-center gap-1">
+              <MapPin className="h-3 w-3" />
+              {activeComp.subprefeitura}
+              {activeComp.zona && ` · ${ZONA_LABELS[activeComp.zona] ?? activeComp.zona}`}
+            </p>
+          )}
+        </div>
+      )}
 
       {!matches && <div className="text-muted-foreground">Carregando...</div>}
 
@@ -250,4 +320,4 @@ function RankingPage() {
       )}
     </PublicShell>
   );
-}
+      }
