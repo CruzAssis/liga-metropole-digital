@@ -1,4 +1,5 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
+import { SkeletonMatchList, EmptyResultados } from "@/components/AppSkeletons";
 import { useEffect, useState, useRef } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { PublicShell } from "@/components/PublicShell";
@@ -191,7 +192,7 @@ function ResultadosPage() {
         </div>
       )}
 
-      {loadingMatches && <div className="text-muted-foreground">Carregando...</div>}
+      {loadingMatches && <SkeletonMatchList count={5} />}
 
       {!loadingMatches && matches && matches.length === 0 && (
         <div className="rounded-lg border border-border bg-card p-8 text-center text-muted-foreground">
