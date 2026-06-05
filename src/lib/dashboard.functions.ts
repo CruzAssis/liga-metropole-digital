@@ -3,6 +3,15 @@ import { requireSupabaseAuth } from "@/integrations/supabase/auth-middleware";
 import { supabaseAdmin } from "@/integrations/supabase/client.server";
 import { calcStatus, diasAtraso, mesAtual } from "./pagamentos.functions";
 
+const adminDb = supabaseAdmin as any;
+type PagamentoDashboardRow = {
+  time_id: string;
+  status: "pendente" | "pago" | "atrasado";
+  valor: number;
+  mes_referencia: string;
+};
+type CompetitionDashboardRow = { id: string; conference_name: string | null; name: string };
+
 async function requireAdmin(userId: string) {
   const { data } = await supabaseAdmin
     .from("user_roles")
@@ -107,13 +116,13 @@ export const getAdminDashboardMetrics = createServerFn({ method: "GET" })
       .eq("status", "approved");
     const approvedIds = (approvedTeamsData ?? []).map((t) => t.id);
     const { data: pagamentos } = approvedIds.length
-      ? await supabaseAdmin
+      ? await adminDb
           .from("pagamentos")
           .select("time_id, status, valor, mes_referencia")
           .eq("mes_referencia", mes)
           .in("time_id", approvedIds)
       : { data: [] };
-    const pagList = pagamentos ?? [];
+    const pagList = (pagamentos ?? []) as PagamentoDashboardRow[];
     const times_pagos = pagList.filter(
       (p) => calcStatus({ status: p.status as "pendente" | "pago" | "atrasado", mes_referencia: p.mes_referencia }) === "pago"
     ).length;
@@ -159,11 +168,11 @@ export const getAdminDashboardMetrics = createServerFn({ method: "GET" })
     }));
 
     // 6. Inscriptions by conference
-    const { data: competitions } = await supabaseAdmin
+    const { data: competitions } = await adminDb
       .from("competitions")
       .select("id, conference_name, name");
     const competitionMap: Record<string, string> = {};
-    for (const c of competitions ?? []) {
+    for (const c of (competitions ?? []) as CompetitionDashboardRow[]) {
       competitionMap[c.id] = c.conference_name ?? c.name;
     }
 
@@ -174,7 +183,7 @@ export const getAdminDashboardMetrics = createServerFn({ method: "GET" })
 
     const confCounts: Record<string, { total: number; approved: number; pending: number }> = {};
     for (const t of teamsByComp ?? []) {
-      const conf = competitionMap[t.competition_id] ?? "Sem conferência";
+      const conf = t.competition_id ? competitionMap[t.competition_id] ?? "Sem conferência" : "Sem conferência";
       if (!confCounts[conf]) confCounts[conf] = { total: 0, approved: 0, pending: 0 };
       confCounts[conf].total++;
       if (t.status === "approved") confCounts[conf].approved++;
