@@ -106,10 +106,10 @@ function TeamFinanceiroCard() {
   }
 
   return (
-    <div className=`rounded-lg border bg-card p-6 space-y-4 ${inadimplente ? "border-red-800/50" : "border-border"}`}>
+    <div className={`rounded-lg border bg-card p-6 space-y-4 ${inadimplente ? "border-red-800/50" : "border-border"}`}>
       <div className="flex items-center justify-between gap-2">
         <div className="flex items-center gap-2">
-          <DollarSign className=`h-5 w-5 ${inadimplente ? "text-red-400" : "text-primary"}` />
+          <DollarSign className={`h-5 w-5 ${inadimplente ? "text-red-400" : "text-primary"}`} />
           <h2 className="font-display text-2xl tracking-wide">Financeiro</h2>
         </div>
         <PagStatusBadge status={statusAtual} dias={diasAtraso} />
