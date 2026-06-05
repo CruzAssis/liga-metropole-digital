@@ -10,6 +10,8 @@ import { Badge } from "@/components/ui/badge";
 import { Plus, Settings, Users, CheckCircle, AlertTriangle, MapPin } from "lucide-react";
 import { Spinner } from "@/components/AppSkeletons";
 
+const supabaseAny = supabase as any;
+
 export const Route = createFileRoute("/_authenticated/admin/ligas")({
   component: LigasPage,
 });
@@ -137,7 +139,7 @@ function LigasPage() {
       .order("created_at", { ascending: false });
     if (error) toast.error("Erro ao carregar ligas");
     else {
-      const list = (data ?? []) as Competition[];
+      const list = (data ?? []) as unknown as Competition[];
       setCompetitions(list);
       const statsMap: Record<string, FillStats> = {};
       await Promise.all(
@@ -211,11 +213,11 @@ function LigasPage() {
     };
 
     if (editId) {
-      const { error } = await supabase.from("competitions").update(payload).eq("id", editId);
+      const { error } = await supabaseAny.from("competitions").update(payload).eq("id", editId);
       if (error) toast.error("Erro ao salvar", { description: error.message });
       else { toast.success("Liga atualizada"); handleCancel(); void load(); }
     } else {
-      const { error } = await supabase.from("competitions").insert({ ...payload, status: "registration" });
+      const { error } = await supabaseAny.from("competitions").insert({ ...payload, status: "registration" });
       if (error) toast.error("Erro ao criar liga", { description: error.message });
       else { toast.success("Liga criada!"); handleCancel(); void load(); }
     }
