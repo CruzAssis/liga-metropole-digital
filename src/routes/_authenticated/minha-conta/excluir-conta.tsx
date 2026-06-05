@@ -7,6 +7,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { toast } from "sonner";
 import { AlertTriangle, ChevronLeft, Trash2, ShieldAlert } from "lucide-react";
+import { Spinner } from "@/components/AppSkeletons";
 
 export const Route = createFileRoute("/_authenticated/minha-conta/excluir-conta")({
   component: ExcluirContaPage,
@@ -210,7 +211,7 @@ function ExcluirContaPage() {
                 className="gap-2"
               >
                 <Trash2 className="h-4 w-4" />
-                {step === "confirmando" ? "Processando..." : "Confirmar exclusao"}
+                {step === "confirmando" ? <><Spinner className="mr-2 h-4 w-4" />Aguarde...</> : "Confirmar exclusao"}
               </Button>
               <Button
                 variant="outline"
