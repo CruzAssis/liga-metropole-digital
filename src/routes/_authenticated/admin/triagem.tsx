@@ -5,6 +5,7 @@ import { Button } from '@/components/ui/button'
 import { Badge } from '@/components/ui/badge'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
 import { toast } from 'sonner'
+import { Spinner } from '@/components/AppSkeletons'
 
 export const Route = createFileRoute('/_authenticated/admin/triagem')({
   component: TriagemPage,
@@ -236,7 +237,7 @@ function TriagemPage() {
               >
                 {targetFull
                   ? `${slotLabel(team.registration_type, config.lado)} cheio`
-                  : saving === team.id ? 'Aprovando...' : 'Aprovar time'}
+                  : saving === team.id ? <><Spinner className="mr-2 h-4 w-4" />Aguarde...</> : 'Aprovar time'}
               </Button>
             </div>
           )
