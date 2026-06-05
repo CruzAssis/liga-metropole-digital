@@ -2,6 +2,7 @@ import { createFileRoute } from '@tanstack/react-router'
 import { useState, useEffect, useMemo } from 'react'
 import { useServerFn } from '@tanstack/react-start'
 import { toast } from 'sonner'
+import { Spinner } from '@/components/AppSkeletons'
 import { Button } from '@/components/ui/button'
 import { Badge } from '@/components/ui/badge'
 import {
@@ -151,7 +152,7 @@ function ModalPago({ row, mes, onClose, onSaved }: {
           </div>
         </div>
         <Button onClick={salvar} disabled={loading} className="w-full bg-[#1565F5] text-white h-11">
-          {loading ? 'Salvando...' : 'Confirmar Pagamento'}
+          {loading ? <><Spinner className="mr-2 h-4 w-4" />Aguarde...</> : 'Confirmar Pagamento'}
         </Button>
       </div>
     </div>
