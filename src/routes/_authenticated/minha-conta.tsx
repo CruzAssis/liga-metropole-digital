@@ -130,7 +130,7 @@ function TeamFinanceiroCard() {
             const atrasado = s === "atrasado" || m.dias_atraso > 30;
             return (
               <div key={m.mes_referencia}
-                className=`rounded-lg border p-2.5 text-center space-y-1.5 ${
+                className={`rounded-lg border p-2.5 text-center space-y-1.5 ${
                   s === "pago" ? "border-green-800/40 bg-green-900/10" :
                   atrasado ? "border-red-800/40 bg-red-900/10" :
                   "border-border bg-background/50"
