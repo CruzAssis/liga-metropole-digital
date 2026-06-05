@@ -11,6 +11,7 @@ import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { toast } from "sonner";
 import { FileText, CheckCircle2, XCircle } from "lucide-react";
+import { Spinner } from "@/components/AppSkeletons";
 
 export const Route = createFileRoute("/_authenticated/admin/sumulas")({
   component: AdminSumulasPage,
@@ -127,7 +128,7 @@ function AdminSumulasPage() {
                     disabled={confirmMut.isPending}
                     className="gap-1"
                   >
-                    <CheckCircle2 className="h-4 w-4" /> Confirmar placar
+                    {confirmMut.isPending ? <><Spinner className="mr-1 h-4 w-4" />Aguarde...</> : <><CheckCircle2 className="h-4 w-4" /> Confirmar placar</>}
                   </Button>
                 )}
               <Button
