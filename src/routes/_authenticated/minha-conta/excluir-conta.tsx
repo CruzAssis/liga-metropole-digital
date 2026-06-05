@@ -9,6 +9,8 @@ import { toast } from "sonner";
 import { AlertTriangle, ChevronLeft, Trash2, ShieldAlert } from "lucide-react";
 import { Spinner } from "@/components/AppSkeletons";
 
+const supabaseAny = supabase as any;
+
 export const Route = createFileRoute("/_authenticated/minha-conta/excluir-conta")({
   component: ExcluirContaPage,
   head: () => ({
@@ -54,7 +56,7 @@ function ExcluirContaPage() {
       // 2. Solicitar exclusao da conta (Supabase Admin via Edge Function ou direto)
       // Como nao temos Edge Function dedicada, usamos deleteUser via API publica
       // que aciona a logica de exclusao em cascata configurada no banco.
-      const { error: delErr } = await supabase.rpc("request_account_deletion");
+      const { error: delErr } = await supabaseAny.rpc("request_account_deletion");
 
       if (delErr) {
         // Fallback: marcar conta para exclusao via metadata e notificar admin

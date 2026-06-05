@@ -112,7 +112,7 @@ function InscricaoPage() {
         .select('id, name, conference_name, subprefeitura, zona, season, host_slots, visitor_slots, max_teams, starts_at')
         .eq('registration_status', 'open')
         .order('created_at', { ascending: false })
-      const list = (data ?? []) as OpenLeague[]
+      const list = (data ?? []) as unknown as OpenLeague[]
       setAllLeagues(list)
       setLeaguesLoading(false)
     })()

@@ -3,8 +3,20 @@ import { z } from "zod";
 import { requireSupabaseAuth } from "@/integrations/supabase/auth-middleware";
 import { supabaseAdmin } from "@/integrations/supabase/client.server";
 
+const adminDb = supabaseAdmin as any;
+
 export type PagamentoStatus = "pendente" | "pago" | "atrasado";
 export type PagamentoMetodo = "pix" | "outro";
+type PagamentoRow = {
+  id: string;
+  time_id: string;
+  mes_referencia: string;
+  status: PagamentoStatus;
+  valor: number;
+  data_pagamento: string | null;
+  metodo: PagamentoMetodo | null;
+  observacoes: string | null;
+};
 
 export function mesAtual(): string {
   const d = new Date();
@@ -38,9 +50,14 @@ export function diasAtraso(mes_referencia: string): number {
 }
 
 async function assertAdmin(userId: string) {
-  const { data } = await supabaseAdmin
-    .from("profiles").select("is_admin").eq("id", userId).maybeSingle();
-  if (!data?.is_admin) throw new Error("Acesso negado: apenas administradores.");
+  const { data, error } = await supabaseAdmin
+    .from("user_roles")
+    .select("role")
+    .eq("user_id", userId)
+    .eq("role", "admin")
+    .maybeSingle();
+  if (error) throw new Error(error.message);
+  if (!data) throw new Error("Acesso negado: apenas administradores.");
 }
 
 async function getDirectorTeamId(userId: string): Promise<string | null> {
@@ -69,11 +86,12 @@ export const listPagamentosMes = createServerFn({ method: "GET" })
     if (teamsErr) throw new Error(teamsErr.message);
 
     const teamIds = (teams ?? []).map((t) => t.id);
-    const { data: pags } = await supabaseAdmin
+    const { data: pags } = await adminDb
       .from("pagamentos").select("*")
       .eq("mes_referencia", data.mes_referencia).in("time_id", teamIds);
 
-    const pagMap = new Map((pags ?? []).map((p) => [p.time_id, p]));
+    const pagRows = (pags ?? []) as PagamentoRow[];
+    const pagMap = new Map(pagRows.map((p) => [p.time_id, p]));
     const managerIds = [...new Set((teams ?? []).map((t) => t.manager_id).filter(Boolean))];
     const { data: profiles } = managerIds.length
       ? await supabaseAdmin.from("profiles").select("id, full_name, phone").in("id", managerIds)
@@ -132,14 +150,14 @@ export const marcarComoPago = createServerFn({ method: "POST" })
       observacoes: data.observacoes ?? null,
       marcado_por: context.userId,
     };
-    const { data: existing } = await supabaseAdmin
+    const { data: existing } = await adminDb
       .from("pagamentos").select("id")
       .eq("time_id", data.time_id).eq("mes_referencia", data.mes_referencia).maybeSingle();
     if (existing) {
-      const { error } = await supabaseAdmin.from("pagamentos").update(payload).eq("id", existing.id);
+      const { error } = await adminDb.from("pagamentos").update(payload).eq("id", existing.id);
       if (error) throw new Error(error.message);
     } else {
-      const { error } = await supabaseAdmin.from("pagamentos").insert(payload);
+      const { error } = await adminDb.from("pagamentos").insert(payload);
       if (error) throw new Error(error.message);
     }
     return { ok: true };
@@ -155,7 +173,7 @@ export const desfazerPagamento = createServerFn({ method: "POST" })
     }).parse(input))
   .handler(async ({ data, context }) => {
     await assertAdmin(context.userId);
-    await supabaseAdmin.from("pagamentos").update({
+    await adminDb.from("pagamentos").update({
       status: "pendente", data_pagamento: null, metodo: null, marcado_por: context.userId,
     }).eq("time_id", data.time_id).eq("mes_referencia", data.mes_referencia);
     return { ok: true };
@@ -168,10 +186,10 @@ export const getTotalizadores = createServerFn({ method: "GET" })
     z.object({ mes_referencia: z.string().regex(/^[0-9]{4}-[0-9]{2}-01$/) }).parse(input))
   .handler(async ({ data, context }) => {
     await assertAdmin(context.userId);
-    const { data: pags } = await supabaseAdmin
+    const { data: pags } = await adminDb
       .from("pagamentos").select("status, valor, mes_referencia")
       .eq("mes_referencia", data.mes_referencia);
-    const rows = pags ?? [];
+    const rows = (pags ?? []) as PagamentoRow[];
     const receitaMes = rows.filter((p) => p.status === "pago").reduce((s, p) => s + Number(p.valor), 0);
     const aReceber = rows.filter((p) => p.status !== "pago").reduce((s, p) => s + Number(p.valor), 0);
     const atrasadoTotal = rows
@@ -191,10 +209,11 @@ export const exportInadimplentesCSV = createServerFn({ method: "GET" })
       .from("teams").select("id, name, short_name, registration_type, manager_id")
       .eq("status", "approved");
     const teamIds = (teams ?? []).map((t) => t.id);
-    const { data: pags } = await supabaseAdmin
+    const { data: pags } = await adminDb
       .from("pagamentos").select("time_id, status, valor, mes_referencia")
       .eq("mes_referencia", data.mes_referencia).in("time_id", teamIds);
-    const pagMap = new Map((pags ?? []).map((p) => [p.time_id, p]));
+    const pagRows = (pags ?? []) as PagamentoRow[];
+    const pagMap = new Map(pagRows.map((p) => [p.time_id, p]));
     const managerIds = [...new Set((teams ?? []).map((t) => t.manager_id).filter(Boolean))];
     const { data: profiles } = managerIds.length
       ? await supabaseAdmin.from("profiles").select("id, full_name, phone").in("id", managerIds)
@@ -228,10 +247,11 @@ export const getMyTeamPagamentos = createServerFn({ method: "GET" })
     const teamId = await getDirectorTeamId(context.userId);
     if (!teamId) return { meses: [], team_id: null };
     const meses = ultimosMeses(6);
-    const { data: pags } = await supabaseAdmin
+    const { data: pags } = await adminDb
       .from("pagamentos").select("*")
       .eq("time_id", teamId).in("mes_referencia", meses);
-    const pagMap = new Map((pags ?? []).map((p) => [p.mes_referencia, p]));
+    const pagRows = (pags ?? []) as PagamentoRow[];
+    const pagMap = new Map(pagRows.map((p) => [p.mes_referencia, p]));
     const result = meses.map((mes) => {
       const pag = pagMap.get(mes);
       return {

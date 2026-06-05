@@ -64,7 +64,7 @@ function ResultadosPage() {
         .select("id, name, conference_name, subprefeitura, zona, season, status")
         .in("status", ["group_stage", "knockout", "finished"])
         .order("created_at", { ascending: false });
-      const list = (data ?? []) as Competition[];
+      const list = (data ?? []) as unknown as Competition[];
       setCompetitions(list);
       if (list.length > 0) setSelectedComp(list[0].id);
     })();

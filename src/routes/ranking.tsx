@@ -212,7 +212,7 @@ function RankingPage() {
         .select("id, name, conference_name, subprefeitura, zona, season")
         .in("registration_status", ["active", "finished", "draw_ready", "open"])
         .order("created_at", { ascending: false });
-      const list = (data ?? []) as Competition[];
+      const list = (data ?? []) as unknown as Competition[];
       setCompetitions(list);
       if (list.length > 0) setSelectedComp(list[0].id);
     })();

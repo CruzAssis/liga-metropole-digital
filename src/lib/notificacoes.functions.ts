@@ -1,7 +1,7 @@
 import { createServerFn } from "@tanstack/react-start";
 import { z } from "zod";
 import { supabaseAdmin } from "@/integrations/supabase/client.server";
-import { requireSupabaseAuth } from "@/integrations/supabase/auth.server";
+import { requireSupabaseAuth } from "@/integrations/supabase/auth-middleware";
 
 // ─── Types ────────────────────────────────────────────────────────────────────
 
@@ -14,6 +14,7 @@ export type NotificacaoTipo =
 
 export type NotificacaoCanal = "email" | "whatsapp";
 export type NotificacaoStatus = "pendente" | "enviado" | "falhou";
+type JsonValue = string | number | boolean | null | JsonValue[] | { [key: string]: JsonValue };
 
 export interface NotificacaoLog {
   id: string;
@@ -27,7 +28,7 @@ export interface NotificacaoLog {
   corpo_preview: string | null;
   status: NotificacaoStatus;
   erro_mensagem: string | null;
-  payload: Record<string, unknown>;
+  payload: JsonValue;
   whatsapp_template: string | null;
   enviado_em: string | null;
   created_at: string;
@@ -54,42 +55,57 @@ export const CANAL_LABELS: Record<NotificacaoCanal, string> = {
   whatsapp: "WhatsApp",
 };
 
+const notificacoesFilterSchema = z.object({
+  limit: z.number().min(1).max(500).default(100),
+  tipo: z
+    .enum([
+      "team_approved",
+      "jogo_agendado",
+      "sumula_disponivel",
+      "sumula_prazo_alerta",
+      "destaque_publicado",
+    ])
+    .optional(),
+  status: z.enum(["pendente", "enviado", "falhou"]).optional(),
+  canal: z.enum(["email", "whatsapp"]).optional(),
+});
+
+const triggerNotificacaoSchema = z.object({
+  functionName: z.enum([
+    "notify-team-approved",
+    "notify-jogo-agendado",
+    "notify-sumula-disponivel",
+    "notify-sumula-prazo-alerta",
+    "notify-destaque-publicado",
+  ]),
+  payload: z.record(z.string(), z.unknown()),
+});
+
+async function assertAdmin(userId: string) {
+  const { data, error } = await supabaseAdmin
+    .from("user_roles")
+    .select("role")
+    .eq("user_id", userId)
+    .eq("role", "admin")
+    .maybeSingle();
+  if (error) throw new Error(error.message);
+  if (!data) throw new Error("Acesso restrito a administradores");
+}
+
+const adminDb = supabaseAdmin as any;
+
 // ─── Server Functions ──────────────────────────────────────────────────────────
 
 /**
  * List last N notification log entries (admin only)
  */
 export const listNotificacoes = createServerFn({ method: "GET" })
-  .validator(
-    z.object({
-      limit: z.number().min(1).max(500).default(100),
-      tipo: z
-        .enum([
-          "team_approved",
-          "jogo_agendado",
-          "sumula_disponivel",
-          "sumula_prazo_alerta",
-          "destaque_publicado",
-        ])
-        .optional(),
-      status: z.enum(["pendente", "enviado", "falhou"]).optional(),
-      canal: z.enum(["email", "whatsapp"]).optional(),
-    })
-  )
+  .inputValidator((input) => notificacoesFilterSchema.parse(input))
   .middleware([requireSupabaseAuth])
   .handler(async ({ data, context }) => {
-    // Check admin
-    const { data: profile } = await supabaseAdmin
-      .from("profiles")
-      .select("is_admin")
-      .eq("id", context.user.id)
-      .single();
+    await assertAdmin(context.userId);
 
-    if (!profile?.is_admin) {
-      throw new Error("Acesso restrito a administradores");
-    }
-
-    let query = supabaseAdmin
+    let query = adminDb
       .from("notificacoes_log")
       .select("*")
       .order("created_at", { ascending: false })
@@ -120,29 +136,26 @@ export const listNotificacoes = createServerFn({ method: "GET" })
 export const getNotificacoesStats = createServerFn({ method: "GET" })
   .middleware([requireSupabaseAuth])
   .handler(async ({ context }) => {
-    const { data: profile } = await supabaseAdmin
-      .from("profiles")
-      .select("is_admin")
-      .eq("id", context.user.id)
-      .single();
+    await assertAdmin(context.userId);
 
-    if (!profile?.is_admin) {
-      throw new Error("Acesso restrito a administradores");
-    }
-
-    const { data: stats } = await supabaseAdmin
+    const { data: stats } = await adminDb
       .from("notificacoes_log")
       .select("status, canal, tipo");
 
-    const total = stats?.length ?? 0;
-    const enviados = stats?.filter((s) => s.status === "enviado").length ?? 0;
-    const falhos = stats?.filter((s) => s.status === "falhou").length ?? 0;
-    const pendentes = stats?.filter((s) => s.status === "pendente").length ?? 0;
+    const statsRows = (stats ?? []) as Array<{
+      status: NotificacaoStatus;
+      canal: NotificacaoCanal;
+      tipo: NotificacaoTipo;
+    }>;
+    const total = statsRows.length;
+    const enviados = statsRows.filter((s) => s.status === "enviado").length;
+    const falhos = statsRows.filter((s) => s.status === "falhou").length;
+    const pendentes = statsRows.filter((s) => s.status === "pendente").length;
 
     const byTipo = Object.entries(TIPO_LABELS).map(([tipo, label]) => ({
       tipo: tipo as NotificacaoTipo,
       label,
-      count: stats?.filter((s) => s.tipo === tipo).length ?? 0,
+      count: statsRows.filter((s) => s.tipo === tipo).length,
     }));
 
     return { total, enviados, falhos, pendentes, byTipo };
@@ -153,29 +166,10 @@ export const getNotificacoesStats = createServerFn({ method: "GET" })
  * Useful for retrying failed notifications
  */
 export const triggerNotificacao = createServerFn({ method: "POST" })
-  .validator(
-    z.object({
-      functionName: z.enum([
-        "notify-team-approved",
-        "notify-jogo-agendado",
-        "notify-sumula-disponivel",
-        "notify-sumula-prazo-alerta",
-        "notify-destaque-publicado",
-      ]),
-      payload: z.record(z.unknown()),
-    })
-  )
+  .inputValidator((input) => triggerNotificacaoSchema.parse(input))
   .middleware([requireSupabaseAuth])
   .handler(async ({ data, context }) => {
-    const { data: profile } = await supabaseAdmin
-      .from("profiles")
-      .select("is_admin")
-      .eq("id", context.user.id)
-      .single();
-
-    if (!profile?.is_admin) {
-      throw new Error("Acesso restrito a administradores");
-    }
+    await assertAdmin(context.userId);
 
     const supabaseUrl = process.env["SUPABASE_URL"];
     const serviceKey = process.env["SUPABASE_SERVICE_ROLE_KEY"];
