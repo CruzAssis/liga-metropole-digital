@@ -74,11 +74,7 @@ function AtletasPage() {
 
         <TabsContent value="todos" className="mt-6">
           {!rows && <SkeletonAthleteGrid count={6} />}
-          {rows && rows.length === 0 && (
-            <div className="rounded-lg border border-border bg-card p-8 text-center text-muted-foreground">
-              Nenhum atleta cadastrado ainda.
-            </div>
-          )}
+          {rows && rows.length === 0 && <EmptyAtletas />}
           {rows && rows.length > 0 && (
             <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
               {rows.map((a) => (
@@ -177,7 +173,18 @@ function EmptyRanking({ label }: { label: string }) {
 
 function ScorersRanking() {
   const { data, isLoading } = useRankings();
-  if (isLoading) return <div className="text-muted-foreground">Carregando...</div>;
+  if (isLoading) return (
+    <div className="space-y-2">
+      {[1,2,3,4,5].map(i => (
+        <div key={i} className="rounded-lg border border-border bg-card p-3 flex items-center gap-3 animate-pulse">
+          <div className="h-4 w-5 bg-primary/10 rounded" />
+          <div className="h-8 w-8 rounded-full bg-primary/10" />
+          <div className="flex-1 h-4 bg-primary/10 rounded" />
+          <div className="h-6 w-16 bg-primary/10 rounded" />
+        </div>
+      ))}
+    </div>
+  );
   const rows = data?.topScorers ?? [];
   if (rows.length === 0) return <EmptyRanking label="artilharia" />;
   return (
@@ -205,7 +212,18 @@ function ScorersRanking() {
 
 function RatingsRanking() {
   const { data, isLoading } = useRankings();
-  if (isLoading) return <div className="text-muted-foreground">Carregando...</div>;
+  if (isLoading) return (
+    <div className="space-y-2">
+      {[1,2,3,4,5].map(i => (
+        <div key={i} className="rounded-lg border border-border bg-card p-3 flex items-center gap-3 animate-pulse">
+          <div className="h-4 w-5 bg-primary/10 rounded" />
+          <div className="h-8 w-8 rounded-full bg-primary/10" />
+          <div className="flex-1 h-4 bg-primary/10 rounded" />
+          <div className="h-6 w-16 bg-primary/10 rounded" />
+        </div>
+      ))}
+    </div>
+  );
   const rows = data?.topRated ?? [];
   if (rows.length === 0) return <EmptyRanking label="Nota Metrópole" />;
   return (
@@ -236,7 +254,18 @@ function RatingsRanking() {
 
 function DisciplineRanking() {
   const { data, isLoading } = useRankings();
-  if (isLoading) return <div className="text-muted-foreground">Carregando...</div>;
+  if (isLoading) return (
+    <div className="space-y-2">
+      {[1,2,3,4,5].map(i => (
+        <div key={i} className="rounded-lg border border-border bg-card p-3 flex items-center gap-3 animate-pulse">
+          <div className="h-4 w-5 bg-primary/10 rounded" />
+          <div className="h-8 w-8 rounded-full bg-primary/10" />
+          <div className="flex-1 h-4 bg-primary/10 rounded" />
+          <div className="h-6 w-16 bg-primary/10 rounded" />
+        </div>
+      ))}
+    </div>
+  );
   const rows = data?.discipline ?? [];
   if (rows.length === 0) return <EmptyRanking label="disciplina" />;
   return (
