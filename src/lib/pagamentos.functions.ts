@@ -186,10 +186,10 @@ export const getTotalizadores = createServerFn({ method: "GET" })
     z.object({ mes_referencia: z.string().regex(/^[0-9]{4}-[0-9]{2}-01$/) }).parse(input))
   .handler(async ({ data, context }) => {
     await assertAdmin(context.userId);
-    const { data: pags } = await supabaseAdmin
+    const { data: pags } = await adminDb
       .from("pagamentos").select("status, valor, mes_referencia")
       .eq("mes_referencia", data.mes_referencia);
-    const rows = pags ?? [];
+    const rows = (pags ?? []) as PagamentoRow[];
     const receitaMes = rows.filter((p) => p.status === "pago").reduce((s, p) => s + Number(p.valor), 0);
     const aReceber = rows.filter((p) => p.status !== "pago").reduce((s, p) => s + Number(p.valor), 0);
     const atrasadoTotal = rows
@@ -209,10 +209,11 @@ export const exportInadimplentesCSV = createServerFn({ method: "GET" })
       .from("teams").select("id, name, short_name, registration_type, manager_id")
       .eq("status", "approved");
     const teamIds = (teams ?? []).map((t) => t.id);
-    const { data: pags } = await supabaseAdmin
+    const { data: pags } = await adminDb
       .from("pagamentos").select("time_id, status, valor, mes_referencia")
       .eq("mes_referencia", data.mes_referencia).in("time_id", teamIds);
-    const pagMap = new Map((pags ?? []).map((p) => [p.time_id, p]));
+    const pagRows = (pags ?? []) as PagamentoRow[];
+    const pagMap = new Map(pagRows.map((p) => [p.time_id, p]));
     const managerIds = [...new Set((teams ?? []).map((t) => t.manager_id).filter(Boolean))];
     const { data: profiles } = managerIds.length
       ? await supabaseAdmin.from("profiles").select("id, full_name, phone").in("id", managerIds)
@@ -246,10 +247,11 @@ export const getMyTeamPagamentos = createServerFn({ method: "GET" })
     const teamId = await getDirectorTeamId(context.userId);
     if (!teamId) return { meses: [], team_id: null };
     const meses = ultimosMeses(6);
-    const { data: pags } = await supabaseAdmin
+    const { data: pags } = await adminDb
       .from("pagamentos").select("*")
       .eq("time_id", teamId).in("mes_referencia", meses);
-    const pagMap = new Map((pags ?? []).map((p) => [p.mes_referencia, p]));
+    const pagRows = (pags ?? []) as PagamentoRow[];
+    const pagMap = new Map(pagRows.map((p) => [p.mes_referencia, p]));
     const result = meses.map((mes) => {
       const pag = pagMap.get(mes);
       return {
