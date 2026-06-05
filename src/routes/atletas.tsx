@@ -101,7 +101,21 @@ function AtletasPage() {
       <Dialog open={!!open} onOpenChange={(v) => !v && setOpen(null)}>
         <DialogContent className="max-w-md">
           <DialogTitle className="sr-only">Perfil do atleta</DialogTitle>
-          {open && <IDMetropoleCard athlete={open} />}
+          {open && (
+            <>
+              <IDMetropoleCard athlete={open} />
+              <div className="mt-4 text-center">
+                <Link
+                  to="/atletas/$id"
+                  params={{ id: open.id }}
+                  className="text-sm text-primary hover:underline"
+                  onClick={() => setOpen(null)}
+                >
+                  Ver perfil completo →
+                </Link>
+              </div>
+            </>
+          )}
         </DialogContent>
       </Dialog>
     </PublicShell>
