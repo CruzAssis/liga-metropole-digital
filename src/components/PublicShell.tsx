@@ -42,6 +42,16 @@ export function PublicShell({ children }: { children: React.ReactNode }) {
         </div>
       </header>
       <main className="mx-auto max-w-6xl px-6 py-10">{children}</main>
+    <footer className="border-t border-border mt-auto">
+      <div className="mx-auto flex max-w-6xl items-center justify-between flex-wrap gap-2 px-6 py-4 text-xs text-muted-foreground">
+        <span>&copy; {new Date().getFullYear()} Liga Metropole Varzea</span>
+        <nav className="flex items-center gap-4">
+          <Link to="/privacidade" className="hover:text-foreground transition-colors">Privacidade</Link>
+          <Link to="/termos" className="hover:text-foreground transition-colors">Termos de Uso</Link>
+          <a href="mailto:shelderdouglasdacruz@gmail.com" className="hover:text-foreground transition-colors">Contato</a>
+        </nav>
+      </div>
+    </footer>
     </div>
   );
     }
