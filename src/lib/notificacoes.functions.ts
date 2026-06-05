@@ -14,6 +14,7 @@ export type NotificacaoTipo =
 
 export type NotificacaoCanal = "email" | "whatsapp";
 export type NotificacaoStatus = "pendente" | "enviado" | "falhou";
+type JsonValue = string | number | boolean | null | JsonValue[] | { [key: string]: JsonValue };
 
 export interface NotificacaoLog {
   id: string;
@@ -27,7 +28,7 @@ export interface NotificacaoLog {
   corpo_preview: string | null;
   status: NotificacaoStatus;
   erro_mensagem: string | null;
-  payload: Record<string, unknown>;
+  payload: JsonValue;
   whatsapp_template: string | null;
   enviado_em: string | null;
   created_at: string;
@@ -141,15 +142,20 @@ export const getNotificacoesStats = createServerFn({ method: "GET" })
       .from("notificacoes_log")
       .select("status, canal, tipo");
 
-    const total = stats?.length ?? 0;
-    const enviados = stats?.filter((s) => s.status === "enviado").length ?? 0;
-    const falhos = stats?.filter((s) => s.status === "falhou").length ?? 0;
-    const pendentes = stats?.filter((s) => s.status === "pendente").length ?? 0;
+    const statsRows = (stats ?? []) as Array<{
+      status: NotificacaoStatus;
+      canal: NotificacaoCanal;
+      tipo: NotificacaoTipo;
+    }>;
+    const total = statsRows.length;
+    const enviados = statsRows.filter((s) => s.status === "enviado").length;
+    const falhos = statsRows.filter((s) => s.status === "falhou").length;
+    const pendentes = statsRows.filter((s) => s.status === "pendente").length;
 
     const byTipo = Object.entries(TIPO_LABELS).map(([tipo, label]) => ({
       tipo: tipo as NotificacaoTipo,
       label,
-      count: stats?.filter((s) => s.tipo === tipo).length ?? 0,
+      count: statsRows.filter((s) => s.tipo === tipo).length,
     }));
 
     return { total, enviados, falhos, pendentes, byTipo };
