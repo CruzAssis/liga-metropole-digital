@@ -106,10 +106,10 @@ function TeamFinanceiroCard() {
   }
 
   return (
-    <div className=`rounded-lg border bg-card p-6 space-y-4 ${inadimplente ? "border-red-800/50" : "border-border"}`}>
+    <div className={`rounded-lg border bg-card p-6 space-y-4 ${inadimplente ? "border-red-800/50" : "border-border"}`}>
       <div className="flex items-center justify-between gap-2">
         <div className="flex items-center gap-2">
-          <DollarSign className=`h-5 w-5 ${inadimplente ? "text-red-400" : "text-primary"}` />
+          <DollarSign className={`h-5 w-5 ${inadimplente ? "text-red-400" : "text-primary"}`} />
           <h2 className="font-display text-2xl tracking-wide">Financeiro</h2>
         </div>
         <PagStatusBadge status={statusAtual} dias={diasAtraso} />
@@ -130,7 +130,7 @@ function TeamFinanceiroCard() {
             const atrasado = s === "atrasado" || m.dias_atraso > 30;
             return (
               <div key={m.mes_referencia}
-                className=`rounded-lg border p-2.5 text-center space-y-1.5 ${
+                className={`rounded-lg border p-2.5 text-center space-y-1.5 ${
                   s === "pago" ? "border-green-800/40 bg-green-900/10" :
                   atrasado ? "border-red-800/40 bg-red-900/10" :
                   "border-border bg-background/50"
@@ -141,7 +141,7 @@ function TeamFinanceiroCard() {
                   : atrasado
                   ? <AlertTriangle className="h-4 w-4 text-red-400 mx-auto" />
                   : <Clock className="h-4 w-4 text-amber-400 mx-auto" />}
-                <p className=`text-xs font-mono ${
+                <p className={`text-xs font-mono ${
                   s === "pago" ? "text-green-400" :
                   atrasado ? "text-red-400" : "text-amber-400"
                 }`}>
