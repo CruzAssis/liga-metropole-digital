@@ -141,7 +141,7 @@ function TeamFinanceiroCard() {
                   : atrasado
                   ? <AlertTriangle className="h-4 w-4 text-red-400 mx-auto" />
                   : <Clock className="h-4 w-4 text-amber-400 mx-auto" />}
-                <p className=`text-xs font-mono ${
+                <p className={`text-xs font-mono ${
                   s === "pago" ? "text-green-400" :
                   atrasado ? "text-red-400" : "text-amber-400"
                 }`}>
