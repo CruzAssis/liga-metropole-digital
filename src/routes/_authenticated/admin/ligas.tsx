@@ -8,6 +8,7 @@ import { Label } from "@/components/ui/label";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Plus, Settings, Users, CheckCircle, AlertTriangle, MapPin } from "lucide-react";
+import { Spinner } from "@/components/AppSkeletons";
 
 export const Route = createFileRoute("/_authenticated/admin/ligas")({
   component: LigasPage,
@@ -354,7 +355,7 @@ function LigasPage() {
           </div>
           <div className="flex gap-2">
             <Button onClick={handleSave} disabled={saving}>
-              {saving ? "Salvando..." : editId ? "Salvar alterações" : "Criar conferência"}
+              {saving ? <><Spinner className="mr-2 h-4 w-4" />Aguarde...</> : editId ? "Salvar alterações" : "Criar conferência"}
             </Button>
             {editId && (
               <Button variant="outline" onClick={handleCancel}>Cancelar</Button>
