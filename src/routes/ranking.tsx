@@ -1,4 +1,5 @@
 import { createFileRoute } from "@tanstack/react-router";
+import { SkeletonRankingPage, EmptyRanking } from "@/components/AppSkeletons";
 import { useEffect, useMemo, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { PublicShell } from "@/components/PublicShell";
@@ -300,9 +301,12 @@ function RankingPage() {
         </div>
       )}
 
-      {!matches && <div className="text-muted-foreground">Carregando...</div>}
+      {!matches && <SkeletonRankingPage />}
 
-      {matches && (
+      {matches && matches.length === 0 && hostStandings.length === 0 && visitorStandings.length === 0 && (
+          <EmptyRanking />
+        )}
+        {matches && (hostStandings.length > 0 || visitorStandings.length > 0) && (
         <Tabs defaultValue="mandantes">
           <TabsList>
             <TabsTrigger value="mandantes">Mandantes ({hosts.length})</TabsTrigger>
