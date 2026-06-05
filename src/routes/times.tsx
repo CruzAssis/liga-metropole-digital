@@ -6,102 +6,110 @@ import { PublicShell } from "@/components/PublicShell";
 import { Badge } from "@/components/ui/badge";
 
 type Team = {
-  id: string;
-  name: string;
-  short_name: string;
-  slug: string | null;
-  logo_url: string | null;
-  registration_type: string;
+id: string;
+name: string;
+short_name: string;
+slug: string | null;
+logo_url: string | null;
+registration_type: string;
 };
 
 export const Route = createFileRoute("/times")({
-  component: TimesPage,
-  head: () => ({
-    meta: [
-      { title: "Times · Liga Metrópole Várzea" },
-      { name: "description", content: "Times aprovados da Liga Metrópole Várzea." },
-    ],
-  }),
+component: TimesPage,
+head: () => ({
+  meta: [
+    { title: "Times · Liga Metrópole Várzea" },
+    { name: "description", content: "Times aprovados da Liga Metrópole Várzea." },
+  ],
+}),
 });
 
 function TimesPage() {
-  const [teams, setTeams] = useState<Team[] | null>(null);
+const [teams, setTeams] = useState<Team[] | null>(null);
 
-  useEffect(() => {
-    (async () => {
-      const { data } = await supabase
-        .from("teams")
-        .select("id, name, short_name, slug, logo_url, registration_type")
-        .eq("status", "approved")
-        .order("name");
-      setTeams(data ?? []);
-    })();
-  }, []);
+useEffect(() => {
+  (async () => {
+    const { data } = await supabase
+      .from("teams")
+      .select("id, name, short_name, slug, logo_url, registration_type")
+      .eq("status", "approved")
+      .order("name");
+    setTeams(data ?? []);
+  })();
+}, []);
 
-  const mandantes = teams?.filter((t) => t.registration_type === "host") ?? [];
-  const visitantes = teams?.filter((t) => t.registration_type === "visitor") ?? [];
-
+if (!teams) {
   return (
     <PublicShell>
       <header className="mb-6">
         <h1 className="font-display text-5xl tracking-wide">Times</h1>
-        <p className="text-muted-foreground mt-1">
-          {teams ? `${teams.length} times aprovados` : "Carregando times..."}
-        </p>
+        <p className="text-muted-foreground mt-1">Carregando times...</p>
       </header>
-
-      {teams && teams.length === 0 && (
-        <div className="rounded-lg border border-border bg-card p-8 text-center text-muted-foreground">
-          Nenhum time aprovado ainda.
-        </div>
-      )}
-
-      {[
-        { label: "Mandantes", list: mandantes, variant: "default" as const },
-        { label: "Visitantes", list: visitantes, variant: "secondary" as const },
-      ].map(
-        (group) =>
-          group.list.length > 0 && (
-            <section key={group.label} className="mb-10">
-              <h2 className="font-display text-2xl tracking-wide mb-3 flex items-center gap-2">
-                {group.label} <Badge variant={group.variant}>{group.list.length}</Badge>
-              </h2>
-              <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
-                {group.list.map((t) => {
-                  const inner = (
-                    <>
-                      <div className="h-12 w-12 rounded-full bg-muted overflow-hidden flex items-center justify-center">
-                        {t.logo_url ? (
-                          <img src={t.logo_url} alt={t.name} className="h-full w-full object-cover" />
-                        ) : (
-                          <span className="font-display text-lg">{t.short_name?.[0] ?? "?"}</span>
-                        )}
-                      </div>
-                      <div className="min-w-0">
-                        <div className="font-medium truncate">{t.name}</div>
-                        <div className="text-xs text-muted-foreground">{t.short_name}</div>
-                      </div>
-                    </>
-                  );
-                  return t.slug ? (
-                    <Link
-                      key={t.id}
-                      to="/times/$slug"
-                      params={{ slug: t.slug }}
-                      className="flex items-center gap-3 rounded-lg border border-border bg-card p-4 hover:bg-accent transition-colors"
-                    >
-                      {inner}
-                    </Link>
-                  ) : (
-                    <div key={t.id} className="flex items-center gap-3 rounded-lg border border-border bg-card p-4">
-                      {inner}
-                    </div>
-                  );
-                })}
-              </div>
-            </section>
-          ),
-      )}
+      <SkeletonTeamGrid count={6} />
     </PublicShell>
   );
+}
+
+const mandantes = teams.filter((t) => t.registration_type === "host");
+const visitantes = teams.filter((t) => t.registration_type === "visitor");
+
+return (
+  <PublicShell>
+    <header className="mb-6">
+      <h1 className="font-display text-5xl tracking-wide">Times</h1>
+      <p className="text-muted-foreground mt-1">
+        {teams.length} time{teams.length !== 1 ? "s" : ""} aprovado{teams.length !== 1 ? "s" : ""}
+      </p>
+    </header>
+
+    {teams.length === 0 && <EmptyTimes />}
+
+    {[
+      { label: "Mandantes", list: mandantes, variant: "default" as const },
+      { label: "Visitantes", list: visitantes, variant: "secondary" as const },
+    ].map(
+      (group) =>
+        group.list.length > 0 && (
+          <section key={group.label} className="mb-10">
+            <h2 className="font-display text-2xl tracking-wide mb-3 flex items-center gap-2">
+              {group.label} <Badge variant={group.variant}>{group.list.length}</Badge>
+            </h2>
+            <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
+              {group.list.map((t) => {
+                const inner = (
+                  <>
+                    <div className="h-12 w-12 rounded-full bg-muted overflow-hidden flex items-center justify-center">
+                      {t.logo_url ? (
+                        <img src={t.logo_url} alt={t.name} className="h-full w-full object-cover" />
+                      ) : (
+                        <span className="font-display text-lg">{t.short_name?.[0] ?? "?"}</span>
+                      )}
+                    </div>
+                    <div className="min-w-0">
+                      <div className="font-medium truncate">{t.name}</div>
+                      <div className="text-xs text-muted-foreground">{t.short_name}</div>
+                    </div>
+                  </>
+                );
+                return t.slug ? (
+                  <Link
+                    key={t.id}
+                    to="/times/$slug"
+                    params={{ slug: t.slug }}
+                    className="flex items-center gap-3 rounded-lg border border-border bg-card p-4 hover:bg-accent transition-colors"
+                  >
+                    {inner}
+                  </Link>
+                ) : (
+                  <div key={t.id} className="flex items-center gap-3 rounded-lg border border-border bg-card p-4">
+                    {inner}
+                  </div>
+                );
+              })}
+            </div>
+          </section>
+        ),
+    )}
+  </PublicShell>
+);
 }
