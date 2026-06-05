@@ -1,7 +1,7 @@
 import { createServerFn } from "@tanstack/react-start";
 import { z } from "zod";
 import { supabaseAdmin } from "@/integrations/supabase/client.server";
-import { requireSupabaseAuth } from "@/integrations/supabase/auth.server";
+import { requireSupabaseAuth } from "@/integrations/supabase/auth-middleware";
 
 // ─── Types ────────────────────────────────────────────────────────────────────
 
@@ -82,7 +82,7 @@ export const listNotificacoes = createServerFn({ method: "GET" })
     const { data: profile } = await supabaseAdmin
       .from("profiles")
       .select("is_admin")
-      .eq("id", context.user.id)
+      .eq("id", context.userId)
       .single();
 
     if (!profile?.is_admin) {
@@ -123,7 +123,7 @@ export const getNotificacoesStats = createServerFn({ method: "GET" })
     const { data: profile } = await supabaseAdmin
       .from("profiles")
       .select("is_admin")
-      .eq("id", context.user.id)
+      .eq("id", context.userId)
       .single();
 
     if (!profile?.is_admin) {
@@ -170,7 +170,7 @@ export const triggerNotificacao = createServerFn({ method: "POST" })
     const { data: profile } = await supabaseAdmin
       .from("profiles")
       .select("is_admin")
-      .eq("id", context.user.id)
+      .eq("id", context.userId)
       .single();
 
     if (!profile?.is_admin) {
