@@ -50,13 +50,13 @@ export const submitSumulaScore = createServerFn({ method: "POST" })
     await assertIsDirector(context.userId, match.visitor_team_id);
     if (match.status === "closed" || match.status === "wo") throw new Error("Sumula ja encerrada");
     if (woExpired(match.scheduled_at)) throw new Error("Prazo de 72h expirado");
-    const update = {
+    const update: Record<string, unknown> = {
       host_score: data.host_score, visitor_score: data.visitor_score,
       host_filled_at: new Date().toISOString(), status: "awaiting_confirmation",
     };
     if (data.questionamento_arbitragem !== undefined)
       update.questionamento_arbitragem = data.questionamento_arbitragem ?? null;
-    const { error } = await supabaseAdmin.from("matches").update(update).eq("id", data.match_id);
+    const { error } = await adminDb.from("matches").update(update).eq("id", data.match_id);
     if (error) throw new Error(error.message);
     return { ok: true };
   });
