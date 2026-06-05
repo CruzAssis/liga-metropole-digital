@@ -7,6 +7,7 @@ import { Label } from '@/components/ui/label'
 import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group'
 import { Upload, Shield, X, MapPin } from 'lucide-react'
 import { toast } from 'sonner'
+import { Spinner } from '@/components/AppSkeletons'
 import { supabase } from '@/integrations/supabase/client'
 import { createTeamRegistration } from '@/lib/team-registration.functions'
 
@@ -419,7 +420,7 @@ function InscricaoPage() {
 
           <Button type="submit" disabled={loading || !selectedLeagueId}
             className="w-full bg-[#1565F5] hover:bg-blue-600 text-white font-semibold py-2.5">
-            {loading ? 'Enviando inscrição...' : 'Enviar inscrição'}
+            {loading ? <><Spinner className="mr-2 h-4 w-4" />Aguarde...</> : 'Enviar inscrição'}
           </Button>
         </form>
       </div>
