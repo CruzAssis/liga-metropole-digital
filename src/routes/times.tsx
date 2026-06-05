@@ -1,4 +1,5 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
+import { SkeletonTeamGrid, EmptyTimes } from "@/components/AppSkeletons";
 import { useEffect, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { PublicShell } from "@/components/PublicShell";
@@ -45,7 +46,7 @@ function TimesPage() {
       <header className="mb-6">
         <h1 className="font-display text-5xl tracking-wide">Times</h1>
         <p className="text-muted-foreground mt-1">
-          {teams ? `${teams.length} times aprovados` : "Carregando..."}
+          {teams ? `${teams.length} times aprovados` : "Carregando times..."}
         </p>
       </header>
 
