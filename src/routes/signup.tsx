@@ -5,6 +5,7 @@ import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
 import { toast } from 'sonner'
+import { Spinner } from '@/components/AppSkeletons'
 
 export const Route = createFileRoute('/signup')({
   component: SignupPage,
@@ -134,8 +135,25 @@ function SignupPage() {
               Após criar a conta, vá em <strong>Inscrição</strong> no menu lateral para cadastrar seu time.
             </div>
           )}
+          <div className="border border-zinc-700 rounded-lg p-4">
+            <label className="flex items-start gap-3 cursor-pointer">
+              <input
+                type="checkbox"
+                checked={aceitaTermos}
+                onChange={e => setAceitaTermos(e.target.checked)}
+                className="mt-0.5 w-4 h-4 accent-blue-500"
+                required
+              />
+              <span className="text-sm text-zinc-300">
+                Li e aceito os{' '}
+                <Link to="/termos" className="text-[#1565F5] hover:underline" target="_blank">Termos de Uso</Link>
+                {' '}e a{' '}
+                <Link to="/privacidade" className="text-[#1565F5] hover:underline" target="_blank">Política de Privacidade</Link>
+              </span>
+            </label>
+          </div>
           <Button type="submit" disabled={loading} className="w-full bg-[#1565F5] hover:bg-blue-600 text-white font-semibold py-2.5">
-            {loading ? 'Criando conta...' : 'Criar conta'}
+            {loading ? <><Spinner className="mr-2 h-4 w-4" />Aguarde...</> : 'Criar conta'}
           </Button>
         </form>
         <p className="text-center text-sm text-zinc-500">
