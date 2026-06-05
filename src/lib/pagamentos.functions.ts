@@ -3,6 +3,8 @@ import { z } from "zod";
 import { requireSupabaseAuth } from "@/integrations/supabase/auth-middleware";
 import { supabaseAdmin } from "@/integrations/supabase/client.server";
 
+const adminDb = supabaseAdmin as any;
+
 export type PagamentoStatus = "pendente" | "pago" | "atrasado";
 export type PagamentoMetodo = "pix" | "outro";
 
@@ -38,9 +40,14 @@ export function diasAtraso(mes_referencia: string): number {
 }
 
 async function assertAdmin(userId: string) {
-  const { data } = await supabaseAdmin
-    .from("profiles").select("is_admin").eq("id", userId).maybeSingle();
-  if (!data?.is_admin) throw new Error("Acesso negado: apenas administradores.");
+  const { data, error } = await supabaseAdmin
+    .from("user_roles")
+    .select("role")
+    .eq("user_id", userId)
+    .eq("role", "admin")
+    .maybeSingle();
+  if (error) throw new Error(error.message);
+  if (!data) throw new Error("Acesso negado: apenas administradores.");
 }
 
 async function getDirectorTeamId(userId: string): Promise<string | null> {
@@ -69,7 +76,7 @@ export const listPagamentosMes = createServerFn({ method: "GET" })
     if (teamsErr) throw new Error(teamsErr.message);
 
     const teamIds = (teams ?? []).map((t) => t.id);
-    const { data: pags } = await supabaseAdmin
+    const { data: pags } = await adminDb
       .from("pagamentos").select("*")
       .eq("mes_referencia", data.mes_referencia).in("time_id", teamIds);
 
@@ -132,14 +139,14 @@ export const marcarComoPago = createServerFn({ method: "POST" })
       observacoes: data.observacoes ?? null,
       marcado_por: context.userId,
     };
-    const { data: existing } = await supabaseAdmin
+    const { data: existing } = await adminDb
       .from("pagamentos").select("id")
       .eq("time_id", data.time_id).eq("mes_referencia", data.mes_referencia).maybeSingle();
     if (existing) {
-      const { error } = await supabaseAdmin.from("pagamentos").update(payload).eq("id", existing.id);
+      const { error } = await adminDb.from("pagamentos").update(payload).eq("id", existing.id);
       if (error) throw new Error(error.message);
     } else {
-      const { error } = await supabaseAdmin.from("pagamentos").insert(payload);
+      const { error } = await adminDb.from("pagamentos").insert(payload);
       if (error) throw new Error(error.message);
     }
     return { ok: true };
