@@ -2,6 +2,8 @@ import { createServerFn } from "@tanstack/react-start";
 import { z } from "zod";
 import { supabaseAdmin } from "@/integrations/supabase/client.server";
 
+const adminDb = supabaseAdmin as any;
+
 // ─── Types ────────────────────────────────────────────────────────────────────
 
 export interface AtletaPublicProfile {
@@ -46,7 +48,7 @@ export interface PartidaRecente {
  * Public profile for a single athlete — no auth required
  */
 export const getAtletaPublicProfile = createServerFn({ method: "GET" })
-  .validator(z.object({ athleteId: z.string().uuid() }))
+  .inputValidator((input) => z.object({ athleteId: z.string().uuid() }).parse(input))
   .handler(async ({ data }) => {
     // 1. Base athlete data
     const { data: athlete, error: athErr } = await supabaseAdmin
@@ -149,7 +151,7 @@ export const getAtletaPublicProfile = createServerFn({ method: "GET" })
         const teamMap = new Map((teams ?? []).map((t) => [t.id, t]));
 
         // Destaque publicado lookup
-        const { data: destaques } = await supabaseAdmin
+        const { data: destaques } = await adminDb
           .from("match_destaques_publicados")
           .select("match_id, jersey_number, identified_name")
           .in("match_id", matchIds)
