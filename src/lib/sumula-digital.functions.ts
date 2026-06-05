@@ -3,6 +3,8 @@ import { z } from "zod";
 import { requireSupabaseAuth } from "@/integrations/supabase/auth-middleware";
 import { supabaseAdmin } from "@/integrations/supabase/client.server";
 
+const adminDb = supabaseAdmin as any;
+
 async function loadMatchOr404(matchId: string) {
   const { data, error } = await supabaseAdmin
     .from("matches")
@@ -48,7 +50,7 @@ export const submitSumulaScore = createServerFn({ method: "POST" })
     await assertIsDirector(context.userId, match.visitor_team_id);
     if (match.status === "closed" || match.status === "wo") throw new Error("Sumula ja encerrada");
     if (woExpired(match.scheduled_at)) throw new Error("Prazo de 72h expirado");
-    const update: Record<string, unknown> = {
+    const update = {
       host_score: data.host_score, visitor_score: data.visitor_score,
       host_filled_at: new Date().toISOString(), status: "awaiting_confirmation",
     };
@@ -122,13 +124,13 @@ export const saveSumulaGoalsAndDestaque = createServerFn({ method: "POST" })
       jersey_number: data.destaque_jersey,
       identified_name: data.destaque_name?.trim() ?? null,
     };
-    const { data: existingDest } = await supabaseAdmin
+    const { data: existingDest } = await adminDb
       .from("match_best_own_votes").select("id")
       .eq("match_id", data.match_id).eq("team_id", data.team_id).maybeSingle();
     if (existingDest) {
-      await supabaseAdmin.from("match_best_own_votes").update(destaquePayload).eq("id", existingDest.id);
+      await adminDb.from("match_best_own_votes").update(destaquePayload).eq("id", existingDest.id);
     } else {
-      await supabaseAdmin.from("match_best_own_votes").insert(destaquePayload);
+      await adminDb.from("match_best_own_votes").insert(destaquePayload);
     }
     return { ok: true };
   });
@@ -180,13 +182,13 @@ export const rateSumulaOpponentBest = createServerFn({ method: "POST" })
           jersey_number: v.jersey_number, identified_name: v.identified_name,
           rating: v.rating, published_at: new Date().toISOString(),
         };
-        const { data: existingD } = await supabaseAdmin
+        const { data: existingD } = await adminDb
           .from("match_destaques_publicados").select("id")
           .eq("match_id", data.match_id).eq("team_id", v.opponent_team_id).maybeSingle();
         if (existingD) {
-          await supabaseAdmin.from("match_destaques_publicados").update(d).eq("id", existingD.id);
+          await adminDb.from("match_destaques_publicados").update(d).eq("id", existingD.id);
         } else {
-          await supabaseAdmin.from("match_destaques_publicados").insert(d);
+          await adminDb.from("match_destaques_publicados").insert(d);
         }
       }
       await supabaseAdmin.from("matches").update({ status: "closed" }).eq("id", data.match_id);
