@@ -17,6 +17,7 @@ function SignupPage() {
   const [is_diretor, setIsDiretor] = useState(false)
   const [is_jogador, setIsJogador] = useState(false)
   const [is_torcedor, setIsTorcedor] = useState(false)
+  const [aceitaTermos, setAceitaTermos] = useState(false)
 
   function handleChange(e: ChangeEvent<HTMLInputElement>) {
     const { name, value } = e.target
@@ -27,6 +28,10 @@ function SignupPage() {
     e.preventDefault()
     if (!is_diretor && !is_jogador && !is_torcedor) {
       toast.error('Selecione ao menos um perfil')
+      return
+    }
+    if (!aceitaTermos) {
+      toast.error('Voce deve aceitar os Termos de Uso e a Politica de Privacidade para continuar.')
       return
     }
     setLoading(true)
