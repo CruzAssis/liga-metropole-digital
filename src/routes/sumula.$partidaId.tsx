@@ -18,6 +18,8 @@ import {
   applyAutoWO,
   msUntilWO,
 } from '@/lib/sumula-digital.functions'
+import { DestaqueInlineShare } from '@/components/DestaqueShareCard'
+import { type DestaqueShareData } from '@/lib/share'
 
 export const Route = createFileRoute('/sumula/$partidaId')({
   component: SumulaDigitalPage,
@@ -538,6 +540,28 @@ function DestaquePublicado({ match, destaques }: { match: Match; destaques: Dest
           )
         })}
       </div>
+
+      {/* Share card — shown when destaque is published */}
+      {destaques.length > 0 && (
+        <div className="mt-4 space-y-3">
+          {destaques.map((d) => {
+            const shareData: DestaqueShareData = {
+              matchId: match.id,
+              playerName: d.identified_name ?? `Camisa #${d.jersey_number}`,
+              rating: d.rating,
+              teamCasa: match.host_team.name,
+              teamVisitante: match.visitor_team.name,
+              scoreCasa: match.host_score,
+              scoreVisitante: match.visitor_score,
+              rodada: match.round,
+              stage: match.stage,
+            }
+            return (
+              <DestaqueInlineShare key={d.id} data={shareData} />
+            )
+          })}
+        </div>
+      )}
     </div>
   )
 }
