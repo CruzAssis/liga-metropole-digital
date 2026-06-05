@@ -21,6 +21,8 @@ import {
 import { DestaqueInlineShare } from '@/components/DestaqueShareCard'
 import { type DestaqueShareData } from '@/lib/share'
 
+const supabaseAny = supabase as any
+
 export const Route = createFileRoute('/sumula/$partidaId')({
   component: SumulaDigitalPage,
 })
@@ -661,10 +663,10 @@ function SumulaDigitalPage() {
 
     // Load supplementary data
     const [ownRes, oppRes, goalRes, destRes] = await Promise.all([
-      supabase.from('match_best_own_votes').select('*').eq('match_id', partidaId),
+      supabaseAny.from('match_best_own_votes').select('*').eq('match_id', partidaId),
       supabase.from('match_best_opponent_votes').select('*').eq('match_id', partidaId),
       supabase.from('match_events').select('*').eq('match_id', partidaId).eq('kind', 'goal'),
-      supabase.from('match_destaques_publicados').select('*').eq('match_id', partidaId),
+      supabaseAny.from('match_destaques_publicados').select('*').eq('match_id', partidaId),
     ])
     setOwnVotes((ownRes.data ?? []) as unknown as OwnVote[])
     setOpponentVotes((oppRes.data ?? []) as unknown as OpponentVote[])
