@@ -10,6 +10,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { BrandLogo } from "@/components/BrandLogo";
+import { Spinner } from "@/components/AppSkeletons";
 
 const schema = z.object({
   email: z.string().email("Email inválido").max(255),
@@ -86,7 +87,7 @@ function LoginPage() {
               {errors.password && <p className="text-sm text-destructive">{errors.password.message}</p>}
             </div>
             <Button type="submit" className="w-full" disabled={submitting}>
-              {submitting ? "Entrando..." : "Entrar"}
+              {submitting ? <><Spinner className="mr-2 h-4 w-4" />Aguarde...</> : "Entrar"}
             </Button>
           </form>
 
