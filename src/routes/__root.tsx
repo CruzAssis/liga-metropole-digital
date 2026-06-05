@@ -7,6 +7,7 @@ import {
   HeadContent,
   Scripts,
 } from "@tanstack/react-router";
+import { useEffect } from "react";
 
 import appCss from "../styles.css?url";
 import { AuthProvider } from "@/hooks/use-auth";
@@ -74,12 +75,26 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
       { name: "description", content: "A nova era do futebol amador." },
       { property: "og:title", content: "Liga Metrópole" },
       { property: "og:description", content: "A nova era do futebol amador." },
-      { property: "og:type", content: "website" },
+      { property: "og:type", content: "site" },
       { name: "twitter:title", content: "Liga Metrópole" },
       { name: "twitter:description", content: "A nova era do futebol amador." },
-      { property: "og:image", content: "https://storage.googleapis.com/gpt-engineer-file-uploads/attachments/og-images/d5cd7797-b4f8-4cf1-9dc2-976f3e1c1766" },
-      { name: "twitter:image", content: "https://storage.googleapis.com/gpt-engineer-file-uploads/attachments/og-images/d5cd7797-b4f8-4cf1-9dc2-976f3e1c1766" },
+      {
+        property: "og:image",
+        content:
+          "https://storage.googleapis.com/gpt-engineer-file-uploads/attachments/og-image.png",
+      },
+      {
+        name: "twitter:image",
+        content:
+          "https://storage.googleapis.com/gpt-engineer-file-uploads/attachments/og-image.png",
+      },
       { name: "twitter:card", content: "summary_large_image" },
+      // PWA meta tags
+      { name: "theme-color", content: "#2563eb" },
+      { name: "mobile-web-app-capable", content: "yes" },
+      { name: "apple-mobile-web-app-capable", content: "yes" },
+      { name: "apple-mobile-web-app-status-bar-style", content: "black-translucent" },
+      { name: "apple-mobile-web-app-title", content: "Liga Metrópole" },
     ],
     links: [
       { rel: "stylesheet", href: appCss },
@@ -89,15 +104,35 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
         rel: "stylesheet",
         href: "https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Montserrat:wght@400;500;600;700&display=swap",
       },
+      // PWA manifest
+      { rel: "manifest", href: "/manifest.json" },
+      // Apple touch icon (fallback to SVG)
+      { rel: "apple-touch-icon", href: "/icons/icon-192.svg" },
     ],
   }),
-  shellComponent: RootShell,
   component: RootComponent,
+  shellComponent: RootDocument,
   notFoundComponent: NotFoundComponent,
   errorComponent: ErrorComponent,
 });
 
-function RootShell({ children }: { children: React.ReactNode }) {
+function RootDocument({ children }: { children: React.ReactNode }) {
+  // Register service worker for PWA
+  useEffect(() => {
+    if ("serviceWorker" in navigator) {
+      window.addEventListener("load", () => {
+        navigator.serviceWorker
+          .register("/sw.js")
+          .then((registration) => {
+            console.log("[PWA] Service Worker registered:", registration.scope);
+          })
+          .catch((error) => {
+            console.warn("[PWA] Service Worker registration failed:", error);
+          });
+      });
+    }
+  }, []);
+
   return (
     <html lang="pt-BR" className="dark">
       <head>
@@ -112,7 +147,7 @@ function RootShell({ children }: { children: React.ReactNode }) {
 }
 
 function RootComponent() {
-  const { queryClient } = Route.useRouteContext();
+  const queryClient = new QueryClient();
 
   return (
     <QueryClientProvider client={queryClient}>
