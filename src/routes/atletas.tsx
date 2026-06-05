@@ -1,4 +1,5 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
+import { SkeletonAthleteGrid, EmptyAtletas } from "@/components/AppSkeletons";
 import { useEffect, useState } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { useServerFn } from "@tanstack/react-start";
@@ -72,7 +73,7 @@ function AtletasPage() {
         </TabsList>
 
         <TabsContent value="todos" className="mt-6">
-          {!rows && <div className="text-muted-foreground">Carregando...</div>}
+          {!rows && <SkeletonAthleteGrid count={6} />}
           {rows && rows.length === 0 && (
             <div className="rounded-lg border border-border bg-card p-8 text-center text-muted-foreground">
               Nenhum atleta cadastrado ainda.
