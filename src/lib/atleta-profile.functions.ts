@@ -169,7 +169,8 @@ export const getAtletaPublicProfile = createServerFn({ method: "GET" })
           const hostTeam = teamMap.get(m.host_team_id);
           const visitorTeam = teamMap.get(m.visitor_team_id);
           // Check if destaque by identified_name or jersey_number (best-effort)
-          const foiDestaque = (destaques ?? []).some(
+          const destaqueRows = (destaques ?? []) as Array<{ match_id: string; identified_name: string | null }>;
+          const foiDestaque = destaqueRows.some(
             (d) =>
               d.match_id === m.id &&
               (d.identified_name === athlete.full_name ||
