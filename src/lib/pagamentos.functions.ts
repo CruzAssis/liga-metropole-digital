@@ -7,6 +7,16 @@ const adminDb = supabaseAdmin as any;
 
 export type PagamentoStatus = "pendente" | "pago" | "atrasado";
 export type PagamentoMetodo = "pix" | "outro";
+type PagamentoRow = {
+  id: string;
+  time_id: string;
+  mes_referencia: string;
+  status: PagamentoStatus;
+  valor: number;
+  data_pagamento: string | null;
+  metodo: PagamentoMetodo | null;
+  observacoes: string | null;
+};
 
 export function mesAtual(): string {
   const d = new Date();
@@ -80,7 +90,8 @@ export const listPagamentosMes = createServerFn({ method: "GET" })
       .from("pagamentos").select("*")
       .eq("mes_referencia", data.mes_referencia).in("time_id", teamIds);
 
-    const pagMap = new Map((pags ?? []).map((p) => [p.time_id, p]));
+    const pagRows = (pags ?? []) as PagamentoRow[];
+    const pagMap = new Map(pagRows.map((p) => [p.time_id, p]));
     const managerIds = [...new Set((teams ?? []).map((t) => t.manager_id).filter(Boolean))];
     const { data: profiles } = managerIds.length
       ? await supabaseAdmin.from("profiles").select("id, full_name, phone").in("id", managerIds)
@@ -162,7 +173,7 @@ export const desfazerPagamento = createServerFn({ method: "POST" })
     }).parse(input))
   .handler(async ({ data, context }) => {
     await assertAdmin(context.userId);
-    await supabaseAdmin.from("pagamentos").update({
+    await adminDb.from("pagamentos").update({
       status: "pendente", data_pagamento: null, metodo: null, marcado_por: context.userId,
     }).eq("time_id", data.time_id).eq("mes_referencia", data.mes_referencia);
     return { ok: true };
