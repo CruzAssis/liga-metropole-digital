@@ -199,6 +199,7 @@ function Legend() {
 
 function RankingPage() {
   const [competitions, setCompetitions] = useState<Competition[]>([]);
+  const [compsLoaded, setCompsLoaded] = useState(false);
   const [selectedComp, setSelectedComp] = useState<string | null>(null);
   const [matches, setMatches] = useState<Match[] | null>(null);
   const [teams, setTeams] = useState<Team[]>([]);
@@ -214,6 +215,7 @@ function RankingPage() {
         .order("created_at", { ascending: false });
       const list = (data ?? []) as unknown as Competition[];
       setCompetitions(list);
+      setCompsLoaded(true);
       if (list.length > 0) setSelectedComp(list[0].id);
     })();
   }, []);
@@ -291,7 +293,13 @@ function RankingPage() {
               </button>
             ))}
           </div>
-          {activeComp?.subprefeitura && (
+          {compsLoaded && competitions.length === 0 && (
+        <div className="mb-8 rounded-lg border border-zinc-800 bg-zinc-900/50 p-8 text-center">
+          <p className="text-zinc-400 text-lg">Nenhuma conferência ativa.</p>
+          <p className="text-zinc-500 text-sm mt-2">Crie uma liga no painel admin para visualizar o ranking.</p>
+        </div>
+      )}
+      {activeComp?.subprefeitura && (
             <p className="text-xs text-muted-foreground flex items-center gap-1">
               <MapPin className="h-3 w-3" />
               {activeComp.subprefeitura}
