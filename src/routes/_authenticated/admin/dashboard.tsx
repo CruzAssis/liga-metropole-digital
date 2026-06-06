@@ -1,4 +1,4 @@
-import { createFileRoute, Link } from "@tanstack/react-router";
+óimport { createFileRoute, Link } from "@tanstack/react-router";
 import { useServerFn } from "@tanstack/react-start";
 import { useQuery } from "@tanstack/react-query";
 import {
@@ -176,7 +176,7 @@ function AdminDashboard() {
         <div>
           <h1 className="font-display text-4xl tracking-wide text-white">Painel Admin</h1>
           <p className="text-zinc-400 text-sm mt-1">
-            Liga Metrópole Várzea · Métricas em tempo real
+            Liga Metrópole · Métricas em tempo real
           </p>
         </div>
         <Button
