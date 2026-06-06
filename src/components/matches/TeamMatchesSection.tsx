@@ -297,7 +297,7 @@ function OpponentContact({ match }: { match: Match }) {
   const dateStr = match.scheduled_at
     ? new Date(match.scheduled_at).toLocaleDateString("pt-BR")
     : "(data a definir)";
-  const text = `Olá! Sou do ${myName ?? "time"} (Liga Metrópole Várzea). Vamos combinar nosso jogo contra ${opponent.short_name} — ${dateStr}${match.venue ? ` em ${match.venue}` : ""}.`;
+  const text = `Olá! Sou do ${myName ?? "time"} (Liga Metrópole). Vamos combinar nosso jogo contra ${opponent.short_name} — ${dateStr}${match.venue ? ` em ${match.venue}` : ""}.`;
   const link = buildWhatsAppLink(opponent.manager_phone, text);
   if (!link) return null;
   return (
