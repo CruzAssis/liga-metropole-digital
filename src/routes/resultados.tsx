@@ -42,8 +42,8 @@ export const Route = createFileRoute("/resultados")({
   component: ResultadosPage,
   head: () => ({
     meta: [
-      { title: "Resultados · Liga Metrópole Várzea" },
-      { name: "description", content: "Resultados dos jogos da Liga Metrópole Várzea." },
+      { title: "Resultados · Liga Metrópole" },
+      { name: "description", content: "Resultados dos jogos da Liga Metrópole." },
     ],
   }),
 });
