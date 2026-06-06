@@ -58,11 +58,11 @@ export const Route = createFileRoute("/ranking")({
   component: RankingPage,
   head: () => ({
     meta: [
-      { title: "Classificação · Liga Metrópole Várzea 2026" },
+      { title: "Classificação · Liga Metrópole 2026" },
       {
         name: "description",
         content:
-          "Rankings de Mandantes e Visitantes da Liga Metrópole Várzea. 40 times por grupo, top 8 ao playoff, últimos 10 rebaixados para Série B.",
+          "Rankings de Mandantes e Visitantes da Liga Metrópole. 40 times por grupo, top 8 ao playoff, últimos 10 rebaixados para Série B.",
       },
     ],
   }),
