@@ -24,7 +24,7 @@ function AdminSumulasPage() {
   const forceConfirm = useServerFn(adminForceConfirm);
   const qc = useQueryClient();
 
-  const { data, isLoading } = useQuery({
+  const { data, isLoading, isError } = useQuery({
     queryKey: ["admin-sumulas"],
     queryFn: () => list(),
     enabled: isAdmin,
@@ -68,6 +68,12 @@ function AdminSumulasPage() {
         <h1 className="font-display text-4xl tracking-wide">Súmulas pendentes</h1>
       </div>
 
+      {isError && (
+        <div className="rounded-lg border border-red-800 bg-red-950/30 p-6 text-center">
+          <p className="text-red-400 font-medium">Erro ao carregar súmulas.</p>
+          <p className="text-zinc-500 text-sm mt-1">Verifique sua conexão e tente novamente.</p>
+        </div>
+      )}
       {isLoading && <div className="text-muted-foreground">Carregando...</div>}
       {!isLoading && matches.length === 0 && (
         <div className="rounded-lg border border-border bg-card p-8 text-center text-muted-foreground">
