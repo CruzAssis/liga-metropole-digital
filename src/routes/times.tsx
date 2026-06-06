@@ -18,8 +18,8 @@ export const Route = createFileRoute("/times")({
 component: TimesPage,
 head: () => ({
   meta: [
-    { title: "Times · Liga Metrópole Várzea" },
-    { name: "description", content: "Times aprovados da Liga Metrópole Várzea." },
+    { title: "Times · Liga Metrópole" },
+    { name: "description", content: "Times aprovados da Liga Metrópole." },
   ],
 }),
 });
