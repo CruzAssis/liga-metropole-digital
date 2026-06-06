@@ -197,31 +197,37 @@ function LigasPage() {
     if (host + visitor !== max) { toast.error(`Vagas Mandante (${host}) + Visitante (${visitor}) deve somar ${max}`); return; }
 
     setSaving(true);
-    const sp = SUBPREFEITURAS.find((s) => s.label === form.subprefeitura);
-    const payload = {
-      name: form.name.trim(),
-      season: form.season.trim() ? parseInt(form.season.trim(), 10) : new Date().getFullYear(),
-      max_teams: max,
-      host_slots: host,
-      visitor_slots: visitor,
-      starts_at: form.starts_at || null,
-      registration_status: form.registration_status,
-      subprefeitura: form.subprefeitura || null,
-      conference_name: sp?.conference_name ?? form.name.trim(),
-      zona: sp?.zona ?? null,
-      conference_number: sp?.conference_number ?? null,
-    };
+    try {
+      const sp = SUBPREFEITURAS.find((s) => s.label === form.subprefeitura);
+      const payload = {
+        name: form.name.trim(),
+        season: form.season.trim() ? parseInt(form.season.trim(), 10) : new Date().getFullYear(),
+        max_teams: max,
+        host_slots: host,
+        visitor_slots: visitor,
+        starts_at: form.starts_at || null,
+        registration_status: form.registration_status,
+        subprefeitura: form.subprefeitura || null,
+        conference_name: sp?.conference_name ?? form.name.trim(),
+        zona: sp?.zona ?? null,
+        conference_number: sp?.conference_number ?? null,
+      };
 
-    if (editId) {
-      const { error } = await supabaseAny.from("competitions").update(payload).eq("id", editId);
-      if (error) toast.error("Erro ao salvar", { description: error.message });
-      else { toast.success("Liga atualizada"); handleCancel(); void load(); }
-    } else {
-      const { error } = await supabaseAny.from("competitions").insert({ ...payload, status: "registration" });
-      if (error) toast.error("Erro ao criar liga", { description: error.message });
-      else { toast.success("Liga criada!"); handleCancel(); void load(); }
+      if (editId) {
+        const { error } = await supabaseAny.from("competitions").update(payload).eq("id", editId);
+        if (error) toast.error("Erro ao salvar", { description: error.message });
+        else { toast.success("Liga atualizada"); handleCancel(); void load(); }
+      } else {
+        const { error } = await supabaseAny.from("competitions").insert({ ...payload, status: "registration" });
+        if (error) toast.error("Erro ao criar liga", { description: error.message });
+        else { toast.success("Liga criada!"); handleCancel(); void load(); }
+      }
+    } catch (e: unknown) {
+      const msg = e instanceof Error ? e.message : 'Erro inesperado ao salvar';
+      toast.error('Erro ao salvar liga', { description: msg });
+    } finally {
+      setSaving(false);
     }
-    setSaving(false);
   };
 
   const handleToggleStatus = async (c: Competition) => {
