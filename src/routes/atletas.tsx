@@ -20,8 +20,8 @@ export const Route = createFileRoute("/atletas")({
   component: AtletasPage,
   head: () => ({
     meta: [
-      { title: "Atletas · Liga Metrópole Várzea" },
-      { name: "description", content: "Atletas, artilharia e ranking da Liga Metrópole Várzea." },
+      { title: "Atletas · Liga Metrópole" },
+      { name: "description", content: "Atletas, artilharia e ranking da Liga Metrópole." },
     ],
   }),
 });
