@@ -18,7 +18,7 @@ export function PublicShell({ children }: { children: React.ReactNode }) {
         <div className="mx-auto flex max-w-6xl items-center justify-between px-6 py-4">
           <Link to="/" className="flex items-center gap-2">
             <BrandLogo className="h-8 w-8" />
-            <span className="font-display text-xl tracking-wider">Liga Metropole Varzea</span>
+            <span className="font-display text-xl tracking-wider">Liga Metropole</span>
           </Link>
           <nav className="flex flex-wrap items-center gap-1">
             <Button asChild variant="ghost" size="sm"><Link to="/ranking">Ranking</Link></Button>
@@ -44,7 +44,7 @@ export function PublicShell({ children }: { children: React.ReactNode }) {
       <main className="mx-auto max-w-6xl px-6 py-10">{children}</main>
     <footer className="border-t border-border mt-auto">
       <div className="mx-auto flex max-w-6xl items-center justify-between flex-wrap gap-2 px-6 py-4 text-xs text-muted-foreground">
-        <span>&copy; {new Date().getFullYear()} Liga Metropole Varzea</span>
+        <span>&copy; {new Date().getFullYear()} Liga Metropole</span>
         <nav className="flex items-center gap-4">
           <Link to="/privacidade" className="hover:text-foreground transition-colors">Privacidade</Link>
           <Link to="/termos" className="hover:text-foreground transition-colors">Termos de Uso</Link>
