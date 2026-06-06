@@ -56,7 +56,7 @@ function HomePage() {
   return (
     <div className="min-h-screen bg-black text-white flex flex-col">
       <header className="flex items-center justify-between px-6 py-4 border-b border-zinc-800">
-        <span className="text-lg font-bold tracking-tight">Liga Metrópole Várzea</span>
+        <span className="text-lg font-bold tracking-tight">Liga Metrópole</span>
         <div className="flex items-center gap-3">
           <Link to="/ranking" className="text-sm text-zinc-400 hover:text-white transition-colors hidden sm:inline">Classificação</Link>
           {!loading && (
@@ -92,10 +92,10 @@ function HomePage() {
 
           <h1 className="text-5xl md:text-6xl font-black tracking-tight leading-tight">
             Metrópole<br />
-            <span className="text-[#1565F5]">Várzea</span>
+            <span className="text-[#1565F5]">Futebol</span>
           </h1>
           <p className="text-zinc-400 text-lg max-w-lg mx-auto leading-relaxed">
-            A liga oficial da várzea metropolitana. Conferências por subprefeitura de São Paulo — times do seu bairro, jogando perto de você.
+            A liga oficial do futebol amador metropolitano. Conferências por subprefeitura de São Paulo — times do seu bairro, jogando perto de você.
           </p>
           <div className="flex flex-col sm:flex-row items-center justify-center gap-4 pt-4">
             <Link to="/signup" className="w-full sm:w-auto bg-[#1565F5] hover:bg-blue-600 text-white font-semibold px-8 py-3 rounded-lg text-base transition-colors text-center">
@@ -176,7 +176,7 @@ function HomePage() {
       </section>
 
       <footer className="border-t border-zinc-800 px-6 py-4 text-center">
-        <p className="text-zinc-600 text-sm">2026 Liga Metrópole Várzea</p>
+        <p className="text-zinc-600 text-sm">2026 Liga Metrópole</p>
       </footer>
     </div>
   )
