@@ -175,6 +175,130 @@ function HomePage() {
         </div>
       </section>
 
+
+      {/* ---- PORTAL DE FUTEBOL: Seções dinâmicas ---- */}
+      {(recentMatches.length > 0 || upcomingMatches.length > 0 || topStandings.length > 0) && (
+        <section className="py-10 px-4 md:px-8 max-w-5xl mx-auto w-full space-y-10">
+
+          {/* Últimos Resultados */}
+          {recentMatches.length > 0 && (
+            <div>
+              <div className="flex items-center justify-between mb-4">
+                <h2 className="text-xl font-bold flex items-center gap-2">
+                  <Trophy className="h-5 w-5 text-[#1565F5]" />
+                  Últimos Resultados
+                </h2>
+                <Link to="/resultados" className="text-sm text-[#1565F5] hover:underline flex items-center gap-1">
+                  Ver todos <ChevronRight className="h-4 w-4" />
+                </Link>
+              </div>
+              <div className="space-y-3">
+                {recentMatches.map(m => (
+                  <div key={m.id} className="bg-zinc-900 border border-zinc-800 rounded-xl p-4 flex items-center justify-between">
+                    <div className="flex-1 text-right">
+                      <span className="font-semibold text-zinc-100 text-sm">{m.home_team}</span>
+                    </div>
+                    <div className="mx-4 text-center">
+                      <span className="text-2xl font-bold text-white tabular-nums">
+                        {m.home_score ?? '-'} – {m.away_score ?? '-'}
+                      </span>
+                      <p className="text-xs text-zinc-500 mt-0.5">{m.conference_name}</p>
+                    </div>
+                    <div className="flex-1 text-left">
+                      <span className="font-semibold text-zinc-100 text-sm">{m.away_team}</span>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </div>
+          )}
+
+          {/* Próximos Jogos */}
+          {upcomingMatches.length > 0 && (
+            <div>
+              <div className="flex items-center justify-between mb-4">
+                <h2 className="text-xl font-bold flex items-center gap-2">
+                  <Calendar className="h-5 w-5 text-[#1565F5]" />
+                  Próximos Jogos
+                </h2>
+                <Link to="/agenda" className="text-sm text-[#1565F5] hover:underline flex items-center gap-1">
+                  Ver agenda <ChevronRight className="h-4 w-4" />
+                </Link>
+              </div>
+              <div className="space-y-3">
+                {upcomingMatches.map(m => {
+                  const dt = new Date(m.scheduled_at)
+                  const dateStr = dt.toLocaleDateString('pt-BR', { weekday: 'short', day: '2-digit', month: '2-digit' })
+                  const timeStr = dt.toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' })
+                  return (
+                    <div key={m.id} className="bg-zinc-900 border border-zinc-800 rounded-xl p-4">
+                      <div className="flex items-center justify-between mb-2">
+                        <span className="text-xs text-[#1565F5] font-medium">{m.conference_name}</span>
+                        <span className="text-xs text-zinc-400">{dateStr} · {timeStr}</span>
+                      </div>
+                      <div className="flex items-center justify-between">
+                        <span className="font-semibold text-zinc-100 text-sm">{m.home_team}</span>
+                        <span className="text-zinc-600 font-bold text-lg mx-3">×</span>
+                        <span className="font-semibold text-zinc-100 text-sm text-right">{m.away_team}</span>
+                      </div>
+                      {m.venue && (
+                        <p className="text-xs text-zinc-500 mt-1.5 flex items-center gap-1">
+                          <MapPin className="h-3 w-3" />{m.venue}
+                        </p>
+                      )}
+                    </div>
+                  )
+                })}
+              </div>
+            </div>
+          )}
+
+          {/* Tabela Top 5 */}
+          {topStandings.length > 0 && (
+            <div>
+              <div className="flex items-center justify-between mb-4">
+                <h2 className="text-xl font-bold flex items-center gap-2">
+                  <Trophy className="h-5 w-5 text-yellow-400" />
+                  Classificação
+                </h2>
+                <Link to="/ranking" className="text-sm text-[#1565F5] hover:underline flex items-center gap-1">
+                  Tabela completa <ChevronRight className="h-4 w-4" />
+                </Link>
+              </div>
+              <div className="bg-zinc-900 border border-zinc-800 rounded-xl overflow-hidden">
+                <table className="w-full text-sm">
+                  <thead>
+                    <tr className="border-b border-zinc-800 text-zinc-500 text-xs">
+                      <th className="text-left px-4 py-2.5 w-6">#</th>
+                      <th className="text-left px-4 py-2.5">Time</th>
+                      <th className="text-center px-2 py-2.5">PJ</th>
+                      <th className="text-center px-2 py-2.5">V</th>
+                      <th className="text-center px-2 py-2.5">E</th>
+                      <th className="text-center px-2 py-2.5">D</th>
+                      <th className="text-center px-3 py-2.5 font-bold text-zinc-300">PTS</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {topStandings.map((s, idx) => (
+                      <tr key={s.team_name} className="border-b border-zinc-800/50 last:border-0 hover:bg-zinc-800/30 transition-colors">
+                        <td className="px-4 py-3 text-zinc-500">{idx + 1}</td>
+                        <td className="px-4 py-3 font-medium text-zinc-100">{s.team_name}</td>
+                        <td className="text-center px-2 py-3 text-zinc-400">{s.gp}</td>
+                        <td className="text-center px-2 py-3 text-zinc-400">{s.gw}</td>
+                        <td className="text-center px-2 py-3 text-zinc-400">{s.gd}</td>
+                        <td className="text-center px-2 py-3 text-zinc-400">{s.gl}</td>
+                        <td className="text-center px-3 py-3 font-bold text-[#1565F5]">{s.pts}</td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              </div>
+            </div>
+          )}
+
+        </section>
+      )}
+
       <footer className="border-t border-zinc-800 px-6 py-4 text-center">
         <p className="text-zinc-600 text-sm">2026 Liga Metrópole</p>
       </footer>
