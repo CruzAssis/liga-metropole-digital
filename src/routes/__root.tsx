@@ -72,12 +72,12 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
       { charSet: "utf-8" },
       { name: "viewport", content: "width=device-width, initial-scale=1" },
       { title: "Liga Metrópole" },
-      { name: "description", content: "A nova era do futebol amador." },
+      { name: "description", content: "Metrópole + Futebol. A liga que transforma amistosos invisíveis em competições oficiais." },
       { property: "og:title", content: "Liga Metrópole" },
-      { property: "og:description", content: "A nova era do futebol amador." },
+      { property: "og:description", content: "Metrópole + Futebol. A liga que transforma amistosos invisíveis em competições oficiais." },
       { property: "og:type", content: "site" },
       { name: "twitter:title", content: "Liga Metrópole" },
-      { name: "twitter:description", content: "A nova era do futebol amador." },
+      { name: "twitter:description", content: "Metrópole + Futebol. A liga que transforma amistosos invisíveis em competições oficiais." },
       {
         property: "og:image",
         content:
