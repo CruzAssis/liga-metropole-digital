@@ -32,7 +32,7 @@ type TeamRow = {
 };
 
 /**
- * Sorteio oficial Liga Metrópole Várzea (V6):
+ * Sorteio oficial Liga Metrópole (V6):
  *  - 40 Mandantes + 40 Visitantes, divididos em Lado A e Lado B (20 cada).
  *  - Confrontos APENAS Mandante × Visitante e SOMENTE dentro do mesmo Lado.
  *  - 20 rodadas (round-robin cíclico) → 400 partidas por Lado → 800 totais.
