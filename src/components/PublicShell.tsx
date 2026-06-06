@@ -1,4 +1,4 @@
-import { Link, useNavigate } from "@tanstack/react-router";
+import { Link, useNavigate, useRouterState } from "@tanstack/react-router";
 import { BrandLogo } from "@/components/BrandLogo";
 import { Button } from "@/components/ui/button";
 import { useAuth } from "@/hooks/use-auth";
@@ -11,6 +11,10 @@ export function PublicShell({ children }: { children: React.ReactNode }) {
     await signOut();
     navigate({ to: "/", replace: true });
   };
+
+  const routerState = useRouterState()
+  const currentPath = routerState.location.pathname
+  const isHome = currentPath === '/'
 
   return (
     <div className="min-h-screen bg-background text-foreground">
@@ -38,7 +42,14 @@ export function PublicShell({ children }: { children: React.ReactNode }) {
                 </>
               )
             )}
-          </nav>
+          
+          {!isHome && (
+            <Link to="/" className="flex items-center gap-1 text-sm text-zinc-400 hover:text-white transition-colors mr-2">
+              <ArrowLeft className="h-4 w-4" />
+              Início
+            </Link>
+          )}
+        </nav>
         </div>
       </header>
       <main className="mx-auto max-w-6xl px-6 py-10">{children}</main>
