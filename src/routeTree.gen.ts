@@ -12,6 +12,10 @@ import { Route as rootRouteImport } from './routes/__root'
 import { Route as VerificarRouteImport } from './routes/verificar'
 import { Route as TimesRouteImport } from './routes/times'
 import { Route as TermosRouteImport } from './routes/termos'
+import { Route as OnboardingRouteImport } from './routes/onboarding'
+import { Route as OnboardingDiretorRouteImport } from './routes/onboarding.diretor'
+import { Route as OnboardingJogadorRouteImport } from './routes/onboarding.jogador'
+import { Route as OnboardingTorcedorRouteImport } from './routes/onboarding.torcedor'
 import { Route as SignupRouteImport } from './routes/signup'
 import { Route as ResultadosRouteImport } from './routes/resultados'
 import { Route as RankingRouteImport } from './routes/ranking'
@@ -54,6 +58,26 @@ const TermosRoute = TermosRouteImport.update({
   id: '/termos',
   path: '/termos',
   getParentRoute: () => rootRouteImport,
+} as any)
+const OnboardingRoute = OnboardingRouteImport.update({
+  id: '/onboarding',
+  path: '/onboarding',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const OnboardingDiretorRoute = OnboardingDiretorRouteImport.update({
+  id: '/onboarding/diretor',
+  path: '/diretor',
+  getParentRoute: () => OnboardingRoute,
+} as any)
+const OnboardingJogadorRoute = OnboardingJogadorRouteImport.update({
+  id: '/onboarding/jogador',
+  path: '/jogador',
+  getParentRoute: () => OnboardingRoute,
+} as any)
+const OnboardingTorcedorRoute = OnboardingTorcedorRouteImport.update({
+  id: '/onboarding/torcedor',
+  path: '/torcedor',
+  getParentRoute: () => OnboardingRoute,
 } as any)
 const SignupRoute = SignupRouteImport.update({
   id: '/signup',
@@ -207,6 +231,10 @@ export interface FileRoutesByFullPath {
   '/privacidade': typeof PrivacidadeRoute
   '/ranking': typeof RankingRoute
   '/resultados': typeof ResultadosRoute
+  '/onboarding': typeof OnboardingRoute
+  '/onboarding/diretor': typeof OnboardingDiretorRoute
+  '/onboarding/jogador': typeof OnboardingJogadorRoute
+  '/onboarding/torcedor': typeof OnboardingTorcedorRoute
   '/signup': typeof SignupRoute
   '/termos': typeof TermosRoute
   '/times': typeof TimesRouteWithChildren
@@ -304,6 +332,10 @@ export interface FileRouteTypes {
     | '/privacidade'
     | '/ranking'
     | '/resultados'
+    | '/onboarding'
+    | '/onboarding/diretor'
+    | '/onboarding/jogador'
+    | '/onboarding/torcedor'
     | '/signup'
     | '/termos'
     | '/times'
