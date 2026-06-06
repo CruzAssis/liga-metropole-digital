@@ -10,8 +10,8 @@ export const Route = createFileRoute("/locais")({
   component: LocaisPage,
   head: () => ({
     meta: [
-      { title: "Locais · Liga Metrópole Várzea" },
-      { name: "description", content: "Campos e locais dos jogos da Liga Metrópole Várzea." },
+      { title: "Locais · Liga Metrópole" },
+      { name: "description", content: "Campos e locais dos jogos da Liga Metrópole." },
     ],
   }),
 });
