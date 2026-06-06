@@ -39,8 +39,8 @@ export const Route = createFileRoute("/agenda")({
   component: AgendaPage,
   head: () => ({
     meta: [
-      { title: "Agenda · Liga Metrópole Várzea" },
-      { name: "description", content: "Próximos jogos da Liga Metrópole Várzea." },
+      { title: "Agenda · Liga Metrópole" },
+      { name: "description", content: "Próximos jogos da Liga Metrópole." },
     ],
   }),
 });
