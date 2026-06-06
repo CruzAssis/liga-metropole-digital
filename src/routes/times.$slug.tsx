@@ -19,10 +19,10 @@ export const Route = createFileRoute("/times/$slug")({
   head: ({ loaderData }) => ({
     meta: loaderData
       ? [
-          { title: `${loaderData.team.name} · Liga Metrópole Várzea` },
+          { title: `${loaderData.team.name} · Liga Metrópole` },
           {
             name: "description",
-            content: `Perfil do ${loaderData.team.name}: elenco, jogos e classificação na Liga Metrópole Várzea.`,
+            content: `Perfil do ${loaderData.team.name}: elenco, jogos e classificação na Liga Metrópole.`,
           },
         ]
       : [],
@@ -250,7 +250,7 @@ function ContactSection({ slug, teamName }: { slug: string; teamName: string }) 
             {contact.phone && (
               <Button asChild variant="default" size="sm" className="gap-2">
                 <a
-                  href={buildWhatsAppLink(contact.phone, `Olá! Sobre a Liga Metrópole Várzea — ${teamName}.`) ?? "#"}
+                  href={buildWhatsAppLink(contact.phone, `Olá! Sobre a Liga Metrópole — ${teamName}.`) ?? "#"}
                   target="_blank"
                   rel="noreferrer"
                 >
