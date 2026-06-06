@@ -35,10 +35,10 @@ function LoginPage() {
   const { redirect: redirectTo } = useSearch({ from: "/login" });
   const [submitting, setSubmitting] = useState(false);
 
-  // Se ja esta autenticado, vai para redirect ou minha-conta
+  // Se ja esta autenticado, vai para redirect ou home
   useEffect(() => {
     if (!loading && user) {
-      navigate({ to: redirectTo ?? "/minha-conta", replace: true });
+      navigate({ to: redirectTo ?? "/", replace: true });
     }
   }, [user, loading, navigate, redirectTo]);
 
@@ -55,8 +55,8 @@ function LoginPage() {
       return;
     }
     toast.success("Bem-vindo de volta!");
-    // Redireciona para o destino original (ex: /inscricao) ou para minha-conta
-    navigate({ to: redirectTo ?? "/minha-conta", replace: true });
+    // Redireciona para o destino original (ex: /inscricao) ou para /
+    navigate({ to: redirectTo ?? "/", replace: true });
   };
 
   return (
@@ -64,7 +64,7 @@ function LoginPage() {
       <div className="w-full max-w-md">
         <Link to="/" className="flex items-center gap-2 justify-center mb-8">
           <BrandLogo className="h-10 w-10" />
-          <span className="font-display text-2xl tracking-wider">Liga Metrópole Várzea</span>
+          <span className="font-display text-2xl tracking-wider">Liga Metrópole</span>
         </Link>
 
         <div className="rounded-lg border border-border bg-card p-8">
