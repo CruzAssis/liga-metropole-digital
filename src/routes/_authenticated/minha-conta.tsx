@@ -199,7 +199,7 @@ function MinhaContaPage() {
         <div className="rounded-lg border border-border bg-card p-8 text-center">
           <ClipboardList className="mx-auto h-10 w-10 text-primary mb-3" />
           <h2 className="font-display text-3xl tracking-wide">Você ainda não inscreveu um time</h2>
-          <p className="mt-2 text-muted-foreground">Faça a inscrição para participar da Liga Metrópole Várzea.</p>
+          <p className="mt-2 text-muted-foreground">Faça a inscrição para participar da Liga Metrópole.</p>
           <Button asChild className="mt-6"><Link to="/inscricao">Inscrever meu time</Link></Button>
         </div>
       ) : (
