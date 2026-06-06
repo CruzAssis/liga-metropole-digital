@@ -145,11 +145,29 @@ function MatchRow({ match }: { match: UpcomingMatch }) {
 function AdminDashboard() {
   const fetchMetrics = useServerFn(getAdminDashboardMetrics);
 
-  const { data: metrics, isLoading, refetch } = useQuery<DashboardMetrics>({
+  const { data: metrics, isLoading, isError, refetch } = useQuery<DashboardMetrics>({
     queryKey: ["admin-dashboard-metrics"],
     queryFn: () => fetchMetrics({}),
     refetchInterval: 60_000, // auto-refresh every 60s
   });
+
+  if (isError) {
+    return (
+      <div className="p-8 flex flex-col items-center justify-center gap-4 text-center">
+        <AlertCircle className="h-12 w-12 text-red-500" />
+        <div>
+          <p className="text-lg font-semibold text-zinc-100">Erro ao carregar métricas</p>
+          <p className="text-sm text-zinc-400 mt-1">Verifique a conexão com o banco de dados.</p>
+        </div>
+        <button
+          onClick={() => refetch()}
+          className="px-4 py-2 bg-primary text-white rounded-md text-sm hover:bg-primary/90"
+        >
+          Tentar novamente
+        </button>
+      </div>
+    );
+  }
 
   if (isLoading || !metrics) {
     return (
