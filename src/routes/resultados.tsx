@@ -188,7 +188,7 @@ function ResultadosPage() {
 
       {!selectedComp && competitions.length === 0 && (
         <div className="rounded-lg border border-border bg-card p-8 text-center text-muted-foreground">
-          Nenhuma competição em andamento.
+          Nenhuma conferência ativa. Crie uma liga no painel admin.
         </div>
       )}
 
