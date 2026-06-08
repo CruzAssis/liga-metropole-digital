@@ -3,7 +3,7 @@ import { createFileRoute, Link, useNavigate } from '@tanstack/react-router'
 import { useEffect, useState } from 'react'
 import { useAuth } from '@/hooks/use-auth'
 import { supabase } from '@/integrations/supabase/client'
-import { MapPin } from 'lucide-react'
+import { MapPin, Trophy, Calendar, ChevronRight } from 'lucide-react'
 
 export const Route = createFileRoute('/')({
   component: HomePage,
@@ -25,7 +25,9 @@ function HomePage() {
   const { user, loading, signOut } = useAuth()
   const navigate = useNavigate()
   const [activeConference, setActiveConference] = useState<ActiveConference | null>(null)
-
+const [recentMatches, setRecentMatches] = useState([])
+  const [upcomingMatches, setUpcomingMatches] = useState([])
+  const [topStandings, setTopStandings] = useState([])
   // Load the active (open or in-progress) conference — default to Norte 1
   useEffect(() => {
     (async () => {
