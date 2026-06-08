@@ -12,14 +12,11 @@ import { Route as rootRouteImport } from './routes/__root'
 import { Route as VerificarRouteImport } from './routes/verificar'
 import { Route as TimesRouteImport } from './routes/times'
 import { Route as TermosRouteImport } from './routes/termos'
-import { Route as OnboardingRouteImport } from './routes/onboarding'
-import { Route as OnboardingDiretorRouteImport } from './routes/onboarding.diretor'
-import { Route as OnboardingJogadorRouteImport } from './routes/onboarding.jogador'
-import { Route as OnboardingTorcedorRouteImport } from './routes/onboarding.torcedor'
 import { Route as SignupRouteImport } from './routes/signup'
 import { Route as ResultadosRouteImport } from './routes/resultados'
 import { Route as RankingRouteImport } from './routes/ranking'
 import { Route as PrivacidadeRouteImport } from './routes/privacidade'
+import { Route as OnboardingRouteImport } from './routes/onboarding'
 import { Route as LoginRouteImport } from './routes/login'
 import { Route as LocaisRouteImport } from './routes/locais'
 import { Route as AtletasRouteImport } from './routes/atletas'
@@ -29,6 +26,9 @@ import { Route as IndexRouteImport } from './routes/index'
 import { Route as TimesSlugRouteImport } from './routes/times.$slug'
 import { Route as SumulaPartidaIdRouteImport } from './routes/sumula.$partidaId'
 import { Route as PartidasIdRouteImport } from './routes/partidas.$id'
+import { Route as OnboardingTorcedorRouteImport } from './routes/onboarding.torcedor'
+import { Route as OnboardingJogadorRouteImport } from './routes/onboarding.jogador'
+import { Route as OnboardingDiretorRouteImport } from './routes/onboarding.diretor'
 import { Route as AtletasIdRouteImport } from './routes/atletas.$id'
 import { Route as AuthenticatedMinhaContaRouteImport } from './routes/_authenticated/minha-conta'
 import { Route as AuthenticatedInscricaoRouteImport } from './routes/_authenticated/inscricao'
@@ -59,26 +59,6 @@ const TermosRoute = TermosRouteImport.update({
   path: '/termos',
   getParentRoute: () => rootRouteImport,
 } as any)
-const OnboardingRoute = OnboardingRouteImport.update({
-  id: '/onboarding',
-  path: '/onboarding',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const OnboardingDiretorRoute = OnboardingDiretorRouteImport.update({
-  id: '/onboarding/diretor',
-  path: '/diretor',
-  getParentRoute: () => OnboardingRoute,
-} as any)
-const OnboardingJogadorRoute = OnboardingJogadorRouteImport.update({
-  id: '/onboarding/jogador',
-  path: '/jogador',
-  getParentRoute: () => OnboardingRoute,
-} as any)
-const OnboardingTorcedorRoute = OnboardingTorcedorRouteImport.update({
-  id: '/onboarding/torcedor',
-  path: '/torcedor',
-  getParentRoute: () => OnboardingRoute,
-} as any)
 const SignupRoute = SignupRouteImport.update({
   id: '/signup',
   path: '/signup',
@@ -97,6 +77,11 @@ const RankingRoute = RankingRouteImport.update({
 const PrivacidadeRoute = PrivacidadeRouteImport.update({
   id: '/privacidade',
   path: '/privacidade',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const OnboardingRoute = OnboardingRouteImport.update({
+  id: '/onboarding',
+  path: '/onboarding',
   getParentRoute: () => rootRouteImport,
 } as any)
 const LoginRoute = LoginRouteImport.update({
@@ -142,6 +127,21 @@ const PartidasIdRoute = PartidasIdRouteImport.update({
   id: '/partidas/$id',
   path: '/partidas/$id',
   getParentRoute: () => rootRouteImport,
+} as any)
+const OnboardingTorcedorRoute = OnboardingTorcedorRouteImport.update({
+  id: '/torcedor',
+  path: '/torcedor',
+  getParentRoute: () => OnboardingRoute,
+} as any)
+const OnboardingJogadorRoute = OnboardingJogadorRouteImport.update({
+  id: '/jogador',
+  path: '/jogador',
+  getParentRoute: () => OnboardingRoute,
+} as any)
+const OnboardingDiretorRoute = OnboardingDiretorRouteImport.update({
+  id: '/diretor',
+  path: '/diretor',
+  getParentRoute: () => OnboardingRoute,
 } as any)
 const AtletasIdRoute = AtletasIdRouteImport.update({
   id: '/$id',
@@ -228,13 +228,10 @@ export interface FileRoutesByFullPath {
   '/atletas': typeof AtletasRouteWithChildren
   '/locais': typeof LocaisRoute
   '/login': typeof LoginRoute
+  '/onboarding': typeof OnboardingRouteWithChildren
   '/privacidade': typeof PrivacidadeRoute
   '/ranking': typeof RankingRoute
   '/resultados': typeof ResultadosRoute
-  '/onboarding': typeof OnboardingRoute
-  '/onboarding/diretor': typeof OnboardingDiretorRoute
-  '/onboarding/jogador': typeof OnboardingJogadorRoute
-  '/onboarding/torcedor': typeof OnboardingTorcedorRoute
   '/signup': typeof SignupRoute
   '/termos': typeof TermosRoute
   '/times': typeof TimesRouteWithChildren
@@ -243,6 +240,9 @@ export interface FileRoutesByFullPath {
   '/inscricao': typeof AuthenticatedInscricaoRoute
   '/minha-conta': typeof AuthenticatedMinhaContaRouteWithChildren
   '/atletas/$id': typeof AtletasIdRoute
+  '/onboarding/diretor': typeof OnboardingDiretorRoute
+  '/onboarding/jogador': typeof OnboardingJogadorRoute
+  '/onboarding/torcedor': typeof OnboardingTorcedorRoute
   '/partidas/$id': typeof PartidasIdRoute
   '/sumula/$partidaId': typeof SumulaPartidaIdRoute
   '/times/$slug': typeof TimesSlugRoute
@@ -263,6 +263,7 @@ export interface FileRoutesByTo {
   '/atletas': typeof AtletasRouteWithChildren
   '/locais': typeof LocaisRoute
   '/login': typeof LoginRoute
+  '/onboarding': typeof OnboardingRouteWithChildren
   '/privacidade': typeof PrivacidadeRoute
   '/ranking': typeof RankingRoute
   '/resultados': typeof ResultadosRoute
@@ -274,6 +275,9 @@ export interface FileRoutesByTo {
   '/inscricao': typeof AuthenticatedInscricaoRoute
   '/minha-conta': typeof AuthenticatedMinhaContaRouteWithChildren
   '/atletas/$id': typeof AtletasIdRoute
+  '/onboarding/diretor': typeof OnboardingDiretorRoute
+  '/onboarding/jogador': typeof OnboardingJogadorRoute
+  '/onboarding/torcedor': typeof OnboardingTorcedorRoute
   '/partidas/$id': typeof PartidasIdRoute
   '/sumula/$partidaId': typeof SumulaPartidaIdRoute
   '/times/$slug': typeof TimesSlugRoute
@@ -296,6 +300,7 @@ export interface FileRoutesById {
   '/atletas': typeof AtletasRouteWithChildren
   '/locais': typeof LocaisRoute
   '/login': typeof LoginRoute
+  '/onboarding': typeof OnboardingRouteWithChildren
   '/privacidade': typeof PrivacidadeRoute
   '/ranking': typeof RankingRoute
   '/resultados': typeof ResultadosRoute
@@ -307,6 +312,9 @@ export interface FileRoutesById {
   '/_authenticated/inscricao': typeof AuthenticatedInscricaoRoute
   '/_authenticated/minha-conta': typeof AuthenticatedMinhaContaRouteWithChildren
   '/atletas/$id': typeof AtletasIdRoute
+  '/onboarding/diretor': typeof OnboardingDiretorRoute
+  '/onboarding/jogador': typeof OnboardingJogadorRoute
+  '/onboarding/torcedor': typeof OnboardingTorcedorRoute
   '/partidas/$id': typeof PartidasIdRoute
   '/sumula/$partidaId': typeof SumulaPartidaIdRoute
   '/times/$slug': typeof TimesSlugRoute
@@ -329,13 +337,10 @@ export interface FileRouteTypes {
     | '/atletas'
     | '/locais'
     | '/login'
+    | '/onboarding'
     | '/privacidade'
     | '/ranking'
     | '/resultados'
-    | '/onboarding'
-    | '/onboarding/diretor'
-    | '/onboarding/jogador'
-    | '/onboarding/torcedor'
     | '/signup'
     | '/termos'
     | '/times'
@@ -344,6 +349,9 @@ export interface FileRouteTypes {
     | '/inscricao'
     | '/minha-conta'
     | '/atletas/$id'
+    | '/onboarding/diretor'
+    | '/onboarding/jogador'
+    | '/onboarding/torcedor'
     | '/partidas/$id'
     | '/sumula/$partidaId'
     | '/times/$slug'
@@ -364,6 +372,7 @@ export interface FileRouteTypes {
     | '/atletas'
     | '/locais'
     | '/login'
+    | '/onboarding'
     | '/privacidade'
     | '/ranking'
     | '/resultados'
@@ -375,6 +384,9 @@ export interface FileRouteTypes {
     | '/inscricao'
     | '/minha-conta'
     | '/atletas/$id'
+    | '/onboarding/diretor'
+    | '/onboarding/jogador'
+    | '/onboarding/torcedor'
     | '/partidas/$id'
     | '/sumula/$partidaId'
     | '/times/$slug'
@@ -396,6 +408,7 @@ export interface FileRouteTypes {
     | '/atletas'
     | '/locais'
     | '/login'
+    | '/onboarding'
     | '/privacidade'
     | '/ranking'
     | '/resultados'
@@ -407,6 +420,9 @@ export interface FileRouteTypes {
     | '/_authenticated/inscricao'
     | '/_authenticated/minha-conta'
     | '/atletas/$id'
+    | '/onboarding/diretor'
+    | '/onboarding/jogador'
+    | '/onboarding/torcedor'
     | '/partidas/$id'
     | '/sumula/$partidaId'
     | '/times/$slug'
@@ -429,6 +445,7 @@ export interface RootRouteChildren {
   AtletasRoute: typeof AtletasRouteWithChildren
   LocaisRoute: typeof LocaisRoute
   LoginRoute: typeof LoginRoute
+  OnboardingRoute: typeof OnboardingRouteWithChildren
   PrivacidadeRoute: typeof PrivacidadeRoute
   RankingRoute: typeof RankingRoute
   ResultadosRoute: typeof ResultadosRoute
@@ -490,6 +507,13 @@ declare module '@tanstack/react-router' {
       path: '/privacidade'
       fullPath: '/privacidade'
       preLoaderRoute: typeof PrivacidadeRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/onboarding': {
+      id: '/onboarding'
+      path: '/onboarding'
+      fullPath: '/onboarding'
+      preLoaderRoute: typeof OnboardingRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/login': {
@@ -554,6 +578,27 @@ declare module '@tanstack/react-router' {
       fullPath: '/partidas/$id'
       preLoaderRoute: typeof PartidasIdRouteImport
       parentRoute: typeof rootRouteImport
+    }
+    '/onboarding/torcedor': {
+      id: '/onboarding/torcedor'
+      path: '/torcedor'
+      fullPath: '/onboarding/torcedor'
+      preLoaderRoute: typeof OnboardingTorcedorRouteImport
+      parentRoute: typeof OnboardingRoute
+    }
+    '/onboarding/jogador': {
+      id: '/onboarding/jogador'
+      path: '/jogador'
+      fullPath: '/onboarding/jogador'
+      preLoaderRoute: typeof OnboardingJogadorRouteImport
+      parentRoute: typeof OnboardingRoute
+    }
+    '/onboarding/diretor': {
+      id: '/onboarding/diretor'
+      path: '/diretor'
+      fullPath: '/onboarding/diretor'
+      preLoaderRoute: typeof OnboardingDiretorRouteImport
+      parentRoute: typeof OnboardingRoute
     }
     '/atletas/$id': {
       id: '/atletas/$id'
@@ -723,6 +768,22 @@ const AtletasRouteChildren: AtletasRouteChildren = {
 const AtletasRouteWithChildren =
   AtletasRoute._addFileChildren(AtletasRouteChildren)
 
+interface OnboardingRouteChildren {
+  OnboardingDiretorRoute: typeof OnboardingDiretorRoute
+  OnboardingJogadorRoute: typeof OnboardingJogadorRoute
+  OnboardingTorcedorRoute: typeof OnboardingTorcedorRoute
+}
+
+const OnboardingRouteChildren: OnboardingRouteChildren = {
+  OnboardingDiretorRoute: OnboardingDiretorRoute,
+  OnboardingJogadorRoute: OnboardingJogadorRoute,
+  OnboardingTorcedorRoute: OnboardingTorcedorRoute,
+}
+
+const OnboardingRouteWithChildren = OnboardingRoute._addFileChildren(
+  OnboardingRouteChildren,
+)
+
 interface TimesRouteChildren {
   TimesSlugRoute: typeof TimesSlugRoute
 }
@@ -740,6 +801,7 @@ const rootRouteChildren: RootRouteChildren = {
   AtletasRoute: AtletasRouteWithChildren,
   LocaisRoute: LocaisRoute,
   LoginRoute: LoginRoute,
+  OnboardingRoute: OnboardingRouteWithChildren,
   PrivacidadeRoute: PrivacidadeRoute,
   RankingRoute: RankingRoute,
   ResultadosRoute: ResultadosRoute,
@@ -754,3 +816,13 @@ const rootRouteChildren: RootRouteChildren = {
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)
   ._addFileTypes<FileRouteTypes>()
+
+import type { getRouter } from './router.tsx'
+import type { startInstance } from './start.ts'
+declare module '@tanstack/react-start' {
+  interface Register {
+    ssr: true
+    router: Awaited<ReturnType<typeof getRouter>>
+    config: Awaited<ReturnType<typeof startInstance.getOptions>>
+  }
+}
