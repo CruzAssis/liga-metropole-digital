@@ -18,11 +18,11 @@ export function AppShell({ children }: { children: ReactNode }) {
         <AppSidebar />
         <div className="flex-1 flex flex-col">
           <header className="h-14 flex items-center justify-between border-b border-border px-4">
-            <div className="flex items-center gap-3">
+            <Link to="/" className="flex items-center gap-3">
               <SidebarTrigger />
               <BrandLogo className="h-7 w-7" />
               <span className="font-display text-xl tracking-wider">Liga Metrópole</span>
-            </div>
+            </Link>
             <div className="flex items-center gap-3">
               {isAdmin && (
                 <Button asChild size="sm" variant="outline">
