@@ -7,24 +7,71 @@ import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
 import { toast } from 'sonner'
 import { Spinner } from '@/components/AppSkeletons'
+import { Shirt, Star, Users, Check } from 'lucide-react'
 
 export const Route = createFileRoute('/signup')({
   component: SignupPage,
 })
 
+const PROFILES = [
+  {
+    key: 'jogador',
+    icon: Shirt,
+    label: 'Jogador',
+    desc: 'Crie seu perfil de atleta e seja encontrado por times',
+    color: 'border-blue-500',
+    bg: 'bg-blue-500/10',
+    selectedBg: 'bg-blue-500/20',
+    iconColor: 'text-blue-400',
+  },
+  {
+    key: 'diretor',
+    icon: Star,
+    label: 'Diretor',
+    desc: 'Cadastre seu time e participe das competicoes',
+    color: 'border-yellow-500',
+    bg: 'bg-yellow-500/10',
+    selectedBg: 'bg-yellow-500/20',
+    iconColor: 'text-yellow-400',
+  },
+  {
+    key: 'torcedor',
+    icon: Users,
+    label: 'Torcedor',
+    desc: 'Acompanhe seu time favorito na liga',
+    color: 'border-green-500',
+    bg: 'bg-green-500/10',
+    selectedBg: 'bg-green-500/20',
+    iconColor: 'text-green-400',
+  },
+]
+
 function SignupPage() {
   const navigate = useNavigate()
+  const [loading, setLoading] = useState(false)
   const [checkingAuth, setCheckingAuth] = useState(true)
-  const search = new URLSearchParams(typeof window !== 'undefined' ? window.location.search : '')
-  const perfil = search.get('perfil')
+  const search = typeof window !== 'undefined' ? new URLSearchParams(window.location.search) : new URLSearchParams()
+  const perfilParam = search.get('perfil') || ''
+  const [selectedPerfil, setSelectedPerfil] = useState(perfilParam)
+
+  const [form, setForm] = useState({
+    full_name: '',
+    cpf: '',
+    phone: '',
+    email: '',
+    password: '',
+  })
 
   useEffect(() => {
     ;(async () => {
       const { data } = await supabase.auth.getUser()
       if (data.user) {
-        // User already logged in - redirect appropriately
-        if (perfil === 'diretor') {
+        if (perfilParam === 'diretor') {
           navigate({ to: '/_authenticated/inscricao', replace: true })
+        } else if (perfilParam === 'jogador') {
+          navigate({ to: '/onboarding/jogador', replace: true })
+        } else if (perfilParam === 'torcedor') {
+          navigate({ to: '/onboarding/torcedor', replace: true })
         } else {
           navigate({ to: '/onboarding', replace: true })
         }
@@ -34,16 +81,6 @@ function SignupPage() {
     })()
   }, [])
 
-  if (checkingAuth) return null
-  const [loading, setLoading] = useState(false)
-  const [form, setForm] = useState({
-    full_name: '',
-    cpf: '',
-    phone: '',
-    email: '',
-    password: '',
-  })
-
   function handleChange(e: ChangeEvent<HTMLInputElement>) {
     const { name, value } = e.target
     setForm(prev => ({ ...prev, [name]: value }))
@@ -52,7 +89,7 @@ function SignupPage() {
   async function handleSubmit(e: FormEvent) {
     e.preventDefault()
     if (form.cpf.length < 11) {
-      toast.error('CPF deve ter 11 dÃ­gitos')
+      toast.error('CPF invalido')
       return
     }
     setLoading(true)
@@ -61,10 +98,9 @@ function SignupPage() {
         email: form.email,
         password: form.password,
         options: {
-          emailRedirectTo: window.location.origin + '/',
           data: {
             full_name: form.full_name,
-            cpf: form.cpf,
+            cpf: form.cpf.replace(/D/g, ''),
             phone: form.phone,
           },
         },
@@ -72,8 +108,20 @@ function SignupPage() {
       if (error) throw error
 
       if (data.session) {
-        toast.success('Conta criada! Agora escolha seu perfil.')
-        navigate({ to: '/onboarding', replace: true })
+        const perfil = selectedPerfil || perfilParam
+        if (perfil === 'diretor') {
+          toast.success('Conta criada! Agora cadastre seu time.')
+          navigate({ to: '/onboarding/diretor', replace: true })
+        } else if (perfil === 'jogador') {
+          toast.success('Conta criada! Agora crie seu perfil de atleta.')
+          navigate({ to: '/onboarding/jogador', replace: true })
+        } else if (perfil === 'torcedor') {
+          toast.success('Conta criada! Agora escolha seu time.')
+          navigate({ to: '/onboarding/torcedor', replace: true })
+        } else {
+          toast.success('Conta criada! Agora escolha seu perfil.')
+          navigate({ to: '/onboarding', replace: true })
+        }
       } else {
         toast.success('Conta criada! Verifique seu email para confirmar o cadastro.')
         navigate({ to: '/login', replace: true })
@@ -86,13 +134,43 @@ function SignupPage() {
     }
   }
 
+  if (checkingAuth) return null
+
   return (
     <div className="min-h-screen bg-black flex items-center justify-center px-4 py-12">
       <div className="w-full max-w-md space-y-8">
         <div className="text-center">
-          <Link to="/" className="text-2xl font-bold text-white tracking-tight">Liga MetrÃ³pole</Link>
+          <Link to="/" className="text-2xl font-bold text-white tracking-tight">Liga Metropole</Link>
           <h2 className="mt-4 text-xl font-semibold text-zinc-200">Criar conta</h2>
-          <p className="mt-1 text-sm text-zinc-400">Passo 1 de 2 â Dados bÃ¡sicos</p>
+          <p className="mt-1 text-sm text-zinc-400">Passo 1 de 2 - Dados basicos</p>
+        </div>
+
+        {/* Profile selector */}
+        <div className="space-y-2">
+          <p className="text-sm text-zinc-400 font-medium">Quero me cadastrar como:</p>
+          <div className="grid grid-cols-3 gap-2">
+            {PROFILES.map(p => {
+              const Icon = p.icon
+              const isSelected = selectedPerfil === p.key
+              return (
+                <button
+                  key={p.key}
+                  type="button"
+                  onClick={() => setSelectedPerfil(p.key)}
+                  className={`relative flex flex-col items-center gap-1.5 p-3 rounded-xl border-2 transition-all ${isSelected ? p.color + ' ' + p.selectedBg : 'border-zinc-700 bg-zinc-900 hover:border-zinc-500'}`}
+                >
+                  {isSelected && <Check className="absolute top-1.5 right-1.5 h-3 w-3 text-white" />}
+                  <Icon className={`h-5 w-5 ${isSelected ? p.iconColor : 'text-zinc-500'}`} />
+                  <span className={`text-xs font-medium ${isSelected ? 'text-white' : 'text-zinc-400'}`}>{p.label}</span>
+                </button>
+              )
+            })}
+          </div>
+          {selectedPerfil && (
+            <p className="text-xs text-zinc-500 text-center">
+              {PROFILES.find(p => p.key === selectedPerfil)?.desc}
+            </p>
+          )}
         </div>
 
         <form onSubmit={handleSubmit} className="space-y-5">
@@ -109,36 +187,32 @@ function SignupPage() {
               placeholder="Seu nome completo"
             />
           </div>
-
           <div>
-            <Label htmlFor="cpf" className="text-zinc-300">CPF (apenas nÃºmeros)</Label>
+            <Label htmlFor="cpf" className="text-zinc-300">CPF</Label>
             <Input
               id="cpf"
               name="cpf"
               type="text"
               required
-              maxLength={11}
+              maxLength={14}
               value={form.cpf}
               onChange={handleChange}
               className="mt-1 bg-zinc-900 border-zinc-700 text-white"
-              placeholder="00000000000"
+              placeholder="000.000.000-00"
             />
           </div>
-
           <div>
-            <Label htmlFor="phone" className="text-zinc-300">WhatsApp</Label>
+            <Label htmlFor="phone" className="text-zinc-300">Telefone</Label>
             <Input
               id="phone"
               name="phone"
-              type="text"
-              required
+              type="tel"
               value={form.phone}
               onChange={handleChange}
               className="mt-1 bg-zinc-900 border-zinc-700 text-white"
-              placeholder="11987654321"
+              placeholder="(11) 99999-9999"
             />
           </div>
-
           <div>
             <Label htmlFor="email" className="text-zinc-300">Email</Label>
             <Input
@@ -152,7 +226,6 @@ function SignupPage() {
               placeholder="seu@email.com"
             />
           </div>
-
           <div>
             <Label htmlFor="password" className="text-zinc-300">Senha</Label>
             <Input
@@ -164,7 +237,7 @@ function SignupPage() {
               value={form.password}
               onChange={handleChange}
               className="mt-1 bg-zinc-900 border-zinc-700 text-white"
-              placeholder="MÃ­nimo 6 caracteres"
+              placeholder="Minimo 6 caracteres"
             />
           </div>
 
@@ -178,7 +251,7 @@ function SignupPage() {
         </form>
 
         <p className="text-center text-sm text-zinc-500">
-          JÃ¡ tem conta?{' '}
+          Ja tem conta?{' '}
           <Link to="/login" className="text-blue-400 hover:underline">
             Entrar
           </Link>
@@ -186,4 +259,4 @@ function SignupPage() {
       </div>
     </div>
   )
-}
+          }
