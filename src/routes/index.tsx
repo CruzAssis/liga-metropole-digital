@@ -3,7 +3,7 @@ import { createFileRoute, Link, useNavigate } from '@tanstack/react-router'
 import { useEffect, useState } from 'react'
 import { useAuth } from '@/hooks/use-auth'
 import { supabase } from '@/integrations/supabase/client'
-import { MapPin, Trophy, Calendar, ChevronRight } from 'lucide-react'
+import { MapPin, Trophy, Calendar, ChevronRight, Users, Shirt, Star } from 'lucide-react'
 
 export const Route = createFileRoute('/')({
   component: HomePage,
@@ -18,291 +18,213 @@ type ActiveConference = {
 };
 
 const ZONA_LABELS: Record<string, string> = {
-  norte: "Zona Norte", sul: "Zona Sul", leste: "Zona Leste", oeste: "Zona Oeste", centro: "Centro",
+  norte: 'Zona Norte', sul: 'Zona Sul', leste: 'Zona Leste', oeste: 'Zona Oeste', centro: 'Centro',
 };
 
 function HomePage() {
   const { user, loading, signOut } = useAuth()
   const navigate = useNavigate()
-  const [activeConference, setActiveConference] = useState<ActiveConference | null>(null)
-const [recentMatches, setRecentMatches] = useState([])
+  const [activeConference, setActiveConference] = useState(null)
+  const [recentMatches, setRecentMatches] = useState([])
   const [upcomingMatches, setUpcomingMatches] = useState([])
   const [topStandings, setTopStandings] = useState([])
-  // Load the active (open or in-progress) conference — default to Norte 1
+
   useEffect(() => {
-    (async () => {
-      // Try to find the currently active/open Norte 1 conference first
+    ;(async () => {
       const { data } = await supabase
         .from('competitions')
         .select('id, conference_name, subprefeitura, zona, name')
         .in('registration_status', ['open', 'draw_ready', 'active'])
         .order('created_at', { ascending: true })
         .limit(1)
-      if (data && data.length > 0) {
-        setActiveConference(data[0] as ActiveConference)
-      }
+      if (data && data.length > 0) setActiveConference(data[0])
     })()
   }, [])
+
+  useEffect(() => {
+    if (!user) return
+    ;(async () => {
+      const { data: rm } = await supabase
+        .from('matches')
+        .select('id, home_team, away_team, home_score, away_score, conference_name')
+        .in('status', ['confirmed', 'closed'])
+        .order('updated_at', { ascending: false })
+        .limit(5)
+      if (rm) setRecentMatches(rm)
+      const { data: um } = await supabase
+        .from('matches')
+        .select('id, home_team, away_team, scheduled_at, conference_name, venue')
+        .eq('status', 'scheduled')
+        .order('scheduled_at', { ascending: true })
+        .limit(5)
+      if (um) setUpcomingMatches(um)
+    })()
+  }, [user])
 
   const handleSignOut = async () => {
     await signOut()
     navigate({ to: '/', replace: true })
   }
 
-  const conferenceLabel = activeConference?.conference_name
-    ?? activeConference?.name
-    ?? 'Conferência Norte 1'
+  const conferenceLabel = activeConference?.conference_name ?? activeConference?.name ?? 'Conferencia Norte 1'
   const subprefeituraLabel = activeConference?.subprefeitura ?? 'Vila Maria/Vila Guilherme'
-  const zonaLabel = activeConference?.zona ? ZONA_LABELS[activeConference.zona] ?? '' : 'Zona Norte'
+  const zonaLabel = activeConference?.zona ? (ZONA_LABELS[activeConference.zona] ?? '') : 'Zona Norte'
 
   return (
     <div className="min-h-screen bg-black text-white flex flex-col">
-      <header className="flex items-center justify-between px-6 py-4 border-b border-zinc-800">
-        <span className="text-lg font-bold tracking-tight">Liga Metrópole</span>
+      <header className="flex items-center justify-between px-6 py-4 border-b border-zinc-800 sticky top-0 bg-black/95 backdrop-blur-sm z-50">
+        <Link to="/" className="text-xl font-black tracking-tight text-white hover:text-zinc-200 transition-colors">
+          Liga <span className="text-[#1565F5]">Metropole</span>
+        </Link>
         <div className="flex items-center gap-3">
-          <Link to="/ranking" className="text-sm text-zinc-400 hover:text-white transition-colors hidden sm:inline">Classificação</Link>
           {!loading && (
             user ? (
-              <button
-                onClick={handleSignOut}
-                className="text-sm text-zinc-400 hover:text-white transition-colors"
-              >
-                Sair
-              </button>
+              <button onClick={handleSignOut} className="text-sm text-zinc-400 hover:text-white transition-colors">Sair</button>
             ) : (
-              <>
-                <Link to="/login" className="text-sm text-zinc-400 hover:text-white transition-colors">Entrar</Link>
-                <Link to="/signup" className="text-sm bg-[#1565F5] hover:bg-blue-600 text-white px-4 py-1.5 rounded-md font-medium transition-colors">Criar conta</Link>
-              </>
+              <Link to="/login" className="text-sm bg-[#1565F5] hover:bg-blue-600 text-white px-5 py-2 rounded-lg font-semibold transition-colors">Entrar</Link>
             )
           )}
         </div>
       </header>
 
-      <main className="flex-1 flex flex-col items-center justify-center text-center px-4 py-20">
-        <div className="max-w-2xl mx-auto space-y-6">
-          <p className="text-[#1565F5] text-sm font-semibold tracking-widest uppercase">TEMPORADA 2026</p>
-
-          {/* Active Conference Badge */}
-          <div className="inline-flex items-center gap-2 bg-zinc-900 border border-zinc-700 rounded-full px-4 py-1.5 text-sm text-zinc-300">
-            <MapPin className="h-3.5 w-3.5 text-[#1565F5]" />
-            <span className="font-medium text-white">{conferenceLabel}</span>
-            <span className="text-zinc-500">—</span>
-            <span>{subprefeituraLabel}</span>
-            <span className="text-xs text-zinc-500 border-l border-zinc-700 pl-2 ml-1">{zonaLabel}</span>
-          </div>
-
-          <h1 className="text-5xl md:text-6xl font-black tracking-tight leading-tight">
-            Metrópole<br />
-            <span className="text-[#1565F5]">Futebol</span>
-          </h1>
-          <p className="text-zinc-400 text-lg max-w-lg mx-auto leading-relaxed">
-            A liga oficial do futebol amador metropolitano. Conferências por subprefeitura de São Paulo — times do seu bairro, jogando perto de você.
-          </p>
-          <div className="flex flex-col sm:flex-row items-center justify-center gap-4 pt-4">
-            <Link to="/signup" className="w-full sm:w-auto bg-[#1565F5] hover:bg-blue-600 text-white font-semibold px-8 py-3 rounded-lg text-base transition-colors text-center">
-              Inscrever meu time
-            </Link>
-            <Link to="/ranking" className="w-full sm:w-auto border border-zinc-700 hover:border-zinc-500 text-zinc-300 hover:text-white font-medium px-8 py-3 rounded-lg text-base transition-colors text-center">
-              Ver classificação
-            </Link>
-          </div>
+      <section className="flex flex-col items-center justify-center text-center px-4 py-16 md:py-24">
+        <p className="text-[#1565F5] text-xs font-bold tracking-widest uppercase mb-4">TEMPORADA 2026</p>
+        <div className="inline-flex items-center gap-2 bg-zinc-900 border border-zinc-700 rounded-full px-4 py-1.5 text-sm text-zinc-300 mb-8">
+          <MapPin className="h-3.5 w-3.5 text-[#1565F5]" />
+          <span className="font-medium text-white">{conferenceLabel}</span>
+          <span className="text-zinc-500">-</span>
+          <span>{subprefeituraLabel}</span>
+          <span className="text-xs text-zinc-500 border-l border-zinc-700 pl-2 ml-1">{zonaLabel}</span>
         </div>
-      </main>
+        <h1 className="text-5xl md:text-7xl font-black tracking-tight leading-tight mb-6">
+          METROPOLE<br /><span className="text-[#1565F5]">FUTEBOL</span>
+        </h1>
+        <p className="text-zinc-400 text-lg max-w-lg mx-auto leading-relaxed mb-10">
+          A liga oficial do futebol amador metropolitano
+        </p>
 
-      {/* Como funciona */}
-      <section className="border-t border-zinc-800 px-6 py-16">
-        <div className="max-w-4xl mx-auto">
-          <h2 className="text-3xl font-bold text-center mb-2">Como funciona a liga</h2>
-          <p className="text-zinc-400 text-center mb-10 max-w-xl mx-auto">
-            32 conferências, uma por subprefeitura de São Paulo. Cada conferência tem seus próprios times, regras e calendário.
-          </p>
-
-          <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-8">
-            {[
-              { zona: "Zona Norte", count: "7", color: "text-blue-400" },
-              { zona: "Zona Leste", count: "12", color: "text-emerald-400" },
-              { zona: "Zona Sul", count: "9", color: "text-yellow-400" },
-              { zona: "Zona Oeste + Centro", count: "4", color: "text-purple-400" },
-            ].map((z) => (
-              <div key={z.zona} className="bg-zinc-900 border border-zinc-800 rounded-xl p-4 text-center">
-                <div className={`text-2xl font-bold ${z.color}`}>{z.count}</div>
-                <div className="text-xs text-zinc-400 mt-1">{z.zona}</div>
+        {!loading && (
+          user ? (
+            <div className="w-full max-w-5xl mx-auto space-y-10 text-left">
+              {recentMatches.length > 0 && (
+                <div>
+                  <div className="flex items-center justify-between mb-4">
+                    <h2 className="text-xl font-bold flex items-center gap-2">
+                      <Trophy className="h-5 w-5 text-[#1565F5]" />Ultimos Resultados
+                    </h2>
+                    <Link to="/resultados" className="text-sm text-[#1565F5] hover:underline flex items-center gap-1">
+                      Ver todos <ChevronRight className="h-4 w-4" />
+                    </Link>
+                  </div>
+                  <div className="space-y-3">
+                    {recentMatches.map((m) => (
+                      <div key={m.id} className="bg-zinc-900 border border-zinc-800 rounded-xl p-4 flex items-center justify-between">
+                        <div className="flex-1 text-right"><span className="font-semibold text-zinc-100 text-sm">{m.home_team}</span></div>
+                        <div className="mx-4 text-center">
+                          <span className="text-2xl font-bold text-white tabular-nums">{m.home_score ?? '-'} x {m.away_score ?? '-'}</span>
+                          <p className="text-xs text-zinc-500 mt-0.5">{m.conference_name}</p>
+                        </div>
+                        <div className="flex-1 text-left"><span className="font-semibold text-zinc-100 text-sm">{m.away_team}</span></div>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              )}
+              {upcomingMatches.length > 0 && (
+                <div>
+                  <div className="flex items-center justify-between mb-4">
+                    <h2 className="text-xl font-bold flex items-center gap-2">
+                      <Calendar className="h-5 w-5 text-[#1565F5]" />Proximos Jogos
+                    </h2>
+                    <Link to="/agenda" className="text-sm text-[#1565F5] hover:underline flex items-center gap-1">
+                      Ver agenda <ChevronRight className="h-4 w-4" />
+                    </Link>
+                  </div>
+                  <div className="space-y-3">
+                    {upcomingMatches.map((m) => {
+                      const dt = new Date(m.scheduled_at)
+                      const dateStr = dt.toLocaleDateString('pt-BR', { weekday: 'short', day: '2-digit', month: '2-digit' })
+                      const timeStr = dt.toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' })
+                      return (
+                        <div key={m.id} className="bg-zinc-900 border border-zinc-800 rounded-xl p-4">
+                          <div className="flex items-center justify-between mb-2">
+                            <span className="text-xs text-[#1565F5] font-medium">{m.conference_name}</span>
+                            <span className="text-xs text-zinc-400">{dateStr} - {timeStr}</span>
+                          </div>
+                          <div className="flex items-center justify-between">
+                            <span className="font-semibold text-zinc-100 text-sm">{m.home_team}</span>
+                            <span className="text-zinc-600 font-bold text-lg mx-3">x</span>
+                            <span className="font-semibold text-zinc-100 text-sm text-right">{m.away_team}</span>
+                          </div>
+                        </div>
+                      )
+                    })}
+                  </div>
+                </div>
+              )}
+              {recentMatches.length === 0 && upcomingMatches.length === 0 && (
+                <p className="text-zinc-500 text-center py-8">Nenhum jogo disponivel no momento.</p>
+              )}
+            </div>
+          ) : (
+            <div className="w-full max-w-5xl mx-auto grid grid-cols-1 md:grid-cols-3 gap-5 px-4">
+              <div className="flex flex-col bg-zinc-950 border-2 border-blue-600 rounded-2xl p-8 text-center hover:border-blue-400 hover:bg-zinc-900 transition-all group">
+                <div className="w-14 h-14 bg-blue-600/20 rounded-full flex items-center justify-center mx-auto mb-5">
+                  <Shirt className="h-7 w-7 text-blue-400" />
+                </div>
+                <span className="text-xs font-bold tracking-widest text-blue-400 uppercase mb-2">Cadastro como Jogador</span>
+                <h3 className="text-xl font-black text-white mb-3 leading-tight">
+                  FACA PARTE DO JOGO!<br /><span className="text-blue-400">CRIE SEU PERFIL DE ATLETA</span>
+                </h3>
+                <p className="text-zinc-400 text-sm mb-8 flex-1">Registre seus dados, escolha sua posicao e fique disponivel para os times da sua regiao.</p>
+                <Link to="/signup" search={{ perfil: 'jogador' }} className="w-full bg-blue-600 hover:bg-blue-500 text-white font-bold py-3 px-6 rounded-xl transition-colors text-sm uppercase tracking-wide">
+                  Quero ser jogador
+                </Link>
               </div>
-            ))}
-          </div>
+              <div className="flex flex-col bg-zinc-950 border-2 border-yellow-600 rounded-2xl p-8 text-center hover:border-yellow-400 hover:bg-zinc-900 transition-all group md:scale-105 md:shadow-2xl">
+                <div className="w-14 h-14 bg-yellow-600/20 rounded-full flex items-center justify-center mx-auto mb-5">
+                  <Star className="h-7 w-7 text-yellow-400" />
+                </div>
+                <span className="text-xs font-bold tracking-widest text-yellow-400 uppercase mb-2">Cadastro como Diretor</span>
+                <h3 className="text-xl font-black text-white mb-3 leading-tight">
+                  LIDERE SEU TIME!<br /><span className="text-yellow-400">CADASTRE SUA EQUIPE NA LIGA</span>
+                </h3>
+                <p className="text-zinc-400 text-sm mb-8 flex-1">Inscreva seu clube, gerencie o elenco e dispute as conferencias da sua subprefeitura.</p>
+                <Link to="/signup" search={{ perfil: 'diretor' }} className="w-full bg-yellow-600 hover:bg-yellow-500 text-black font-bold py-3 px-6 rounded-xl transition-colors text-sm uppercase tracking-wide">
+                  Inscrever meu time
+                </Link>
+              </div>
+              <div className="flex flex-col bg-zinc-950 border-2 border-green-600 rounded-2xl p-8 text-center hover:border-green-400 hover:bg-zinc-900 transition-all group">
+                <div className="w-14 h-14 bg-green-600/20 rounded-full flex items-center justify-center mx-auto mb-5">
+                  <Users className="h-7 w-7 text-green-400" />
+                </div>
+                <span className="text-xs font-bold tracking-widest text-green-400 uppercase mb-2">Cadastro como Torcedor</span>
+                <h3 className="text-xl font-black text-white mb-3 leading-tight">
+                  TORCA PELO SEU CLUBE!<br /><span className="text-green-400">FIQUE POR DENTRO DE TUDO</span>
+                </h3>
+                <p className="text-zinc-400 text-sm mb-8 flex-1">Acompanhe resultados, tabelas e proximos jogos do seu time favorito na liga.</p>
+                <Link to="/signup" search={{ perfil: 'torcedor' }} className="w-full bg-green-600 hover:bg-green-500 text-white font-bold py-3 px-6 rounded-xl transition-colors text-sm uppercase tracking-wide">
+                  Quero torcer
+                </Link>
+              </div>
+            </div>
+          )
+        )}
 
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-8">
-            <div className="bg-zinc-900 border border-zinc-800 rounded-xl p-6">
-              <div className="text-xs font-semibold text-blue-400 uppercase tracking-wider mb-2">Conferência Norte 1 (piloto)</div>
-              <h3 className="text-xl font-bold mb-2">Vila Maria / Vila Guilherme</h3>
-              <p className="text-zinc-400 text-sm leading-relaxed">
-                80 times · 40 Mandantes + 40 Visitantes · Lado A e B · 20 rodadas de pontos corridos.
-              </p>
-            </div>
-            <div className="bg-zinc-900 border border-zinc-800 rounded-xl p-6">
-              <div className="text-xs font-semibold text-zinc-400 uppercase tracking-wider mb-2">Demais conferências</div>
-              <h3 className="text-xl font-bold mb-2">Configuração própria</h3>
-              <p className="text-zinc-400 text-sm leading-relaxed">
-                Cada subprefeitura tem seu número de vagas e regras definidas pelo admin. Inscreva seu time na conferência da sua região.
-              </p>
-            </div>
+        {!loading && !user && (
+          <div className="flex flex-col sm:flex-row items-center justify-center gap-4 mt-10">
+            <Link to="/ranking" className="border border-zinc-700 hover:border-zinc-400 text-zinc-300 hover:text-white font-semibold px-8 py-3 rounded-xl transition-colors text-sm">
+              Ver classificacao
+            </Link>
+            <Link to="/agenda" className="border border-zinc-700 hover:border-zinc-400 text-zinc-300 hover:text-white font-semibold px-8 py-3 rounded-xl transition-colors text-sm">
+              Ver agenda
+            </Link>
           </div>
-
-          <div className="bg-zinc-900 border border-zinc-800 rounded-xl p-6 mb-8">
-            <h3 className="text-lg font-bold mb-3 flex items-center gap-2">
-              <span className="text-[#1565F5]">vs</span> Regra de confronto (Norte 1)
-            </h3>
-            <p className="text-zinc-400 text-sm leading-relaxed">
-              Mandantes enfrentam <strong className="text-white">apenas</strong> Visitantes.
-              Alinhamento direto: Mandante Lado A × Visitante Lado A, Mandante Lado B × Visitante Lado B.
-              Times do mesmo tipo nunca se enfrentam na fase regular.
-            </p>
-          </div>
-
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-            <div className="bg-zinc-900 border border-zinc-800 rounded-xl p-5">
-              <div className="text-2xl font-bold text-[#1565F5]">32 conferências</div>
-              <p className="text-zinc-400 text-sm mt-1">Uma por subprefeitura de São Paulo.</p>
-            </div>
-            <div className="bg-zinc-900 border border-zinc-800 rounded-xl p-5">
-              <div className="text-2xl font-bold text-emerald-400">Top 8 Playoff</div>
-              <p className="text-zinc-400 text-sm mt-1">Os 8 melhores de cada ranking disputam quartas, semis e final.</p>
-            </div>
-            <div className="bg-zinc-900 border border-zinc-800 rounded-xl p-5">
-              <div className="text-2xl font-bold text-red-400">31 ao 40 Série B</div>
-              <p className="text-zinc-400 text-sm mt-1">Últimos 10 de cada ranking são rebaixados na próxima temporada.</p>
-            </div>
-          </div>
-        </div>
+        )}
       </section>
 
-
-      {/* ---- PORTAL DE FUTEBOL: Seções dinâmicas ---- */}
-      {(recentMatches.length > 0 || upcomingMatches.length > 0 || topStandings.length > 0) && (
-        <section className="py-10 px-4 md:px-8 max-w-5xl mx-auto w-full space-y-10">
-
-          {/* Últimos Resultados */}
-          {recentMatches.length > 0 && (
-            <div>
-              <div className="flex items-center justify-between mb-4">
-                <h2 className="text-xl font-bold flex items-center gap-2">
-                  <Trophy className="h-5 w-5 text-[#1565F5]" />
-                  Últimos Resultados
-                </h2>
-                <Link to="/resultados" className="text-sm text-[#1565F5] hover:underline flex items-center gap-1">
-                  Ver todos <ChevronRight className="h-4 w-4" />
-                </Link>
-              </div>
-              <div className="space-y-3">
-                {recentMatches.map(m => (
-                  <div key={m.id} className="bg-zinc-900 border border-zinc-800 rounded-xl p-4 flex items-center justify-between">
-                    <div className="flex-1 text-right">
-                      <span className="font-semibold text-zinc-100 text-sm">{m.home_team}</span>
-                    </div>
-                    <div className="mx-4 text-center">
-                      <span className="text-2xl font-bold text-white tabular-nums">
-                        {m.home_score ?? '-'} – {m.away_score ?? '-'}
-                      </span>
-                      <p className="text-xs text-zinc-500 mt-0.5">{m.conference_name}</p>
-                    </div>
-                    <div className="flex-1 text-left">
-                      <span className="font-semibold text-zinc-100 text-sm">{m.away_team}</span>
-                    </div>
-                  </div>
-                ))}
-              </div>
-            </div>
-          )}
-
-          {/* Próximos Jogos */}
-          {upcomingMatches.length > 0 && (
-            <div>
-              <div className="flex items-center justify-between mb-4">
-                <h2 className="text-xl font-bold flex items-center gap-2">
-                  <Calendar className="h-5 w-5 text-[#1565F5]" />
-                  Próximos Jogos
-                </h2>
-                <Link to="/agenda" className="text-sm text-[#1565F5] hover:underline flex items-center gap-1">
-                  Ver agenda <ChevronRight className="h-4 w-4" />
-                </Link>
-              </div>
-              <div className="space-y-3">
-                {upcomingMatches.map(m => {
-                  const dt = new Date(m.scheduled_at)
-                  const dateStr = dt.toLocaleDateString('pt-BR', { weekday: 'short', day: '2-digit', month: '2-digit' })
-                  const timeStr = dt.toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' })
-                  return (
-                    <div key={m.id} className="bg-zinc-900 border border-zinc-800 rounded-xl p-4">
-                      <div className="flex items-center justify-between mb-2">
-                        <span className="text-xs text-[#1565F5] font-medium">{m.conference_name}</span>
-                        <span className="text-xs text-zinc-400">{dateStr} · {timeStr}</span>
-                      </div>
-                      <div className="flex items-center justify-between">
-                        <span className="font-semibold text-zinc-100 text-sm">{m.home_team}</span>
-                        <span className="text-zinc-600 font-bold text-lg mx-3">×</span>
-                        <span className="font-semibold text-zinc-100 text-sm text-right">{m.away_team}</span>
-                      </div>
-                      {m.venue && (
-                        <p className="text-xs text-zinc-500 mt-1.5 flex items-center gap-1">
-                          <MapPin className="h-3 w-3" />{m.venue}
-                        </p>
-                      )}
-                    </div>
-                  )
-                })}
-              </div>
-            </div>
-          )}
-
-          {/* Tabela Top 5 */}
-          {topStandings.length > 0 && (
-            <div>
-              <div className="flex items-center justify-between mb-4">
-                <h2 className="text-xl font-bold flex items-center gap-2">
-                  <Trophy className="h-5 w-5 text-yellow-400" />
-                  Classificação
-                </h2>
-                <Link to="/ranking" className="text-sm text-[#1565F5] hover:underline flex items-center gap-1">
-                  Tabela completa <ChevronRight className="h-4 w-4" />
-                </Link>
-              </div>
-              <div className="bg-zinc-900 border border-zinc-800 rounded-xl overflow-hidden">
-                <table className="w-full text-sm">
-                  <thead>
-                    <tr className="border-b border-zinc-800 text-zinc-500 text-xs">
-                      <th className="text-left px-4 py-2.5 w-6">#</th>
-                      <th className="text-left px-4 py-2.5">Time</th>
-                      <th className="text-center px-2 py-2.5">PJ</th>
-                      <th className="text-center px-2 py-2.5">V</th>
-                      <th className="text-center px-2 py-2.5">E</th>
-                      <th className="text-center px-2 py-2.5">D</th>
-                      <th className="text-center px-3 py-2.5 font-bold text-zinc-300">PTS</th>
-                    </tr>
-                  </thead>
-                  <tbody>
-                    {topStandings.map((s, idx) => (
-                      <tr key={s.team_name} className="border-b border-zinc-800/50 last:border-0 hover:bg-zinc-800/30 transition-colors">
-                        <td className="px-4 py-3 text-zinc-500">{idx + 1}</td>
-                        <td className="px-4 py-3 font-medium text-zinc-100">{s.team_name}</td>
-                        <td className="text-center px-2 py-3 text-zinc-400">{s.gp}</td>
-                        <td className="text-center px-2 py-3 text-zinc-400">{s.gw}</td>
-                        <td className="text-center px-2 py-3 text-zinc-400">{s.gd}</td>
-                        <td className="text-center px-2 py-3 text-zinc-400">{s.gl}</td>
-                        <td className="text-center px-3 py-3 font-bold text-[#1565F5]">{s.pts}</td>
-                      </tr>
-                    ))}
-                  </tbody>
-                </table>
-              </div>
-            </div>
-          )}
-
-        </section>
-      )}
-
-      <footer className="border-t border-zinc-800 px-6 py-4 text-center">
-        <p className="text-zinc-600 text-sm">2026 Liga Metrópole</p>
+      <footer className="border-t border-zinc-800 px-6 py-4 text-center mt-auto">
+        <p className="text-zinc-600 text-sm">2026 Liga Metropole</p>
       </footer>
     </div>
   )
