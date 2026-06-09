@@ -1,5 +1,7 @@
+// Perfil publico do jogador com QR Code - feat: public player profile with QR code
 import { createFileRoute, Link, notFound } from "@tanstack/react-router";
 import { useServerFn } from "@tanstack/react-start";
+import { useState } from "react"
 import { useQuery } from "@tanstack/react-query";
 import { QRCodeSVG } from "qrcode.react";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
@@ -16,6 +18,8 @@ import {
   Instagram,
   QrCode,
   ChevronLeft,
+  Copy,
+  Check,
 } from "lucide-react";
 
 const APP_BASE_URL = "https://ligametropole.app";
