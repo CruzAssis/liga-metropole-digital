@@ -284,7 +284,13 @@ function HomePage() {
       </section>
 
       <footer className="border-t border-zinc-800 px-6 py-4 text-center mt-auto">
-        <p className="text-zinc-600 text-sm">2026 Liga Metropole</p>
+        <div className="flex flex-col sm:flex-row items-center justify-center gap-2 sm:gap-4 text-zinc-600 text-sm">
+          <span>2026 Liga Metropole</span>
+          <span className="hidden sm:inline">·</span>
+          <Link to="/privacidade" className="hover:text-zinc-400 transition-colors">Privacidade</Link>
+          <span>·</span>
+          <Link to="/termos" className="hover:text-zinc-400 transition-colors">Termos</Link>
+        </div>
       </footer>
     </div>
   )
