@@ -1,6 +1,6 @@
 // @ts-nocheck
 import { createFileRoute, Link, useNavigate } from '@tanstack/react-router'
-import { useState, type ChangeEvent, type FormEvent } from 'react'
+import { useState, useEffect, type ChangeEvent, type FormEvent } from 'react'
 import { supabase } from '@/integrations/supabase/client'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
@@ -14,6 +14,27 @@ export const Route = createFileRoute('/signup')({
 
 function SignupPage() {
   const navigate = useNavigate()
+  const [checkingAuth, setCheckingAuth] = useState(true)
+  const search = new URLSearchParams(typeof window !== 'undefined' ? window.location.search : '')
+  const perfil = search.get('perfil')
+
+  useEffect(() => {
+    ;(async () => {
+      const { data } = await supabase.auth.getUser()
+      if (data.user) {
+        // User already logged in - redirect appropriately
+        if (perfil === 'diretor') {
+          navigate({ to: '/_authenticated/inscricao', replace: true })
+        } else {
+          navigate({ to: '/onboarding', replace: true })
+        }
+      } else {
+        setCheckingAuth(false)
+      }
+    })()
+  }, [])
+
+  if (checkingAuth) return null
   const [loading, setLoading] = useState(false)
   const [form, setForm] = useState({
     full_name: '',
@@ -31,7 +52,7 @@ function SignupPage() {
   async function handleSubmit(e: FormEvent) {
     e.preventDefault()
     if (form.cpf.length < 11) {
-      toast.error('CPF deve ter 11 dígitos')
+      toast.error('CPF deve ter 11 dÃ­gitos')
       return
     }
     setLoading(true)
@@ -69,9 +90,9 @@ function SignupPage() {
     <div className="min-h-screen bg-black flex items-center justify-center px-4 py-12">
       <div className="w-full max-w-md space-y-8">
         <div className="text-center">
-          <Link to="/" className="text-2xl font-bold text-white tracking-tight">Liga Metrópole</Link>
+          <Link to="/" className="text-2xl font-bold text-white tracking-tight">Liga MetrÃ³pole</Link>
           <h2 className="mt-4 text-xl font-semibold text-zinc-200">Criar conta</h2>
-          <p className="mt-1 text-sm text-zinc-400">Passo 1 de 2 — Dados básicos</p>
+          <p className="mt-1 text-sm text-zinc-400">Passo 1 de 2 â Dados bÃ¡sicos</p>
         </div>
 
         <form onSubmit={handleSubmit} className="space-y-5">
@@ -90,7 +111,7 @@ function SignupPage() {
           </div>
 
           <div>
-            <Label htmlFor="cpf" className="text-zinc-300">CPF (apenas números)</Label>
+            <Label htmlFor="cpf" className="text-zinc-300">CPF (apenas nÃºmeros)</Label>
             <Input
               id="cpf"
               name="cpf"
@@ -143,7 +164,7 @@ function SignupPage() {
               value={form.password}
               onChange={handleChange}
               className="mt-1 bg-zinc-900 border-zinc-700 text-white"
-              placeholder="Mínimo 6 caracteres"
+              placeholder="MÃ­nimo 6 caracteres"
             />
           </div>
 
@@ -157,7 +178,7 @@ function SignupPage() {
         </form>
 
         <p className="text-center text-sm text-zinc-500">
-          Já tem conta?{' '}
+          JÃ¡ tem conta?{' '}
           <Link to="/login" className="text-blue-400 hover:underline">
             Entrar
           </Link>
