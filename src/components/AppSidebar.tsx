@@ -1,5 +1,5 @@
 import { Link, useRouterState, useNavigate } from "@tanstack/react-router";
-import { Home, ClipboardList, UserCircle, LogOut, Shuffle, LayoutDashboard, ListChecks, Users, BadgeCheck, Shield, FileText, Trophy } from "lucide-react";
+import { Home, ClipboardList, UserCircle, LogOut, Shuffle, LayoutDashboard, ListChecks, Users, BadgeCheck, Shield, FileText, Trophy, ExternalLink, UsersRound } from "lucide-react";
 import { BrandLogo } from "@/components/BrandLogo";
 import { useIsAdmin } from "@/hooks/use-is-admin";
 import {
@@ -25,9 +25,8 @@ const items = [
 ];
 
 export function AppSidebar() {
-  const { state } = useSidebar();
-  const collapsed = state === "collapsed";
   const pathname = useRouterState({ select: (s) => s.location.pathname });
+  const { collapsed } = useSidebar();
   const { signOut } = useAuth();
   const { isAdmin } = useIsAdmin();
   const navigate = useNavigate();
@@ -35,6 +34,7 @@ export function AppSidebar() {
   const adminItems = [
     { title: "Dashboard", url: "/admin/dashboard", icon: LayoutDashboard },
     { title: "Triagem", url: "/admin/triagem", icon: ListChecks },
+    { title: "Times", url: "/admin/triagem", icon: UsersRound },
     { title: "Ligas", url: "/admin/ligas", icon: Trophy },
     { title: "Sorteio", url: "/admin/sorteio", icon: Shuffle },
     { title: "Súmulas", url: "/admin/sumulas", icon: FileText },
@@ -53,8 +53,9 @@ export function AppSidebar() {
           <BrandLogo className="h-8 w-8" />
           {!collapsed && (
             <div className="font-display text-lg leading-none">
-              <div>Liga</div>
-              <div className="text-primary">Metrópole</div>
+              <span className="font-bold text-primary">METRÓPOLE</span>
+              <br />
+              <span className="text-xs text-muted-foreground font-medium tracking-widest">FUTEBOL</span>
             </div>
           )}
         </div>
@@ -65,7 +66,7 @@ export function AppSidebar() {
           <SidebarGroupContent>
             <SidebarMenu>
               {items.map((item) => (
-                <SidebarMenuItem key={item.url}>
+                <SidebarMenuItem key={item.url + item.title}>
                   <SidebarMenuButton asChild isActive={pathname === item.url}>
                     <Link to={item.url}>
                       <item.icon className="h-4 w-4" />
@@ -89,8 +90,8 @@ export function AppSidebar() {
             <SidebarGroupContent>
               <SidebarMenu>
                 {adminItems.map((item) => (
-                  <SidebarMenuItem key={item.url}>
-                    <SidebarMenuButton asChild isActive={pathname === item.url}>
+                  <SidebarMenuItem key={item.url + item.title}>
+                    <SidebarMenuButton asChild isActive={pathname === item.url && item.title !== "Times"}>
                       <Link to={item.url}>
                         <item.icon className="h-4 w-4" />
                         <span>{item.title}</span>
@@ -98,6 +99,14 @@ export function AppSidebar() {
                     </SidebarMenuButton>
                   </SidebarMenuItem>
                 ))}
+                <SidebarMenuItem>
+                  <SidebarMenuButton asChild>
+                    <a href="/" target="_blank" rel="noopener noreferrer">
+                      <ExternalLink className="h-4 w-4" />
+                      <span>Ver site</span>
+                    </a>
+                  </SidebarMenuButton>
+                </SidebarMenuItem>
               </SidebarMenu>
             </SidebarGroupContent>
           </SidebarGroup>
