@@ -116,6 +116,27 @@ function TriagemPage() {
       toast.error(msg)
     } finally { setSaving(null) }
   }
+  async function reprovarTime(team: TeamRow) {
+    const reason = window.prompt('Motivo da reprovacao (obrigatorio):')
+    if (!reason || !reason.trim()) return
+    setSaving(team.id)
+    try {
+      const { error } = await supabase
+        .from('teams')
+        .update({ status: 'rejected', rejected_reason: reason.trim() })
+        .eq('id', team.id)
+      if (error) throw error
+      toast.success('Time reprovado.')
+      await loadTeams()
+    } catch (err) {
+      const msg = err instanceof Error ? err.message : 'Erro ao reprovar'
+      toast.error(msg)
+    } finally {
+      setSaving(null)
+    }
+  }
+
+
 
   function updateApproval(teamId: string, field: keyof ApprovalConfig, value: string) {
     setApprovals(prev => ({
@@ -239,6 +260,15 @@ function TriagemPage() {
                   ? `${slotLabel(team.registration_type, config.lado)} cheio`
                   : saving === team.id ? <><Spinner className="mr-2 h-4 w-4" />Aguarde...</> : 'Aprovar time'}
               </Button>
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={() => reprovarTime(team)}
+              disabled={saving === team.id}
+              className="w-full border-red-800 text-red-400 hover:bg-red-950 mt-2"
+            >
+              {saving === team.id ? <><Spinner className="mr-2 h-4 w-4" />Aguarde...</> : 'Reprovar time'}
+            </Button>
             </div>
           )
         })}
