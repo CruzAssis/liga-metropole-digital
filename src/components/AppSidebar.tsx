@@ -34,7 +34,7 @@ export function AppSidebar() {
   const adminItems = [
     { title: "Dashboard", url: "/admin/dashboard", icon: LayoutDashboard },
     { title: "Triagem", url: "/admin/triagem", icon: ListChecks },
-    { title: "Times", url: "/admin/triagem", icon: UsersRound },
+    { title: "Times", url: "/admin/times", icon: UsersRound },
     { title: "Ligas", url: "/admin/ligas", icon: Trophy },
     { title: "Sorteio", url: "/admin/sorteio", icon: Shuffle },
     { title: "Súmulas", url: "/admin/sumulas", icon: FileText },
