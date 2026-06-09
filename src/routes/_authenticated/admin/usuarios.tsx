@@ -87,7 +87,7 @@ function UsuariosPage() {
               {isLoading && (
                 <tr>
                   <td colSpan={6} className="px-4 py-8 text-center text-muted-foreground">
-                    Carregando...
+                    Buscando usuarios...
                   </td>
                 </tr>
               )}
