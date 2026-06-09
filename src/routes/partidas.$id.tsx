@@ -5,7 +5,7 @@ import { supabase } from '@/integrations/supabase/client'
 import { useAuth } from '@/hooks/use-auth'
 import { Button } from '@/components/ui/button'
 import { Badge } from '@/components/ui/badge'
-import { ArrowLeft, Clock, CheckCircle, AlertCircle, Trophy } from 'lucide-react'
+import { ArrowLeft, Clock, CheckCircle, AlertCircle, Trophy, Share2, Copy, Check } from 'lucide-react'
 import {
   submitScore,
   confirmScore,
@@ -13,6 +13,50 @@ import {
   saveGoals,
   rateOpponentBest,
 } from '@/lib/match-sumula.functions'
+
+
+// ── Share Buttons ──────────────────────────────────────────────────────────
+function ShareButtons({ match, votes }: { match: Match; votes: BestVote[] }) {
+  const [copied, setCopied] = useState(false)
+  const matchUrl = typeof window !== 'undefined'
+    ? window.location.href
+    : `https://liga-metropole.app/partidas/${match.id}`
+
+  const topVote = votes[0]
+  const destaqueText = topVote
+    ? ` | Destaque: #${topVote.jersey_number}${topVote.identified_name ? ' - ' + topVote.identified_name : ''} (${topVote.rating}/10)`
+    : ''
+
+  const waText = encodeURIComponent(
+    `⚽ ${match.host_team.name} ${match.host_score ?? '-'} x ${match.visitor_score ?? '-'} ${match.visitor_team.name}${destaqueText} | Liga Metropole\n\nVeja mais: ${matchUrl}`
+  )
+
+  const handleCopy = async () => {
+    try { await navigator.clipboard.writeText(matchUrl) } catch { void 0 }
+    setCopied(true)
+    setTimeout(() => setCopied(false), 2500)
+  }
+
+  return (
+    <div className="flex flex-wrap gap-2 mt-4 pt-3 border-t border-zinc-800">
+      <a
+        href={`https://wa.me/?text=${waText}`}
+        target="_blank"
+        rel="noopener noreferrer"
+        className="inline-flex items-center gap-2 bg-[#25D366] hover:bg-[#1ebe59] text-white text-sm rounded-lg px-3 py-1.5 font-medium transition-colors"
+      >
+        <Share2 className="h-4 w-4" /> Compartilhar no WhatsApp
+      </a>
+      <button
+        onClick={handleCopy}
+        className="inline-flex items-center gap-2 bg-zinc-800 hover:bg-zinc-700 text-zinc-300 text-sm rounded-lg px-3 py-1.5 transition-colors"
+      >
+        {copied ? <Check className="h-4 w-4 text-green-400" /> : <Copy className="h-4 w-4" />}
+        {copied ? 'Copiado!' : 'Copiar link'}
+      </button>
+    </div>
+  )
+}
 
 export const Route = createFileRoute('/partidas/$id')({
   component: PartidaPage,
@@ -360,6 +404,8 @@ function PartidaPage() {
           </div>
         )}
 
+
+        {encerrada && <ShareButtons match={match} votes={votes} />}
         {meuJogo && !encerrada && (
           <div className="space-y-4">
             <EtapaPlacar match={match} myTeamId={myTeamId!} onRefresh={load} />
