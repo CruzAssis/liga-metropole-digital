@@ -36,6 +36,7 @@ import { Route as AuthenticatedAdminRouteImport } from './routes/_authenticated/
 import { Route as AuthenticatedMinhaContaExcluirContaRouteImport } from './routes/_authenticated/minha-conta/excluir-conta'
 import { Route as AuthenticatedAdminUsuariosRouteImport } from './routes/_authenticated/admin/usuarios'
 import { Route as AuthenticatedAdminTriagemRouteImport } from './routes/_authenticated/admin/triagem'
+import { Route as AuthenticatedAdminTimesRouteImport } from './routes/_authenticated/admin/times'
 import { Route as AuthenticatedAdminSumulasRouteImport } from './routes/_authenticated/admin/sumulas'
 import { Route as AuthenticatedAdminSorteioRouteImport } from './routes/_authenticated/admin/sorteio'
 import { Route as AuthenticatedAdminNotificacoesRouteImport } from './routes/_authenticated/admin/notificacoes'
@@ -181,6 +182,12 @@ const AuthenticatedAdminTriagemRoute =
     path: '/triagem',
     getParentRoute: () => AuthenticatedAdminRoute,
   } as any)
+const AuthenticatedAdminTimesRoute =
+  AuthenticatedAdminTimesRouteImport.update({
+    id: '/times',
+    path: '/times',
+    getParentRoute: () => AuthenticatedAdminRoute,
+  } as any)
 const AuthenticatedAdminSumulasRoute =
   AuthenticatedAdminSumulasRouteImport.update({
     id: '/sumulas',
@@ -324,6 +331,8 @@ export interface FileRoutesById {
   '/_authenticated/admin/notificacoes': typeof AuthenticatedAdminNotificacoesRoute
   '/_authenticated/admin/sorteio': typeof AuthenticatedAdminSorteioRoute
   '/_authenticated/admin/sumulas': typeof AuthenticatedAdminSumulasRoute
+  '/_authenticated/admin/times': typeof AuthenticatedAdminTimesRoute
+  '/_authenticated/admin/times': typeof AuthenticatedAdminTimesRoute
   '/_authenticated/admin/triagem': typeof AuthenticatedAdminTriagemRoute
   '/_authenticated/admin/usuarios': typeof AuthenticatedAdminUsuariosRoute
   '/_authenticated/minha-conta/excluir-conta': typeof AuthenticatedMinhaContaExcluirContaRoute
@@ -361,6 +370,7 @@ export interface FileRouteTypes {
     | '/admin/notificacoes'
     | '/admin/sorteio'
     | '/admin/sumulas'
+    | '/admin/times'
     | '/admin/triagem'
     | '/admin/usuarios'
     | '/minha-conta/excluir-conta'
@@ -396,6 +406,7 @@ export interface FileRouteTypes {
     | '/admin/notificacoes'
     | '/admin/sorteio'
     | '/admin/sumulas'
+    | '/admin/times'
     | '/admin/triagem'
     | '/admin/usuarios'
     | '/minha-conta/excluir-conta'
@@ -432,6 +443,7 @@ export interface FileRouteTypes {
     | '/_authenticated/admin/notificacoes'
     | '/_authenticated/admin/sorteio'
     | '/_authenticated/admin/sumulas'
+    | '/_authenticated/admin/times'
     | '/_authenticated/admin/triagem'
     | '/_authenticated/admin/usuarios'
     | '/_authenticated/minha-conta/excluir-conta'
@@ -642,6 +654,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedAdminUsuariosRouteImport
       parentRoute: typeof AuthenticatedAdminRoute
     }
+    '/_authenticated/admin/times': {
+      id: '/_authenticated/admin/times'
+      path: '/times'
+      fullPath: '/admin/times'
+      preLoaderRoute: typeof AuthenticatedAdminTimesRouteImport
+      parentRoute: typeof AuthenticatedAdminRoute
+    }
     '/_authenticated/admin/triagem': {
       id: '/_authenticated/admin/triagem'
       path: '/triagem'
@@ -708,6 +727,7 @@ interface AuthenticatedAdminRouteChildren {
   AuthenticatedAdminNotificacoesRoute: typeof AuthenticatedAdminNotificacoesRoute
   AuthenticatedAdminSorteioRoute: typeof AuthenticatedAdminSorteioRoute
   AuthenticatedAdminSumulasRoute: typeof AuthenticatedAdminSumulasRoute
+  AuthenticatedAdminTimesRoute: typeof AuthenticatedAdminTimesRoute
   AuthenticatedAdminTriagemRoute: typeof AuthenticatedAdminTriagemRoute
   AuthenticatedAdminUsuariosRoute: typeof AuthenticatedAdminUsuariosRoute
 }
@@ -719,6 +739,7 @@ const AuthenticatedAdminRouteChildren: AuthenticatedAdminRouteChildren = {
   AuthenticatedAdminNotificacoesRoute: AuthenticatedAdminNotificacoesRoute,
   AuthenticatedAdminSorteioRoute: AuthenticatedAdminSorteioRoute,
   AuthenticatedAdminSumulasRoute: AuthenticatedAdminSumulasRoute,
+  AuthenticatedAdminTimesRoute: AuthenticatedAdminTimesRoute,
   AuthenticatedAdminTriagemRoute: AuthenticatedAdminTriagemRoute,
   AuthenticatedAdminUsuariosRoute: AuthenticatedAdminUsuariosRoute,
 }
