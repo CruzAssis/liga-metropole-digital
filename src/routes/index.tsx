@@ -3,7 +3,7 @@ import { createFileRoute, Link, useNavigate } from '@tanstack/react-router'
 import { useEffect, useState } from 'react'
 import { useAuth } from '@/hooks/use-auth'
 import { supabase } from '@/integrations/supabase/client'
-import { MapPin, Trophy, Calendar, ChevronRight, Users, Shirt, Star } from 'lucide-react'
+import { MapPin, Trophy, Calendar, ChevronRight, Users, Shirt, Star, Menu, X, LayoutDashboard, User } from 'lucide-react'
 
 export const Route = createFileRoute('/')({
   component: HomePage,
@@ -27,7 +27,8 @@ function HomePage() {
   const [activeConference, setActiveConference] = useState(null)
   const [recentMatches, setRecentMatches] = useState([])
   const [upcomingMatches, setUpcomingMatches] = useState([])
-  const [topStandings, setTopStandings] = useState([])
+  const [isAdmin, setIsAdmin] = useState(false)
+  const [menuOpen, setMenuOpen] = useState(false)
 
   useEffect(() => {
     ;(async () => {
@@ -58,6 +59,12 @@ function HomePage() {
         .order('scheduled_at', { ascending: true })
         .limit(5)
       if (um) setUpcomingMatches(um)
+      // Check admin role
+      const { data: roles } = await supabase
+        .from('user_roles')
+        .select('role')
+        .eq('user_id', user.id)
+      if (roles && roles.some((r) => r.role === 'admin')) setIsAdmin(true)
     })()
   }, [user])
 
@@ -70,23 +77,82 @@ function HomePage() {
   const subprefeituraLabel = activeConference?.subprefeitura ?? 'Vila Maria/Vila Guilherme'
   const zonaLabel = activeConference?.zona ? (ZONA_LABELS[activeConference.zona] ?? '') : 'Zona Norte'
 
+  const navLinks = [
+    { to: '/ranking', label: 'Ranking' },
+    { to: '/resultados', label: 'Resultados' },
+    { to: '/agenda', label: 'Agenda' },
+    { to: '/times', label: 'Times' },
+    { to: '/atletas', label: 'Atletas' },
+  ]
+
   return (
     <div className="min-h-screen bg-black text-white flex flex-col">
-      <header className="flex items-center justify-between px-6 py-4 border-b border-zinc-800 sticky top-0 bg-black/95 backdrop-blur-sm z-50">
-        <Link to="/" className="text-xl font-black tracking-tight text-white hover:text-zinc-200 transition-colors">
+      {/* HEADER */}
+      <header className="flex items-center justify-between px-4 md:px-6 py-4 border-b border-zinc-800 sticky top-0 bg-black/95 backdrop-blur-sm z-50">
+        <Link to="/" className="text-xl font-black tracking-tight text-white hover:text-zinc-200 transition-colors flex-shrink-0">
           Liga <span className="text-[#1565F5]">Metropole</span>
         </Link>
-        <div className="flex items-center gap-3">
-          {!loading && (
-            user ? (
-              <button onClick={handleSignOut} className="text-sm text-zinc-400 hover:text-white transition-colors">Sair</button>
-            ) : (
-              <Link to="/login" className="text-sm bg-[#1565F5] hover:bg-blue-600 text-white px-5 py-2 rounded-lg font-semibold transition-colors">Entrar</Link>
-            )
-          )}
-        </div>
+
+        {!loading && user ? (
+          <>
+            {/* Desktop nav */}
+            <nav className="hidden md:flex items-center gap-1 mx-4">
+              {navLinks.map(link => (
+                <Link key={link.to} to={link.to} className="text-sm text-zinc-400 hover:text-white px-3 py-1.5 rounded-md hover:bg-zinc-800 transition-colors">
+                  {link.label}
+                </Link>
+              ))}
+              {isAdmin && (
+                <Link to="/_authenticated/admin/dashboard" className="text-sm text-yellow-400 hover:text-yellow-300 px-3 py-1.5 rounded-md hover:bg-zinc-800 transition-colors flex items-center gap-1">
+                  <LayoutDashboard className="h-3.5 w-3.5" />Painel Admin
+                </Link>
+              )}
+            </nav>
+            <div className="flex items-center gap-2">
+              <Link to="/_authenticated/minha-conta" className="hidden md:flex items-center gap-1.5 text-sm text-zinc-400 hover:text-white px-3 py-1.5 rounded-md hover:bg-zinc-800 transition-colors">
+                <User className="h-4 w-4" />Minha Conta
+              </Link>
+              <button onClick={handleSignOut} className="hidden md:block text-sm text-zinc-500 hover:text-white px-3 py-1.5 rounded-md hover:bg-zinc-800 transition-colors">
+                Sair
+              </button>
+              {/* Mobile menu toggle */}
+              <button onClick={() => setMenuOpen(!menuOpen)} className="md:hidden p-2 text-zinc-400 hover:text-white">
+                {menuOpen ? <X className="h-5 w-5" /> : <Menu className="h-5 w-5" />}
+              </button>
+            </div>
+          </>
+        ) : (
+          !loading && (
+            <Link to="/login" className="text-sm bg-[#1565F5] hover:bg-blue-600 text-white px-5 py-2 rounded-lg font-semibold transition-colors">
+              Entrar
+            </Link>
+          )
+        )}
       </header>
 
+      {/* Mobile menu dropdown */}
+      {menuOpen && user && (
+        <div className="md:hidden bg-zinc-900 border-b border-zinc-800 px-4 py-3 space-y-1 z-40">
+          {navLinks.map(link => (
+            <Link key={link.to} to={link.to} onClick={() => setMenuOpen(false)} className="block text-sm text-zinc-300 hover:text-white py-2 px-3 rounded-md hover:bg-zinc-800 transition-colors">
+              {link.label}
+            </Link>
+          ))}
+          {isAdmin && (
+            <Link to="/_authenticated/admin/dashboard" onClick={() => setMenuOpen(false)} className="flex items-center gap-1.5 text-sm text-yellow-400 hover:text-yellow-300 py-2 px-3 rounded-md hover:bg-zinc-800 transition-colors">
+              <LayoutDashboard className="h-4 w-4" />Painel Admin
+            </Link>
+          )}
+          <Link to="/_authenticated/minha-conta" onClick={() => setMenuOpen(false)} className="flex items-center gap-1.5 text-sm text-zinc-300 hover:text-white py-2 px-3 rounded-md hover:bg-zinc-800 transition-colors">
+            <User className="h-4 w-4" />Minha Conta
+          </Link>
+          <button onClick={handleSignOut} className="w-full text-left text-sm text-zinc-500 hover:text-white py-2 px-3 rounded-md hover:bg-zinc-800 transition-colors">
+            Sair
+          </button>
+        </div>
+      )}
+
+      {/* HERO */}
       <section className="flex flex-col items-center justify-center text-center px-4 py-16 md:py-24">
         <p className="text-[#1565F5] text-xs font-bold tracking-widest uppercase mb-4">TEMPORADA 2026</p>
         <div className="inline-flex items-center gap-2 bg-zinc-900 border border-zinc-700 rounded-full px-4 py-1.5 text-sm text-zinc-300 mb-8">
@@ -173,9 +239,7 @@ function HomePage() {
                   <Shirt className="h-7 w-7 text-blue-400" />
                 </div>
                 <span className="text-xs font-bold tracking-widest text-blue-400 uppercase mb-2">Cadastro como Jogador</span>
-                <h3 className="text-xl font-black text-white mb-3 leading-tight">
-                  FACA PARTE DO JOGO!<br /><span className="text-blue-400">CRIE SEU PERFIL DE ATLETA</span>
-                </h3>
+                <h3 className="text-xl font-black text-white mb-3 leading-tight">FACA PARTE DO JOGO!<br /><span className="text-blue-400">CRIE SEU PERFIL DE ATLETA</span></h3>
                 <p className="text-zinc-400 text-sm mb-8 flex-1">Registre seus dados, escolha sua posicao e fique disponivel para os times da sua regiao.</p>
                 <Link to="/signup" search={{ perfil: 'jogador' }} className="w-full bg-blue-600 hover:bg-blue-500 text-white font-bold py-3 px-6 rounded-xl transition-colors text-sm uppercase tracking-wide">
                   Quero ser jogador
@@ -186,9 +250,7 @@ function HomePage() {
                   <Star className="h-7 w-7 text-yellow-400" />
                 </div>
                 <span className="text-xs font-bold tracking-widest text-yellow-400 uppercase mb-2">Cadastro como Diretor</span>
-                <h3 className="text-xl font-black text-white mb-3 leading-tight">
-                  LIDERE SEU TIME!<br /><span className="text-yellow-400">CADASTRE SUA EQUIPE NA LIGA</span>
-                </h3>
+                <h3 className="text-xl font-black text-white mb-3 leading-tight">LIDERE SEU TIME!<br /><span className="text-yellow-400">CADASTRE SUA EQUIPE NA LIGA</span></h3>
                 <p className="text-zinc-400 text-sm mb-8 flex-1">Inscreva seu clube, gerencie o elenco e dispute as conferencias da sua subprefeitura.</p>
                 <Link to="/signup" search={{ perfil: 'diretor' }} className="w-full bg-yellow-600 hover:bg-yellow-500 text-black font-bold py-3 px-6 rounded-xl transition-colors text-sm uppercase tracking-wide">
                   Inscrever meu time
@@ -199,9 +261,7 @@ function HomePage() {
                   <Users className="h-7 w-7 text-green-400" />
                 </div>
                 <span className="text-xs font-bold tracking-widest text-green-400 uppercase mb-2">Cadastro como Torcedor</span>
-                <h3 className="text-xl font-black text-white mb-3 leading-tight">
-                  TORCA PELO SEU CLUBE!<br /><span className="text-green-400">FIQUE POR DENTRO DE TUDO</span>
-                </h3>
+                <h3 className="text-xl font-black text-white mb-3 leading-tight">TORCA PELO SEU CLUBE!<br /><span className="text-green-400">FIQUE POR DENTRO DE TUDO</span></h3>
                 <p className="text-zinc-400 text-sm mb-8 flex-1">Acompanhe resultados, tabelas e proximos jogos do seu time favorito na liga.</p>
                 <Link to="/signup" search={{ perfil: 'torcedor' }} className="w-full bg-green-600 hover:bg-green-500 text-white font-bold py-3 px-6 rounded-xl transition-colors text-sm uppercase tracking-wide">
                   Quero torcer
@@ -228,4 +288,4 @@ function HomePage() {
       </footer>
     </div>
   )
-  }
+    }
