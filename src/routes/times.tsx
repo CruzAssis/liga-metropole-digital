@@ -43,7 +43,7 @@ if (!teams) {
     <PublicShell>
       <header className="mb-6">
         <h1 className="font-display text-5xl tracking-wide">Times</h1>
-        <p className="text-muted-foreground mt-1">Carregando times...</p>
+        <p className="text-muted-foreground mt-1">Buscando times da conferencia...</p>
       </header>
       <SkeletonTeamGrid count={6} />
     </PublicShell>
