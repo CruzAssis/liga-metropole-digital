@@ -9,9 +9,9 @@ WHERE slug IS NULL;
 
 -- Garante unicidade adicionando sufixo numérico em duplicatas
 WITH dups AS (
-  SELECT id, slug, row_number() OVER (PARTITION BY slug ORDER BY created_at) AS rn
-  FROM public.teams
-)
+    SELECT id, slug, row_number() OVER (PARTITION BY slug ORDER BY created_at) AS rn
+    FROM public.teams
+  )
 UPDATE public.teams t
 SET slug = t.slug || '-' || dups.rn
 FROM dups
@@ -19,16 +19,17 @@ WHERE t.id = dups.id AND dups.rn > 1;
 
 -- Log de notificações (evita duplicatas)
 CREATE TABLE IF NOT EXISTS public.notification_log (
-  id uuid PRIMARY KEY DEFAULT gen_random_uuid(),
-  match_id uuid NOT NULL,
-  user_id uuid NOT NULL,
-  kind text NOT NULL,
-  sent_at timestamptz NOT NULL DEFAULT now(),
-  UNIQUE(match_id, user_id, kind)
-);
+    id uuid PRIMARY KEY DEFAULT gen_random_uuid(),
+    match_id uuid NOT NULL,
+    user_id uuid NOT NULL,
+    kind text NOT NULL,
+    sent_at timestamptz NOT NULL DEFAULT now(),
+    UNIQUE(match_id, user_id, kind)
+  );
 
 ALTER TABLE public.notification_log ENABLE ROW LEVEL SECURITY;
 
+DROP POLICY IF EXISTS "notification_log admin read" ON public.notification_log;
 CREATE POLICY "notification_log admin read"
 ON public.notification_log
 FOR SELECT
