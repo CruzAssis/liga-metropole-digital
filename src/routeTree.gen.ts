@@ -182,12 +182,11 @@ const AuthenticatedAdminTriagemRoute =
     path: '/triagem',
     getParentRoute: () => AuthenticatedAdminRoute,
   } as any)
-const AuthenticatedAdminTimesRoute =
-  AuthenticatedAdminTimesRouteImport.update({
-    id: '/times',
-    path: '/times',
-    getParentRoute: () => AuthenticatedAdminRoute,
-  } as any)
+const AuthenticatedAdminTimesRoute = AuthenticatedAdminTimesRouteImport.update({
+  id: '/times',
+  path: '/times',
+  getParentRoute: () => AuthenticatedAdminRoute,
+} as any)
 const AuthenticatedAdminSumulasRoute =
   AuthenticatedAdminSumulasRouteImport.update({
     id: '/sumulas',
@@ -259,6 +258,7 @@ export interface FileRoutesByFullPath {
   '/admin/notificacoes': typeof AuthenticatedAdminNotificacoesRoute
   '/admin/sorteio': typeof AuthenticatedAdminSorteioRoute
   '/admin/sumulas': typeof AuthenticatedAdminSumulasRoute
+  '/admin/times': typeof AuthenticatedAdminTimesRoute
   '/admin/triagem': typeof AuthenticatedAdminTriagemRoute
   '/admin/usuarios': typeof AuthenticatedAdminUsuariosRoute
   '/minha-conta/excluir-conta': typeof AuthenticatedMinhaContaExcluirContaRoute
@@ -294,6 +294,7 @@ export interface FileRoutesByTo {
   '/admin/notificacoes': typeof AuthenticatedAdminNotificacoesRoute
   '/admin/sorteio': typeof AuthenticatedAdminSorteioRoute
   '/admin/sumulas': typeof AuthenticatedAdminSumulasRoute
+  '/admin/times': typeof AuthenticatedAdminTimesRoute
   '/admin/triagem': typeof AuthenticatedAdminTriagemRoute
   '/admin/usuarios': typeof AuthenticatedAdminUsuariosRoute
   '/minha-conta/excluir-conta': typeof AuthenticatedMinhaContaExcluirContaRoute
@@ -331,7 +332,6 @@ export interface FileRoutesById {
   '/_authenticated/admin/notificacoes': typeof AuthenticatedAdminNotificacoesRoute
   '/_authenticated/admin/sorteio': typeof AuthenticatedAdminSorteioRoute
   '/_authenticated/admin/sumulas': typeof AuthenticatedAdminSumulasRoute
-  '/_authenticated/admin/times': typeof AuthenticatedAdminTimesRoute
   '/_authenticated/admin/times': typeof AuthenticatedAdminTimesRoute
   '/_authenticated/admin/triagem': typeof AuthenticatedAdminTriagemRoute
   '/_authenticated/admin/usuarios': typeof AuthenticatedAdminUsuariosRoute
@@ -654,18 +654,18 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedAdminUsuariosRouteImport
       parentRoute: typeof AuthenticatedAdminRoute
     }
-    '/_authenticated/admin/times': {
-      id: '/_authenticated/admin/times'
-      path: '/times'
-      fullPath: '/admin/times'
-      preLoaderRoute: typeof AuthenticatedAdminTimesRouteImport
-      parentRoute: typeof AuthenticatedAdminRoute
-    }
     '/_authenticated/admin/triagem': {
       id: '/_authenticated/admin/triagem'
       path: '/triagem'
       fullPath: '/admin/triagem'
       preLoaderRoute: typeof AuthenticatedAdminTriagemRouteImport
+      parentRoute: typeof AuthenticatedAdminRoute
+    }
+    '/_authenticated/admin/times': {
+      id: '/_authenticated/admin/times'
+      path: '/times'
+      fullPath: '/admin/times'
+      preLoaderRoute: typeof AuthenticatedAdminTimesRouteImport
       parentRoute: typeof AuthenticatedAdminRoute
     }
     '/_authenticated/admin/sumulas': {
@@ -837,3 +837,13 @@ const rootRouteChildren: RootRouteChildren = {
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)
   ._addFileTypes<FileRouteTypes>()
+
+import type { getRouter } from './router.tsx'
+import type { startInstance } from './start.ts'
+declare module '@tanstack/react-start' {
+  interface Register {
+    ssr: true
+    router: Awaited<ReturnType<typeof getRouter>>
+    config: Awaited<ReturnType<typeof startInstance.getOptions>>
+  }
+}
