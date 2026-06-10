@@ -1,3 +1,4 @@
-insert into public.user_roles (user_id, role)
-values ('e47e2788-9a0b-4759-a5fa-864af84c93fe', 'admin')
-on conflict (user_id, role) do nothing;
+-- Migration 9: seed admin role
+-- Removed hardcoded user_id INSERT to avoid FK violation.
+-- Admin role must be inserted manually after the first user registers.
+-- Use the seed migration (20260609000000_seed_admin_role.sql) instead.
