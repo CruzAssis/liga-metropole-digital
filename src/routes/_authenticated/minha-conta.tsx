@@ -348,7 +348,7 @@ function DirectorContactCard() {
           O processo pode levar ate 30 dias conforme a LGPD.
         </p>
         <a
-          href={`mailto:shelderdouglasdacruz@gmail.com?subject=Solicitacao%20de%20exclusao%20de%20conta&body=Ola%2C%20gostaria%20de%20solicitar%20a%20exclusao%20da%20minha%20conta%20na%20Liga%20Metropole.%0A%0AEmail%3A%20${data?.email || user?.email || ''}`}
+          href={`mailto:shelderdouglasdacruz@gmail.com?subject=Solicitacao%20de%20exclusao%20de%20conta&body=Ola%2C%20gostaria%20de%20solicitar%20a%20exclusao%20da%20minha%20conta%20na%20Liga%20Metropole.%0A%0AEmail%3A%20${profile?.email || ''}`}
           className="inline-flex items-center gap-2 text-red-400 hover:text-red-300 text-sm border border-red-900/40 hover:border-red-700 rounded px-3 py-1.5 transition-colors"
         >
           Solicitar exclusao de conta

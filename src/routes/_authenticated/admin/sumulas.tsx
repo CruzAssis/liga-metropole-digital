@@ -52,13 +52,13 @@ function AdminSumulasPage() {
   });
 
   const woMut = useMutation({
-    mutationFn: ({ matchId, winner }: { matchId: string; winner: "host" | "visitor" }) => applyWOFn({ matchId, winner }),
+    mutationFn: ({ matchId, winner }: { matchId: string; winner: "host" | "visitor" }) => applyWOFn({ data: { matchId, winner } }),
     onSuccess: () => { toast.success("WO aplicado"); qc.invalidateQueries({ queryKey: ["admin-sumulas"] }); },
     onError: (e: Error) => toast.error(e.message),
   });
 
   const confirmMut = useMutation({
-    mutationFn: (matchId: string) => forceConfirmFn({ matchId }),
+    mutationFn: (matchId: string) => forceConfirmFn({ data: { matchId } }),
     onSuccess: () => { toast.success("Sumula confirmada"); qc.invalidateQueries({ queryKey: ["admin-sumulas"] }); },
     onError: (e: Error) => toast.error(e.message),
   });

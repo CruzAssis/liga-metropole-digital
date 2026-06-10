@@ -26,7 +26,8 @@ const items = [
 
 export function AppSidebar() {
   const pathname = useRouterState({ select: (s) => s.location.pathname });
-  const { collapsed } = useSidebar();
+  const { state } = useSidebar();
+  const collapsed = state === "collapsed";
   const { signOut } = useAuth();
   const { isAdmin } = useIsAdmin();
   const navigate = useNavigate();
