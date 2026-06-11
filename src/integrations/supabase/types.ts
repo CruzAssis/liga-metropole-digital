@@ -78,6 +78,8 @@ export type Database = {
       }
       competitions: {
         Row: {
+          conference_name: string | null
+          conference_number: number | null
           created_at: string
           draw_executed_at: string | null
           full_notified_at: string | null
@@ -90,12 +92,16 @@ export type Database = {
           season: number
           starts_at: string | null
           status: string
+          subprefeitura: string | null
           sumula_confirm_window_hours: number | null
           visitor_slots: number
           wo_fine_brl: number | null
           wo_tolerance_minutes: number | null
+          zona: string | null
         }
         Insert: {
+          conference_name?: string | null
+          conference_number?: number | null
           created_at?: string
           draw_executed_at?: string | null
           full_notified_at?: string | null
@@ -108,12 +114,16 @@ export type Database = {
           season: number
           starts_at?: string | null
           status?: string
+          subprefeitura?: string | null
           sumula_confirm_window_hours?: number | null
           visitor_slots?: number
           wo_fine_brl?: number | null
           wo_tolerance_minutes?: number | null
+          zona?: string | null
         }
         Update: {
+          conference_name?: string | null
+          conference_number?: number | null
           created_at?: string
           draw_executed_at?: string | null
           full_notified_at?: string | null
@@ -126,10 +136,12 @@ export type Database = {
           season?: number
           starts_at?: string | null
           status?: string
+          subprefeitura?: string | null
           sumula_confirm_window_hours?: number | null
           visitor_slots?: number
           wo_fine_brl?: number | null
           wo_tolerance_minutes?: number | null
+          zona?: string | null
         }
         Relationships: []
       }
