@@ -11,7 +11,7 @@ import { Spinner } from "@/components/AppSkeletons";
 
 const supabaseAny = supabase as any;
 
-export const Route = createFileRoute("/minha-conta/excluir-conta")({
+export const Route = createFileRoute("/_authenticated/minha-conta/excluir-conta")({
   component: ExcluirContaPage,
   head: () => ({
     meta: [{ title: "Excluir Conta · Liga Metropole" }],
