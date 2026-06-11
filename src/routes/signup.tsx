@@ -67,7 +67,7 @@ function SignupPage() {
       const { data } = await supabase.auth.getUser()
       if (data.user) {
         if (perfilParam === 'diretor') {
-          navigate({ to: '/_authenticated/inscricao', replace: true })
+          navigate({ to: '/inscricao', replace: true })
         } else if (perfilParam === 'jogador') {
           navigate({ to: '/onboarding/jogador', replace: true })
         } else if (perfilParam === 'torcedor') {

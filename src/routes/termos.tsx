@@ -110,7 +110,7 @@ function TermosPage() {
         <Section title="9. Exclusao de conta e dados">
           <p>
             Voce pode solicitar a exclusao da sua conta a qualquer momento em{" "}
-            <Link to="/_authenticated/minha-conta/excluir-conta" className="text-primary hover:underline">
+            <Link to="/minha-conta/excluir-conta" className="text-primary hover:underline">
               Minha Conta &rsaquo; Excluir Conta
             </Link>
             . Apos a exclusao, seus dados serao removidos conforme a{" "}
