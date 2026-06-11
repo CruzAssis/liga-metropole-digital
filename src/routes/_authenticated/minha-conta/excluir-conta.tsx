@@ -11,7 +11,7 @@ import { Spinner } from "@/components/AppSkeletons";
 
 const supabaseAny = supabase as any;
 
-export const Route = createFileRoute("/_authenticated/minha-conta/excluir-conta")({
+export const Route = createFileRoute("/minha-conta/excluir-conta")({
   component: ExcluirContaPage,
   head: () => ({
     meta: [{ title: "Excluir Conta · Liga Metropole" }],
@@ -105,7 +105,7 @@ function ExcluirContaPage() {
       <div className="max-w-lg mx-auto space-y-8">
         {/* Back */}
         <Link
-          to="/_authenticated/minha-conta"
+          to="/minha-conta"
           className="inline-flex items-center gap-1 text-sm text-muted-foreground hover:text-foreground transition-colors"
         >
           <ChevronLeft className="h-4 w-4" /> Voltar para Minha Conta
@@ -140,7 +140,7 @@ function ExcluirContaPage() {
                 <span>
                   Antes de excluir, considere apenas{" "}
                   <Link
-                    to="/_authenticated/minha-conta"
+                    to="/minha-conta"
                     className="text-primary hover:underline"
                   >
                     atualizar seus dados
@@ -167,7 +167,7 @@ function ExcluirContaPage() {
               </Button>
               <Button
                 variant="outline"
-                onClick={() => navigate({ to: "/_authenticated/minha-conta" })}
+                onClick={() => navigate({ to: "/minha-conta" })}
               >
                 Cancelar
               </Button>

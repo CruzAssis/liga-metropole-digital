@@ -113,7 +113,7 @@ function PrivacidadePage() {
             <li><strong className="text-foreground">Acesso</strong> — solicitar confirmacao e copia dos seus dados tratados</li>
             <li><strong className="text-foreground">Correcao</strong> — corrigir dados incompletos, inexatos ou desatualizados (disponivel em Minha Conta)</li>
             <li><strong className="text-foreground">Exclusao</strong> — solicitar a eliminacao dos seus dados (disponivel em{" "}
-              <Link to="/_authenticated/minha-conta/excluir-conta" className="text-primary hover:underline">
+              <Link to="/minha-conta/excluir-conta" className="text-primary hover:underline">
                 Minha Conta &rsaquo; Excluir Conta
               </Link>
               )
