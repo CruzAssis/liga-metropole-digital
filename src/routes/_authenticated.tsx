@@ -1,29 +1,41 @@
-import { createFileRoute, Outlet, redirect, useRouterState } from "@tanstack/react-router";
-import { useAuth } from "@/hooks/use-auth";
+import { createFileRoute, Outlet, redirect } from "@tanstack/react-router";
+import { useEffect, useState } from "react";
+import type { User } from "@supabase/supabase-js";
+import { supabase } from "@/integrations/supabase/client";
 import { AppShell } from "@/components/AppShell";
 
 export const Route = createFileRoute("/_authenticated")({
+  ssr: false,
+  beforeLoad: async ({ location }) => {
+    const { data } = await supabase.auth.getSession();
+    if (!data.session?.user) {
+      throw redirect({
+        to: "/login",
+        search: { redirect: location.pathname },
+        replace: true,
+      });
+    }
+  },
   component: AuthenticatedLayout,
 });
 
 function AuthenticatedLayout() {
-  const { user, loading } = useAuth();
-  const pathname = useRouterState({ select: (s) => s.location.pathname });
+  const [user, setUser] = useState<User | null>(null);
+  const [ready, setReady] = useState(false);
 
-  // Enquanto o estado de auth carrega, nao renderiza nada (evita flash de conteudo protegido)
-  if (loading) {
-    return null;
-  }
-
-  // Se nao autenticado, redireciona para /login preservando a URL de origem
-  // para que apos o login o usuario volte automaticamente para onde queria ir.
-  if (!user) {
-    throw redirect({
-      to: "/login",
-      search: { redirect: pathname },
-      replace: true,
+  useEffect(() => {
+    const { data: { subscription } } = supabase.auth.onAuthStateChange((_e, s) => {
+      setUser(s?.user ?? null);
+      setReady(true);
     });
-  }
+    supabase.auth.getSession().then(({ data }) => {
+      setUser(data.session?.user ?? null);
+      setReady(true);
+    });
+    return () => subscription.unsubscribe();
+  }, []);
+
+  if (!ready || !user) return null;
 
   return (
     <AppShell>
