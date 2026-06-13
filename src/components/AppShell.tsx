@@ -20,8 +20,7 @@ export function AppShell({ children }: { children: ReactNode }) {
           <header className="h-14 flex items-center justify-between border-b border-border px-4">
             <Link to="/" className="flex items-center gap-3">
               <SidebarTrigger />
-              <BrandLogo className="h-7 w-7" />
-              <span className="font-display text-xl tracking-wider">Liga Metrópole</span>
+              <Logo variant="horizontal" size={28} />
             </Link>
             <div className="flex items-center gap-3">
               {isAdmin && (
