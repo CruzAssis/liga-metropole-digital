@@ -1,6 +1,6 @@
 import { Link, useRouterState, useNavigate } from "@tanstack/react-router";
 import { Home, ClipboardList, UserCircle, LogOut, Shuffle, LayoutDashboard, ListChecks, Users, BadgeCheck, Shield, FileText, Trophy, ExternalLink, UsersRound } from "lucide-react";
-import { BrandLogo } from "@/components/BrandLogo";
+import { Logo } from "@/components/Logo";
 import { useIsAdmin } from "@/hooks/use-is-admin";
 import {
   Sidebar,
