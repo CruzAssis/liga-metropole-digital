@@ -51,13 +51,10 @@ export function AppSidebar() {
     <Sidebar collapsible="icon">
       <SidebarHeader className="border-b border-sidebar-border">
         <div className="flex items-center gap-2 px-2 py-3">
-          <BrandLogo className="h-8 w-8" />
-          {!collapsed && (
-            <div className="font-display text-lg leading-none">
-              <span className="font-bold text-primary">METRÓPOLE</span>
-              <br />
-              <span className="text-xs text-muted-foreground font-medium tracking-widest">FUTEBOL</span>
-            </div>
+          {collapsed ? (
+            <Logo variant="symbol" size={28} />
+          ) : (
+            <Logo variant="horizontal" size={28} />
           )}
         </div>
       </SidebarHeader>
