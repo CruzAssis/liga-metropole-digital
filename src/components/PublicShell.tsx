@@ -1,5 +1,5 @@
 import { Link, useNavigate, useRouterState } from "@tanstack/react-router";
-import { BrandLogo } from "@/components/BrandLogo";
+import { Logo } from "@/components/Logo";
 import { Button } from "@/components/ui/button";
 import { useAuth } from "@/hooks/use-auth";
 import { ArrowLeft } from "lucide-react";
@@ -22,8 +22,7 @@ export function PublicShell({ children }: { children: React.ReactNode }) {
       <header className="border-b border-border">
         <div className="mx-auto flex max-w-6xl items-center justify-between px-6 py-4">
           <Link to="/" className="flex items-center gap-2">
-            <BrandLogo className="h-8 w-8" />
-            <span className="font-display text-xl tracking-wider">Liga Metrópole</span>
+            <Logo variant="horizontal" size={28} />
           </Link>
           <nav className="flex flex-wrap items-center gap-1">
             <Button asChild variant="ghost" size="sm"><Link to="/ranking">Ranking</Link></Button>

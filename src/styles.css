@@ -84,6 +84,32 @@
   --sidebar-accent-foreground: oklch(0.985 0 0);
   --sidebar-border: oklch(1 0 0 / 10%);
   --sidebar-ring: oklch(0.605 0.221 257.5);
+
+  /* Brand */
+  --brand-primary: #1565F5;
+  --brand-primary-hover: #1251CC;
+  --brand-primary-muted: rgba(21, 101, 245, 0.15);
+
+  /* Backgrounds */
+  --bg-base: #09090B;
+  --bg-surface: #18181B;
+  --bg-elevated: #1F1F23;
+  --bg-border: #27272A;
+
+  /* Text */
+  --text-primary: #FAFAFA;
+  --text-secondary: #A1A1AA;
+  --text-muted: #52525B;
+
+  /* Status */
+  --status-success: #16A34A;
+  --status-error: #DC2626;
+  --status-warning: #D97706;
+  --status-info: #1565F5;
+
+  /* Typography scale */
+  --font-display: 'Bebas Neue', sans-serif;
+  --font-body: 'Montserrat', sans-serif;
 }
 
 @layer base {
