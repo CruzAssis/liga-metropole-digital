@@ -487,7 +487,17 @@ function LigasPage() {
                             <AlertTriangle className="h-3 w-3 mr-1" /> Liga Completa!
                           </Badge>
                         )}
+                        <Badge variant="outline" className="text-[10px]">
+                          {c.use_sides ? "Lados A/B" : "Pote único"}
+                        </Badge>
+                        <Badge variant="outline" className="text-[10px] bg-emerald-500/10 text-emerald-300 border-emerald-500/30">
+                          {c.qualified_count ?? 0} classificados
+                        </Badge>
+                        <Badge variant="outline" className="text-[10px] bg-red-500/10 text-red-300 border-red-500/30">
+                          {c.relegated_count ?? 0} rebaixados
+                        </Badge>
                       </div>
+
                       {c.subprefeitura && (
                         <p className="text-xs text-muted-foreground mt-0.5 flex items-center gap-1">
                           <MapPin className="h-3 w-3" />
