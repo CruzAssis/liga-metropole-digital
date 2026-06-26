@@ -233,7 +233,7 @@ function RankingPage() {
     (async () => {
       const { data } = await supabase
         .from("competitions")
-        .select("id, name, conference_name, subprefeitura, zona, season")
+        .select("id, name, conference_name, subprefeitura, zona, season, qualified_count, relegated_count, use_sides")
         .in("registration_status", ["active", "finished", "draw_ready", "open"])
         .order("created_at", { ascending: false });
       const list = (data ?? []) as unknown as Competition[];
