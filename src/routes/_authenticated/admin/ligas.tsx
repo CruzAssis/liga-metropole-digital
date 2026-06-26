@@ -381,7 +381,73 @@ function LigasPage() {
               />
               <p className="text-xs text-muted-foreground mt-1">Dividido automaticamente em Lado A e B</p>
             </div>
+
+            {/* Divisão por Lado A/B */}
+            <div className="sm:col-span-2 rounded-md border border-border bg-muted/30 p-3 flex items-start gap-3">
+              <input
+                id="use_sides"
+                type="checkbox"
+                className="mt-1 h-4 w-4"
+                checked={form.use_sides}
+                onChange={(e) => setForm((f) => ({ ...f, use_sides: e.target.checked }))}
+              />
+              <div className="flex-1">
+                <Label htmlFor="use_sides" className="cursor-pointer">
+                  Dividir times em Lado A e Lado B
+                </Label>
+                <p className="text-xs text-muted-foreground mt-1">
+                  {form.use_sides
+                    ? "Formato Liga Metrópole: confrontos apenas dentro do mesmo Lado, ranking separado por Lado."
+                    : "Formato único: todos os times concorrem juntos, sem separação por Lado."}
+                </p>
+              </div>
+            </div>
+
+            {/* Classificação e rebaixamento */}
+            <div>
+              <Label>Times classificados (mata-mata)</Label>
+              <Input
+                type="number"
+                min={0}
+                value={form.qualified_count}
+                onChange={(e) => setForm((f) => ({ ...f, qualified_count: e.target.value }))}
+              />
+              <p className="text-xs text-muted-foreground mt-1">
+                Quantos times do topo avançam para a fase eliminatória (0 = sem mata-mata).
+              </p>
+            </div>
+            <div>
+              <Label>Times rebaixados</Label>
+              <Input
+                type="number"
+                min={0}
+                value={form.relegated_count}
+                onChange={(e) => setForm((f) => ({ ...f, relegated_count: e.target.value }))}
+              />
+              <p className="text-xs text-muted-foreground mt-1">
+                Quantos times do final da tabela caem de divisão (0 = sem rebaixamento).
+              </p>
+            </div>
+
+            {/* Feedback dinâmico */}
+            {(() => {
+              const max = parseInt(form.max_teams, 10) || 0;
+              const q = parseInt(form.qualified_count, 10) || 0;
+              const r = parseInt(form.relegated_count, 10) || 0;
+              if (max <= 0) return null;
+              const ok = q + r <= max;
+              return (
+                <div className={`sm:col-span-2 rounded-md p-3 text-sm ${ok ? "bg-emerald-500/10 text-emerald-300 border border-emerald-500/30" : "bg-red-500/10 text-red-300 border border-red-500/30"}`}>
+                  {ok ? (
+                    <>Liga com <strong>{max}</strong> times: <strong>{q}</strong> avançam ao mata-mata, <strong>{r}</strong> são rebaixados{form.use_sides ? " (configuração aplicada por Lado)" : ""}.</>
+                  ) : (
+                    <>⚠ Configuração inválida: classificados ({q}) + rebaixados ({r}) excedem o total ({max}).</>
+                  )}
+                </div>
+              );
+            })()}
           </div>
+
           <div className="flex gap-2">
             <Button onClick={handleSave} disabled={saving}>
               {saving ? <><Spinner className="mr-2 h-4 w-4" />Aguarde...</> : editId ? "Salvar alterações" : "Criar conferência"}
