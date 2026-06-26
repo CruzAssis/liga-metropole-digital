@@ -125,7 +125,11 @@ const emptyForm = {
   visitor_slots: "40",
   starts_at: "",
   registration_status: "open",
+  qualified_count: "8",
+  relegated_count: "10",
+  use_sides: true,
 };
+
 
 function LigasPage() {
   const [competitions, setCompetitions] = useState<Competition[]>([]);
