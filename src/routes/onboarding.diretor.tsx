@@ -14,12 +14,12 @@ export const Route = createFileRoute('/onboarding/diretor')({
 })
 
 const SUBPREFEITURAS = [
-  'Aricanduva/Formosa/CarrÃ£o', 'ButantÃ£', 'Campo Limpo', 'Casa Verde/Cachoeirinha',
-  'Cidade Ademar', 'Cidade Tiradentes', 'Ermelino Matarazzo', 'Freguesia/BrasilÃ¢ndia',
-  'Guaianases', 'Ipiranga', 'Itaim Paulista', 'Itaquera', 'Jabaquara', 'JaÃ§anÃ£/TremembÃ©',
+  'Aricanduva/Formosa/Carrão', 'Butantã', 'Campo Limpo', 'Casa Verde/Cachoeirinha',
+  'Cidade Ademar', 'Cidade Tiradentes', 'Ermelino Matarazzo', 'Freguesia/Brasilândia',
+  'Guaianases', 'Ipiranga', 'Itaim Paulista', 'Itaquera', 'Jabaquara', 'Jaçanã/Tremembé',
   'Lapa', "M'Boi Mirim", 'Mooca', 'Parelheiros', 'Penha', 'Perus', 'Pinheiros',
-  'Pirituba/JaraguÃ¡', 'Santana/Tucuruvi', 'Santo Amaro', 'SÃ£o Mateus', 'SÃ£o Miguel',
-  'Sapopemba', 'SÃ©', 'Socorro', 'Vila Maria/Vila Guilherme', 'Vila Mariana', 'Vila Prudente',
+  'Pirituba/Jaraguá', 'Santana/Tucuruvi', 'Santo Amaro', 'São Mateus', 'São Miguel',
+  'Sapopemba', 'Sé', 'Socorro', 'Vila Maria/Vila Guilherme', 'Vila Mariana', 'Vila Prudente',
 ]
 
 function DiretorOnboarding() {
@@ -90,7 +90,7 @@ function DiretorOnboarding() {
         }
       }
       const homeVenueStr = form.registration_type === 'host'
-        ? [form.home_venue, form.home_address].filter(Boolean).join(' â ')
+        ? [form.home_venue, form.home_address].filter(Boolean).join(' — ')
         : null
       const { error } = await supabase.from('teams').insert({
         name: form.name.trim(),
@@ -123,7 +123,7 @@ function DiretorOnboarding() {
       <div className="max-w-xl mx-auto space-y-8">
         <div className="text-center">
           <h1 className="text-2xl font-bold text-white">Cadastro do Time</h1>
-          <p className="mt-1 text-sm text-zinc-400">Preencha os dados do seu time para participar da Liga MetrÃ³pole</p>
+          <p className="mt-1 text-sm text-zinc-400">Preencha os dados do seu time para participar da Liga Metrópole</p>
         </div>
         <form onSubmit={handleSubmit} className="space-y-6">
           <div>
@@ -138,7 +138,7 @@ function DiretorOnboarding() {
             <Input id="name" name="name" type="text" required value={form.name} onChange={handleChange} className="mt-1 bg-zinc-900 border-zinc-700 text-white" placeholder="Ex: Vila Nova FC" />
           </div>
           <div>
-            <Label htmlFor="short_name" className="text-zinc-300">Sigla (atÃ© 5 letras)</Label>
+            <Label htmlFor="short_name" className="text-zinc-300">Sigla (até 5 letras)</Label>
             <Input id="short_name" name="short_name" type="text" required maxLength={5} value={form.short_name} onChange={handleChange} className="mt-1 bg-zinc-900 border-zinc-700 text-white" placeholder="Ex: VNFC" />
           </div>
           <div>
@@ -154,18 +154,18 @@ function DiretorOnboarding() {
           </div>
           <div>
             <Label htmlFor="bairro" className="text-zinc-300">Bairro do time</Label>
-            <Input id="bairro" name="bairro" type="text" required value={form.bairro} onChange={handleChange} className="mt-1 bg-zinc-900 border-zinc-700 text-white" placeholder="Ex: TatuapÃ©" />
+            <Input id="bairro" name="bairro" type="text" required value={form.bairro} onChange={handleChange} className="mt-1 bg-zinc-900 border-zinc-700 text-white" placeholder="Ex: Tatuapé" />
           </div>
           {isMandante && (
             <div className="space-y-4 p-4 border border-zinc-800 rounded-xl">
-              <p className="text-sm text-zinc-400 font-medium">InformaÃ§Ãµes do campo (Mandante)</p>
+              <p className="text-sm text-zinc-400 font-medium">Informações do campo (Mandante)</p>
               <div>
                 <Label htmlFor="home_venue" className="text-zinc-300">Nome do campo</Label>
                 <Input id="home_venue" name="home_venue" type="text" value={form.home_venue} onChange={handleChange} className="mt-1 bg-zinc-900 border-zinc-700 text-white" placeholder="Ex: Campo do Parque" />
               </div>
               <div>
-                <Label htmlFor="home_address" className="text-zinc-300">EndereÃ§o completo</Label>
-                <Input id="home_address" name="home_address" type="text" value={form.home_address} onChange={handleChange} className="mt-1 bg-zinc-900 border-zinc-700 text-white" placeholder="Rua, nÃºmero, bairro - SÃ£o Paulo, SP" />
+                <Label htmlFor="home_address" className="text-zinc-300">Endereço completo</Label>
+                <Input id="home_address" name="home_address" type="text" value={form.home_address} onChange={handleChange} className="mt-1 bg-zinc-900 border-zinc-700 text-white" placeholder="Rua, número, bairro - São Paulo, SP" />
               </div>
               <div>
                 <Label htmlFor="maps_link" className="text-zinc-300 flex items-center gap-1"><MapPin className="h-4 w-4" /> Link Google Maps (opcional)</Label>
@@ -193,14 +193,14 @@ function DiretorOnboarding() {
           </div>
           <div className="grid grid-cols-2 gap-4">
             <div>
-              <Label htmlFor="primary_color" className="text-zinc-300">Cor primÃ¡ria</Label>
+              <Label htmlFor="primary_color" className="text-zinc-300">Cor primária</Label>
               <div className="flex items-center gap-2 mt-1">
                 <input id="primary_color" name="primary_color" type="color" value={form.primary_color} onChange={handleChange} className="h-9 w-9 rounded border border-zinc-700 cursor-pointer bg-transparent" />
                 <span className="text-zinc-400 text-sm">{form.primary_color}</span>
               </div>
             </div>
             <div>
-              <Label htmlFor="secondary_color" className="text-zinc-300">Cor secundÃ¡ria</Label>
+              <Label htmlFor="secondary_color" className="text-zinc-300">Cor secundária</Label>
               <div className="flex items-center gap-2 mt-1">
                 <input id="secondary_color" name="secondary_color" type="color" value={form.secondary_color} onChange={handleChange} className="h-9 w-9 rounded border border-zinc-700 cursor-pointer bg-transparent" />
                 <span className="text-zinc-400 text-sm">{form.secondary_color}</span>
@@ -209,7 +209,7 @@ function DiretorOnboarding() {
           </div>
           <label className="flex items-start gap-3 cursor-pointer">
             <input type="checkbox" checked={aceitaTermos} onChange={e => setAceitaTermos(e.target.checked)} className="mt-0.5 accent-blue-500" />
-            <span className="text-sm text-zinc-400">Ao cadastrar vocÃª concorda com o <a href="/termos" target="_blank" className="text-blue-400 hover:underline">regulamento da Liga MetrÃ³pole</a></span>
+            <span className="text-sm text-zinc-400">Ao cadastrar você concorda com o <a href="/termos" target="_blank" className="text-blue-400 hover:underline">regulamento da Liga Metrópole</a></span>
           </label>
           <Button type="submit" disabled={loading} className="w-full bg-[#1565F5] hover:bg-blue-600 text-white font-semibold py-3">
             {loading ? <Spinner /> : 'Cadastrar Time'}

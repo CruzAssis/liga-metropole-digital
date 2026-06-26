@@ -36,7 +36,7 @@ type Team = {
 };
 
 const statusMeta: Record<Team["status"], { label: string; variant: "default" | "secondary" | "destructive" | "outline" }> = {
-  pending: { label: "Em anÃ¡lise", variant: "secondary" },
+  pending: { label: "Em análise", variant: "secondary" },
   approved: { label: "Aprovado", variant: "default" },
   rejected: { label: "Rejeitado", variant: "destructive" },
   waitlist: { label: "Sala de espera", variant: "outline" },
@@ -46,7 +46,7 @@ export const Route = createFileRoute("/_authenticated/minha-conta")({
   component: MinhaContaPage,
 });
 
-// âââ Pagamento Status Badge âââââââââââââââââââââââââââââââââââââââââââââââââââ
+// ─── Pagamento Status Badge ───────────────────────────────────────────────────
 function PagStatusBadge({ status, dias }: { status: PagamentoStatus; dias: number }) {
   if (status === "pago") return (
     <span className="inline-flex items-center gap-1 text-xs px-2 py-1 rounded-full bg-green-900/30 text-green-400 border border-green-800/40 font-medium">
@@ -65,7 +65,7 @@ function PagStatusBadge({ status, dias }: { status: PagamentoStatus; dias: numbe
   );
 }
 
-// âââ Painel Financeiro do Diretor âââââââââââââââââââââââââââââââââââââââââââââ
+// ─── Painel Financeiro do Diretor ─────────────────────────────────────────────
 function TeamFinanceiroCard() {
   const getPagFn = useServerFn(getMyTeamPagamentos);
   const [data, setData] = useState<{ meses: Array<{
@@ -102,7 +102,7 @@ function TeamFinanceiroCard() {
   }
 
   function fmtBRL(val: number) {
-    return val > 0 ? val.toLocaleString("pt-BR", { style: "currency", currency: "BRL" }) : "â";
+    return val > 0 ? val.toLocaleString("pt-BR", { style: "currency", currency: "BRL" }) : "—";
   }
 
   return (
@@ -118,12 +118,12 @@ function TeamFinanceiroCard() {
       {inadimplente && (
         <div className="rounded-md border border-red-800/40 bg-red-900/10 p-4 text-sm text-red-300">
           <AlertTriangle className="h-4 w-4 inline mr-2 text-red-400" />
-          Seu time estÃ¡ inadimplente. Entre em contato com a organizaÃ§Ã£o da liga para regularizar.
+          Seu time está inadimplente. Entre em contato com a organização da liga para regularizar.
         </div>
       )}
 
       <div>
-        <p className="text-xs text-muted-foreground mb-3 uppercase tracking-wide font-medium">HistÃ³rico â 6 meses</p>
+        <p className="text-xs text-muted-foreground mb-3 uppercase tracking-wide font-medium">Histórico — 6 meses</p>
         <div className="grid grid-cols-3 sm:grid-cols-6 gap-2">
           {meses.map((m) => {
             const s = m.status;
@@ -157,15 +157,15 @@ function TeamFinanceiroCard() {
       {mesAtual?.status === "pago" && mesAtual.data_pagamento && (
         <p className="text-xs text-muted-foreground">
           <CreditCard className="h-3.5 w-3.5 inline mr-1" />
-          Ãltimo pagamento: {new Date(mesAtual.data_pagamento).toLocaleDateString("pt-BR")}
-          {mesAtual.metodo ? " Â· " + mesAtual.metodo.toUpperCase() : ""}
+          Último pagamento: {new Date(mesAtual.data_pagamento).toLocaleDateString("pt-BR")}
+          {mesAtual.metodo ? " · " + mesAtual.metodo.toUpperCase() : ""}
         </p>
       )}
     </div>
   );
 }
 
-// âââ Main Page ââââââââââââââââââââââââââââââââââââââââââââââââââââââââââââââââ
+// ─── Main Page ────────────────────────────────────────────────────────────────
 function MinhaContaPage() {
   const { user } = useAuth();
   const [team, setTeam] = useState<Team | null>(null);
@@ -206,15 +206,15 @@ function MinhaContaPage() {
       {!team ? (
         <div className="rounded-lg border border-border bg-card p-8 text-center">
           <ClipboardList className="mx-auto h-10 w-10 text-primary mb-3" />
-          <h2 className="font-display text-3xl tracking-wide">VocÃª ainda nÃ£o inscreveu um time</h2>
-          <p className="mt-2 text-muted-foreground">FaÃ§a a inscriÃ§Ã£o para participar da Liga MetrÃ³pole.</p>
+          <h2 className="font-display text-3xl tracking-wide">Você ainda não inscreveu um time</h2>
+          <p className="mt-2 text-muted-foreground">Faça a inscrição para participar da Liga Metrópole.</p>
           <Button asChild className="mt-6"><Link to="/inscricao">Inscrever meu time</Link></Button>
         </div>
       ) : (
         <TeamCard team={team} />
       )}
 
-      {/* Painel Financeiro â visÃ­vel para diretores de times aprovados */}
+      {/* Painel Financeiro — visível para diretores de times aprovados */}
       {team?.status === "approved" && <TeamFinanceiroCard />}
 
       {team?.status === "approved" && (
@@ -248,14 +248,14 @@ function TeamCard({ team }: { team: Team }) {
             <Badge variant={meta.variant}>{meta.label}</Badge>
           </div>
           <p className="text-sm text-muted-foreground mt-1">
-            Sigla: <span className="font-mono">{team.short_name}</span> Â· Tipo:{" "}
+            Sigla: <span className="font-mono">{team.short_name}</span> · Tipo:{" "}
             {team.registration_type === "host" ? "Mandante" : "Visitante"}
           </p>
           <p className="text-xs text-muted-foreground mt-1">Inscrito em {new Date(team.created_at).toLocaleDateString("pt-BR")}</p>
           {team.status === "approved" && team.slug && (
             <Button asChild variant="outline" size="sm" className="mt-3 gap-1">
               <Link to="/times/$slug" params={{ slug: team.slug }}>
-                <ExternalLink className="h-3 w-3" /> Ver perfil pÃºblico
+                <ExternalLink className="h-3 w-3" /> Ver perfil público
               </Link>
             </Button>
           )}
@@ -263,17 +263,17 @@ function TeamCard({ team }: { team: Team }) {
       </div>
       {team.status === "rejected" && team.rejected_reason && (
         <div className="mt-6 rounded-md border border-destructive/40 bg-destructive/10 p-4 text-sm">
-          <strong>Motivo da rejeiÃ§Ã£o:</strong> {team.rejected_reason}
+          <strong>Motivo da rejeição:</strong> {team.rejected_reason}
         </div>
       )}
       {team.status === "waitlist" && (
         <div className="mt-6 rounded-md border border-border bg-background/50 p-4 text-sm text-muted-foreground">
-          As 40 vagas de {team.registration_type === "host" ? "Mandante" : "Visitante"} jÃ¡ foram preenchidas. VocÃª estÃ¡ na sala de espera.
+          As 40 vagas de {team.registration_type === "host" ? "Mandante" : "Visitante"} já foram preenchidas. Você está na sala de espera.
         </div>
       )}
       {team.status === "pending" && (
         <div className="mt-6 rounded-md border border-border bg-background/50 p-4 text-sm text-muted-foreground">
-          Sua inscriÃ§Ã£o estÃ¡ em anÃ¡lise pela organizaÃ§Ã£o da liga.
+          Sua inscrição está em análise pela organização da liga.
         </div>
       )}
     </div>
@@ -303,7 +303,7 @@ function DirectorContactCard() {
       <div className="flex items-center justify-between gap-2 mb-3">
         <div className="flex items-center gap-2">
           <User2 className="h-5 w-5 text-primary" />
-          <h2 className="font-display text-2xl tracking-wide">Diretor / tÃ©cnico</h2>
+          <h2 className="font-display text-2xl tracking-wide">Diretor / técnico</h2>
         </div>
         {!editing && !isLoading && (
           <Button variant="outline" size="sm" onClick={() => setEditing(true)}>Editar</Button>
@@ -313,9 +313,9 @@ function DirectorContactCard() {
         <p className="text-sm text-muted-foreground">Carregando...</p>
       ) : !editing ? (
         <dl className="grid sm:grid-cols-2 gap-3 text-sm">
-          <div><dt className="text-muted-foreground">Nome</dt><dd className="font-medium">{data?.full_name || "â"}</dd></div>
-          <div><dt className="text-muted-foreground">WhatsApp</dt><dd className="font-medium">{data?.phone ? formatPhoneBR(data.phone) : "â"}</dd></div>
-          <div className="sm:col-span-2"><dt className="text-muted-foreground">E-mail</dt><dd className="font-medium">{data?.email || "â"}</dd></div>
+          <div><dt className="text-muted-foreground">Nome</dt><dd className="font-medium">{data?.full_name || "—"}</dd></div>
+          <div><dt className="text-muted-foreground">WhatsApp</dt><dd className="font-medium">{data?.phone ? formatPhoneBR(data.phone) : "—"}</dd></div>
+          <div className="sm:col-span-2"><dt className="text-muted-foreground">E-mail</dt><dd className="font-medium">{data?.email || "—"}</dd></div>
         </dl>
       ) : (
         <div className="space-y-3">
@@ -324,14 +324,14 @@ function DirectorContactCard() {
             <Input id="full_name" value={form.full_name} onChange={(e) => setForm({ ...form, full_name: e.target.value })} />
           </div>
           <div>
-            <Label htmlFor="phone">WhatsApp (DDD + nÃºmero, sÃ³ dÃ­gitos)</Label>
+            <Label htmlFor="phone">WhatsApp (DDD + número, só dígitos)</Label>
             <Input id="phone" inputMode="numeric" maxLength={11} placeholder="11987654321"
               value={form.phone} onChange={(e) => setForm({ ...form, phone: e.target.value.replace(/\D/g, "") })} />
           </div>
           <div>
             <Label htmlFor="email">E-mail</Label>
             <Input id="email" type="email" value={form.email} onChange={(e) => setForm({ ...form, email: e.target.value })} />
-            <p className="text-xs text-muted-foreground mt-1">Trocar o e-mail vai exigir reconfirmaÃ§Ã£o.</p>
+            <p className="text-xs text-muted-foreground mt-1">Trocar o e-mail vai exigir reconfirmação.</p>
           </div>
           <div className="flex gap-2">
             <Button onClick={() => mut.mutate()} disabled={mut.isPending}>{mut.isPending ? "Salvando..." : "Salvar"}</Button>
