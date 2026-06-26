@@ -71,10 +71,9 @@ function OnboardingPage() {
     if (!userId) return
     setLoading(true)
     try {
-      // Insert roles into user_roles table
-      const inserts = selected.map(role => ({ user_id: userId, role }))
-      const { error } = await supabase.from('user_roles').insert(inserts)
-      if (error) throw error
+      // Assign roles via server function (RLS prevents direct client insert)
+      await assignRoles({ data: { roles: selected as ('director' | 'player' | 'supporter')[] } })
+
 
       toast.success('Perfil salvo!')
 
