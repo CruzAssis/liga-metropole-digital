@@ -45,6 +45,7 @@ function OnboardingPage() {
   const [selected, setSelected] = useState<string[]>([])
   const [loading, setLoading] = useState(false)
   const [userId, setUserId] = useState<string | null>(null)
+  const assignRoles = useServerFn(assignSelfRoles)
 
   useEffect(() => {
     supabase.auth.getUser().then(({ data }) => {
