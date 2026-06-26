@@ -1,11 +1,13 @@
 // @ts-nocheck
 import { createFileRoute, useNavigate } from '@tanstack/react-router'
 import { useState, useEffect } from 'react'
+import { useServerFn } from '@tanstack/react-start'
 import { supabase } from '@/integrations/supabase/client'
 import { Button } from '@/components/ui/button'
 import { toast } from 'sonner'
 import { Spinner } from '@/components/AppSkeletons'
 import { Users, Trophy, Heart } from 'lucide-react'
+import { assignSelfRoles } from '@/lib/onboarding.functions'
 
 export const Route = createFileRoute('/onboarding')({
   component: OnboardingPage,
@@ -43,6 +45,7 @@ function OnboardingPage() {
   const [selected, setSelected] = useState<string[]>([])
   const [loading, setLoading] = useState(false)
   const [userId, setUserId] = useState<string | null>(null)
+  const assignRoles = useServerFn(assignSelfRoles)
 
   useEffect(() => {
     supabase.auth.getUser().then(({ data }) => {
@@ -68,10 +71,9 @@ function OnboardingPage() {
     if (!userId) return
     setLoading(true)
     try {
-      // Insert roles into user_roles table
-      const inserts = selected.map(role => ({ user_id: userId, role }))
-      const { error } = await supabase.from('user_roles').insert(inserts)
-      if (error) throw error
+      // Assign roles via server function (RLS prevents direct client insert)
+      await assignRoles({ data: { roles: selected as ('director' | 'player' | 'supporter')[] } })
+
 
       toast.success('Perfil salvo!')
 

@@ -1,0 +1,1 @@
+DROP POLICY IF EXISTS "User roles: self assign non-admin" ON public.user_roles;
