@@ -33,7 +33,11 @@ type Competition = {
   subprefeitura: string | null;
   zona: string | null;
   season: number | null;
+  qualified_count: number;
+  relegated_count: number;
+  use_sides: boolean;
 };
+
 
 type Standing = {
   team: Team;
@@ -113,7 +117,17 @@ function computeStandings(
     );
 }
 
-function StandingsTable({ rows }: { rows: Standing[] }) {
+function StandingsTable({
+  rows,
+  qualifiedCount,
+  relegatedCount,
+  showLado,
+}: {
+  rows: Standing[];
+  qualifiedCount: number;
+  relegatedCount: number;
+  showLado: boolean;
+}) {
   if (rows.length === 0) {
     return (
       <div className="rounded-md border border-border bg-card p-6 text-center text-sm text-muted-foreground">
@@ -142,9 +156,10 @@ function StandingsTable({ rows }: { rows: Standing[] }) {
         <tbody>
           {rows.map((r, i) => {
             const pos = i + 1;
-            const isTop8 = pos <= 8;
-            const isRelegation = pos >= rows.length - 9 && rows.length >= 10;
-            const rowCls = isTop8
+            const isQualified = qualifiedCount > 0 && pos <= qualifiedCount;
+            const isRelegation =
+              relegatedCount > 0 && pos > rows.length - relegatedCount;
+            const rowCls = isQualified
               ? "bg-emerald-500/5 border-l-2 border-emerald-500"
               : isRelegation
               ? "bg-red-500/5 border-l-2 border-red-500"
@@ -161,7 +176,9 @@ function StandingsTable({ rows }: { rows: Standing[] }) {
                     )}
                     <span className="hidden sm:inline">{r.team.name}</span>
                     <span className="sm:hidden font-mono">{r.team.short_name}</span>
-                    <Badge variant="outline" className="text-[10px] ml-1">{r.team.lado}</Badge>
+                    {showLado && (
+                      <Badge variant="outline" className="text-[10px] ml-1">{r.team.lado}</Badge>
+                    )}
                   </div>
                 </td>
                 <td className="text-center p-2 font-bold text-primary tabular-nums">{r.points}</td>
@@ -182,20 +199,26 @@ function StandingsTable({ rows }: { rows: Standing[] }) {
   );
 }
 
-function Legend() {
+function Legend({ qualifiedCount, relegatedCount }: { qualifiedCount: number; relegatedCount: number }) {
+  if (qualifiedCount === 0 && relegatedCount === 0) return null;
   return (
     <div className="flex flex-wrap items-center gap-4 text-xs text-muted-foreground mt-3">
-      <span className="flex items-center gap-2">
-        <span className="inline-block h-3 w-3 rounded-sm bg-emerald-500/40 border-l-2 border-emerald-500" />
-        Top 8 — Playoff
-      </span>
-      <span className="flex items-center gap-2">
-        <span className="inline-block h-3 w-3 rounded-sm bg-red-500/40 border-l-2 border-red-500" />
-        31º–40º — Rebaixamento Série B
-      </span>
+      {qualifiedCount > 0 && (
+        <span className="flex items-center gap-2">
+          <span className="inline-block h-3 w-3 rounded-sm bg-emerald-500/40 border-l-2 border-emerald-500" />
+          Top {qualifiedCount} — Classificados ao mata-mata
+        </span>
+      )}
+      {relegatedCount > 0 && (
+        <span className="flex items-center gap-2">
+          <span className="inline-block h-3 w-3 rounded-sm bg-red-500/40 border-l-2 border-red-500" />
+          Últimos {relegatedCount} — Zona de rebaixamento
+        </span>
+      )}
     </div>
   );
 }
+
 
 function RankingPage() {
   const [competitions, setCompetitions] = useState<Competition[]>([]);
@@ -210,7 +233,7 @@ function RankingPage() {
     (async () => {
       const { data } = await supabase
         .from("competitions")
-        .select("id, name, conference_name, subprefeitura, zona, season")
+        .select("id, name, conference_name, subprefeitura, zona, season, qualified_count, relegated_count, use_sides")
         .in("registration_status", ["active", "finished", "draw_ready", "open"])
         .order("created_at", { ascending: false });
       const list = (data ?? []) as unknown as Competition[];
@@ -315,21 +338,52 @@ function RankingPage() {
           <EmptyRanking />
         )}
         {matches && (hostStandings.length > 0 || visitorStandings.length > 0) && (
-        <Tabs defaultValue="mandantes">
-          <TabsList>
-            <TabsTrigger value="mandantes">Mandantes ({hosts.length})</TabsTrigger>
-            <TabsTrigger value="visitantes">Visitantes ({visitors.length})</TabsTrigger>
-          </TabsList>
-          <TabsContent value="mandantes" className="mt-4">
-            <StandingsTable rows={hostStandings} />
-            <Legend />
-          </TabsContent>
-          <TabsContent value="visitantes" className="mt-4">
-            <StandingsTable rows={visitorStandings} />
-            <Legend />
-          </TabsContent>
-        </Tabs>
-      )}
+          activeComp?.use_sides === false ? (
+            (() => {
+              const all = computeStandings(teams, matches, supporters);
+              const q = activeComp?.qualified_count ?? 0;
+              const r = activeComp?.relegated_count ?? 0;
+              return (
+                <>
+                  <StandingsTable rows={all} qualifiedCount={q} relegatedCount={r} showLado={false} />
+                  <Legend qualifiedCount={q} relegatedCount={r} />
+                </>
+              );
+            })()
+          ) : (
+            <Tabs defaultValue="mandantes">
+              <TabsList>
+                <TabsTrigger value="mandantes">Mandantes ({hosts.length})</TabsTrigger>
+                <TabsTrigger value="visitantes">Visitantes ({visitors.length})</TabsTrigger>
+              </TabsList>
+              <TabsContent value="mandantes" className="mt-4">
+                <StandingsTable
+                  rows={hostStandings}
+                  qualifiedCount={activeComp?.qualified_count ?? 0}
+                  relegatedCount={activeComp?.relegated_count ?? 0}
+                  showLado
+                />
+                <Legend
+                  qualifiedCount={activeComp?.qualified_count ?? 0}
+                  relegatedCount={activeComp?.relegated_count ?? 0}
+                />
+              </TabsContent>
+              <TabsContent value="visitantes" className="mt-4">
+                <StandingsTable
+                  rows={visitorStandings}
+                  qualifiedCount={activeComp?.qualified_count ?? 0}
+                  relegatedCount={activeComp?.relegated_count ?? 0}
+                  showLado
+                />
+                <Legend
+                  qualifiedCount={activeComp?.qualified_count ?? 0}
+                  relegatedCount={activeComp?.relegated_count ?? 0}
+                />
+              </TabsContent>
+            </Tabs>
+          )
+        )}
+
     </PublicShell>
   );
       }

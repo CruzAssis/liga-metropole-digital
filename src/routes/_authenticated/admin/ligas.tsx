@@ -89,6 +89,9 @@ type Competition = {
   subprefeitura: string | null;
   zona: string | null;
   conference_number: number | null;
+  qualified_count: number;
+  relegated_count: number;
+  use_sides: boolean;
 };
 
 type FillStats = {
@@ -103,6 +106,7 @@ type FillStats = {
   is_full: boolean;
   registration_status: string;
 };
+
 
 const REG_STATUS_LABELS: Record<string, { label: string; cls: string }> = {
   open:      { label: "Aberta",         cls: "bg-emerald-500/20 text-emerald-400 border-emerald-500/30" },
@@ -121,7 +125,11 @@ const emptyForm = {
   visitor_slots: "40",
   starts_at: "",
   registration_status: "open",
+  qualified_count: "8",
+  relegated_count: "10",
+  use_sides: true,
 };
+
 
 function LigasPage() {
   const [competitions, setCompetitions] = useState<Competition[]>([]);
@@ -135,7 +143,7 @@ function LigasPage() {
     setLoading(true);
     const { data, error } = await supabase
       .from("competitions")
-      .select("id,name,season,status,registration_status,max_teams,host_slots,visitor_slots,starts_at,draw_executed_at,full_notified_at,created_at,conference_name,subprefeitura,zona,conference_number")
+      .select("id,name,season,status,registration_status,max_teams,host_slots,visitor_slots,starts_at,draw_executed_at,full_notified_at,created_at,conference_name,subprefeitura,zona,conference_number,qualified_count,relegated_count,use_sides")
       .order("created_at", { ascending: false });
     if (error) toast.error("Erro ao carregar ligas");
     else {
@@ -180,8 +188,12 @@ function LigasPage() {
       visitor_slots: String(c.visitor_slots),
       starts_at: c.starts_at ?? "",
       registration_status: c.registration_status,
+      qualified_count: String(c.qualified_count ?? 8),
+      relegated_count: String(c.relegated_count ?? 10),
+      use_sides: c.use_sides ?? true,
     });
   };
+
 
   const handleCancel = () => {
     setEditId(null);
@@ -193,8 +205,13 @@ function LigasPage() {
     const max = parseInt(form.max_teams, 10);
     const host = parseInt(form.host_slots, 10);
     const visitor = parseInt(form.visitor_slots, 10);
+    const qualified = parseInt(form.qualified_count, 10);
+    const relegated = parseInt(form.relegated_count, 10);
     if (!max || !host || !visitor) { toast.error("Números de vagas inválidos"); return; }
     if (host + visitor !== max) { toast.error(`Vagas Mandante (${host}) + Visitante (${visitor}) deve somar ${max}`); return; }
+    if (isNaN(qualified) || qualified < 0) { toast.error("Quantidade de classificados inválida"); return; }
+    if (isNaN(relegated) || relegated < 0) { toast.error("Quantidade de rebaixados inválida"); return; }
+    if (qualified + relegated > max) { toast.error(`Classificados (${qualified}) + Rebaixados (${relegated}) não podem exceder ${max} times`); return; }
 
     setSaving(true);
     try {
@@ -211,7 +228,11 @@ function LigasPage() {
         conference_name: sp?.conference_name ?? form.name.trim(),
         zona: sp?.zona ?? null,
         conference_number: sp?.conference_number ?? null,
+        qualified_count: qualified,
+        relegated_count: relegated,
+        use_sides: form.use_sides,
       };
+
 
       if (editId) {
         const { error } = await supabaseAny.from("competitions").update(payload).eq("id", editId);
@@ -360,7 +381,73 @@ function LigasPage() {
               />
               <p className="text-xs text-muted-foreground mt-1">Dividido automaticamente em Lado A e B</p>
             </div>
+
+            {/* Divisão por Lado A/B */}
+            <div className="sm:col-span-2 rounded-md border border-border bg-muted/30 p-3 flex items-start gap-3">
+              <input
+                id="use_sides"
+                type="checkbox"
+                className="mt-1 h-4 w-4"
+                checked={form.use_sides}
+                onChange={(e) => setForm((f) => ({ ...f, use_sides: e.target.checked }))}
+              />
+              <div className="flex-1">
+                <Label htmlFor="use_sides" className="cursor-pointer">
+                  Dividir times em Lado A e Lado B
+                </Label>
+                <p className="text-xs text-muted-foreground mt-1">
+                  {form.use_sides
+                    ? "Formato Liga Metrópole: confrontos apenas dentro do mesmo Lado, ranking separado por Lado."
+                    : "Formato único: todos os times concorrem juntos, sem separação por Lado."}
+                </p>
+              </div>
+            </div>
+
+            {/* Classificação e rebaixamento */}
+            <div>
+              <Label>Times classificados (mata-mata)</Label>
+              <Input
+                type="number"
+                min={0}
+                value={form.qualified_count}
+                onChange={(e) => setForm((f) => ({ ...f, qualified_count: e.target.value }))}
+              />
+              <p className="text-xs text-muted-foreground mt-1">
+                Quantos times do topo avançam para a fase eliminatória (0 = sem mata-mata).
+              </p>
+            </div>
+            <div>
+              <Label>Times rebaixados</Label>
+              <Input
+                type="number"
+                min={0}
+                value={form.relegated_count}
+                onChange={(e) => setForm((f) => ({ ...f, relegated_count: e.target.value }))}
+              />
+              <p className="text-xs text-muted-foreground mt-1">
+                Quantos times do final da tabela caem de divisão (0 = sem rebaixamento).
+              </p>
+            </div>
+
+            {/* Feedback dinâmico */}
+            {(() => {
+              const max = parseInt(form.max_teams, 10) || 0;
+              const q = parseInt(form.qualified_count, 10) || 0;
+              const r = parseInt(form.relegated_count, 10) || 0;
+              if (max <= 0) return null;
+              const ok = q + r <= max;
+              return (
+                <div className={`sm:col-span-2 rounded-md p-3 text-sm ${ok ? "bg-emerald-500/10 text-emerald-300 border border-emerald-500/30" : "bg-red-500/10 text-red-300 border border-red-500/30"}`}>
+                  {ok ? (
+                    <>Liga com <strong>{max}</strong> times: <strong>{q}</strong> avançam ao mata-mata, <strong>{r}</strong> são rebaixados{form.use_sides ? " (configuração aplicada por Lado)" : ""}.</>
+                  ) : (
+                    <>⚠ Configuração inválida: classificados ({q}) + rebaixados ({r}) excedem o total ({max}).</>
+                  )}
+                </div>
+              );
+            })()}
           </div>
+
           <div className="flex gap-2">
             <Button onClick={handleSave} disabled={saving}>
               {saving ? <><Spinner className="mr-2 h-4 w-4" />Aguarde...</> : editId ? "Salvar alterações" : "Criar conferência"}
@@ -400,7 +487,17 @@ function LigasPage() {
                             <AlertTriangle className="h-3 w-3 mr-1" /> Liga Completa!
                           </Badge>
                         )}
+                        <Badge variant="outline" className="text-[10px]">
+                          {c.use_sides ? "Lados A/B" : "Pote único"}
+                        </Badge>
+                        <Badge variant="outline" className="text-[10px] bg-emerald-500/10 text-emerald-300 border-emerald-500/30">
+                          {c.qualified_count ?? 0} classificados
+                        </Badge>
+                        <Badge variant="outline" className="text-[10px] bg-red-500/10 text-red-300 border-red-500/30">
+                          {c.relegated_count ?? 0} rebaixados
+                        </Badge>
                       </div>
+
                       {c.subprefeitura && (
                         <p className="text-xs text-muted-foreground mt-0.5 flex items-center gap-1">
                           <MapPin className="h-3 w-3" />
