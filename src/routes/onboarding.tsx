@@ -16,7 +16,7 @@ const PROFILES = [
     key: 'director',
     icon: Trophy,
     title: 'Sou Diretor',
-    description: 'Quero cadastrar um time e participar das competiÃ§Ãµes.',
+    description: 'Quero cadastrar um time e participar das competições.',
     color: 'border-blue-500 bg-blue-500/10',
     selectedColor: 'border-blue-400 bg-blue-500/25 ring-2 ring-blue-500',
   },
@@ -95,8 +95,8 @@ function OnboardingPage() {
     <div className="min-h-screen bg-black flex items-center justify-center px-4 py-12">
       <div className="w-full max-w-lg space-y-8">
         <div className="text-center">
-          <h1 className="text-2xl font-bold text-white">Como vocÃª quer participar?</h1>
-          <p className="mt-2 text-sm text-zinc-400">Passo 2 de 2 â Escolha seu perfil (pode escolher mais de um)</p>
+          <h1 className="text-2xl font-bold text-white">Como você quer participar?</h1>
+          <p className="mt-2 text-sm text-zinc-400">Passo 2 de 2 — Escolha seu perfil (pode escolher mais de um)</p>
         </div>
 
         <div className="space-y-4">

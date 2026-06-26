@@ -14,12 +14,12 @@ export const Route = createFileRoute('/onboarding/torcedor')({
 })
 
 const SUBPREFEITURAS = [
-  'Aricanduva/Formosa/CarrÃ£o', 'ButantÃ£', 'Campo Limpo', 'Casa Verde/Cachoeirinha',
-  'Cidade Ademar', 'Cidade Tiradentes', 'Ermelino Matarazzo', 'Freguesia/BrasilÃ¢ndia',
-  'Guaianases', 'Ipiranga', 'Itaim Paulista', 'Itaquera', 'Jabaquara', 'JaÃ§anÃ£/TremembÃ©',
+  'Aricanduva/Formosa/Carrão', 'Butantã', 'Campo Limpo', 'Casa Verde/Cachoeirinha',
+  'Cidade Ademar', 'Cidade Tiradentes', 'Ermelino Matarazzo', 'Freguesia/Brasilândia',
+  'Guaianases', 'Ipiranga', 'Itaim Paulista', 'Itaquera', 'Jabaquara', 'Jaçanã/Tremembé',
   'Lapa', "M'Boi Mirim", 'Mooca', 'Parelheiros', 'Penha', 'Perus', 'Pinheiros',
-  'Pirituba/JaraguÃ¡', 'Santana/Tucuruvi', 'Santo Amaro', 'SÃ£o Mateus', 'SÃ£o Miguel',
-  'Sapopemba', 'SÃ©', 'Socorro', 'Vila Maria/Vila Guilherme', 'Vila Mariana', 'Vila Prudente',
+  'Pirituba/Jaraguá', 'Santana/Tucuruvi', 'Santo Amaro', 'São Mateus', 'São Miguel',
+  'Sapopemba', 'Sé', 'Socorro', 'Vila Maria/Vila Guilherme', 'Vila Mariana', 'Vila Prudente',
 ]
 
 function TorcedorOnboarding() {
@@ -63,7 +63,7 @@ function TorcedorOnboarding() {
         const { error } = await supabase.from('team_supporters').insert({ user_id: userId, team_id: selectedTeam.id })
         if (error) throw error
       }
-      toast.success('Agora vocÃª torce por ' + selectedTeam.name + '!')
+      toast.success('Agora você torce por ' + selectedTeam.name + '!')
       navigate({ to: '/minha-conta', replace: true })
     } catch (err) {
       toast.error(err instanceof Error ? err.message : 'Erro ao selecionar time')
@@ -77,7 +77,7 @@ function TorcedorOnboarding() {
       <div className="max-w-xl mx-auto space-y-8">
         <div className="text-center">
           <h1 className="text-2xl font-bold text-white">Escolha seu Time</h1>
-          <p className="mt-1 text-sm text-zinc-400">Encontre o time que vocÃª quer torcer na Liga MetrÃ³pole</p>
+          <p className="mt-1 text-sm text-zinc-400">Encontre o time que você quer torcer na Liga Metrópole</p>
         </div>
 
         <div className="space-y-4">
@@ -140,7 +140,7 @@ function TorcedorOnboarding() {
 
         {selectedTeam && (
           <div className="p-4 border border-red-500/30 bg-red-500/5 rounded-xl">
-            <p className="text-sm text-zinc-300">VocÃª vai torcer para <span className="font-semibold text-white">{selectedTeam.name}</span></p>
+            <p className="text-sm text-zinc-300">Você vai torcer para <span className="font-semibold text-white">{selectedTeam.name}</span></p>
           </div>
         )}
 

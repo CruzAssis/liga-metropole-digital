@@ -124,7 +124,7 @@ function TermosPage() {
           </p>
           <ul className="list-disc list-inside space-y-1 ml-2">
             <li>Incidentes fisicos ocorridos durante as partidas (lesoes, acidentes)</li>
-            <li>Interrupcoes do servico por razoes tecnicas ou de forca maior</li>
+            <li>Interrupcoes do servico por razoes técnicas ou de forca maior</li>
             <li>Conteudo publicado por outros usuarios</li>
             <li>Uso indevido das credenciais de acesso pelo titular</li>
           </ul>

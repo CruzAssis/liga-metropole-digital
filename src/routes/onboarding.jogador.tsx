@@ -51,7 +51,7 @@ function JogadorOnboarding() {
   async function handleSubmit(e) {
     e.preventDefault()
     if (!form.nickname.trim()) { toast.error('Informe seu apelido de campo'); return }
-    if (!form.position) { toast.error('Selecione sua posiÃ§Ã£o'); return }
+    if (!form.position) { toast.error('Selecione sua posição'); return }
     if (!userId) return
     setLoading(true)
     try {
@@ -67,7 +67,7 @@ function JogadorOnboarding() {
         cpf_hash, cpf_last4, team_id: mode === 'team' && selectedTeamId ? selectedTeamId : null, available_for_transfer: mode === 'market', verified: false,
       })
       if (error) throw error
-      toast.success(mode === 'market' ? 'VocÃª estÃ¡ no mercado de jogadores!' : 'Perfil de jogador criado!')
+      toast.success(mode === 'market' ? 'Você está no mercado de jogadores!' : 'Perfil de jogador criado!')
       navigate({ to: '/minha-conta', replace: true })
     } catch (err) {
       toast.error(err instanceof Error ? err.message : 'Erro ao criar perfil')
@@ -81,17 +81,17 @@ function JogadorOnboarding() {
       <div className="max-w-xl mx-auto space-y-8">
         <div className="text-center">
           <h1 className="text-2xl font-bold text-white">Perfil de Jogador</h1>
-          <p className="mt-1 text-sm text-zinc-400">Crie seu perfil de atleta na Liga MetrÃ³pole</p>
+          <p className="mt-1 text-sm text-zinc-400">Crie seu perfil de atleta na Liga Metrópole</p>
         </div>
         <form onSubmit={handleSubmit} className="space-y-6">
           <div>
             <Label htmlFor="nickname" className="text-zinc-300">Apelido / Nome de campo</Label>
-            <Input id="nickname" name="nickname" type="text" required value={form.nickname} onChange={handleChange} className="mt-1 bg-zinc-900 border-zinc-700 text-white" placeholder="Como vocÃª Ã© chamado em campo?" />
+            <Input id="nickname" name="nickname" type="text" required value={form.nickname} onChange={handleChange} className="mt-1 bg-zinc-900 border-zinc-700 text-white" placeholder="Como você é chamado em campo?" />
           </div>
           <div>
-            <Label className="text-zinc-300">PosiÃ§Ã£o</Label>
+            <Label className="text-zinc-300">Posição</Label>
             <select name="position" value={form.position} onChange={handleChange} required className="w-full mt-1 bg-zinc-900 border border-zinc-700 text-white rounded-md px-3 py-2 text-sm">
-              <option value="">Selecione sua posiÃ§Ã£o...</option>
+              <option value="">Selecione sua posição...</option>
               {POSICOES.map(p => <option key={p} value={p}>{p}</option>)}
             </select>
           </div>
@@ -101,24 +101,24 @@ function JogadorOnboarding() {
           </div>
           <div>
             <Label htmlFor="phrase" className="text-zinc-300">Meu estilo de jogo em uma frase</Label>
-            <Input id="phrase" name="phrase" type="text" maxLength={100} value={form.phrase} onChange={handleChange} className="mt-1 bg-zinc-900 border-zinc-700 text-white" placeholder="Ex: RÃ¡pido e sempre na correria" />
+            <Input id="phrase" name="phrase" type="text" maxLength={100} value={form.phrase} onChange={handleChange} className="mt-1 bg-zinc-900 border-zinc-700 text-white" placeholder="Ex: Rápido e sempre na correria" />
             <p className="text-xs text-zinc-600 mt-1">{form.phrase.length}/100</p>
           </div>
           <div>
-            <Label className="text-zinc-300">Como vocÃª avalia seu nÃ­vel? ({form.rating}/10)</Label>
+            <Label className="text-zinc-300">Como você avalia seu nível? ({form.rating}/10)</Label>
             <input type="range" min="1" max="10" name="rating" value={form.rating} onChange={e => setForm(prev => ({ ...prev, rating: Number(e.target.value) }))} className="w-full mt-2 accent-blue-500" />
             <div className="flex justify-between text-xs text-zinc-600 mt-1"><span>Iniciante (1)</span><span>Semi-profissional (10)</span></div>
           </div>
           <div className="space-y-3">
-            <Label className="text-zinc-300">O que vocÃª quer fazer?</Label>
+            <Label className="text-zinc-300">O que você quer fazer?</Label>
             <div className="space-y-2">
               <button type="button" onClick={() => setMode('team')} className={`w-full p-4 rounded-xl border-2 text-left ${mode === 'team' ? 'border-blue-500 bg-blue-500/10' : 'border-zinc-700 bg-zinc-900'}`}>
                 <p className="font-medium text-white text-sm">Vincular a uma equipe</p>
-                <p className="text-xs text-zinc-400 mt-1">Busque pelo nome do time que vocÃª jÃ¡ joga</p>
+                <p className="text-xs text-zinc-400 mt-1">Busque pelo nome do time que você já joga</p>
               </button>
               <button type="button" onClick={() => setMode('market')} className={`w-full p-4 rounded-xl border-2 text-left ${mode === 'market' ? 'border-green-500 bg-green-500/10' : 'border-zinc-700 bg-zinc-900'}`}>
                 <p className="font-medium text-white text-sm">Entrar no mercado de jogadores</p>
-                <p className="text-xs text-zinc-400 mt-1">Seu perfil ficarÃ¡ visÃ­vel para diretores que buscam jogadores</p>
+                <p className="text-xs text-zinc-400 mt-1">Seu perfil ficará visível para diretores que buscam jogadores</p>
               </button>
             </div>
           </div>
