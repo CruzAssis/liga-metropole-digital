@@ -338,21 +338,52 @@ function RankingPage() {
           <EmptyRanking />
         )}
         {matches && (hostStandings.length > 0 || visitorStandings.length > 0) && (
-        <Tabs defaultValue="mandantes">
-          <TabsList>
-            <TabsTrigger value="mandantes">Mandantes ({hosts.length})</TabsTrigger>
-            <TabsTrigger value="visitantes">Visitantes ({visitors.length})</TabsTrigger>
-          </TabsList>
-          <TabsContent value="mandantes" className="mt-4">
-            <StandingsTable rows={hostStandings} />
-            <Legend />
-          </TabsContent>
-          <TabsContent value="visitantes" className="mt-4">
-            <StandingsTable rows={visitorStandings} />
-            <Legend />
-          </TabsContent>
-        </Tabs>
-      )}
+          activeComp?.use_sides === false ? (
+            (() => {
+              const all = computeStandings(teams, matches, supporters);
+              const q = activeComp?.qualified_count ?? 0;
+              const r = activeComp?.relegated_count ?? 0;
+              return (
+                <>
+                  <StandingsTable rows={all} qualifiedCount={q} relegatedCount={r} showLado={false} />
+                  <Legend qualifiedCount={q} relegatedCount={r} />
+                </>
+              );
+            })()
+          ) : (
+            <Tabs defaultValue="mandantes">
+              <TabsList>
+                <TabsTrigger value="mandantes">Mandantes ({hosts.length})</TabsTrigger>
+                <TabsTrigger value="visitantes">Visitantes ({visitors.length})</TabsTrigger>
+              </TabsList>
+              <TabsContent value="mandantes" className="mt-4">
+                <StandingsTable
+                  rows={hostStandings}
+                  qualifiedCount={activeComp?.qualified_count ?? 0}
+                  relegatedCount={activeComp?.relegated_count ?? 0}
+                  showLado
+                />
+                <Legend
+                  qualifiedCount={activeComp?.qualified_count ?? 0}
+                  relegatedCount={activeComp?.relegated_count ?? 0}
+                />
+              </TabsContent>
+              <TabsContent value="visitantes" className="mt-4">
+                <StandingsTable
+                  rows={visitorStandings}
+                  qualifiedCount={activeComp?.qualified_count ?? 0}
+                  relegatedCount={activeComp?.relegated_count ?? 0}
+                  showLado
+                />
+                <Legend
+                  qualifiedCount={activeComp?.qualified_count ?? 0}
+                  relegatedCount={activeComp?.relegated_count ?? 0}
+                />
+              </TabsContent>
+            </Tabs>
+          )
+        )}
+
     </PublicShell>
   );
       }
