@@ -1,11 +1,13 @@
 // @ts-nocheck
 import { createFileRoute, useNavigate } from '@tanstack/react-router'
 import { useState, useEffect } from 'react'
+import { useServerFn } from '@tanstack/react-start'
 import { supabase } from '@/integrations/supabase/client'
 import { Button } from '@/components/ui/button'
 import { toast } from 'sonner'
 import { Spinner } from '@/components/AppSkeletons'
 import { Users, Trophy, Heart } from 'lucide-react'
+import { assignSelfRoles } from '@/lib/onboarding.functions'
 
 export const Route = createFileRoute('/onboarding')({
   component: OnboardingPage,
