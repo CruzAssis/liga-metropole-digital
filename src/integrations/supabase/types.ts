@@ -88,12 +88,15 @@ export type Database = {
           max_teams: number
           monthly_fee_brl: number | null
           name: string
+          qualified_count: number
           registration_status: string
+          relegated_count: number
           season: number
           starts_at: string | null
           status: string
           subprefeitura: string | null
           sumula_confirm_window_hours: number | null
+          use_sides: boolean
           visitor_slots: number
           wo_fine_brl: number | null
           wo_tolerance_minutes: number | null
@@ -110,12 +113,15 @@ export type Database = {
           max_teams?: number
           monthly_fee_brl?: number | null
           name: string
+          qualified_count?: number
           registration_status?: string
+          relegated_count?: number
           season: number
           starts_at?: string | null
           status?: string
           subprefeitura?: string | null
           sumula_confirm_window_hours?: number | null
+          use_sides?: boolean
           visitor_slots?: number
           wo_fine_brl?: number | null
           wo_tolerance_minutes?: number | null
@@ -132,12 +138,15 @@ export type Database = {
           max_teams?: number
           monthly_fee_brl?: number | null
           name?: string
+          qualified_count?: number
           registration_status?: string
+          relegated_count?: number
           season?: number
           starts_at?: string | null
           status?: string
           subprefeitura?: string | null
           sumula_confirm_window_hours?: number | null
+          use_sides?: boolean
           visitor_slots?: number
           wo_fine_brl?: number | null
           wo_tolerance_minutes?: number | null
