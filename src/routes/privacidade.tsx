@@ -124,10 +124,10 @@ function PrivacidadePage() {
           </ul>
         </Section>
 
-        <Section title="8. Cookies e dados tecnicos">
+        <Section title="8. Cookies e dados técnicos">
           <p>
             Utilizamos cookies essenciais de sessao para autenticacao. Nao utilizamos cookies de rastreamento
-            ou publicidade de terceiros. Dados tecnicos como endereco IP podem ser registrados pelos provedores
+            ou publicidade de terceiros. Dados técnicos como endereco IP podem ser registrados pelos provedores
             de infraestrutura para fins de seguranca.
           </p>
         </Section>
