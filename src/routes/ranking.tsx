@@ -117,7 +117,17 @@ function computeStandings(
     );
 }
 
-function StandingsTable({ rows }: { rows: Standing[] }) {
+function StandingsTable({
+  rows,
+  qualifiedCount,
+  relegatedCount,
+  showLado,
+}: {
+  rows: Standing[];
+  qualifiedCount: number;
+  relegatedCount: number;
+  showLado: boolean;
+}) {
   if (rows.length === 0) {
     return (
       <div className="rounded-md border border-border bg-card p-6 text-center text-sm text-muted-foreground">
@@ -146,9 +156,10 @@ function StandingsTable({ rows }: { rows: Standing[] }) {
         <tbody>
           {rows.map((r, i) => {
             const pos = i + 1;
-            const isTop8 = pos <= 8;
-            const isRelegation = pos >= rows.length - 9 && rows.length >= 10;
-            const rowCls = isTop8
+            const isQualified = qualifiedCount > 0 && pos <= qualifiedCount;
+            const isRelegation =
+              relegatedCount > 0 && pos > rows.length - relegatedCount;
+            const rowCls = isQualified
               ? "bg-emerald-500/5 border-l-2 border-emerald-500"
               : isRelegation
               ? "bg-red-500/5 border-l-2 border-red-500"
@@ -165,7 +176,9 @@ function StandingsTable({ rows }: { rows: Standing[] }) {
                     )}
                     <span className="hidden sm:inline">{r.team.name}</span>
                     <span className="sm:hidden font-mono">{r.team.short_name}</span>
-                    <Badge variant="outline" className="text-[10px] ml-1">{r.team.lado}</Badge>
+                    {showLado && (
+                      <Badge variant="outline" className="text-[10px] ml-1">{r.team.lado}</Badge>
+                    )}
                   </div>
                 </td>
                 <td className="text-center p-2 font-bold text-primary tabular-nums">{r.points}</td>
@@ -186,20 +199,26 @@ function StandingsTable({ rows }: { rows: Standing[] }) {
   );
 }
 
-function Legend() {
+function Legend({ qualifiedCount, relegatedCount }: { qualifiedCount: number; relegatedCount: number }) {
+  if (qualifiedCount === 0 && relegatedCount === 0) return null;
   return (
     <div className="flex flex-wrap items-center gap-4 text-xs text-muted-foreground mt-3">
-      <span className="flex items-center gap-2">
-        <span className="inline-block h-3 w-3 rounded-sm bg-emerald-500/40 border-l-2 border-emerald-500" />
-        Top 8 — Playoff
-      </span>
-      <span className="flex items-center gap-2">
-        <span className="inline-block h-3 w-3 rounded-sm bg-red-500/40 border-l-2 border-red-500" />
-        31º–40º — Rebaixamento Série B
-      </span>
+      {qualifiedCount > 0 && (
+        <span className="flex items-center gap-2">
+          <span className="inline-block h-3 w-3 rounded-sm bg-emerald-500/40 border-l-2 border-emerald-500" />
+          Top {qualifiedCount} — Classificados ao mata-mata
+        </span>
+      )}
+      {relegatedCount > 0 && (
+        <span className="flex items-center gap-2">
+          <span className="inline-block h-3 w-3 rounded-sm bg-red-500/40 border-l-2 border-red-500" />
+          Últimos {relegatedCount} — Zona de rebaixamento
+        </span>
+      )}
     </div>
   );
 }
+
 
 function RankingPage() {
   const [competitions, setCompetitions] = useState<Competition[]>([]);
