@@ -33,7 +33,11 @@ type Competition = {
   subprefeitura: string | null;
   zona: string | null;
   season: number | null;
+  qualified_count: number;
+  relegated_count: number;
+  use_sides: boolean;
 };
+
 
 type Standing = {
   team: Team;
