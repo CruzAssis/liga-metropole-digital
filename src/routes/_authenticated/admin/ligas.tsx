@@ -89,6 +89,9 @@ type Competition = {
   subprefeitura: string | null;
   zona: string | null;
   conference_number: number | null;
+  qualified_count: number;
+  relegated_count: number;
+  use_sides: boolean;
 };
 
 type FillStats = {
@@ -103,6 +106,7 @@ type FillStats = {
   is_full: boolean;
   registration_status: string;
 };
+
 
 const REG_STATUS_LABELS: Record<string, { label: string; cls: string }> = {
   open:      { label: "Aberta",         cls: "bg-emerald-500/20 text-emerald-400 border-emerald-500/30" },
