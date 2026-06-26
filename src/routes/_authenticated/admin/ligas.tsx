@@ -205,8 +205,13 @@ function LigasPage() {
     const max = parseInt(form.max_teams, 10);
     const host = parseInt(form.host_slots, 10);
     const visitor = parseInt(form.visitor_slots, 10);
+    const qualified = parseInt(form.qualified_count, 10);
+    const relegated = parseInt(form.relegated_count, 10);
     if (!max || !host || !visitor) { toast.error("Números de vagas inválidos"); return; }
     if (host + visitor !== max) { toast.error(`Vagas Mandante (${host}) + Visitante (${visitor}) deve somar ${max}`); return; }
+    if (isNaN(qualified) || qualified < 0) { toast.error("Quantidade de classificados inválida"); return; }
+    if (isNaN(relegated) || relegated < 0) { toast.error("Quantidade de rebaixados inválida"); return; }
+    if (qualified + relegated > max) { toast.error(`Classificados (${qualified}) + Rebaixados (${relegated}) não podem exceder ${max} times`); return; }
 
     setSaving(true);
     try {
@@ -223,7 +228,11 @@ function LigasPage() {
         conference_name: sp?.conference_name ?? form.name.trim(),
         zona: sp?.zona ?? null,
         conference_number: sp?.conference_number ?? null,
+        qualified_count: qualified,
+        relegated_count: relegated,
+        use_sides: form.use_sides,
       };
+
 
       if (editId) {
         const { error } = await supabaseAny.from("competitions").update(payload).eq("id", editId);
