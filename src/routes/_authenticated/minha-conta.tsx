@@ -20,6 +20,70 @@ import { TeamHomeVenueCard } from "@/components/teams/TeamHomeVenueCard";
 import { getMyProfile, updateMyProfile } from "@/lib/profile.functions";
 import { getMyTeamPagamentos, type PagamentoStatus } from "@/lib/pagamentos.functions";
 import { formatPhoneBR } from "@/lib/wa";
+import homeBg from "@/assets/home-bg.png.asset.json";
+
+// ─── Ligas abertas para inscrição ────────────────────────────────────────────
+type OpenLeague = {
+  id: string;
+  name: string;
+  conference_name: string | null;
+  subprefeitura: string | null;
+  season: number | null;
+  host_slots: number;
+  visitor_slots: number;
+  starts_at: string | null;
+};
+
+function OpenLeaguesCard() {
+  const [leagues, setLeagues] = useState<OpenLeague[]>([]);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    (async () => {
+      const { data } = await supabase
+        .from("competitions")
+        .select("id,name,conference_name,subprefeitura,season,host_slots,visitor_slots,starts_at")
+        .eq("registration_status", "open")
+        .order("created_at", { ascending: false });
+      setLeagues((data ?? []) as unknown as OpenLeague[]);
+      setLoading(false);
+    })();
+  }, []);
+
+  if (loading) return null;
+  if (leagues.length === 0) return null;
+
+  return (
+    <div className="rounded-lg border border-[#1565F5]/40 bg-[#1565F5]/5 p-6 space-y-4">
+      <div className="flex items-center gap-2">
+        <ClipboardList className="h-5 w-5 text-[#1565F5]" />
+        <h2 className="font-display text-2xl tracking-wide">Ligas com inscrições abertas</h2>
+      </div>
+      <p className="text-sm text-muted-foreground">
+        Inscreva seu time em uma das conferências disponíveis abaixo.
+      </p>
+      <div className="space-y-2">
+        {leagues.map((l) => (
+          <div key={l.id} className="flex items-center justify-between gap-3 rounded-lg border border-border bg-background/60 p-3">
+            <div className="min-w-0">
+              <p className="font-medium text-sm truncate">
+                {l.conference_name ?? l.name}{l.season ? ` · ${l.season}` : ""}
+              </p>
+              <p className="text-xs text-muted-foreground truncate">
+                {l.subprefeitura ? `${l.subprefeitura} · ` : ""}
+                {l.host_slots} Mandantes + {l.visitor_slots} Visitantes
+                {l.starts_at ? ` · Início ${new Date(l.starts_at).toLocaleDateString("pt-BR")}` : ""}
+              </p>
+            </div>
+            <Button asChild size="sm" className="bg-[#1565F5] hover:bg-blue-600 text-white shrink-0">
+              <Link to="/inscricao">Inscrever-se</Link>
+            </Button>
+          </div>
+        ))}
+      </div>
+    </div>
+  );
+}
 
 type Team = {
   id: string;
@@ -187,7 +251,19 @@ function MinhaContaPage() {
   if (loading) return <div className="text-muted-foreground">Carregando...</div>;
 
   return (
-    <div className="max-w-2xl mx-auto space-y-8">
+    <div className="relative -mx-4 -my-6 sm:-mx-6 px-4 sm:px-6 py-6 min-h-screen">
+      {/* Background image */}
+      <div
+        aria-hidden
+        className="pointer-events-none absolute inset-0 -z-10 bg-cover bg-center bg-no-repeat opacity-30"
+        style={{ backgroundImage: `url(${homeBg.url})` }}
+      />
+      <div
+        aria-hidden
+        className="pointer-events-none absolute inset-0 -z-10 bg-gradient-to-b from-background/70 via-background/85 to-background"
+      />
+
+      <div className="max-w-2xl mx-auto space-y-8">
       <div>
         <h1 className="font-display text-4xl tracking-wide">Minha conta</h1>
         <p className="text-muted-foreground mt-1">Seus dados de contato e o status do seu time.</p>
@@ -200,6 +276,9 @@ function MinhaContaPage() {
           </Link>
         </div>
       </div>
+
+      {/* Ligas abertas — visível para diretores com time inscrito */}
+      {team && <OpenLeaguesCard />}
 
       <DirectorContactCard />
 
