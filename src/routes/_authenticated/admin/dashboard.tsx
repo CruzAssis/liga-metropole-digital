@@ -21,6 +21,8 @@ import {
   AlertCircle,
   FileWarning,
   ChevronRight,
+  Trophy,
+  Plus,
 } from "lucide-react";
 
 export const Route = createFileRoute("/_authenticated/admin/dashboard")({
@@ -406,6 +408,12 @@ function AdminDashboard() {
       <div>
         <h2 className="font-display text-xl tracking-wide text-zinc-200 mb-3">Atalhos rápidos</h2>
         <div className="flex flex-wrap gap-3">
+          <Button asChild className="bg-emerald-600 hover:bg-emerald-700 text-white gap-2">
+            <Link to="/admin/ligas">
+              <Plus className="h-4 w-4" />
+              Criar / Gerenciar ligas
+            </Link>
+          </Button>
           <Button asChild className="bg-[#1565F5] hover:bg-blue-600 text-white gap-2">
             <Link to="/admin/triagem">
               <UserCheck className="h-4 w-4" />
