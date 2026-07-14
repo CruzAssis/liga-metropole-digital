@@ -14,11 +14,13 @@ import { Route as TimesRouteImport } from './routes/times'
 import { Route as TermosRouteImport } from './routes/termos'
 import { Route as SignupRouteImport } from './routes/signup'
 import { Route as ResultadosRouteImport } from './routes/resultados'
+import { Route as ResetPasswordRouteImport } from './routes/reset-password'
 import { Route as RankingRouteImport } from './routes/ranking'
 import { Route as PrivacidadeRouteImport } from './routes/privacidade'
 import { Route as OnboardingRouteImport } from './routes/onboarding'
 import { Route as LoginRouteImport } from './routes/login'
 import { Route as LocaisRouteImport } from './routes/locais'
+import { Route as ForgotPasswordRouteImport } from './routes/forgot-password'
 import { Route as AtletasRouteImport } from './routes/atletas'
 import { Route as AgendaRouteImport } from './routes/agenda'
 import { Route as AuthenticatedRouteImport } from './routes/_authenticated'
@@ -29,6 +31,7 @@ import { Route as PartidasIdRouteImport } from './routes/partidas.$id'
 import { Route as OnboardingTorcedorRouteImport } from './routes/onboarding.torcedor'
 import { Route as OnboardingJogadorRouteImport } from './routes/onboarding.jogador'
 import { Route as OnboardingDiretorRouteImport } from './routes/onboarding.diretor'
+import { Route as ConviteCodeRouteImport } from './routes/convite.$code'
 import { Route as AtletasIdRouteImport } from './routes/atletas.$id'
 import { Route as AuthenticatedMinhaContaRouteImport } from './routes/_authenticated/minha-conta'
 import { Route as AuthenticatedInscricaoRouteImport } from './routes/_authenticated/inscricao'
@@ -70,6 +73,11 @@ const ResultadosRoute = ResultadosRouteImport.update({
   path: '/resultados',
   getParentRoute: () => rootRouteImport,
 } as any)
+const ResetPasswordRoute = ResetPasswordRouteImport.update({
+  id: '/reset-password',
+  path: '/reset-password',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const RankingRoute = RankingRouteImport.update({
   id: '/ranking',
   path: '/ranking',
@@ -93,6 +101,11 @@ const LoginRoute = LoginRouteImport.update({
 const LocaisRoute = LocaisRouteImport.update({
   id: '/locais',
   path: '/locais',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ForgotPasswordRoute = ForgotPasswordRouteImport.update({
+  id: '/forgot-password',
+  path: '/forgot-password',
   getParentRoute: () => rootRouteImport,
 } as any)
 const AtletasRoute = AtletasRouteImport.update({
@@ -143,6 +156,11 @@ const OnboardingDiretorRoute = OnboardingDiretorRouteImport.update({
   id: '/diretor',
   path: '/diretor',
   getParentRoute: () => OnboardingRoute,
+} as any)
+const ConviteCodeRoute = ConviteCodeRouteImport.update({
+  id: '/convite/$code',
+  path: '/convite/$code',
+  getParentRoute: () => rootRouteImport,
 } as any)
 const AtletasIdRoute = AtletasIdRouteImport.update({
   id: '/$id',
@@ -232,11 +250,13 @@ export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
   '/agenda': typeof AgendaRoute
   '/atletas': typeof AtletasRouteWithChildren
+  '/forgot-password': typeof ForgotPasswordRoute
   '/locais': typeof LocaisRoute
   '/login': typeof LoginRoute
   '/onboarding': typeof OnboardingRouteWithChildren
   '/privacidade': typeof PrivacidadeRoute
   '/ranking': typeof RankingRoute
+  '/reset-password': typeof ResetPasswordRoute
   '/resultados': typeof ResultadosRoute
   '/signup': typeof SignupRoute
   '/termos': typeof TermosRoute
@@ -246,6 +266,7 @@ export interface FileRoutesByFullPath {
   '/inscricao': typeof AuthenticatedInscricaoRoute
   '/minha-conta': typeof AuthenticatedMinhaContaRouteWithChildren
   '/atletas/$id': typeof AtletasIdRoute
+  '/convite/$code': typeof ConviteCodeRoute
   '/onboarding/diretor': typeof OnboardingDiretorRoute
   '/onboarding/jogador': typeof OnboardingJogadorRoute
   '/onboarding/torcedor': typeof OnboardingTorcedorRoute
@@ -268,11 +289,13 @@ export interface FileRoutesByTo {
   '/': typeof IndexRoute
   '/agenda': typeof AgendaRoute
   '/atletas': typeof AtletasRouteWithChildren
+  '/forgot-password': typeof ForgotPasswordRoute
   '/locais': typeof LocaisRoute
   '/login': typeof LoginRoute
   '/onboarding': typeof OnboardingRouteWithChildren
   '/privacidade': typeof PrivacidadeRoute
   '/ranking': typeof RankingRoute
+  '/reset-password': typeof ResetPasswordRoute
   '/resultados': typeof ResultadosRoute
   '/signup': typeof SignupRoute
   '/termos': typeof TermosRoute
@@ -282,6 +305,7 @@ export interface FileRoutesByTo {
   '/inscricao': typeof AuthenticatedInscricaoRoute
   '/minha-conta': typeof AuthenticatedMinhaContaRouteWithChildren
   '/atletas/$id': typeof AtletasIdRoute
+  '/convite/$code': typeof ConviteCodeRoute
   '/onboarding/diretor': typeof OnboardingDiretorRoute
   '/onboarding/jogador': typeof OnboardingJogadorRoute
   '/onboarding/torcedor': typeof OnboardingTorcedorRoute
@@ -306,11 +330,13 @@ export interface FileRoutesById {
   '/_authenticated': typeof AuthenticatedRouteWithChildren
   '/agenda': typeof AgendaRoute
   '/atletas': typeof AtletasRouteWithChildren
+  '/forgot-password': typeof ForgotPasswordRoute
   '/locais': typeof LocaisRoute
   '/login': typeof LoginRoute
   '/onboarding': typeof OnboardingRouteWithChildren
   '/privacidade': typeof PrivacidadeRoute
   '/ranking': typeof RankingRoute
+  '/reset-password': typeof ResetPasswordRoute
   '/resultados': typeof ResultadosRoute
   '/signup': typeof SignupRoute
   '/termos': typeof TermosRoute
@@ -320,6 +346,7 @@ export interface FileRoutesById {
   '/_authenticated/inscricao': typeof AuthenticatedInscricaoRoute
   '/_authenticated/minha-conta': typeof AuthenticatedMinhaContaRouteWithChildren
   '/atletas/$id': typeof AtletasIdRoute
+  '/convite/$code': typeof ConviteCodeRoute
   '/onboarding/diretor': typeof OnboardingDiretorRoute
   '/onboarding/jogador': typeof OnboardingJogadorRoute
   '/onboarding/torcedor': typeof OnboardingTorcedorRoute
@@ -344,11 +371,13 @@ export interface FileRouteTypes {
     | '/'
     | '/agenda'
     | '/atletas'
+    | '/forgot-password'
     | '/locais'
     | '/login'
     | '/onboarding'
     | '/privacidade'
     | '/ranking'
+    | '/reset-password'
     | '/resultados'
     | '/signup'
     | '/termos'
@@ -358,6 +387,7 @@ export interface FileRouteTypes {
     | '/inscricao'
     | '/minha-conta'
     | '/atletas/$id'
+    | '/convite/$code'
     | '/onboarding/diretor'
     | '/onboarding/jogador'
     | '/onboarding/torcedor'
@@ -380,11 +410,13 @@ export interface FileRouteTypes {
     | '/'
     | '/agenda'
     | '/atletas'
+    | '/forgot-password'
     | '/locais'
     | '/login'
     | '/onboarding'
     | '/privacidade'
     | '/ranking'
+    | '/reset-password'
     | '/resultados'
     | '/signup'
     | '/termos'
@@ -394,6 +426,7 @@ export interface FileRouteTypes {
     | '/inscricao'
     | '/minha-conta'
     | '/atletas/$id'
+    | '/convite/$code'
     | '/onboarding/diretor'
     | '/onboarding/jogador'
     | '/onboarding/torcedor'
@@ -417,11 +450,13 @@ export interface FileRouteTypes {
     | '/_authenticated'
     | '/agenda'
     | '/atletas'
+    | '/forgot-password'
     | '/locais'
     | '/login'
     | '/onboarding'
     | '/privacidade'
     | '/ranking'
+    | '/reset-password'
     | '/resultados'
     | '/signup'
     | '/termos'
@@ -431,6 +466,7 @@ export interface FileRouteTypes {
     | '/_authenticated/inscricao'
     | '/_authenticated/minha-conta'
     | '/atletas/$id'
+    | '/convite/$code'
     | '/onboarding/diretor'
     | '/onboarding/jogador'
     | '/onboarding/torcedor'
@@ -455,16 +491,19 @@ export interface RootRouteChildren {
   AuthenticatedRoute: typeof AuthenticatedRouteWithChildren
   AgendaRoute: typeof AgendaRoute
   AtletasRoute: typeof AtletasRouteWithChildren
+  ForgotPasswordRoute: typeof ForgotPasswordRoute
   LocaisRoute: typeof LocaisRoute
   LoginRoute: typeof LoginRoute
   OnboardingRoute: typeof OnboardingRouteWithChildren
   PrivacidadeRoute: typeof PrivacidadeRoute
   RankingRoute: typeof RankingRoute
+  ResetPasswordRoute: typeof ResetPasswordRoute
   ResultadosRoute: typeof ResultadosRoute
   SignupRoute: typeof SignupRoute
   TermosRoute: typeof TermosRoute
   TimesRoute: typeof TimesRouteWithChildren
   VerificarRoute: typeof VerificarRoute
+  ConviteCodeRoute: typeof ConviteCodeRoute
   PartidasIdRoute: typeof PartidasIdRoute
   SumulaPartidaIdRoute: typeof SumulaPartidaIdRoute
   ApiPublicHooksWoCheckerRoute: typeof ApiPublicHooksWoCheckerRoute
@@ -507,6 +546,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof ResultadosRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/reset-password': {
+      id: '/reset-password'
+      path: '/reset-password'
+      fullPath: '/reset-password'
+      preLoaderRoute: typeof ResetPasswordRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/ranking': {
       id: '/ranking'
       path: '/ranking'
@@ -540,6 +586,13 @@ declare module '@tanstack/react-router' {
       path: '/locais'
       fullPath: '/locais'
       preLoaderRoute: typeof LocaisRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/forgot-password': {
+      id: '/forgot-password'
+      path: '/forgot-password'
+      fullPath: '/forgot-password'
+      preLoaderRoute: typeof ForgotPasswordRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/atletas': {
@@ -611,6 +664,13 @@ declare module '@tanstack/react-router' {
       fullPath: '/onboarding/diretor'
       preLoaderRoute: typeof OnboardingDiretorRouteImport
       parentRoute: typeof OnboardingRoute
+    }
+    '/convite/$code': {
+      id: '/convite/$code'
+      path: '/convite/$code'
+      fullPath: '/convite/$code'
+      preLoaderRoute: typeof ConviteCodeRouteImport
+      parentRoute: typeof rootRouteImport
     }
     '/atletas/$id': {
       id: '/atletas/$id'
@@ -820,16 +880,19 @@ const rootRouteChildren: RootRouteChildren = {
   AuthenticatedRoute: AuthenticatedRouteWithChildren,
   AgendaRoute: AgendaRoute,
   AtletasRoute: AtletasRouteWithChildren,
+  ForgotPasswordRoute: ForgotPasswordRoute,
   LocaisRoute: LocaisRoute,
   LoginRoute: LoginRoute,
   OnboardingRoute: OnboardingRouteWithChildren,
   PrivacidadeRoute: PrivacidadeRoute,
   RankingRoute: RankingRoute,
+  ResetPasswordRoute: ResetPasswordRoute,
   ResultadosRoute: ResultadosRoute,
   SignupRoute: SignupRoute,
   TermosRoute: TermosRoute,
   TimesRoute: TimesRouteWithChildren,
   VerificarRoute: VerificarRoute,
+  ConviteCodeRoute: ConviteCodeRoute,
   PartidasIdRoute: PartidasIdRoute,
   SumulaPartidaIdRoute: SumulaPartidaIdRoute,
   ApiPublicHooksWoCheckerRoute: ApiPublicHooksWoCheckerRoute,

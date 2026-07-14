@@ -92,6 +92,10 @@ function SignupPage() {
       toast.error('CPF invalido')
       return
     }
+    if (!/^(?=.*[A-Za-z])(?=.*\d).{8,}$/.test(form.password)) {
+      toast.error('A senha precisa ter no mínimo 8 caracteres, com letras e números.')
+      return
+    }
     setLoading(true)
     try {
       const { data, error } = await supabase.auth.signUp({
@@ -233,13 +237,18 @@ function SignupPage() {
               name="password"
               type="password"
               required
-              minLength={6}
+              minLength={8}
               value={form.password}
               onChange={handleChange}
               className="mt-1 bg-zinc-900 border-zinc-700 text-white"
-              placeholder="Minimo 6 caracteres"
+              placeholder="Mínimo 8 caracteres"
             />
+            <p className="mt-1 text-xs text-zinc-500">
+              Use no mínimo 8 caracteres, com letras e números.
+            </p>
           </div>
+
+
 
           <Button
             type="submit"

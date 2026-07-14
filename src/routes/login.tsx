@@ -14,7 +14,7 @@ import { Spinner } from "@/components/AppSkeletons";
 
 const schema = z.object({
   email: z.string().email("Email inválido").max(255),
-  password: z.string().min(6, "Mínimo 6 caracteres").max(72),
+  password: z.string().min(1, "Informe sua senha").max(72),
 });
 
 type FormData = z.infer<typeof schema>;
@@ -82,7 +82,12 @@ function LoginPage() {
               {errors.email && <p className="text-sm text-destructive">{errors.email.message}</p>}
             </div>
             <div className="space-y-2">
-              <Label htmlFor="password">Senha</Label>
+              <div className="flex items-center justify-between">
+                <Label htmlFor="password">Senha</Label>
+                <Link to="/forgot-password" className="text-xs text-primary hover:underline">
+                  Esqueci minha senha
+                </Link>
+              </div>
               <Input id="password" type="password" {...register("password")} />
               {errors.password && <p className="text-sm text-destructive">{errors.password.message}</p>}
             </div>
