@@ -532,6 +532,7 @@ export type Database = {
           home_time: string | null
           home_venue: string | null
           id: string
+          invite_code: string | null
           lado: Database["public"]["Enums"]["team_side"]
           logo_url: string | null
           manager_id: string
@@ -554,6 +555,7 @@ export type Database = {
           home_time?: string | null
           home_venue?: string | null
           id?: string
+          invite_code?: string | null
           lado?: Database["public"]["Enums"]["team_side"]
           logo_url?: string | null
           manager_id: string
@@ -576,6 +578,7 @@ export type Database = {
           home_time?: string | null
           home_venue?: string | null
           id?: string
+          invite_code?: string | null
           lado?: Database["public"]["Enums"]["team_side"]
           logo_url?: string | null
           manager_id?: string
@@ -646,6 +649,19 @@ export type Database = {
           visitor_a_approved: number
           visitor_b_approved: number
           visitor_slots: number
+        }[]
+      }
+      generate_team_invite_code: { Args: never; Returns: string }
+      get_team_by_invite_code: {
+        Args: { _code: string }
+        Returns: {
+          id: string
+          logo_url: string
+          name: string
+          primary_color: string
+          secondary_color: string
+          short_name: string
+          status: string
         }[]
       }
       has_role: {
