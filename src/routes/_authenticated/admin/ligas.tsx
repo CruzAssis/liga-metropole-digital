@@ -511,15 +511,27 @@ function LigasPage() {
                         </p>
                       )}
                     </div>
-                    <div className="flex gap-2">
+                    <div className="flex gap-2 flex-wrap">
                       <Button variant="outline" size="sm" onClick={() => handleEdit(c)}>
                         <Settings className="h-4 w-4 mr-1" /> Editar
                       </Button>
-                      {(c.registration_status === "open" || c.registration_status === "closed") && (
-                        <Button variant="outline" size="sm" onClick={() => handleToggleStatus(c)}>
-                          {c.registration_status === "open" ? "Fechar inscrições" : "Reabrir inscrições"}
+                      {c.registration_status === "open" ? (
+                        <Button
+                          variant="outline"
+                          size="sm"
+                          onClick={() => handleToggleStatus(c)}
+                        >
+                          Fechar inscrições
                         </Button>
-                      )}
+                      ) : (c.registration_status === "closed" || c.registration_status === "draw_ready") ? (
+                        <Button
+                          size="sm"
+                          onClick={() => handleToggleStatus(c)}
+                          className="bg-emerald-600 hover:bg-emerald-700 text-white font-semibold shadow"
+                        >
+                          <CheckCircle className="h-4 w-4 mr-1" /> Ativar Liga (abrir inscrições)
+                        </Button>
+                      ) : null}
                     </div>
                   </div>
 
