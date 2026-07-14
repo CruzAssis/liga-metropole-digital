@@ -97,6 +97,7 @@ type Team = {
   status: "pending" | "approved" | "rejected" | "waitlist";
   rejected_reason: string | null;
   created_at: string;
+  invite_code: string | null;
 };
 
 const statusMeta: Record<Team["status"], { label: string; variant: "default" | "secondary" | "destructive" | "outline" }> = {
@@ -239,7 +240,7 @@ function MinhaContaPage() {
     if (!user) return;
     const { data } = await supabase
       .from("teams")
-      .select("id,name,short_name,slug,logo_url,banner_url,primary_color,registration_type,status,rejected_reason,created_at")
+      .select("id,name,short_name,slug,logo_url,banner_url,primary_color,registration_type,status,rejected_reason,created_at,invite_code")
       .eq("manager_id", user.id)
       .maybeSingle();
     setTeam((data as Team | null) ?? null);
@@ -356,6 +357,47 @@ function TeamCard({ team }: { team: Team }) {
           Sua inscrição está em análise pela organização da liga.
         </div>
       )}
+      {team.invite_code && <InviteLinkBlock code={team.invite_code} teamName={team.name} />}
+    </div>
+  );
+}
+
+function InviteLinkBlock({ code, teamName }: { code: string; teamName: string }) {
+  const origin = typeof window !== "undefined" ? window.location.origin : "";
+  const url = `${origin}/convite/${code}`;
+  const waMessage = encodeURIComponent(
+    `Olá! Você foi convidado(a) para se juntar ao time ${teamName} na Liga Metrópole. Clique no link e crie sua conta de jogador: ${url}`,
+  );
+  const copy = async () => {
+    try {
+      await navigator.clipboard.writeText(url);
+      toast.success("Link copiado!");
+    } catch {
+      toast.error("Não foi possível copiar. Selecione manualmente.");
+    }
+  };
+  return (
+    <div className="mt-6 rounded-md border border-primary/30 bg-primary/5 p-4 space-y-3">
+      <div>
+        <p className="text-sm font-semibold">Convide seus jogadores</p>
+        <p className="text-xs text-muted-foreground mt-1">
+          Compartilhe o link abaixo. Quem abrir vai se cadastrar e entrar automaticamente no seu time.
+        </p>
+      </div>
+      <div className="flex items-center gap-2 flex-wrap">
+        <code className="flex-1 min-w-0 text-xs font-mono bg-background border border-border rounded px-3 py-2 truncate">
+          {url}
+        </code>
+        <Button size="sm" variant="outline" onClick={copy}>Copiar</Button>
+        <Button size="sm" asChild className="bg-emerald-600 hover:bg-emerald-700 text-white">
+          <a href={`https://wa.me/?text=${waMessage}`} target="_blank" rel="noopener noreferrer">
+            Enviar no WhatsApp
+          </a>
+        </Button>
+      </div>
+      <p className="text-xs text-muted-foreground">
+        Código: <span className="font-mono font-semibold">{code}</span>
+      </p>
     </div>
   );
 }
