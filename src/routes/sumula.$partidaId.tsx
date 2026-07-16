@@ -376,11 +376,11 @@ function Etapa2GolesDestaque({
         )}
       </div>
 
-      {erro && <p className="text-red-400 text-sm">{erro}</p>}
       <PrimaryCTA
         onClick={salvar}
         loading={loading}
         loadingText="Salvando..."
+        errorMessage={erro}
         disabled={!destaqueJersey || goals.length !== myScore}
       >
         Confirmar Gols + Destaque
