@@ -29,7 +29,15 @@ function Counter({ stat, start }: { stat: Stat; start: boolean }) {
     return () => cancelAnimationFrame(raf);
   }, [start, stat.value]);
   return (
-    <span style={{ fontSize: 32, fontWeight: 900, color: "#FAFAFA", letterSpacing: "-0.03em" }}>
+    <span
+      className="font-display tabular-nums"
+      style={{
+        fontSize: "clamp(40px, 6vw, 56px)",
+        lineHeight: 1,
+        color: "#FAFAFA",
+        letterSpacing: "0.01em",
+      }}
+    >
       {n}
       {stat.suffix ?? ""}
     </span>
@@ -58,14 +66,22 @@ export function AnimatedStats() {
   return (
     <section
       ref={ref}
-      className="border-y"
-      style={{ background: "#111113", borderColor: "#27272A" }}
+      className="relative border-y overflow-hidden"
+      style={{ background: "#0B0B0D", borderColor: "#27272A" }}
     >
-      <div className="mx-auto grid max-w-5xl grid-cols-2 md:grid-cols-4">
+      {/* Subtle glow behind grid */}
+      <div
+        className="pointer-events-none absolute inset-0 opacity-40"
+        style={{
+          background:
+            "radial-gradient(ellipse at 50% 100%, rgba(21,101,245,0.15) 0%, transparent 60%)",
+        }}
+      />
+      <div className="relative mx-auto grid max-w-5xl grid-cols-2 md:grid-cols-4">
         {STATS.map((s, i) => (
           <div
             key={s.label}
-            className="flex flex-col items-center justify-center py-8"
+            className="flex flex-col items-center justify-center py-10 md:py-14 px-4"
             style={{
               borderRight: i < STATS.length - 1 ? "1px solid #27272A" : "none",
               borderBottom: i < 2 ? "1px solid #27272A" : "none",
@@ -76,10 +92,10 @@ export function AnimatedStats() {
               style={{
                 fontSize: 11,
                 textTransform: "uppercase",
-                letterSpacing: "0.1em",
-                color: "#52525B",
-                marginTop: 4,
-                fontWeight: 600,
+                letterSpacing: "0.14em",
+                color: "#71717A",
+                marginTop: 10,
+                fontWeight: 700,
               }}
             >
               {s.label}

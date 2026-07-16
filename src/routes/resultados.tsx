@@ -3,6 +3,7 @@ import { SkeletonMatchList, EmptyResultados } from "@/components/AppSkeletons";
 import { useEffect, useState, useRef } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { PublicShell } from "@/components/PublicShell";
+import { PageHeader } from "@/components/PageHeader";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { ChevronLeft, ChevronRight, MapPin } from "lucide-react";
@@ -113,10 +114,12 @@ function ResultadosPage() {
 
   return (
     <PublicShell>
-      <header className="mb-6">
-        <h1 className="font-display text-5xl tracking-wide">Resultados</h1>
-        <p className="text-muted-foreground mt-1">Partidas confirmadas.</p>
-      </header>
+      <PageHeader
+        eyebrow="Últimas rodadas"
+        title="Resultados"
+        description="Partidas confirmadas da temporada."
+      />
+
 
       {/* Conference filter */}
       {competitions.length > 0 && (
@@ -130,16 +133,17 @@ function ResultadosPage() {
                 key={c.id}
                 onClick={() => { setSelectedComp(c.id); setSelectedRound(1); }}
                 className={[
-                  "text-sm px-3 py-1.5 rounded-md border transition-colors",
+                  "text-sm font-semibold px-3.5 py-2 rounded-full border transition-all",
                   selectedComp === c.id
-                    ? "bg-primary text-primary-foreground border-primary"
-                    : "border-border text-muted-foreground hover:text-foreground",
+                    ? "bg-primary text-primary-foreground border-primary shadow-[0_0_20px_-6px_rgba(21,101,245,0.6)]"
+                    : "border-border bg-card text-muted-foreground hover:text-foreground hover:border-primary/40",
                 ].join(" ")}
               >
                 {c.conference_name ?? c.name}{c.season ? ` ${c.season}` : ""}
               </button>
             ))}
           </div>
+
           {activeComp?.subprefeitura && (
             <p className="text-xs text-muted-foreground flex items-center gap-1">
               <MapPin className="h-3 w-3" />
@@ -154,13 +158,12 @@ function ResultadosPage() {
       {selectedComp && (
         <div className="mb-6">
           <div className="flex items-center gap-2">
-            <Button variant="ghost" size="icon" onClick={prevRound} disabled={selectedRound === 1} className="shrink-0">
+            <Button variant="outline" size="icon" onClick={prevRound} disabled={selectedRound === 1} className="shrink-0 h-9 w-9">
               <ChevronLeft className="h-4 w-4" />
             </Button>
             <div
               ref={navRef}
-              className="flex-1 overflow-x-auto scrollbar-none flex gap-1 py-1"
-              style={{ scrollbarWidth: "none" }}
+              className="flex-1 overflow-x-auto scrollbar-none flex gap-1.5 py-1"
             >
               {Array.from({ length: TOTAL_ROUNDS }, (_, i) => i + 1).map((r) => (
                 <button
@@ -168,23 +171,24 @@ function ResultadosPage() {
                   data-active={selectedRound === r ? "true" : "false"}
                   onClick={() => setSelectedRound(r)}
                   className={[
-                    "shrink-0 px-3 py-1.5 rounded-md text-sm font-medium transition-colors",
+                    "shrink-0 px-3.5 py-1.5 rounded-full text-sm font-semibold transition-all",
                     selectedRound === r
-                      ? "bg-primary text-primary-foreground"
-                      : "bg-muted text-muted-foreground hover:bg-muted/80 hover:text-foreground",
+                      ? "bg-primary text-primary-foreground shadow-[0_0_20px_-6px_rgba(21,101,245,0.6)]"
+                      : "bg-card border border-border text-muted-foreground hover:text-foreground hover:border-primary/40",
                   ].join(" ")}
                 >
                   Rod. {r}
                 </button>
               ))}
             </div>
-            <Button variant="ghost" size="icon" onClick={nextRound} disabled={selectedRound === TOTAL_ROUNDS} className="shrink-0">
+            <Button variant="outline" size="icon" onClick={nextRound} disabled={selectedRound === TOTAL_ROUNDS} className="shrink-0 h-9 w-9">
               <ChevronRight className="h-4 w-4" />
             </Button>
           </div>
-          <p className="text-sm text-muted-foreground mt-1 text-center">Rodada {selectedRound} de {TOTAL_ROUNDS}</p>
+          <p className="text-xs text-muted-foreground mt-2 text-center font-medium">Rodada {selectedRound} de {TOTAL_ROUNDS}</p>
         </div>
       )}
+
 
       {!selectedComp && competitions.length === 0 && (
         <div className="rounded-lg border border-border bg-card p-8 text-center text-muted-foreground">
@@ -203,33 +207,46 @@ function ResultadosPage() {
       <div className="space-y-3">
         {matches?.map((m) => {
           const isWO = m.status === "wo";
+          const hostWon = (m.host_score ?? 0) > (m.visitor_score ?? 0);
+          const visitorWon = (m.visitor_score ?? 0) > (m.host_score ?? 0);
           return (
             <Link
               key={m.id}
               to="/partidas/$id"
               params={{ id: m.id }}
-              className="rounded-lg border border-border bg-card p-4 flex flex-wrap items-center justify-between gap-3 hover:bg-accent transition-colors"
+              className="group block rounded-xl border border-border bg-card p-4 hover:border-primary/40 hover:shadow-[0_8px_24px_-12px_rgba(21,101,245,0.4)] hover:-translate-y-0.5 transition-all"
             >
-              <div className="flex items-center gap-3">
-                {m.group_label && (
-                  <Badge variant="outline" className="shrink-0">Lado {m.group_label}</Badge>
+              <div className="flex items-center justify-between gap-2 mb-3">
+                <div className="flex items-center gap-2 min-w-0">
+                  {m.group_label && (
+                    <Badge variant="outline" className="shrink-0">Lado {m.group_label}</Badge>
+                  )}
+                  {isWO && <Badge variant="destructive">WO</Badge>}
+                </div>
+                {m.scheduled_at && (
+                  <span className="text-xs text-muted-foreground tabular-nums shrink-0">
+                    {new Date(m.scheduled_at).toLocaleDateString("pt-BR")}
+                  </span>
                 )}
-                <span className="font-medium">{teams.get(m.host_team_id) ?? "—"}</span>
-                <span className="font-display text-2xl">
-                  {m.host_score ?? 0} <span className="text-muted-foreground">x</span> {m.visitor_score ?? 0}
-                </span>
-                <span className="font-medium">{teams.get(m.visitor_team_id) ?? "—"}</span>
-                {isWO && <Badge variant="destructive">WO</Badge>}
               </div>
-              {m.scheduled_at && (
-                <span className="text-sm text-muted-foreground">
-                  {new Date(m.scheduled_at).toLocaleDateString("pt-BR")}
+              <div className="grid grid-cols-[minmax(0,1fr)_auto_minmax(0,1fr)] items-center gap-3">
+                <span className={`font-semibold truncate text-right ${hostWon ? "text-foreground" : "text-muted-foreground"}`}>
+                  {teams.get(m.host_team_id) ?? "—"}
                 </span>
-              )}
+                <span className="font-display text-3xl tabular-nums px-3">
+                  <span className={hostWon ? "text-foreground" : "text-muted-foreground"}>{m.host_score ?? 0}</span>
+                  <span className="text-muted-foreground/40 mx-1">×</span>
+                  <span className={visitorWon ? "text-foreground" : "text-muted-foreground"}>{m.visitor_score ?? 0}</span>
+                </span>
+                <span className={`font-semibold truncate ${visitorWon ? "text-foreground" : "text-muted-foreground"}`}>
+                  {teams.get(m.visitor_team_id) ?? "—"}
+                </span>
+              </div>
             </Link>
           );
         })}
       </div>
+
     </PublicShell>
   );
   }

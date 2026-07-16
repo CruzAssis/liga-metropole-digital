@@ -3,9 +3,10 @@ import { SkeletonMatchList, EmptyAgenda } from "@/components/AppSkeletons";
 import { useEffect, useState, useRef } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { PublicShell } from "@/components/PublicShell";
+import { PageHeader } from "@/components/PageHeader";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import { ChevronLeft, ChevronRight, MapPin } from "lucide-react";
+import { ChevronLeft, ChevronRight, MapPin, Clock } from "lucide-react";
 
 const TOTAL_ROUNDS = 20;
 
@@ -113,10 +114,12 @@ function AgendaPage() {
 
   return (
     <PublicShell>
-      <header className="mb-6">
-        <h1 className="font-display text-5xl tracking-wide">Agenda</h1>
-        <p className="text-muted-foreground mt-1">Próximos jogos.</p>
-      </header>
+      <PageHeader
+        eyebrow="Próximas rodadas"
+        title="Agenda"
+        description="Confira dia, horário e local dos próximos jogos."
+      />
+
 
       {/* Conference filter */}
       {competitions.length > 0 && (
@@ -130,16 +133,17 @@ function AgendaPage() {
                 key={c.id}
                 onClick={() => { setSelectedComp(c.id); setSelectedRound(1); }}
                 className={[
-                  "text-sm px-3 py-1.5 rounded-md border transition-colors",
+                  "text-sm font-semibold px-3.5 py-2 rounded-full border transition-all",
                   selectedComp === c.id
-                    ? "bg-primary text-primary-foreground border-primary"
-                    : "border-border text-muted-foreground hover:text-foreground",
+                    ? "bg-primary text-primary-foreground border-primary shadow-[0_0_20px_-6px_rgba(21,101,245,0.6)]"
+                    : "border-border bg-card text-muted-foreground hover:text-foreground hover:border-primary/40",
                 ].join(" ")}
               >
                 {c.conference_name ?? c.name}{c.season ? ` ${c.season}` : ""}
               </button>
             ))}
           </div>
+
           {activeComp?.subprefeitura && (
             <p className="text-xs text-muted-foreground flex items-center gap-1">
               <MapPin className="h-3 w-3" />
@@ -154,13 +158,12 @@ function AgendaPage() {
       {selectedComp && (
         <div className="mb-6">
           <div className="flex items-center gap-2">
-            <Button variant="ghost" size="icon" onClick={prevRound} disabled={selectedRound === 1} className="shrink-0">
+            <Button variant="outline" size="icon" onClick={prevRound} disabled={selectedRound === 1} className="shrink-0 h-9 w-9">
               <ChevronLeft className="h-4 w-4" />
             </Button>
             <div
               ref={navRef}
-              className="flex-1 overflow-x-auto scrollbar-none flex gap-1 py-1"
-              style={{ scrollbarWidth: "none" }}
+              className="flex-1 overflow-x-auto scrollbar-none flex gap-1.5 py-1"
             >
               {Array.from({ length: TOTAL_ROUNDS }, (_, i) => i + 1).map((r) => (
                 <button
@@ -168,23 +171,24 @@ function AgendaPage() {
                   data-active={selectedRound === r ? "true" : "false"}
                   onClick={() => setSelectedRound(r)}
                   className={[
-                    "shrink-0 px-3 py-1.5 rounded-md text-sm font-medium transition-colors",
+                    "shrink-0 px-3.5 py-1.5 rounded-full text-sm font-semibold transition-all",
                     selectedRound === r
-                      ? "bg-primary text-primary-foreground"
-                      : "bg-muted text-muted-foreground hover:bg-muted/80 hover:text-foreground",
+                      ? "bg-primary text-primary-foreground shadow-[0_0_20px_-6px_rgba(21,101,245,0.6)]"
+                      : "bg-card border border-border text-muted-foreground hover:text-foreground hover:border-primary/40",
                   ].join(" ")}
                 >
                   Rod. {r}
                 </button>
               ))}
             </div>
-            <Button variant="ghost" size="icon" onClick={nextRound} disabled={selectedRound === TOTAL_ROUNDS} className="shrink-0">
+            <Button variant="outline" size="icon" onClick={nextRound} disabled={selectedRound === TOTAL_ROUNDS} className="shrink-0 h-9 w-9">
               <ChevronRight className="h-4 w-4" />
             </Button>
           </div>
-          <p className="text-sm text-muted-foreground mt-1 text-center">Rodada {selectedRound} de {TOTAL_ROUNDS}</p>
+          <p className="text-xs text-muted-foreground mt-2 text-center font-medium">Rodada {selectedRound} de {TOTAL_ROUNDS}</p>
         </div>
       )}
+
 
       {/* No active competition */}
       {!selectedComp && competitions.length === 0 && (
@@ -206,33 +210,46 @@ function AgendaPage() {
         {matches?.map((m) => (
           <div
             key={m.id}
-            className="rounded-lg border border-border bg-card p-4 flex flex-wrap items-center gap-3 justify-between"
+            className="rounded-xl border border-border bg-card p-4 transition-all hover:border-primary/30"
           >
-            <div className="flex items-center gap-3">
-              {m.group_label && (
-                <Badge variant="outline" className="shrink-0">Lado {m.group_label}</Badge>
-              )}
-              <span className="font-medium">{teams.get(m.host_team_id) ?? "—"}</span>
-              <span className="text-muted-foreground">vs</span>
-              <span className="font-medium">{teams.get(m.visitor_team_id) ?? "—"}</span>
+            <div className="flex items-center justify-between gap-2 mb-3 flex-wrap">
+              <div className="flex items-center gap-2">
+                {m.group_label && (
+                  <Badge variant="outline" className="shrink-0">Lado {m.group_label}</Badge>
+                )}
+                {m.status === "live" && (
+                  <Badge variant="destructive" className="animate-pulse">AO VIVO</Badge>
+                )}
+              </div>
+              <div className="text-xs text-muted-foreground flex items-center gap-3 flex-wrap">
+                {m.scheduled_at && (
+                  <span className="inline-flex items-center gap-1.5 tabular-nums font-medium">
+                    <Clock className="h-3 w-3" />
+                    {new Date(m.scheduled_at).toLocaleString("pt-BR", {
+                      day: "2-digit",
+                      month: "2-digit",
+                      hour: "2-digit",
+                      minute: "2-digit",
+                    })}
+                  </span>
+                )}
+                {m.venue && (
+                  <span className="inline-flex items-center gap-1.5">
+                    <MapPin className="h-3 w-3" />
+                    {m.venue}
+                  </span>
+                )}
+              </div>
             </div>
-            <div className="text-sm text-muted-foreground flex items-center gap-3">
-              {m.scheduled_at && (
-                <span>
-                  {new Date(m.scheduled_at).toLocaleString("pt-BR", {
-                    day: "2-digit",
-                    month: "2-digit",
-                    hour: "2-digit",
-                    minute: "2-digit",
-                  })}
-                </span>
-              )}
-              {m.venue && <span>· {m.venue}</span>}
-              {m.status === "live" && <Badge variant="destructive">AO VIVO</Badge>}
+            <div className="grid grid-cols-[minmax(0,1fr)_auto_minmax(0,1fr)] items-center gap-3">
+              <span className="font-semibold truncate text-right">{teams.get(m.host_team_id) ?? "—"}</span>
+              <span className="font-display text-2xl text-muted-foreground px-2">vs</span>
+              <span className="font-semibold truncate">{teams.get(m.visitor_team_id) ?? "—"}</span>
             </div>
           </div>
         ))}
       </div>
+
     </PublicShell>
   );
   }

@@ -2,6 +2,7 @@ import { createFileRoute } from "@tanstack/react-router";
 import { useEffect, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { PublicShell } from "@/components/PublicShell";
+import { PageHeader } from "@/components/PageHeader";
 import { MapPin } from "lucide-react";
 
 type Venue = { name: string; matches: number };
@@ -42,25 +43,44 @@ function LocaisPage() {
 
   return (
     <PublicShell>
-      <header className="mb-6">
-        <h1 className="font-display text-5xl tracking-wide">Locais</h1>
-        <p className="text-muted-foreground mt-1">Campos utilizados nas partidas.</p>
-      </header>
+      <PageHeader
+        eyebrow="Onde a bola rola"
+        title="Locais"
+        description="Campos utilizados nas partidas da liga."
+      />
 
-      {!venues && <div className="text-muted-foreground">Carregando...</div>}
+      {!venues && (
+        <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
+          {[1, 2, 3, 4, 5, 6].map((i) => (
+            <div key={i} className="h-24 rounded-xl border border-border bg-card animate-pulse" />
+          ))}
+        </div>
+      )}
+
       {venues && venues.length === 0 && (
-        <div className="rounded-lg border border-border bg-card p-8 text-center text-muted-foreground">
-          Nenhum local cadastrado ainda. Locais aparecem aqui assim que partidas são agendadas com um campo.
+        <div className="rounded-xl border border-border bg-card p-10 text-center">
+          <MapPin className="mx-auto h-8 w-8 text-muted-foreground/60 mb-3" />
+          <p className="font-semibold">Nenhum local cadastrado ainda</p>
+          <p className="text-sm text-muted-foreground mt-1">
+            Locais aparecem aqui assim que partidas são agendadas com um campo.
+          </p>
         </div>
       )}
 
       <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
         {venues?.map((v) => (
-          <div key={v.name} className="rounded-lg border border-border bg-card p-4 flex items-start gap-3">
-            <MapPin className="h-5 w-5 text-primary mt-0.5" />
-            <div>
-              <div className="font-medium">{v.name}</div>
-              <div className="text-xs text-muted-foreground">{v.matches} partida(s)</div>
+          <div
+            key={v.name}
+            className="group rounded-xl border border-border bg-card p-4 flex items-start gap-3 hover:border-primary/40 hover:-translate-y-0.5 hover:shadow-[0_8px_24px_-12px_rgba(21,101,245,0.4)] transition-all"
+          >
+            <div className="h-10 w-10 rounded-lg bg-primary/10 grid place-items-center text-primary shrink-0">
+              <MapPin className="h-5 w-5" />
+            </div>
+            <div className="min-w-0 flex-1">
+              <div className="font-semibold truncate">{v.name}</div>
+              <div className="text-xs text-muted-foreground mt-0.5">
+                {v.matches} {v.matches === 1 ? "partida" : "partidas"}
+              </div>
             </div>
           </div>
         ))}

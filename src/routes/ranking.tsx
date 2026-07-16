@@ -3,6 +3,7 @@ import { SkeletonRankingPage, EmptyRanking } from "@/components/AppSkeletons";
 import { useEffect, useMemo, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { PublicShell } from "@/components/PublicShell";
+import { PageHeader } from "@/components/PageHeader";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Badge } from "@/components/ui/badge";
 import { MapPin } from "lucide-react";
@@ -136,9 +137,9 @@ function StandingsTable({
     );
   }
   return (
-    <div className="rounded-md border border-border bg-card overflow-x-auto">
+    <div className="rounded-xl border border-border bg-card overflow-x-auto shadow-[0_4px_24px_-12px_rgba(0,0,0,0.6)]">
       <table className="w-full text-sm">
-        <thead className="text-xs uppercase text-muted-foreground border-b border-border">
+        <thead className="text-[11px] uppercase text-muted-foreground border-b border-border font-semibold tracking-wider bg-muted/30">
           <tr>
             <th className="text-left p-3 w-10">#</th>
             <th className="text-left p-3">Time</th>
@@ -160,35 +161,52 @@ function StandingsTable({
             const isRelegation =
               relegatedCount > 0 && pos > rows.length - relegatedCount;
             const rowCls = isQualified
-              ? "bg-emerald-500/5 border-l-2 border-emerald-500"
+              ? "bg-emerald-500/[0.06] border-l-2 border-l-emerald-500"
               : isRelegation
-              ? "bg-red-500/5 border-l-2 border-red-500"
-              : "";
+              ? "bg-red-500/[0.06] border-l-2 border-l-red-500"
+              : "border-l-2 border-l-transparent";
             return (
-              <tr key={r.team.id} className={`border-b border-border last:border-0 ${rowCls}`}>
-                <td className="p-3 text-muted-foreground tabular-nums font-mono">{pos}</td>
+              <tr
+                key={r.team.id}
+                className={`border-b border-border/60 last:border-0 hover:bg-muted/30 transition-colors ${rowCls}`}
+              >
+                <td className="p-3 tabular-nums font-mono">
+                  <span
+                    className={
+                      pos <= 3
+                        ? "inline-flex h-6 w-6 items-center justify-center rounded-full bg-primary/15 text-primary font-bold text-xs"
+                        : "text-muted-foreground"
+                    }
+                  >
+                    {pos}
+                  </span>
+                </td>
                 <td className="p-3 font-medium">
-                  <div className="flex items-center gap-2">
+                  <div className="flex items-center gap-2.5 min-w-0">
                     {r.team.logo_url ? (
-                      <img src={r.team.logo_url} alt="" className="h-6 w-6 rounded object-cover" />
+                      <img src={r.team.logo_url} alt="" className="h-7 w-7 rounded-md object-cover ring-1 ring-border shrink-0" />
                     ) : (
-                      <div className="h-6 w-6 rounded bg-muted" />
+                      <div className="h-7 w-7 rounded-md bg-muted grid place-items-center text-[10px] font-bold text-muted-foreground shrink-0">
+                        {r.team.short_name?.[0] ?? "?"}
+                      </div>
                     )}
-                    <span className="hidden sm:inline">{r.team.name}</span>
-                    <span className="sm:hidden font-mono">{r.team.short_name}</span>
+                    <span className="hidden sm:inline truncate">{r.team.name}</span>
+                    <span className="sm:hidden font-mono font-semibold">{r.team.short_name}</span>
                     {showLado && (
-                      <Badge variant="outline" className="text-[10px] ml-1">{r.team.lado}</Badge>
+                      <Badge variant="outline" className="text-[10px] ml-1 shrink-0">{r.team.lado}</Badge>
                     )}
                   </div>
                 </td>
-                <td className="text-center p-2 font-bold text-primary tabular-nums">{r.points}</td>
-                <td className="text-center p-2 tabular-nums">{r.played}</td>
+                <td className="text-center p-2 font-bold text-primary tabular-nums text-base">{r.points}</td>
+                <td className="text-center p-2 tabular-nums text-muted-foreground">{r.played}</td>
                 <td className="text-center p-2 tabular-nums">{r.wins}</td>
-                <td className="text-center p-2 tabular-nums">{r.draws}</td>
-                <td className="text-center p-2 tabular-nums">{r.losses}</td>
+                <td className="text-center p-2 tabular-nums text-muted-foreground">{r.draws}</td>
+                <td className="text-center p-2 tabular-nums text-muted-foreground">{r.losses}</td>
                 <td className="text-center p-2 tabular-nums">{r.gf}</td>
-                <td className="text-center p-2 tabular-nums">{r.ga}</td>
-                <td className="text-center p-2 tabular-nums">{r.gd}</td>
+                <td className="text-center p-2 tabular-nums text-muted-foreground">{r.ga}</td>
+                <td className={`text-center p-2 tabular-nums font-semibold ${r.gd > 0 ? "text-emerald-400" : r.gd < 0 ? "text-red-400" : "text-muted-foreground"}`}>
+                  {r.gd > 0 ? "+" : ""}{r.gd}
+                </td>
                 <td className="text-center p-2 tabular-nums hidden sm:table-cell text-muted-foreground">{r.supporters}</td>
               </tr>
             );
@@ -286,17 +304,16 @@ function RankingPage() {
 
   return (
     <PublicShell>
-      <header className="mb-6">
-        <h1 className="font-display text-5xl tracking-wide">Classificação</h1>
-        <p className="text-muted-foreground mt-1">
-          Fase regular · 20 rodadas · pontos corridos. Vitória 3 · Empate 1 · Derrota 0.
-        </p>
-      </header>
+      <PageHeader
+        eyebrow="Temporada 2026"
+        title="Classificação"
+        description="Fase regular · 20 rodadas · pontos corridos. Vitória 3 · Empate 1 · Derrota 0."
+      />
 
       {/* Conference filter */}
       {competitions.length > 0 && (
-        <div className="mb-6 space-y-2">
-          <label className="text-xs uppercase tracking-wider text-muted-foreground flex items-center gap-1">
+        <div className="mb-6 space-y-3">
+          <label className="text-[11px] uppercase tracking-[0.14em] text-muted-foreground font-semibold flex items-center gap-1.5">
             <MapPin className="h-3 w-3" /> Conferência
           </label>
           <div className="flex flex-wrap gap-2">
@@ -305,10 +322,10 @@ function RankingPage() {
                 key={c.id}
                 onClick={() => { setSelectedComp(c.id); setMatches(null); }}
                 className={[
-                  "text-sm px-3 py-1.5 rounded-md border transition-colors",
+                  "text-sm font-semibold px-3.5 py-2 rounded-full border transition-all",
                   selectedComp === c.id
-                    ? "bg-primary text-primary-foreground border-primary"
-                    : "border-border text-muted-foreground hover:text-foreground",
+                    ? "bg-primary text-primary-foreground border-primary shadow-[0_0_20px_-6px_rgba(21,101,245,0.6)]"
+                    : "border-border bg-card text-muted-foreground hover:text-foreground hover:border-primary/40",
                 ].join(" ")}
               >
                 {c.conference_name ?? c.name}
@@ -317,13 +334,13 @@ function RankingPage() {
             ))}
           </div>
           {compsLoaded && competitions.length === 0 && (
-        <div className="mb-8 rounded-lg border border-zinc-800 bg-zinc-900/50 p-8 text-center">
-          <p className="text-zinc-400 text-lg">Nenhuma conferência ativa.</p>
-          <p className="text-zinc-500 text-sm mt-2">Crie uma liga no painel admin para visualizar o ranking.</p>
+        <div className="mb-8 rounded-xl border border-border bg-card p-8 text-center">
+          <p className="text-foreground text-lg font-semibold">Nenhuma conferência ativa</p>
+          <p className="text-muted-foreground text-sm mt-2">Crie uma liga no painel admin para visualizar o ranking.</p>
         </div>
       )}
       {activeComp?.subprefeitura && (
-            <p className="text-xs text-muted-foreground flex items-center gap-1">
+            <p className="text-xs text-muted-foreground flex items-center gap-1.5">
               <MapPin className="h-3 w-3" />
               {activeComp.subprefeitura}
               {activeComp.zona && ` · ${ZONA_LABELS[activeComp.zona] ?? activeComp.zona}`}
@@ -331,6 +348,7 @@ function RankingPage() {
           )}
         </div>
       )}
+
 
       {!matches && <SkeletonRankingPage />}
 
