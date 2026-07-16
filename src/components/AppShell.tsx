@@ -43,9 +43,8 @@ export function AppShell({ children }: { children: ReactNode }) {
               </span>
             </div>
           </header>
-          <main className="flex-1 p-4 sm:p-6 lg:p-8">
-            <div className="mx-auto w-full max-w-6xl">{children}</div>
-          </main>
+          <main className="flex-1 p-4 sm:p-6 lg:p-8">{children}</main>
+
         </div>
       </div>
     </SidebarProvider>
