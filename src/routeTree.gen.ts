@@ -31,6 +31,7 @@ import { Route as PartidasIdRouteImport } from './routes/partidas.$id'
 import { Route as OnboardingTorcedorRouteImport } from './routes/onboarding.torcedor'
 import { Route as OnboardingJogadorRouteImport } from './routes/onboarding.jogador'
 import { Route as OnboardingDiretorRouteImport } from './routes/onboarding.diretor'
+import { Route as ManifestoSlugRouteImport } from './routes/manifesto.$slug'
 import { Route as ConviteCodeRouteImport } from './routes/convite.$code'
 import { Route as AtletasIdRouteImport } from './routes/atletas.$id'
 import { Route as AuthenticatedMinhaContaRouteImport } from './routes/_authenticated/minha-conta'
@@ -158,6 +159,11 @@ const OnboardingDiretorRoute = OnboardingDiretorRouteImport.update({
   path: '/diretor',
   getParentRoute: () => OnboardingRoute,
 } as any)
+const ManifestoSlugRoute = ManifestoSlugRouteImport.update({
+  id: '/manifesto/$slug',
+  path: '/manifesto/$slug',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const ConviteCodeRoute = ConviteCodeRouteImport.update({
   id: '/convite/$code',
   path: '/convite/$code',
@@ -274,6 +280,7 @@ export interface FileRoutesByFullPath {
   '/minha-conta': typeof AuthenticatedMinhaContaRouteWithChildren
   '/atletas/$id': typeof AtletasIdRoute
   '/convite/$code': typeof ConviteCodeRoute
+  '/manifesto/$slug': typeof ManifestoSlugRoute
   '/onboarding/diretor': typeof OnboardingDiretorRoute
   '/onboarding/jogador': typeof OnboardingJogadorRoute
   '/onboarding/torcedor': typeof OnboardingTorcedorRoute
@@ -314,6 +321,7 @@ export interface FileRoutesByTo {
   '/minha-conta': typeof AuthenticatedMinhaContaRouteWithChildren
   '/atletas/$id': typeof AtletasIdRoute
   '/convite/$code': typeof ConviteCodeRoute
+  '/manifesto/$slug': typeof ManifestoSlugRoute
   '/onboarding/diretor': typeof OnboardingDiretorRoute
   '/onboarding/jogador': typeof OnboardingJogadorRoute
   '/onboarding/torcedor': typeof OnboardingTorcedorRoute
@@ -356,6 +364,7 @@ export interface FileRoutesById {
   '/_authenticated/minha-conta': typeof AuthenticatedMinhaContaRouteWithChildren
   '/atletas/$id': typeof AtletasIdRoute
   '/convite/$code': typeof ConviteCodeRoute
+  '/manifesto/$slug': typeof ManifestoSlugRoute
   '/onboarding/diretor': typeof OnboardingDiretorRoute
   '/onboarding/jogador': typeof OnboardingJogadorRoute
   '/onboarding/torcedor': typeof OnboardingTorcedorRoute
@@ -398,6 +407,7 @@ export interface FileRouteTypes {
     | '/minha-conta'
     | '/atletas/$id'
     | '/convite/$code'
+    | '/manifesto/$slug'
     | '/onboarding/diretor'
     | '/onboarding/jogador'
     | '/onboarding/torcedor'
@@ -438,6 +448,7 @@ export interface FileRouteTypes {
     | '/minha-conta'
     | '/atletas/$id'
     | '/convite/$code'
+    | '/manifesto/$slug'
     | '/onboarding/diretor'
     | '/onboarding/jogador'
     | '/onboarding/torcedor'
@@ -479,6 +490,7 @@ export interface FileRouteTypes {
     | '/_authenticated/minha-conta'
     | '/atletas/$id'
     | '/convite/$code'
+    | '/manifesto/$slug'
     | '/onboarding/diretor'
     | '/onboarding/jogador'
     | '/onboarding/torcedor'
@@ -517,6 +529,7 @@ export interface RootRouteChildren {
   TimesRoute: typeof TimesRouteWithChildren
   VerificarRoute: typeof VerificarRoute
   ConviteCodeRoute: typeof ConviteCodeRoute
+  ManifestoSlugRoute: typeof ManifestoSlugRoute
   PartidasIdRoute: typeof PartidasIdRoute
   SumulaPartidaIdRoute: typeof SumulaPartidaIdRoute
   ApiPublicHooksWoCheckerRoute: typeof ApiPublicHooksWoCheckerRoute
@@ -677,6 +690,13 @@ declare module '@tanstack/react-router' {
       fullPath: '/onboarding/diretor'
       preLoaderRoute: typeof OnboardingDiretorRouteImport
       parentRoute: typeof OnboardingRoute
+    }
+    '/manifesto/$slug': {
+      id: '/manifesto/$slug'
+      path: '/manifesto/$slug'
+      fullPath: '/manifesto/$slug'
+      preLoaderRoute: typeof ManifestoSlugRouteImport
+      parentRoute: typeof rootRouteImport
     }
     '/convite/$code': {
       id: '/convite/$code'
@@ -915,6 +935,7 @@ const rootRouteChildren: RootRouteChildren = {
   TimesRoute: TimesRouteWithChildren,
   VerificarRoute: VerificarRoute,
   ConviteCodeRoute: ConviteCodeRoute,
+  ManifestoSlugRoute: ManifestoSlugRoute,
   PartidasIdRoute: PartidasIdRoute,
   SumulaPartidaIdRoute: SumulaPartidaIdRoute,
   ApiPublicHooksWoCheckerRoute: ApiPublicHooksWoCheckerRoute,
@@ -922,13 +943,3 @@ const rootRouteChildren: RootRouteChildren = {
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)
   ._addFileTypes<FileRouteTypes>()
-
-import type { getRouter } from './router.tsx'
-import type { startInstance } from './start.ts'
-declare module '@tanstack/react-start' {
-  interface Register {
-    ssr: true
-    router: Awaited<ReturnType<typeof getRouter>>
-    config: Awaited<ReturnType<typeof startInstance.getOptions>>
-  }
-}
