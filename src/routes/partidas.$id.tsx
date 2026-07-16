@@ -275,7 +275,7 @@ function EtapaDestaque({ match, myTeamId, onRefresh }: { match: Match; myTeamId:
 
   return (
     <div className="rounded-xl border border-zinc-800 bg-zinc-900 p-6 space-y-4">
-      <h3 className="text-white font-semibold flex items-center gap-2"><span className="text-[#1565F5] font-bold">03</span> Destaque do {oppTeam.name}</h3>
+      <StepHeader variant="inline" step="03" title={`Destaque do ${oppTeam.name}`} />
       <p className="text-zinc-400 text-sm">Avalie o melhor jogador adversario.</p>
       <div className="grid grid-cols-2 gap-3">
         <div><label className="text-zinc-400 text-xs block mb-1">Camisa *</label><input type="number" min={1} max={99} value={jersey} onChange={e => setJersey(e.target.value)} className="w-full bg-zinc-800 border border-zinc-700 text-white rounded px-3 py-2 text-sm" /></div>
@@ -287,7 +287,7 @@ function EtapaDestaque({ match, myTeamId, onRefresh }: { match: Match; myTeamId:
         <div className="flex justify-between text-xs text-zinc-500 mt-1"><span>1-Fraco</span><span>10-Excepcional</span></div>
       </div>
       {erro && <p className="text-red-400 text-sm">{erro}</p>}
-      <Button onClick={salvar} disabled={loading} className="w-full bg-[#1565F5] text-white">{loading ? 'Salvando...' : 'Confirmar ' + rating + '/10'}</Button>
+      <PrimaryCTA onClick={salvar} loading={loading} className="h-auto">{loading ? 'Salvando...' : 'Confirmar ' + rating + '/10'}</PrimaryCTA>
     </div>
   )
 }
