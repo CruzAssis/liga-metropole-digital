@@ -140,9 +140,9 @@ function JogadorOnboarding() {
               )}
             </div>
           )}
-          <Button type="submit" disabled={loading} className="w-full bg-[#1565F5] hover:bg-blue-600 text-white font-semibold py-3">
-            {loading ? <Spinner /> : 'Criar Perfil de Jogador'}
-          </Button>
+          <PrimaryCTA type="submit" loading={loading} className="py-3">
+            Criar Perfil de Jogador
+          </PrimaryCTA>
           <button type="button" onClick={() => navigate({ to: '/minha-conta', replace: true })} className="w-full text-center text-sm text-zinc-500 hover:text-zinc-300">
             Fazer isso depois
           </button>
