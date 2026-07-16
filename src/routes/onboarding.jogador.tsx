@@ -1,6 +1,6 @@
 // @ts-nocheck
 import { createFileRoute, useNavigate } from '@tanstack/react-router'
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useRef } from 'react'
 import { supabase } from '@/integrations/supabase/client'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
@@ -24,6 +24,11 @@ function JogadorOnboarding() {
   const [selectedTeamId, setSelectedTeamId] = useState(null)
   const [mode, setMode] = useState(null)
   const [form, setForm] = useState({ nickname: '', position: '', age: '', phrase: '', rating: 5 })
+  const [errorMsg, setErrorMsg] = useState('')
+  const nicknameRef = useRef(null)
+  const positionRef = useRef(null)
+  const modeRef = useRef(null)
+  const teamRef = useRef(null)
 
   useEffect(() => {
     supabase.auth.getUser().then(({ data }) => {
@@ -48,10 +53,22 @@ function JogadorOnboarding() {
     setForm(prev => ({ ...prev, [name]: value }))
   }
 
+  function failWith(msg, ref) {
+    setErrorMsg(msg)
+    toast.error(msg)
+    if (ref?.current) {
+      ref.current.focus?.()
+      ref.current.scrollIntoView?.({ behavior: 'smooth', block: 'center' })
+    }
+  }
+
   async function handleSubmit(e) {
     e.preventDefault()
-    if (!form.nickname.trim()) { toast.error('Informe seu apelido de campo'); return }
-    if (!form.position) { toast.error('Selecione sua posição'); return }
+    setErrorMsg('')
+    if (!form.nickname.trim()) return failWith('Informe seu apelido de campo', nicknameRef)
+    if (!form.position) return failWith('Selecione sua posição', positionRef)
+    if (!mode) return failWith('Escolha entre vincular a uma equipe ou entrar no mercado', modeRef)
+    if (mode === 'team' && !selectedTeamId) return failWith('Busque e selecione um time', teamRef)
     if (!userId) return
     setLoading(true)
     try {
@@ -70,7 +87,9 @@ function JogadorOnboarding() {
       toast.success(mode === 'market' ? 'Você está no mercado de jogadores!' : 'Perfil de jogador criado!')
       navigate({ to: '/minha-conta', replace: true })
     } catch (err) {
-      toast.error(err instanceof Error ? err.message : 'Erro ao criar perfil')
+      const msg = err instanceof Error ? err.message : 'Erro ao criar perfil'
+      setErrorMsg(msg)
+      toast.error(msg)
     } finally {
       setLoading(false)
     }
