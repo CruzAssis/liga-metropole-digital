@@ -93,7 +93,7 @@ export const createTeamRegistration = createServerFn({ method: "POST" })
         tertiary_color: data.tertiary_color || null,
         competition_id: data.competition_id || null,
       } as never)
-      .select("id")
+      .select("id, invite_code")
       .single();
 
     if (teamErr || !team) {
@@ -117,5 +117,5 @@ export const createTeamRegistration = createServerFn({ method: "POST" })
       throw new Error(roleErr.message);
     }
 
-    return { team_id: team.id };
+    return { team_id: team.id, invite_code: (team as { invite_code?: string }).invite_code ?? null };
   });

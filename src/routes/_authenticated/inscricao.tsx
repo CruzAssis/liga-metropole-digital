@@ -83,6 +83,7 @@ function InscricaoPage() {
 
   const [loading, setLoading] = useState(false)
   const [submitted, setSubmitted] = useState(false)
+  const [inviteCode, setInviteCode] = useState<string | null>(null)
   const [logoFile, setLogoFile] = useState<File | null>(null)
   const [logoPreview, setLogoPreview] = useState<string | null>(null)
   const [useSecondary, setUseSecondary] = useState(false)
@@ -176,7 +177,7 @@ function InscricaoPage() {
     }
     setLoading(true)
     try {
-      const { team_id } = await createTeam({
+      const { team_id, invite_code } = await createTeam({
         data: {
           name: form.name,
           registration_type: form.registration_type,
@@ -193,6 +194,7 @@ function InscricaoPage() {
           toast.warning('Time criado, mas falhou ao enviar o escudo.', { description: (e as Error).message })
         }
       }
+      setInviteCode(invite_code)
       setSubmitted(true)
     } catch (err) {
       toast.error(err instanceof Error ? err.message : 'Erro ao enviar inscrição')
@@ -202,17 +204,65 @@ function InscricaoPage() {
   }
 
   if (submitted) {
+    const inviteUrl = inviteCode && typeof window !== 'undefined'
+      ? `${window.location.origin}/convite/${inviteCode}`
+      : ''
     return (
-      <div className="min-h-screen bg-black flex items-center justify-center px-4">
-        <div className="text-center max-w-md space-y-6">
+      <div className="min-h-screen bg-black flex items-center justify-center px-4 py-12">
+        <div className="text-center max-w-md space-y-6 w-full">
           <div className="text-5xl">✓</div>
-          <h2 className="text-2xl font-bold text-white">Inscrição enviada!</h2>
-          <p className="text-zinc-400">
-            A Liga Metrópole entrará em contato via WhatsApp em até 48h para confirmar
-            sua participação e orientar sobre o pagamento da taxa de inscrição de{' '}
-            <span className="text-[#1565F5] font-semibold">R$ 50,00</span>.
+          <h2 className="text-2xl font-bold text-white">Time cadastrado!</h2>
+          <p className="text-zinc-400 text-sm">
+            Você já é o <span className="text-white font-semibold">Diretor</span> deste time.
+            Compartilhe o link abaixo com seus jogadores para que eles entrem vinculados
+            automaticamente ao seu time.
           </p>
-          <Button onClick={() => navigate({ to: '/minha-conta' })} className="bg-[#1565F5] hover:bg-blue-600 text-white">
+
+          {inviteUrl && (
+            <div className="rounded-lg border border-zinc-700 bg-zinc-900 p-4 text-left space-y-3">
+              <div>
+                <div className="text-xs text-zinc-500 uppercase tracking-wide">Link de convite</div>
+                <div className="mt-1 text-sm text-white break-all">{inviteUrl}</div>
+              </div>
+              <div className="flex gap-2">
+                <Button
+                  type="button"
+                  className="flex-1 bg-[#1565F5] hover:bg-blue-600 text-white"
+                  onClick={async () => {
+                    try {
+                      await navigator.clipboard.writeText(inviteUrl)
+                      toast.success('Link copiado!')
+                    } catch {
+                      toast.error('Não foi possível copiar. Copie manualmente.')
+                    }
+                  }}
+                >
+                  Copiar link de convite
+                </Button>
+                <Button
+                  type="button"
+                  variant="outline"
+                  onClick={() => {
+                    const msg = `Olá! Você foi convidado para se juntar ao meu time na Liga Metrópole. Cadastre-se por este link: ${inviteUrl}`
+                    window.open(`https://wa.me/?text=${encodeURIComponent(msg)}`, '_blank')
+                  }}
+                >
+                  WhatsApp
+                </Button>
+              </div>
+            </div>
+          )}
+
+          <p className="text-xs text-zinc-500">
+            A Liga entrará em contato via WhatsApp em até 48h para confirmar a inscrição
+            e orientar o pagamento da taxa de <span className="text-[#1565F5] font-semibold">R$ 50,00</span>.
+          </p>
+
+          <Button
+            onClick={() => navigate({ to: '/minha-conta' })}
+            variant="outline"
+            className="w-full"
+          >
             Ir para minha conta
           </Button>
         </div>
