@@ -232,6 +232,7 @@ function LigasPage() {
         zona: sp?.zona ?? null,
         conference_number: sp?.conference_number ?? null,
         qualified_count: qualified,
+        qualified_per_group: parseInt(form.qualified_per_group, 10) || 2,
         relegated_count: relegated,
         use_sides: form.use_sides,
       };
