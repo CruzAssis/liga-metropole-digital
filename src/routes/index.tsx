@@ -21,27 +21,50 @@ function HomePage() {
 
   useEffect(() => {
     if (!user) return
+    let cancelled = false
     ;(async () => {
-      const { data: rm } = await supabase
-        .from('matches')
-        .select('id, home_team, away_team, home_score, away_score, conference_name')
-        .in('status', ['confirmed', 'closed'])
-        .order('updated_at', { ascending: false })
-        .limit(5)
-      if (rm) setRecentMatches(rm)
-      const { data: um } = await supabase
-        .from('matches')
-        .select('id, home_team, away_team, scheduled_at, conference_name, venue')
-        .eq('status', 'scheduled')
-        .order('scheduled_at', { ascending: true })
-        .limit(5)
-      if (um) setUpcomingMatches(um)
-      const { data: roles } = await supabase
-        .from('user_roles')
-        .select('role')
-        .eq('user_id', user.id)
+      const matchSelect =
+        'id, host_score, visitor_score, scheduled_at, venue, status,' +
+        ' host:teams!matches_host_team_id_fkey(name, short_name),' +
+        ' visitor:teams!matches_visitor_team_id_fkey(name, short_name),' +
+        ' competition:competitions(conference_name, name)'
+
+      const mapRow = (m: any) => ({
+        id: m.id,
+        home_team: m.host?.short_name ?? m.host?.name ?? '—',
+        away_team: m.visitor?.short_name ?? m.visitor?.name ?? '—',
+        home_score: m.host_score,
+        away_score: m.visitor_score,
+        scheduled_at: m.scheduled_at,
+        venue: m.venue,
+        conference_name: m.competition?.conference_name ?? m.competition?.name ?? '',
+      })
+
+      const [{ data: rm, error: rmErr }, { data: um, error: umErr }, { data: roles }] = await Promise.all([
+        supabase
+          .from('matches')
+          .select(matchSelect)
+          .eq('status', 'confirmed')
+          .order('scheduled_at', { ascending: false })
+          .limit(5),
+        supabase
+          .from('matches')
+          .select(matchSelect)
+          .eq('status', 'scheduled')
+          .order('scheduled_at', { ascending: true })
+          .limit(5),
+        supabase.from('user_roles').select('role').eq('user_id', user.id),
+      ])
+      if (cancelled) return
+      if (rmErr) console.error('recentMatches', rmErr)
+      if (umErr) console.error('upcomingMatches', umErr)
+      if (rm) setRecentMatches(rm.map(mapRow))
+      if (um) setUpcomingMatches(um.map(mapRow))
       if (roles && roles.some((r) => r.role === 'admin')) setIsAdmin(true)
     })()
+    return () => {
+      cancelled = true
+    }
   }, [user])
 
   const handleSignOut = async () => {
