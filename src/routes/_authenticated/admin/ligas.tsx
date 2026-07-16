@@ -191,6 +191,7 @@ function LigasPage() {
       starts_at: c.starts_at ?? "",
       registration_status: c.registration_status,
       qualified_count: String(c.qualified_count ?? 8),
+      qualified_per_group: String((c as any).qualified_per_group ?? 2),
       relegated_count: String(c.relegated_count ?? 10),
       use_sides: c.use_sides ?? true,
     });
