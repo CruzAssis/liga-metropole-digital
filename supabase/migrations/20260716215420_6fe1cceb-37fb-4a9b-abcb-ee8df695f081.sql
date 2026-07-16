@@ -1,0 +1,1 @@
+ALTER TABLE public.competitions ADD COLUMN IF NOT EXISTS qualified_per_group integer NOT NULL DEFAULT 2;

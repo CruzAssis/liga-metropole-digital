@@ -7,7 +7,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
-import { Plus, Settings, Users, CheckCircle, AlertTriangle, MapPin } from "lucide-react";
+import { Plus, Settings, Users, CheckCircle, AlertTriangle, MapPin, Trash2 } from "lucide-react";
 import { Spinner } from "@/components/AppSkeletons";
 
 const supabaseAny = supabase as any;
@@ -90,6 +90,7 @@ type Competition = {
   zona: string | null;
   conference_number: number | null;
   qualified_count: number;
+  qualified_per_group: number;
   relegated_count: number;
   use_sides: boolean;
 };
@@ -126,6 +127,7 @@ const emptyForm = {
   starts_at: "",
   registration_status: "open",
   qualified_count: "8",
+  qualified_per_group: "2",
   relegated_count: "10",
   use_sides: true,
 };
@@ -143,7 +145,7 @@ function LigasPage() {
     setLoading(true);
     const { data, error } = await supabase
       .from("competitions")
-      .select("id,name,season,status,registration_status,max_teams,host_slots,visitor_slots,starts_at,draw_executed_at,full_notified_at,created_at,conference_name,subprefeitura,zona,conference_number,qualified_count,relegated_count,use_sides")
+      .select("id,name,season,status,registration_status,max_teams,host_slots,visitor_slots,starts_at,draw_executed_at,full_notified_at,created_at,conference_name,subprefeitura,zona,conference_number,qualified_count,qualified_per_group,relegated_count,use_sides")
       .order("created_at", { ascending: false });
     if (error) toast.error("Erro ao carregar ligas");
     else {
@@ -189,6 +191,7 @@ function LigasPage() {
       starts_at: c.starts_at ?? "",
       registration_status: c.registration_status,
       qualified_count: String(c.qualified_count ?? 8),
+      qualified_per_group: String((c as any).qualified_per_group ?? 2),
       relegated_count: String(c.relegated_count ?? 10),
       use_sides: c.use_sides ?? true,
     });
@@ -229,6 +232,7 @@ function LigasPage() {
         zona: sp?.zona ?? null,
         conference_number: sp?.conference_number ?? null,
         qualified_count: qualified,
+        qualified_per_group: parseInt(form.qualified_per_group, 10) || 2,
         relegated_count: relegated,
         use_sides: form.use_sides,
       };
@@ -256,6 +260,13 @@ function LigasPage() {
     const { error } = await supabase.from("competitions").update({ registration_status: next }).eq("id", c.id);
     if (error) toast.error("Erro ao alterar status");
     else { toast.success(`Liga ${next === "open" ? "reaberta" : "fechada"} para inscrições`); void load(); }
+  };
+
+  const handleDelete = async (c: Competition) => {
+    if (!confirm(`Excluir a liga "${c.conference_name ?? c.name}"?\n\nEssa ação removerá a competição permanentemente. Times, partidas e grupos vinculados podem ser afetados.`)) return;
+    const { error } = await supabaseAny.from("competitions").delete().eq("id", c.id);
+    if (error) toast.error("Erro ao excluir liga", { description: error.message });
+    else { toast.success("Liga excluída"); void load(); }
   };
 
   // Group subprefeituras by zona for the dropdown optgroups
@@ -417,6 +428,18 @@ function LigasPage() {
               </p>
             </div>
             <div>
+              <Label>Classificados por grupo</Label>
+              <Input
+                type="number"
+                min={0}
+                value={form.qualified_per_group}
+                onChange={(e) => setForm((f) => ({ ...f, qualified_per_group: e.target.value }))}
+              />
+              <p className="text-xs text-muted-foreground mt-1">
+                Quantos times de cada grupo avançam para a próxima fase (ex.: 2 = os 2 melhores de cada grupo).
+              </p>
+            </div>
+            <div>
               <Label>Times rebaixados</Label>
               <Input
                 type="number"
@@ -491,7 +514,7 @@ function LigasPage() {
                           {c.use_sides ? "Lados A/B" : "Pote único"}
                         </Badge>
                         <Badge variant="outline" className="text-[10px] bg-emerald-500/10 text-emerald-300 border-emerald-500/30">
-                          {c.qualified_count ?? 0} classificados
+                          {c.qualified_count ?? 0} classificados ({(c as any).qualified_per_group ?? 2}/grupo)
                         </Badge>
                         <Badge variant="outline" className="text-[10px] bg-red-500/10 text-red-300 border-red-500/30">
                           {c.relegated_count ?? 0} rebaixados
@@ -532,6 +555,14 @@ function LigasPage() {
                           <CheckCircle className="h-4 w-4 mr-1" /> Ativar Liga (abrir inscrições)
                         </Button>
                       ) : null}
+                      <Button
+                        variant="outline"
+                        size="sm"
+                        onClick={() => handleDelete(c)}
+                        className="border-red-500/40 text-red-400 hover:bg-red-500/10 hover:text-red-300"
+                      >
+                        <Trash2 className="h-4 w-4 mr-1" /> Excluir
+                      </Button>
                     </div>
                   </div>
 
