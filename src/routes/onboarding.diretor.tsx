@@ -30,6 +30,11 @@ function DiretorOnboarding() {
   const logoRef = useRef(null)
   const [userId, setUserId] = useState(null)
   const [aceitaTermos, setAceitaTermos] = useState(false)
+  const [errorMsg, setErrorMsg] = useState('')
+  const subprefRef = useRef(null)
+  const nameRef = useRef(null)
+  const shortNameRef = useRef(null)
+  const termsRef = useRef(null)
   const [form, setForm] = useState({
     subprefeitura: '',
     name: '',
@@ -70,12 +75,22 @@ function DiretorOnboarding() {
     if (logoRef.current) logoRef.current.value = ''
   }
 
+  function failWith(msg, ref) {
+    setErrorMsg(msg)
+    toast.error(msg)
+    if (ref?.current) {
+      ref.current.focus?.()
+      ref.current.scrollIntoView?.({ behavior: 'smooth', block: 'center' })
+    }
+  }
+
   async function handleSubmit(e) {
     e.preventDefault()
-    if (!aceitaTermos) { toast.error('Aceite o regulamento para continuar'); return }
-    if (!form.subprefeitura) { toast.error('Selecione uma subprefeitura'); return }
-    if (!form.name.trim()) { toast.error('Informe o nome do time'); return }
-    if (!form.short_name.trim()) { toast.error('Informe a sigla do time'); return }
+    setErrorMsg('')
+    if (!aceitaTermos) return failWith('Aceite o regulamento para continuar', termsRef)
+    if (!form.subprefeitura) return failWith('Selecione uma subprefeitura', subprefRef)
+    if (!form.name.trim()) return failWith('Informe o nome do time', nameRef)
+    if (!form.short_name.trim()) return failWith('Informe a sigla do time', shortNameRef)
     if (!userId) return
     setLoading(true)
     try {
