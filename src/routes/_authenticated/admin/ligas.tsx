@@ -555,6 +555,14 @@ function LigasPage() {
                           <CheckCircle className="h-4 w-4 mr-1" /> Ativar Liga (abrir inscrições)
                         </Button>
                       ) : null}
+                      <Button
+                        variant="outline"
+                        size="sm"
+                        onClick={() => handleDelete(c)}
+                        className="border-red-500/40 text-red-400 hover:bg-red-500/10 hover:text-red-300"
+                      >
+                        <Trash2 className="h-4 w-4 mr-1" /> Excluir
+                      </Button>
                     </div>
                   </div>
 
