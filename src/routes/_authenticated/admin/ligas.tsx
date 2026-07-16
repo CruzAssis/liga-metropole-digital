@@ -428,6 +428,18 @@ function LigasPage() {
               </p>
             </div>
             <div>
+              <Label>Classificados por grupo</Label>
+              <Input
+                type="number"
+                min={0}
+                value={form.qualified_per_group}
+                onChange={(e) => setForm((f) => ({ ...f, qualified_per_group: e.target.value }))}
+              />
+              <p className="text-xs text-muted-foreground mt-1">
+                Quantos times de cada grupo avançam para a próxima fase (ex.: 2 = os 2 melhores de cada grupo).
+              </p>
+            </div>
+            <div>
               <Label>Times rebaixados</Label>
               <Input
                 type="number"
