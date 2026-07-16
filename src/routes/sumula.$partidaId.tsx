@@ -447,10 +447,12 @@ function Etapa3NotaCruzada({
   return (
     <div className="rounded-xl border border-zinc-800 bg-zinc-900 p-6 space-y-4">
       <div className="flex items-center justify-between">
-        <h3 className="text-white font-semibold flex items-center gap-2">
-          <span className={`w-7 h-7 rounded-full text-white text-sm font-bold flex items-center justify-center ${saved ? 'bg-green-600' : 'bg-[#1565F5]'}`}>3</span>
-          Nota ao Destaque — {oppTeam.name}
-        </h3>
+        <StepHeader
+          variant="badge"
+          step={3}
+          title={`Nota ao Destaque — ${oppTeam.name}`}
+          stepClassName={saved ? 'bg-green-600' : undefined}
+        />
         <EtapaStatusBadge status={etapa3Status} label={etapa3Status === 'concluido' ? 'Concluído' : etapa3Status === 'em_andamento' ? 'Sua nota salva' : 'Pendente'} />
       </div>
 
@@ -498,9 +500,9 @@ function Etapa3NotaCruzada({
             ))}
           </div>
           {erro && <p className="text-red-400 text-sm">{erro}</p>}
-          <Button onClick={salvar} disabled={loading} className="w-full bg-[#1565F5] text-white h-11">
+          <PrimaryCTA onClick={salvar} loading={loading}>
             {loading ? 'Salvando...' : `Confirmar Nota ${rating}/10`}
-          </Button>
+          </PrimaryCTA>
         </div>
       )}
     </div>
