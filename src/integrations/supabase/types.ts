@@ -456,6 +456,33 @@ export type Database = {
         }
         Relationships: []
       }
+      system_settings: {
+        Row: {
+          host_slots_limit: number
+          id: boolean
+          master_registration_open: boolean
+          prospected_count: number
+          updated_at: string
+          updated_by: string | null
+        }
+        Insert: {
+          host_slots_limit?: number
+          id?: boolean
+          master_registration_open?: boolean
+          prospected_count?: number
+          updated_at?: string
+          updated_by?: string | null
+        }
+        Update: {
+          host_slots_limit?: number
+          id?: boolean
+          master_registration_open?: boolean
+          prospected_count?: number
+          updated_at?: string
+          updated_by?: string | null
+        }
+        Relationships: []
+      }
       team_members: {
         Row: {
           accepted_at: string | null
@@ -680,6 +707,19 @@ export type Database = {
         Returns: boolean
       }
       promote_waitlist_for_type: { Args: { _type: string }; Returns: undefined }
+      registration_dashboard_stats: {
+        Args: never
+        Returns: {
+          approved_hosts: number
+          host_limit: number
+          master_open: boolean
+          pending_hosts: number
+          prospected: number
+          slots_remaining: number
+          total_teams: number
+          waitlist_hosts: number
+        }[]
+      }
     }
     Enums: {
       app_role:
