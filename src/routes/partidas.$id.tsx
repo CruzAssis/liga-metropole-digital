@@ -5,6 +5,8 @@ import { supabase } from '@/integrations/supabase/client'
 import { useAuth } from '@/hooks/use-auth'
 import { Button } from '@/components/ui/button'
 import { Badge } from '@/components/ui/badge'
+import { StepHeader } from '@/components/ui/step-header'
+import { PrimaryCTA } from '@/components/ui/primary-cta'
 import { ArrowLeft, Clock, CheckCircle, AlertCircle, Trophy, Share2, Copy, Check } from 'lucide-react'
 import {
   submitScore,
