@@ -79,10 +79,10 @@ function JogadorOnboarding() {
   return (
     <div className="min-h-screen bg-black px-4 py-12">
       <div className="max-w-xl mx-auto space-y-8">
-        <div className="text-center">
-          <h1 className="text-2xl font-bold text-white">Perfil de Jogador</h1>
-          <p className="mt-1 text-sm text-zinc-400">Crie seu perfil de atleta na Liga Metrópole</p>
-        </div>
+        <StepHeader
+          title="Perfil de Jogador"
+          subtitle="Crie seu perfil de atleta na Liga Metrópole"
+        />
         <form onSubmit={handleSubmit} className="space-y-6">
           <div>
             <Label htmlFor="nickname" className="text-zinc-300">Apelido / Nome de campo</Label>
