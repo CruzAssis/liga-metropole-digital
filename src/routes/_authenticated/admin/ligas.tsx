@@ -90,6 +90,7 @@ type Competition = {
   zona: string | null;
   conference_number: number | null;
   qualified_count: number;
+  qualified_per_group: number;
   relegated_count: number;
   use_sides: boolean;
 };
