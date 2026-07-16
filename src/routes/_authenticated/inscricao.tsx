@@ -83,6 +83,7 @@ function InscricaoPage() {
 
   const [loading, setLoading] = useState(false)
   const [submitted, setSubmitted] = useState(false)
+  const [inviteCode, setInviteCode] = useState<string | null>(null)
   const [logoFile, setLogoFile] = useState<File | null>(null)
   const [logoPreview, setLogoPreview] = useState<string | null>(null)
   const [useSecondary, setUseSecondary] = useState(false)
