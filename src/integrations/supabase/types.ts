@@ -89,6 +89,7 @@ export type Database = {
           monthly_fee_brl: number | null
           name: string
           qualified_count: number
+          qualified_per_group: number
           registration_status: string
           relegated_count: number
           season: number
@@ -114,6 +115,7 @@ export type Database = {
           monthly_fee_brl?: number | null
           name: string
           qualified_count?: number
+          qualified_per_group?: number
           registration_status?: string
           relegated_count?: number
           season: number
@@ -139,6 +141,7 @@ export type Database = {
           monthly_fee_brl?: number | null
           name?: string
           qualified_count?: number
+          qualified_per_group?: number
           registration_status?: string
           relegated_count?: number
           season?: number
