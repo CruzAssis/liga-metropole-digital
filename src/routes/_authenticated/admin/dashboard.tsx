@@ -55,22 +55,26 @@ function mesAtual() {
 
 function MetricCard({ label, value, sub, icon, color, alert = false, href }) {
   const inner = (
-    <Card className={`bg-zinc-900 border-zinc-800 ${alert ? "border-red-500/50 bg-red-950/10" : ""}`}>
+    <Card
+      className={`group bg-card border-border transition-all hover:border-primary/40 hover:shadow-[0_4px_24px_-8px_rgba(0,0,0,0.6)] ${
+        alert ? "border-destructive/50 bg-destructive/5" : ""
+      }`}
+    >
       <CardContent className="p-5">
         <div className="flex items-start justify-between gap-2">
           <div className="flex-1 min-w-0">
-            <p className={`text-xs uppercase tracking-wide ${alert ? "text-red-400" : "text-zinc-400"}`}>
+            <p className={`text-[11px] uppercase tracking-[0.14em] font-semibold ${alert ? "text-destructive" : "text-muted-foreground"}`}>
               {label}
             </p>
-            <p className={`text-4xl font-black mt-1 tabular-nums ${alert ? "text-red-400" : "text-white"}`}>
+            <p className={`text-4xl font-display font-black mt-2 tabular-nums leading-none ${alert ? "text-destructive" : "text-foreground"}`}>
               {value}
             </p>
-            {sub && <p className="text-xs text-zinc-500 mt-1">{sub}</p>}
+            {sub && <p className="text-xs text-muted-foreground mt-2">{sub}</p>}
           </div>
-          <div className={`p-2.5 rounded-xl ${color}`}>{icon}</div>
+          <div className={`p-2.5 rounded-xl shrink-0 ${color}`}>{icon}</div>
         </div>
         {href && (
-          <div className="mt-3 flex items-center gap-1 text-xs text-zinc-500 hover:text-zinc-300">
+          <div className="mt-3 flex items-center gap-1 text-xs text-muted-foreground group-hover:text-primary transition-colors">
             Ver detalhes <ChevronRight className="h-3 w-3" />
           </div>
         )}
@@ -78,6 +82,7 @@ function MetricCard({ label, value, sub, icon, color, alert = false, href }) {
     </Card>
   );
   if (href) return <Link to={href}>{inner}</Link>;
+
   return inner;
 }
 

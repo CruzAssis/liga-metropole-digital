@@ -180,3 +180,30 @@
     display: none;
   }
 }
+
+/* Section eyebrow label — small uppercase kicker used above titles */
+@utility eyebrow {
+  font-size: 0.6875rem;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.14em;
+  color: var(--color-primary);
+}
+
+/* Elevated card used across authenticated pages */
+@utility panel {
+  background: var(--color-card);
+  background-image: var(--gradient-card);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-lg);
+  padding: 1.25rem;
+}
+
+@utility panel-hover {
+  transition: border-color 180ms ease, box-shadow 180ms ease, transform 180ms ease;
+  &:hover {
+    border-color: rgba(21, 101, 245, 0.35);
+    box-shadow: var(--shadow-elevated);
+  }
+}
+
