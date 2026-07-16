@@ -48,15 +48,33 @@ function LoginPage() {
 
   const onSubmit = async (data: FormData) => {
     setSubmitting(true);
-    const { error } = await supabase.auth.signInWithPassword(data);
-    setSubmitting(false);
-    if (error) {
-      toast.error("Não foi possível entrar", { description: error.message });
-      return;
+    try {
+      const { error } = await supabase.auth.signInWithPassword(data);
+      if (error) {
+        const msg = (error.message || "").toLowerCase();
+        let friendly = "Não foi possível entrar. Tente novamente.";
+        if (msg.includes("invalid login") || msg.includes("invalid credentials")) {
+          friendly = "E-mail ou senha incorretos.";
+        } else if (msg.includes("email not confirmed")) {
+          friendly = "Confirme seu e-mail antes de entrar. Verifique sua caixa de entrada.";
+        } else if (msg.includes("user not found")) {
+          friendly = "Usuário não encontrado. Verifique o e-mail ou crie uma conta.";
+        } else if (msg.includes("rate") || msg.includes("too many")) {
+          friendly = "Muitas tentativas. Aguarde alguns minutos e tente novamente.";
+        } else if (msg.includes("network") || msg.includes("fetch")) {
+          friendly = "Falha de conexão. Verifique sua internet e tente novamente.";
+        }
+        toast.error(friendly);
+        return;
+      }
+      toast.success("Bem-vindo de volta!");
+      navigate({ to: redirectTo ?? "/", replace: true });
+    } catch (err) {
+      const msg = err instanceof Error ? err.message : "Erro inesperado ao entrar.";
+      toast.error("Não foi possível entrar", { description: msg });
+    } finally {
+      setSubmitting(false);
     }
-    toast.success("Bem-vindo de volta!");
-    // Redireciona para o destino original (ex: /inscricao) ou para /
-    navigate({ to: redirectTo ?? "/", replace: true });
   };
 
   return (
