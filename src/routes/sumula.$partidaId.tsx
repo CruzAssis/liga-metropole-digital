@@ -508,8 +508,7 @@ function Etapa3NotaCruzada({
               </button>
             ))}
           </div>
-          {erro && <p className="text-red-400 text-sm">{erro}</p>}
-          <PrimaryCTA onClick={salvar} loading={loading} loadingText="Salvando...">
+          <PrimaryCTA onClick={salvar} loading={loading} loadingText="Salvando..." errorMessage={erro}>
             {`Confirmar Nota ${rating}/10`}
           </PrimaryCTA>
         </div>
