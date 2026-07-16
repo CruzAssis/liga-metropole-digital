@@ -211,7 +211,13 @@ function DiretorOnboarding() {
             <input type="checkbox" checked={aceitaTermos} onChange={e => setAceitaTermos(e.target.checked)} className="mt-0.5 accent-blue-500" />
             <span className="text-sm text-zinc-400">Ao cadastrar você concorda com o <a href="/termos" target="_blank" className="text-blue-400 hover:underline">regulamento da Liga Metrópole</a></span>
           </label>
-          <PrimaryCTA type="submit" loading={loading} className="py-3">
+          <PrimaryCTA
+            type="submit"
+            loading={loading}
+            loadingText="Cadastrando..."
+            disabled={!aceitaTermos || !form.name.trim() || !form.short_name.trim() || !form.subprefeitura}
+            className="py-3"
+          >
             Cadastrar Time
           </PrimaryCTA>
           <button type="button" onClick={() => navigate({ to: '/minha-conta', replace: true })} className="w-full text-center text-sm text-zinc-500 hover:text-zinc-300">

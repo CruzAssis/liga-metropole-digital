@@ -177,8 +177,8 @@ function Etapa1Placar({ match, myTeamId, onRefresh }: { match: Match; myTeamId: 
               className="w-full bg-zinc-800 border border-zinc-700 text-white rounded-lg px-3 py-2 text-sm resize-none" />
           </div>
           {erro && <p className="text-red-400 text-sm">{erro}</p>}
-          <PrimaryCTA onClick={lancar} loading={loading}>
-            {loading ? 'Salvando...' : 'Lançar Placar Final'}
+          <PrimaryCTA onClick={lancar} loading={loading} loadingText="Salvando...">
+            Lançar Placar Final
           </PrimaryCTA>
         </div>
       )}
@@ -373,8 +373,13 @@ function Etapa2GolesDestaque({
       </div>
 
       {erro && <p className="text-red-400 text-sm">{erro}</p>}
-      <PrimaryCTA onClick={salvar} loading={loading}>
-        {loading ? 'Salvando...' : 'Confirmar Gols + Destaque'}
+      <PrimaryCTA
+        onClick={salvar}
+        loading={loading}
+        loadingText="Salvando..."
+        disabled={!destaqueJersey || goals.length !== myScore}
+      >
+        Confirmar Gols + Destaque
       </PrimaryCTA>
     </div>
   )
@@ -500,8 +505,8 @@ function Etapa3NotaCruzada({
             ))}
           </div>
           {erro && <p className="text-red-400 text-sm">{erro}</p>}
-          <PrimaryCTA onClick={salvar} loading={loading}>
-            {loading ? 'Salvando...' : `Confirmar Nota ${rating}/10`}
+          <PrimaryCTA onClick={salvar} loading={loading} loadingText="Salvando...">
+            {`Confirmar Nota ${rating}/10`}
           </PrimaryCTA>
         </div>
       )}

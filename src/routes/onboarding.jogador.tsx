@@ -140,7 +140,18 @@ function JogadorOnboarding() {
               )}
             </div>
           )}
-          <PrimaryCTA type="submit" loading={loading} className="py-3">
+          <PrimaryCTA
+            type="submit"
+            loading={loading}
+            loadingText="Criando..."
+            disabled={
+              !form.nickname.trim() ||
+              !form.position ||
+              !mode ||
+              (mode === 'team' && !selectedTeamId)
+            }
+            className="py-3"
+          >
             Criar Perfil de Jogador
           </PrimaryCTA>
           <button type="button" onClick={() => navigate({ to: '/minha-conta', replace: true })} className="w-full text-center text-sm text-zinc-500 hover:text-zinc-300">
