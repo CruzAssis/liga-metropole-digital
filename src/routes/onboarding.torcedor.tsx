@@ -31,6 +31,7 @@ function TorcedorOnboarding() {
   const [teamsLoading, setTeamsLoading] = useState(false)
   const [selectedTeam, setSelectedTeam] = useState(null)
   const [filters, setFilters] = useState({ subprefeitura: '', bairro: '', registration_type: '' })
+  const [errorMsg, setErrorMsg] = useState('')
 
   useEffect(() => {
     supabase.auth.getUser().then(({ data }) => {
@@ -53,11 +54,11 @@ function TorcedorOnboarding() {
   }, [search, filters])
 
   async function handleConfirm() {
-    if (!selectedTeam) { toast.error('Selecione um time para torcer'); return }
+    setErrorMsg('')
+    if (!selectedTeam) { setErrorMsg('Selecione um time para torcer'); toast.error('Selecione um time para torcer'); return }
     if (!userId) return
     setLoading(true)
     try {
-      // Check if already supporting this team
       const { data: existing } = await supabase.from('team_supporters').select('id').eq('user_id', userId).eq('team_id', selectedTeam.id).single()
       if (!existing) {
         const { error } = await supabase.from('team_supporters').insert({ user_id: userId, team_id: selectedTeam.id })
@@ -66,7 +67,9 @@ function TorcedorOnboarding() {
       toast.success('Agora você torce por ' + selectedTeam.name + '!')
       navigate({ to: '/minha-conta', replace: true })
     } catch (err) {
-      toast.error(err instanceof Error ? err.message : 'Erro ao selecionar time')
+      const msg = err instanceof Error ? err.message : 'Erro ao selecionar time'
+      setErrorMsg(msg)
+      toast.error(msg)
     } finally {
       setLoading(false)
     }
@@ -148,6 +151,7 @@ function TorcedorOnboarding() {
           onClick={handleConfirm}
           loading={loading}
           loadingText="Salvando..."
+          errorMessage={errorMsg}
           disabled={!selectedTeam}
           className="bg-red-600 hover:bg-red-700 py-3"
         >
