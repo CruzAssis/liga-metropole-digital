@@ -408,6 +408,11 @@ function AdminDashboard() {
       <div>
         <h2 className="font-display text-xl tracking-wide text-zinc-200 mb-3">Atalhos rápidos</h2>
         <div className="flex flex-wrap gap-3">
+          <Button asChild className="bg-yellow-500 hover:bg-yellow-600 text-black gap-2 font-semibold">
+            <Link to="/admin/master-switch">
+              🔑 Chave Mestra da Liga
+            </Link>
+          </Button>
           <Button asChild className="bg-emerald-600 hover:bg-emerald-700 text-white gap-2">
             <Link to="/admin/ligas">
               <Plus className="h-4 w-4" />

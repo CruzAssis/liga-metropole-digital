@@ -49,6 +49,29 @@ export const createTeamRegistration = createServerFn({ method: "POST" })
       throw new Error("Mandante precisa informar o endereco do campo");
     }
 
+    // Read master switch + host slots limit
+    const { data: settings } = await supabaseAdmin
+      .from("system_settings")
+      .select("master_registration_open, host_slots_limit")
+      .eq("id", true)
+      .maybeSingle();
+
+    const masterOpen = (settings as { master_registration_open?: boolean } | null)?.master_registration_open ?? false;
+    const hostLimit = (settings as { host_slots_limit?: number } | null)?.host_slots_limit ?? 20;
+
+    // If master is OFF, everyone waits. If ON and host slots full, host goes to waitlist.
+    let initialStatus: "pending" | "waitlist" = masterOpen ? "pending" : "waitlist";
+    if (masterOpen && data.registration_type === "host") {
+      const { count: approvedHosts } = await supabaseAdmin
+        .from("teams")
+        .select("id", { count: "exact", head: true })
+        .eq("registration_type", "host")
+        .eq("status", "approved");
+      if ((approvedHosts ?? 0) >= hostLimit) {
+        initialStatus = "waitlist";
+      }
+    }
+
     // If a competition_id was provided, verify it is open for registration
     if (data.competition_id) {
       const { data: comp, error: compErr } = await supabaseAdmin
@@ -64,7 +87,6 @@ export const createTeamRegistration = createServerFn({ method: "POST" })
         throw new Error("Esta liga nao esta aceitando novas inscricoes");
       }
 
-      // Count approved teams to enforce max_teams at application level as well
       const { count } = await supabaseAdmin
         .from("teams")
         .select("id", { count: "exact", head: true })
@@ -83,7 +105,7 @@ export const createTeamRegistration = createServerFn({ method: "POST" })
         short_name,
         manager_id: userId,
         registration_type: data.registration_type,
-        status: "pending",
+        status: initialStatus,
         lado: "A",
         serie: "A",
         home_venue: data.home_venue?.trim() || null,
