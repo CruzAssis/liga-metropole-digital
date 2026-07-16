@@ -213,7 +213,12 @@ function Etapa1Placar({ match, myTeamId, onRefresh }: { match: Match; myTeamId: 
             </div>
           )}
           {isVisitor && <p className="text-zinc-400 text-sm text-center">Aguardando confirmação do Mandante.</p>}
-          {erro && <p className="text-red-400 text-sm">{erro}</p>}
+          {erro && (
+            <div role="alert" aria-live="assertive" className="flex items-start gap-2 rounded-lg border border-red-800/60 bg-red-950/40 px-3 py-2 text-sm text-red-300">
+              <AlertCircle className="h-4 w-4 flex-shrink-0 mt-0.5 text-red-400" />
+              <span className="leading-snug">{erro}</span>
+            </div>
+          )}
         </div>
       )}
 
