@@ -239,7 +239,7 @@ function LigasPage() {
         if (error) toast.error("Erro ao salvar", { description: error.message });
         else { toast.success("Liga atualizada"); handleCancel(); void load(); }
       } else {
-        const { error } = await supabaseAny.from("competitions").insert({ ...payload, status: "registration" });
+        const { error } = await supabaseAny.from("competitions").insert({ ...payload, status: "enrollment" });
         if (error) toast.error("Erro ao criar liga", { description: error.message });
         else { toast.success("Liga criada!"); handleCancel(); void load(); }
       }
