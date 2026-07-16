@@ -147,7 +147,7 @@ function EtapaPlacar({ match, myTeamId, onRefresh }: { match: Match; myTeamId: s
             <div><p className="text-zinc-400 text-xs mb-1">{match.visitor_team.short_name} (visit.)</p><input type="number" min={0} max={30} value={vScore} onChange={e => setVScore(+e.target.value)} className="w-full bg-zinc-800 border border-zinc-700 text-white text-center text-3xl font-bold h-16 rounded-lg" /></div>
           </div>
           {erro && <p className="text-red-400 text-sm">{erro}</p>}
-          <PrimaryCTA onClick={lancar} loading={loading} className="h-auto">{loading ? 'Salvando...' : 'Confirmar Placar'}</PrimaryCTA>
+          <PrimaryCTA onClick={lancar} loading={loading} loadingText="Salvando..." className="h-auto">Confirmar Placar</PrimaryCTA>
         </div>
       ) : <p className="text-zinc-400 text-sm text-center py-4">Aguardando Visitante lancar o placar...</p>)}
       {lancado && !confirmado && (
@@ -227,7 +227,7 @@ function EtapaGols({ match, myTeamId, athletes, onRefresh }: { match: Match; myT
         {!goals.length && <p className="text-zinc-500 text-sm italic">Nenhum gol — confirme com 0.</p>}
       </div>
       {erro && <p className="text-red-400 text-sm">{erro}</p>}
-      <PrimaryCTA onClick={salvar} loading={loading} className="h-auto">{loading ? 'Salvando...' : 'Confirmar Gols'}</PrimaryCTA>
+      <PrimaryCTA onClick={salvar} loading={loading} loadingText="Salvando..." disabled={goals.length !== myScore} className="h-auto">Confirmar Gols</PrimaryCTA>
     </div>
   )
 }
@@ -287,7 +287,7 @@ function EtapaDestaque({ match, myTeamId, onRefresh }: { match: Match; myTeamId:
         <div className="flex justify-between text-xs text-zinc-500 mt-1"><span>1-Fraco</span><span>10-Excepcional</span></div>
       </div>
       {erro && <p className="text-red-400 text-sm">{erro}</p>}
-      <PrimaryCTA onClick={salvar} loading={loading} className="h-auto">{loading ? 'Salvando...' : 'Confirmar ' + rating + '/10'}</PrimaryCTA>
+      <PrimaryCTA onClick={salvar} loading={loading} loadingText="Salvando..." disabled={!jersey} className="h-auto">{'Confirmar ' + rating + '/10'}</PrimaryCTA>
     </div>
   )
 }

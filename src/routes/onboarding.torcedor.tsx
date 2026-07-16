@@ -147,6 +147,7 @@ function TorcedorOnboarding() {
         <PrimaryCTA
           onClick={handleConfirm}
           loading={loading}
+          loadingText="Salvando..."
           disabled={!selectedTeam}
           className="bg-red-600 hover:bg-red-700 py-3"
         >
