@@ -127,6 +127,7 @@ const emptyForm = {
   starts_at: "",
   registration_status: "open",
   qualified_count: "8",
+  qualified_per_group: "2",
   relegated_count: "10",
   use_sides: true,
 };
