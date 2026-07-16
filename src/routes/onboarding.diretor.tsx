@@ -30,6 +30,11 @@ function DiretorOnboarding() {
   const logoRef = useRef(null)
   const [userId, setUserId] = useState(null)
   const [aceitaTermos, setAceitaTermos] = useState(false)
+  const [errorMsg, setErrorMsg] = useState('')
+  const subprefRef = useRef(null)
+  const nameRef = useRef(null)
+  const shortNameRef = useRef(null)
+  const termsRef = useRef(null)
   const [form, setForm] = useState({
     subprefeitura: '',
     name: '',
@@ -70,12 +75,22 @@ function DiretorOnboarding() {
     if (logoRef.current) logoRef.current.value = ''
   }
 
+  function failWith(msg, ref) {
+    setErrorMsg(msg)
+    toast.error(msg)
+    if (ref?.current) {
+      ref.current.focus?.()
+      ref.current.scrollIntoView?.({ behavior: 'smooth', block: 'center' })
+    }
+  }
+
   async function handleSubmit(e) {
     e.preventDefault()
-    if (!aceitaTermos) { toast.error('Aceite o regulamento para continuar'); return }
-    if (!form.subprefeitura) { toast.error('Selecione uma subprefeitura'); return }
-    if (!form.name.trim()) { toast.error('Informe o nome do time'); return }
-    if (!form.short_name.trim()) { toast.error('Informe a sigla do time'); return }
+    setErrorMsg('')
+    if (!aceitaTermos) return failWith('Aceite o regulamento para continuar', termsRef)
+    if (!form.subprefeitura) return failWith('Selecione uma subprefeitura', subprefRef)
+    if (!form.name.trim()) return failWith('Informe o nome do time', nameRef)
+    if (!form.short_name.trim()) return failWith('Informe a sigla do time', shortNameRef)
     if (!userId) return
     setLoading(true)
     try {
@@ -110,7 +125,9 @@ function DiretorOnboarding() {
       toast.success('Time enviado para aprovacao!')
       navigate({ to: '/minha-conta', replace: true })
     } catch (err) {
-      toast.error(err instanceof Error ? err.message : 'Erro ao cadastrar time')
+      const msg = err instanceof Error ? err.message : 'Erro ao cadastrar time'
+      setErrorMsg(msg)
+      toast.error(msg)
     } finally {
       setLoading(false)
     }
@@ -128,18 +145,18 @@ function DiretorOnboarding() {
         <form onSubmit={handleSubmit} className="space-y-6">
           <div>
             <Label className="text-zinc-300">Subprefeitura</Label>
-            <select name="subprefeitura" value={form.subprefeitura} onChange={handleChange} required className="w-full mt-1 bg-zinc-900 border border-zinc-700 text-white rounded-md px-3 py-2 text-sm">
+            <select ref={subprefRef} name="subprefeitura" value={form.subprefeitura} onChange={handleChange} required className="w-full mt-1 bg-zinc-900 border border-zinc-700 text-white rounded-md px-3 py-2 text-sm">
               <option value="">Selecione a subprefeitura...</option>
               {SUBPREFEITURAS.map(s => <option key={s} value={s}>{s}</option>)}
             </select>
           </div>
           <div>
             <Label htmlFor="name" className="text-zinc-300">Nome do time</Label>
-            <Input id="name" name="name" type="text" required value={form.name} onChange={handleChange} className="mt-1 bg-zinc-900 border-zinc-700 text-white" placeholder="Ex: Vila Nova FC" />
+            <Input ref={nameRef} id="name" name="name" type="text" required value={form.name} onChange={handleChange} className="mt-1 bg-zinc-900 border-zinc-700 text-white" placeholder="Ex: Vila Nova FC" />
           </div>
           <div>
             <Label htmlFor="short_name" className="text-zinc-300">Sigla (até 5 letras)</Label>
-            <Input id="short_name" name="short_name" type="text" required maxLength={5} value={form.short_name} onChange={handleChange} className="mt-1 bg-zinc-900 border-zinc-700 text-white" placeholder="Ex: VNFC" />
+            <Input ref={shortNameRef} id="short_name" name="short_name" type="text" required maxLength={5} value={form.short_name} onChange={handleChange} className="mt-1 bg-zinc-900 border-zinc-700 text-white" placeholder="Ex: VNFC" />
           </div>
           <div>
             <Label className="text-zinc-300">Tipo de time</Label>
@@ -207,7 +224,7 @@ function DiretorOnboarding() {
               </div>
             </div>
           </div>
-          <label className="flex items-start gap-3 cursor-pointer">
+          <label ref={termsRef} className="flex items-start gap-3 cursor-pointer">
             <input type="checkbox" checked={aceitaTermos} onChange={e => setAceitaTermos(e.target.checked)} className="mt-0.5 accent-blue-500" />
             <span className="text-sm text-zinc-400">Ao cadastrar você concorda com o <a href="/termos" target="_blank" className="text-blue-400 hover:underline">regulamento da Liga Metrópole</a></span>
           </label>
@@ -215,6 +232,7 @@ function DiretorOnboarding() {
             type="submit"
             loading={loading}
             loadingText="Cadastrando..."
+            errorMessage={errorMsg}
             disabled={!aceitaTermos || !form.name.trim() || !form.short_name.trim() || !form.subprefeitura}
             className="py-3"
           >

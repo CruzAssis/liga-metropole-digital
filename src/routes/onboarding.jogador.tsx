@@ -1,6 +1,6 @@
 // @ts-nocheck
 import { createFileRoute, useNavigate } from '@tanstack/react-router'
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useRef } from 'react'
 import { supabase } from '@/integrations/supabase/client'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
@@ -24,6 +24,11 @@ function JogadorOnboarding() {
   const [selectedTeamId, setSelectedTeamId] = useState(null)
   const [mode, setMode] = useState(null)
   const [form, setForm] = useState({ nickname: '', position: '', age: '', phrase: '', rating: 5 })
+  const [errorMsg, setErrorMsg] = useState('')
+  const nicknameRef = useRef(null)
+  const positionRef = useRef(null)
+  const modeRef = useRef(null)
+  const teamRef = useRef(null)
 
   useEffect(() => {
     supabase.auth.getUser().then(({ data }) => {
@@ -48,10 +53,22 @@ function JogadorOnboarding() {
     setForm(prev => ({ ...prev, [name]: value }))
   }
 
+  function failWith(msg, ref) {
+    setErrorMsg(msg)
+    toast.error(msg)
+    if (ref?.current) {
+      ref.current.focus?.()
+      ref.current.scrollIntoView?.({ behavior: 'smooth', block: 'center' })
+    }
+  }
+
   async function handleSubmit(e) {
     e.preventDefault()
-    if (!form.nickname.trim()) { toast.error('Informe seu apelido de campo'); return }
-    if (!form.position) { toast.error('Selecione sua posição'); return }
+    setErrorMsg('')
+    if (!form.nickname.trim()) return failWith('Informe seu apelido de campo', nicknameRef)
+    if (!form.position) return failWith('Selecione sua posição', positionRef)
+    if (!mode) return failWith('Escolha entre vincular a uma equipe ou entrar no mercado', modeRef)
+    if (mode === 'team' && !selectedTeamId) return failWith('Busque e selecione um time', teamRef)
     if (!userId) return
     setLoading(true)
     try {
@@ -70,7 +87,9 @@ function JogadorOnboarding() {
       toast.success(mode === 'market' ? 'Você está no mercado de jogadores!' : 'Perfil de jogador criado!')
       navigate({ to: '/minha-conta', replace: true })
     } catch (err) {
-      toast.error(err instanceof Error ? err.message : 'Erro ao criar perfil')
+      const msg = err instanceof Error ? err.message : 'Erro ao criar perfil'
+      setErrorMsg(msg)
+      toast.error(msg)
     } finally {
       setLoading(false)
     }
@@ -86,11 +105,11 @@ function JogadorOnboarding() {
         <form onSubmit={handleSubmit} className="space-y-6">
           <div>
             <Label htmlFor="nickname" className="text-zinc-300">Apelido / Nome de campo</Label>
-            <Input id="nickname" name="nickname" type="text" required value={form.nickname} onChange={handleChange} className="mt-1 bg-zinc-900 border-zinc-700 text-white" placeholder="Como você é chamado em campo?" />
+            <Input ref={nicknameRef} id="nickname" name="nickname" type="text" required value={form.nickname} onChange={handleChange} className="mt-1 bg-zinc-900 border-zinc-700 text-white" placeholder="Como você é chamado em campo?" />
           </div>
           <div>
             <Label className="text-zinc-300">Posição</Label>
-            <select name="position" value={form.position} onChange={handleChange} required className="w-full mt-1 bg-zinc-900 border border-zinc-700 text-white rounded-md px-3 py-2 text-sm">
+            <select ref={positionRef} name="position" value={form.position} onChange={handleChange} required className="w-full mt-1 bg-zinc-900 border border-zinc-700 text-white rounded-md px-3 py-2 text-sm">
               <option value="">Selecione sua posição...</option>
               {POSICOES.map(p => <option key={p} value={p}>{p}</option>)}
             </select>
@@ -109,7 +128,7 @@ function JogadorOnboarding() {
             <input type="range" min="1" max="10" name="rating" value={form.rating} onChange={e => setForm(prev => ({ ...prev, rating: Number(e.target.value) }))} className="w-full mt-2 accent-blue-500" />
             <div className="flex justify-between text-xs text-zinc-600 mt-1"><span>Iniciante (1)</span><span>Semi-profissional (10)</span></div>
           </div>
-          <div className="space-y-3">
+          <div ref={modeRef} className="space-y-3">
             <Label className="text-zinc-300">O que você quer fazer?</Label>
             <div className="space-y-2">
               <button type="button" onClick={() => setMode('team')} className={`w-full p-4 rounded-xl border-2 text-left ${mode === 'team' ? 'border-blue-500 bg-blue-500/10' : 'border-zinc-700 bg-zinc-900'}`}>
@@ -125,7 +144,7 @@ function JogadorOnboarding() {
           {mode === 'team' && (
             <div>
               <Label className="text-zinc-300">Buscar time pelo nome</Label>
-              <Input type="text" value={teamSearch} onChange={e => setTeamSearch(e.target.value)} className="mt-1 bg-zinc-900 border-zinc-700 text-white" placeholder="Digite o nome do time..." />
+              <Input ref={teamRef} type="text" value={teamSearch} onChange={e => setTeamSearch(e.target.value)} className="mt-1 bg-zinc-900 border-zinc-700 text-white" placeholder="Digite o nome do time..." />
               {teamsLoading && <p className="text-sm text-zinc-400 mt-2">Buscando...</p>}
               {teams.length > 0 && (
                 <div className="mt-2 border border-zinc-700 rounded-lg overflow-hidden">
@@ -144,6 +163,7 @@ function JogadorOnboarding() {
             type="submit"
             loading={loading}
             loadingText="Criando..."
+            errorMessage={errorMsg}
             disabled={
               !form.nickname.trim() ||
               !form.position ||

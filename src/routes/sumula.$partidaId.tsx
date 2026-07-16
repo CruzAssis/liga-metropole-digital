@@ -176,8 +176,7 @@ function Etapa1Placar({ match, myTeamId, onRefresh }: { match: Match; myTeamId: 
               placeholder="Descreva qualquer questionamento sobre a arbitragem..."
               className="w-full bg-zinc-800 border border-zinc-700 text-white rounded-lg px-3 py-2 text-sm resize-none" />
           </div>
-          {erro && <p className="text-red-400 text-sm">{erro}</p>}
-          <PrimaryCTA onClick={lancar} loading={loading} loadingText="Salvando...">
+          <PrimaryCTA onClick={lancar} loading={loading} loadingText="Salvando..." errorMessage={erro}>
             Lançar Placar Final
           </PrimaryCTA>
         </div>
@@ -214,7 +213,12 @@ function Etapa1Placar({ match, myTeamId, onRefresh }: { match: Match; myTeamId: 
             </div>
           )}
           {isVisitor && <p className="text-zinc-400 text-sm text-center">Aguardando confirmação do Mandante.</p>}
-          {erro && <p className="text-red-400 text-sm">{erro}</p>}
+          {erro && (
+            <div role="alert" aria-live="assertive" className="flex items-start gap-2 rounded-lg border border-red-800/60 bg-red-950/40 px-3 py-2 text-sm text-red-300">
+              <AlertCircle className="h-4 w-4 flex-shrink-0 mt-0.5 text-red-400" />
+              <span className="leading-snug">{erro}</span>
+            </div>
+          )}
         </div>
       )}
 
@@ -372,11 +376,11 @@ function Etapa2GolesDestaque({
         )}
       </div>
 
-      {erro && <p className="text-red-400 text-sm">{erro}</p>}
       <PrimaryCTA
         onClick={salvar}
         loading={loading}
         loadingText="Salvando..."
+        errorMessage={erro}
         disabled={!destaqueJersey || goals.length !== myScore}
       >
         Confirmar Gols + Destaque
@@ -504,8 +508,7 @@ function Etapa3NotaCruzada({
               </button>
             ))}
           </div>
-          {erro && <p className="text-red-400 text-sm">{erro}</p>}
-          <PrimaryCTA onClick={salvar} loading={loading} loadingText="Salvando...">
+          <PrimaryCTA onClick={salvar} loading={loading} loadingText="Salvando..." errorMessage={erro}>
             {`Confirmar Nota ${rating}/10`}
           </PrimaryCTA>
         </div>
