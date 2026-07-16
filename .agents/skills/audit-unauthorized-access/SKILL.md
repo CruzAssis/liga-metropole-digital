@@ -1,5 +1,5 @@
 ---
-name: "Audit: Unauthorized Access"
+name: audit-unauthorized-access
 description: "Audita todo o controle de acesso do projeto: rotas e páginas acessíveis sem autenticação, falhas de autorização onde um usuário acessa dados de outro (IDOR), ausência de validação de input em formulários e APIs, escalação de privilégios via parâmetros manipulados, e endpoints administrativos expostos. Classifica cada falha por nível de risco (crítico/alto/médio) e entrega o código de correção."
 ---
 
