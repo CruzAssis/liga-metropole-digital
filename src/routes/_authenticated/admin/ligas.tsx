@@ -514,7 +514,7 @@ function LigasPage() {
                           {c.use_sides ? "Lados A/B" : "Pote único"}
                         </Badge>
                         <Badge variant="outline" className="text-[10px] bg-emerald-500/10 text-emerald-300 border-emerald-500/30">
-                          {c.qualified_count ?? 0} classificados
+                          {c.qualified_count ?? 0} classificados ({(c as any).qualified_per_group ?? 2}/grupo)
                         </Badge>
                         <Badge variant="outline" className="text-[10px] bg-red-500/10 text-red-300 border-red-500/30">
                           {c.relegated_count ?? 0} rebaixados
