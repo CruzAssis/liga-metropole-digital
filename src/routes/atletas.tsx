@@ -11,6 +11,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Badge } from "@/components/ui/badge";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { PublicShell } from "@/components/PublicShell";
+import { PageHeader } from "@/components/PageHeader";
 import { getAthleteRankings } from "@/lib/stats.functions";
 import { Goal, Square, Star } from "lucide-react";
 
@@ -57,12 +58,12 @@ function AtletasPage() {
 
   return (
     <PublicShell>
-      <header className="mb-6">
-        <h1 className="font-display text-5xl tracking-wide">Atletas</h1>
-        <p className="text-muted-foreground mt-1">
-          ID Metrópole — perfil oficial e estatísticas dos atletas da liga.
-        </p>
-      </header>
+      <PageHeader
+        eyebrow="ID Metrópole"
+        title="Atletas"
+        description="Perfil oficial e estatísticas dos atletas da liga."
+      />
+
 
       <Tabs defaultValue="todos" className="mb-6">
         <TabsList>

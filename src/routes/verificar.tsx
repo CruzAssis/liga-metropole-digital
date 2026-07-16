@@ -7,11 +7,12 @@ import { useAuth } from "@/hooks/use-auth";
 import { findAthleteByCpf, verifyAthlete } from "@/lib/athletes.functions";
 import { maskCpf, isValidCpf, onlyDigits } from "@/lib/cpf";
 import { PublicShell } from "@/components/PublicShell";
+import { PageHeader } from "@/components/PageHeader";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { IDMetropoleCard } from "@/components/athletes/IDMetropoleCard";
-import { Upload } from "lucide-react";
+import { Upload, BadgeCheck } from "lucide-react";
 
 export const Route = createFileRoute("/verificar")({
   component: VerificarPage,
@@ -141,10 +142,12 @@ function VerificarPage() {
   return (
     <PublicShell>
       <div className="max-w-xl mx-auto">
-        <h1 className="font-display text-5xl tracking-wide">Verificar ID Metrópole</h1>
-        <p className="text-muted-foreground mt-1">
-          Digite seu CPF para encontrar seu pré-cadastro feito pelo seu time.
-        </p>
+        <PageHeader
+          eyebrow={<><BadgeCheck className="h-3.5 w-3.5" /> ID Metrópole</>}
+          title="Verificar meu cadastro"
+          description="Digite seu CPF para encontrar seu pré-cadastro feito pelo seu time e ativar seu ID oficial."
+        />
+
 
         <div className="mt-8 rounded-lg border border-border bg-card p-6 space-y-4">
           <div>
