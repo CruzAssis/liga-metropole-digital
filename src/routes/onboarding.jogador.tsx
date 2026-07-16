@@ -2,11 +2,11 @@
 import { createFileRoute, useNavigate } from '@tanstack/react-router'
 import { useState, useEffect } from 'react'
 import { supabase } from '@/integrations/supabase/client'
-import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
 import { toast } from 'sonner'
-import { Spinner } from '@/components/AppSkeletons'
+import { StepHeader } from '@/components/ui/step-header'
+import { PrimaryCTA } from '@/components/ui/primary-cta'
 
 export const Route = createFileRoute('/onboarding/jogador')({
   component: JogadorOnboarding,
@@ -79,10 +79,10 @@ function JogadorOnboarding() {
   return (
     <div className="min-h-screen bg-black px-4 py-12">
       <div className="max-w-xl mx-auto space-y-8">
-        <div className="text-center">
-          <h1 className="text-2xl font-bold text-white">Perfil de Jogador</h1>
-          <p className="mt-1 text-sm text-zinc-400">Crie seu perfil de atleta na Liga Metrópole</p>
-        </div>
+        <StepHeader
+          title="Perfil de Jogador"
+          subtitle="Crie seu perfil de atleta na Liga Metrópole"
+        />
         <form onSubmit={handleSubmit} className="space-y-6">
           <div>
             <Label htmlFor="nickname" className="text-zinc-300">Apelido / Nome de campo</Label>
@@ -140,9 +140,9 @@ function JogadorOnboarding() {
               )}
             </div>
           )}
-          <Button type="submit" disabled={loading} className="w-full bg-[#1565F5] hover:bg-blue-600 text-white font-semibold py-3">
-            {loading ? <Spinner /> : 'Criar Perfil de Jogador'}
-          </Button>
+          <PrimaryCTA type="submit" loading={loading} className="py-3">
+            Criar Perfil de Jogador
+          </PrimaryCTA>
           <button type="button" onClick={() => navigate({ to: '/minha-conta', replace: true })} className="w-full text-center text-sm text-zinc-500 hover:text-zinc-300">
             Fazer isso depois
           </button>

@@ -2,11 +2,11 @@
 import { createFileRoute, useNavigate } from '@tanstack/react-router'
 import { useState, useEffect } from 'react'
 import { supabase } from '@/integrations/supabase/client'
-import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
 import { toast } from 'sonner'
-import { Spinner } from '@/components/AppSkeletons'
+import { StepHeader } from '@/components/ui/step-header'
+import { PrimaryCTA } from '@/components/ui/primary-cta'
 import { Heart } from 'lucide-react'
 
 export const Route = createFileRoute('/onboarding/torcedor')({
@@ -75,10 +75,10 @@ function TorcedorOnboarding() {
   return (
     <div className="min-h-screen bg-black px-4 py-12">
       <div className="max-w-xl mx-auto space-y-8">
-        <div className="text-center">
-          <h1 className="text-2xl font-bold text-white">Escolha seu Time</h1>
-          <p className="mt-1 text-sm text-zinc-400">Encontre o time que você quer torcer na Liga Metrópole</p>
-        </div>
+        <StepHeader
+          title="Escolha seu Time"
+          subtitle="Encontre o time que você quer torcer na Liga Metrópole"
+        />
 
         <div className="space-y-4">
           {/* Search */}
@@ -144,13 +144,14 @@ function TorcedorOnboarding() {
           </div>
         )}
 
-        <Button
+        <PrimaryCTA
           onClick={handleConfirm}
-          disabled={loading || !selectedTeam}
-          className="w-full bg-red-600 hover:bg-red-700 text-white font-semibold py-3"
+          loading={loading}
+          disabled={!selectedTeam}
+          className="bg-red-600 hover:bg-red-700 py-3"
         >
-          {loading ? <Spinner /> : 'Torcer por este time'}
-        </Button>
+          Torcer por este time
+        </PrimaryCTA>
 
         <button
           type="button"

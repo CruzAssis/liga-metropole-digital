@@ -5,6 +5,8 @@ import { supabase } from '@/integrations/supabase/client'
 import { useAuth } from '@/hooks/use-auth'
 import { Button } from '@/components/ui/button'
 import { Badge } from '@/components/ui/badge'
+import { StepHeader } from '@/components/ui/step-header'
+import { PrimaryCTA } from '@/components/ui/primary-cta'
 import {
   ArrowLeft, Clock, CheckCircle, AlertCircle, Trophy,
   Star, Users, FileText, TrendingUp, Timer
@@ -148,10 +150,7 @@ function Etapa1Placar({ match, myTeamId, onRefresh }: { match: Match; myTeamId: 
   return (
     <div className="rounded-xl border border-zinc-800 bg-zinc-900 p-6 space-y-4">
       <div className="flex items-center justify-between">
-        <h3 className="text-white font-semibold flex items-center gap-2">
-          <span className="w-7 h-7 rounded-full bg-[#1565F5] text-white text-sm font-bold flex items-center justify-center">1</span>
-          Placar Final
-        </h3>
+        <StepHeader variant="badge" step={1} title="Placar Final" />
         <EtapaStatusBadge status={etapa1Status} label={etapa1Status === 'concluido' ? 'Concluído' : etapa1Status === 'em_andamento' ? 'Aguardando mandante' : 'Pendente'} />
       </div>
 
@@ -178,9 +177,9 @@ function Etapa1Placar({ match, myTeamId, onRefresh }: { match: Match; myTeamId: 
               className="w-full bg-zinc-800 border border-zinc-700 text-white rounded-lg px-3 py-2 text-sm resize-none" />
           </div>
           {erro && <p className="text-red-400 text-sm">{erro}</p>}
-          <Button onClick={lancar} disabled={loading} className="w-full bg-[#1565F5] text-white h-11">
+          <PrimaryCTA onClick={lancar} loading={loading}>
             {loading ? 'Salvando...' : 'Lançar Placar Final'}
-          </Button>
+          </PrimaryCTA>
         </div>
       )}
 
@@ -309,10 +308,7 @@ function Etapa2GolesDestaque({
   return (
     <div className="rounded-xl border border-zinc-800 bg-zinc-900 p-6 space-y-5">
       <div className="flex items-center justify-between">
-        <h3 className="text-white font-semibold flex items-center gap-2">
-          <span className="w-7 h-7 rounded-full bg-[#1565F5] text-white text-sm font-bold flex items-center justify-center">2</span>
-          Gols + Destaque — {myTeam.name}
-        </h3>
+        <StepHeader variant="badge" step={2} title={`Gols + Destaque — ${myTeam.name}`} />
         <EtapaStatusBadge status={etapa2MyStatus} label="Em andamento" />
       </div>
 
@@ -377,9 +373,9 @@ function Etapa2GolesDestaque({
       </div>
 
       {erro && <p className="text-red-400 text-sm">{erro}</p>}
-      <Button onClick={salvar} disabled={loading} className="w-full bg-[#1565F5] text-white h-11">
+      <PrimaryCTA onClick={salvar} loading={loading}>
         {loading ? 'Salvando...' : 'Confirmar Gols + Destaque'}
-      </Button>
+      </PrimaryCTA>
     </div>
   )
 }
@@ -451,10 +447,12 @@ function Etapa3NotaCruzada({
   return (
     <div className="rounded-xl border border-zinc-800 bg-zinc-900 p-6 space-y-4">
       <div className="flex items-center justify-between">
-        <h3 className="text-white font-semibold flex items-center gap-2">
-          <span className={`w-7 h-7 rounded-full text-white text-sm font-bold flex items-center justify-center ${saved ? 'bg-green-600' : 'bg-[#1565F5]'}`}>3</span>
-          Nota ao Destaque — {oppTeam.name}
-        </h3>
+        <StepHeader
+          variant="badge"
+          step={3}
+          title={`Nota ao Destaque — ${oppTeam.name}`}
+          stepClassName={saved ? 'bg-green-600' : undefined}
+        />
         <EtapaStatusBadge status={etapa3Status} label={etapa3Status === 'concluido' ? 'Concluído' : etapa3Status === 'em_andamento' ? 'Sua nota salva' : 'Pendente'} />
       </div>
 
@@ -502,9 +500,9 @@ function Etapa3NotaCruzada({
             ))}
           </div>
           {erro && <p className="text-red-400 text-sm">{erro}</p>}
-          <Button onClick={salvar} disabled={loading} className="w-full bg-[#1565F5] text-white h-11">
+          <PrimaryCTA onClick={salvar} loading={loading}>
             {loading ? 'Salvando...' : `Confirmar Nota ${rating}/10`}
-          </Button>
+          </PrimaryCTA>
         </div>
       )}
     </div>

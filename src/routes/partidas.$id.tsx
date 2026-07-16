@@ -5,6 +5,8 @@ import { supabase } from '@/integrations/supabase/client'
 import { useAuth } from '@/hooks/use-auth'
 import { Button } from '@/components/ui/button'
 import { Badge } from '@/components/ui/badge'
+import { StepHeader } from '@/components/ui/step-header'
+import { PrimaryCTA } from '@/components/ui/primary-cta'
 import { ArrowLeft, Clock, CheckCircle, AlertCircle, Trophy, Share2, Copy, Check } from 'lucide-react'
 import {
   submitScore,
@@ -135,7 +137,7 @@ function EtapaPlacar({ match, myTeamId, onRefresh }: { match: Match; myTeamId: s
 
   return (
     <div className="rounded-xl border border-zinc-800 bg-zinc-900 p-6 space-y-4">
-      <h3 className="text-white font-semibold flex items-center gap-2"><span className="text-[#1565F5] font-bold">01</span> Placar</h3>
+      <StepHeader variant="inline" step="01" title="Placar" />
       {!lancado && (isVisitor ? (
         <div className="space-y-4">
           <p className="text-zinc-400 text-sm">Visitante registra o placar primeiro.</p>
@@ -145,7 +147,7 @@ function EtapaPlacar({ match, myTeamId, onRefresh }: { match: Match; myTeamId: s
             <div><p className="text-zinc-400 text-xs mb-1">{match.visitor_team.short_name} (visit.)</p><input type="number" min={0} max={30} value={vScore} onChange={e => setVScore(+e.target.value)} className="w-full bg-zinc-800 border border-zinc-700 text-white text-center text-3xl font-bold h-16 rounded-lg" /></div>
           </div>
           {erro && <p className="text-red-400 text-sm">{erro}</p>}
-          <Button onClick={lancar} disabled={loading} className="w-full bg-[#1565F5] text-white">{loading ? 'Salvando...' : 'Confirmar Placar'}</Button>
+          <PrimaryCTA onClick={lancar} loading={loading} className="h-auto">{loading ? 'Salvando...' : 'Confirmar Placar'}</PrimaryCTA>
         </div>
       ) : <p className="text-zinc-400 text-sm text-center py-4">Aguardando Visitante lancar o placar...</p>)}
       {lancado && !confirmado && (
@@ -208,7 +210,7 @@ function EtapaGols({ match, myTeamId, athletes, onRefresh }: { match: Match; myT
 
   return (
     <div className="rounded-xl border border-zinc-800 bg-zinc-900 p-6 space-y-4">
-      <h3 className="text-white font-semibold flex items-center gap-2"><span className="text-[#1565F5] font-bold">02</span> Gols do {myTeam.name}</h3>
+      <StepHeader variant="inline" step="02" title={`Gols do ${myTeam.name}`} />
       <p className="text-zinc-400 text-sm">{myScore} gol{myScore !== 1 ? 's' : ''} a registrar.</p>
       <div className="space-y-2">
         {goals.map((g, i) => (
@@ -225,7 +227,7 @@ function EtapaGols({ match, myTeamId, athletes, onRefresh }: { match: Match; myT
         {!goals.length && <p className="text-zinc-500 text-sm italic">Nenhum gol — confirme com 0.</p>}
       </div>
       {erro && <p className="text-red-400 text-sm">{erro}</p>}
-      <Button onClick={salvar} disabled={loading} className="w-full bg-[#1565F5] text-white">{loading ? 'Salvando...' : 'Confirmar Gols'}</Button>
+      <PrimaryCTA onClick={salvar} loading={loading} className="h-auto">{loading ? 'Salvando...' : 'Confirmar Gols'}</PrimaryCTA>
     </div>
   )
 }
@@ -273,7 +275,7 @@ function EtapaDestaque({ match, myTeamId, onRefresh }: { match: Match; myTeamId:
 
   return (
     <div className="rounded-xl border border-zinc-800 bg-zinc-900 p-6 space-y-4">
-      <h3 className="text-white font-semibold flex items-center gap-2"><span className="text-[#1565F5] font-bold">03</span> Destaque do {oppTeam.name}</h3>
+      <StepHeader variant="inline" step="03" title={`Destaque do ${oppTeam.name}`} />
       <p className="text-zinc-400 text-sm">Avalie o melhor jogador adversario.</p>
       <div className="grid grid-cols-2 gap-3">
         <div><label className="text-zinc-400 text-xs block mb-1">Camisa *</label><input type="number" min={1} max={99} value={jersey} onChange={e => setJersey(e.target.value)} className="w-full bg-zinc-800 border border-zinc-700 text-white rounded px-3 py-2 text-sm" /></div>
@@ -285,7 +287,7 @@ function EtapaDestaque({ match, myTeamId, onRefresh }: { match: Match; myTeamId:
         <div className="flex justify-between text-xs text-zinc-500 mt-1"><span>1-Fraco</span><span>10-Excepcional</span></div>
       </div>
       {erro && <p className="text-red-400 text-sm">{erro}</p>}
-      <Button onClick={salvar} disabled={loading} className="w-full bg-[#1565F5] text-white">{loading ? 'Salvando...' : 'Confirmar ' + rating + '/10'}</Button>
+      <PrimaryCTA onClick={salvar} loading={loading} className="h-auto">{loading ? 'Salvando...' : 'Confirmar ' + rating + '/10'}</PrimaryCTA>
     </div>
   )
 }

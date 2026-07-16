@@ -2,11 +2,11 @@
 import { createFileRoute, useNavigate } from '@tanstack/react-router'
 import { useState, useRef, useEffect } from 'react'
 import { supabase } from '@/integrations/supabase/client'
-import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
 import { toast } from 'sonner'
-import { Spinner } from '@/components/AppSkeletons'
+import { StepHeader } from '@/components/ui/step-header'
+import { PrimaryCTA } from '@/components/ui/primary-cta'
 import { Upload, X, MapPin } from 'lucide-react'
 
 export const Route = createFileRoute('/onboarding/diretor')({
@@ -121,10 +121,10 @@ function DiretorOnboarding() {
   return (
     <div className="min-h-screen bg-black px-4 py-12">
       <div className="max-w-xl mx-auto space-y-8">
-        <div className="text-center">
-          <h1 className="text-2xl font-bold text-white">Cadastro do Time</h1>
-          <p className="mt-1 text-sm text-zinc-400">Preencha os dados do seu time para participar da Liga Metrópole</p>
-        </div>
+        <StepHeader
+          title="Cadastro do Time"
+          subtitle="Preencha os dados do seu time para participar da Liga Metrópole"
+        />
         <form onSubmit={handleSubmit} className="space-y-6">
           <div>
             <Label className="text-zinc-300">Subprefeitura</Label>
@@ -211,9 +211,9 @@ function DiretorOnboarding() {
             <input type="checkbox" checked={aceitaTermos} onChange={e => setAceitaTermos(e.target.checked)} className="mt-0.5 accent-blue-500" />
             <span className="text-sm text-zinc-400">Ao cadastrar você concorda com o <a href="/termos" target="_blank" className="text-blue-400 hover:underline">regulamento da Liga Metrópole</a></span>
           </label>
-          <Button type="submit" disabled={loading} className="w-full bg-[#1565F5] hover:bg-blue-600 text-white font-semibold py-3">
-            {loading ? <Spinner /> : 'Cadastrar Time'}
-          </Button>
+          <PrimaryCTA type="submit" loading={loading} className="py-3">
+            Cadastrar Time
+          </PrimaryCTA>
           <button type="button" onClick={() => navigate({ to: '/minha-conta', replace: true })} className="w-full text-center text-sm text-zinc-500 hover:text-zinc-300">
             Fazer isso depois
           </button>
