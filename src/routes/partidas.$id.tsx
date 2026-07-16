@@ -137,7 +137,7 @@ function EtapaPlacar({ match, myTeamId, onRefresh }: { match: Match; myTeamId: s
 
   return (
     <div className="rounded-xl border border-zinc-800 bg-zinc-900 p-6 space-y-4">
-      <h3 className="text-white font-semibold flex items-center gap-2"><span className="text-[#1565F5] font-bold">01</span> Placar</h3>
+      <StepHeader variant="inline" step="01" title="Placar" />
       {!lancado && (isVisitor ? (
         <div className="space-y-4">
           <p className="text-zinc-400 text-sm">Visitante registra o placar primeiro.</p>
@@ -147,7 +147,7 @@ function EtapaPlacar({ match, myTeamId, onRefresh }: { match: Match; myTeamId: s
             <div><p className="text-zinc-400 text-xs mb-1">{match.visitor_team.short_name} (visit.)</p><input type="number" min={0} max={30} value={vScore} onChange={e => setVScore(+e.target.value)} className="w-full bg-zinc-800 border border-zinc-700 text-white text-center text-3xl font-bold h-16 rounded-lg" /></div>
           </div>
           {erro && <p className="text-red-400 text-sm">{erro}</p>}
-          <Button onClick={lancar} disabled={loading} className="w-full bg-[#1565F5] text-white">{loading ? 'Salvando...' : 'Confirmar Placar'}</Button>
+          <PrimaryCTA onClick={lancar} loading={loading} className="h-auto">{loading ? 'Salvando...' : 'Confirmar Placar'}</PrimaryCTA>
         </div>
       ) : <p className="text-zinc-400 text-sm text-center py-4">Aguardando Visitante lancar o placar...</p>)}
       {lancado && !confirmado && (
@@ -210,7 +210,7 @@ function EtapaGols({ match, myTeamId, athletes, onRefresh }: { match: Match; myT
 
   return (
     <div className="rounded-xl border border-zinc-800 bg-zinc-900 p-6 space-y-4">
-      <h3 className="text-white font-semibold flex items-center gap-2"><span className="text-[#1565F5] font-bold">02</span> Gols do {myTeam.name}</h3>
+      <StepHeader variant="inline" step="02" title={`Gols do ${myTeam.name}`} />
       <p className="text-zinc-400 text-sm">{myScore} gol{myScore !== 1 ? 's' : ''} a registrar.</p>
       <div className="space-y-2">
         {goals.map((g, i) => (
@@ -227,7 +227,7 @@ function EtapaGols({ match, myTeamId, athletes, onRefresh }: { match: Match; myT
         {!goals.length && <p className="text-zinc-500 text-sm italic">Nenhum gol — confirme com 0.</p>}
       </div>
       {erro && <p className="text-red-400 text-sm">{erro}</p>}
-      <Button onClick={salvar} disabled={loading} className="w-full bg-[#1565F5] text-white">{loading ? 'Salvando...' : 'Confirmar Gols'}</Button>
+      <PrimaryCTA onClick={salvar} loading={loading} className="h-auto">{loading ? 'Salvando...' : 'Confirmar Gols'}</PrimaryCTA>
     </div>
   )
 }
