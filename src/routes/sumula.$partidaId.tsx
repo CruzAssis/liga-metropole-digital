@@ -373,9 +373,9 @@ function Etapa2GolesDestaque({
       </div>
 
       {erro && <p className="text-red-400 text-sm">{erro}</p>}
-      <Button onClick={salvar} disabled={loading} className="w-full bg-[#1565F5] text-white h-11">
+      <PrimaryCTA onClick={salvar} loading={loading}>
         {loading ? 'Salvando...' : 'Confirmar Gols + Destaque'}
-      </Button>
+      </PrimaryCTA>
     </div>
   )
 }
