@@ -262,6 +262,13 @@ function LigasPage() {
     else { toast.success(`Liga ${next === "open" ? "reaberta" : "fechada"} para inscrições`); void load(); }
   };
 
+  const handleDelete = async (c: Competition) => {
+    if (!confirm(`Excluir a liga "${c.conference_name ?? c.name}"?\n\nEssa ação removerá a competição permanentemente. Times, partidas e grupos vinculados podem ser afetados.`)) return;
+    const { error } = await supabaseAny.from("competitions").delete().eq("id", c.id);
+    if (error) toast.error("Erro ao excluir liga", { description: error.message });
+    else { toast.success("Liga excluída"); void load(); }
+  };
+
   // Group subprefeituras by zona for the dropdown optgroups
   const zonas = ["norte", "leste", "sul", "oeste", "centro"] as const;
 
