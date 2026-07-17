@@ -39,6 +39,7 @@ export function AppSidebar() {
     { title: "Ligas", url: "/admin/ligas", icon: Trophy },
     { title: "Sorteio", url: "/admin/sorteio", icon: Shuffle },
     { title: "Súmulas", url: "/admin/sumulas", icon: FileText },
+    { title: "Manifesto", url: "/admin/manifesto", icon: Megaphone },
     { title: "Usuários", url: "/admin/usuarios", icon: Shield },
   ];
 
