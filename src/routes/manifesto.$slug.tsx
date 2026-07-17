@@ -1,7 +1,7 @@
 import { createFileRoute, useParams, Link } from '@tanstack/react-router'
 import { useEffect, useState } from 'react'
 import { supabase } from '@/integrations/supabase/client'
-import { BrandLogo } from '@/components/BrandLogo'
+import { ManifestoContent } from '@/components/ManifestoContent'
 import { AlertCircle } from 'lucide-react'
 
 export const Route = createFileRoute('/manifesto/$slug')({

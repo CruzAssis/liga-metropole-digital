@@ -45,6 +45,7 @@ import { Route as AuthenticatedAdminSumulasRouteImport } from './routes/_authent
 import { Route as AuthenticatedAdminSorteioRouteImport } from './routes/_authenticated/admin/sorteio'
 import { Route as AuthenticatedAdminNotificacoesRouteImport } from './routes/_authenticated/admin/notificacoes'
 import { Route as AuthenticatedAdminMasterSwitchRouteImport } from './routes/_authenticated/admin/master-switch'
+import { Route as AuthenticatedAdminManifestoRouteImport } from './routes/_authenticated/admin/manifesto'
 import { Route as AuthenticatedAdminLigasRouteImport } from './routes/_authenticated/admin/ligas'
 import { Route as AuthenticatedAdminFinanceiroRouteImport } from './routes/_authenticated/admin/financeiro'
 import { Route as AuthenticatedAdminDashboardRouteImport } from './routes/_authenticated/admin/dashboard'
@@ -236,6 +237,12 @@ const AuthenticatedAdminMasterSwitchRoute =
     path: '/master-switch',
     getParentRoute: () => AuthenticatedAdminRoute,
   } as any)
+const AuthenticatedAdminManifestoRoute =
+  AuthenticatedAdminManifestoRouteImport.update({
+    id: '/manifesto',
+    path: '/manifesto',
+    getParentRoute: () => AuthenticatedAdminRoute,
+  } as any)
 const AuthenticatedAdminLigasRoute = AuthenticatedAdminLigasRouteImport.update({
   id: '/ligas',
   path: '/ligas',
@@ -290,6 +297,7 @@ export interface FileRoutesByFullPath {
   '/admin/dashboard': typeof AuthenticatedAdminDashboardRoute
   '/admin/financeiro': typeof AuthenticatedAdminFinanceiroRoute
   '/admin/ligas': typeof AuthenticatedAdminLigasRoute
+  '/admin/manifesto': typeof AuthenticatedAdminManifestoRoute
   '/admin/master-switch': typeof AuthenticatedAdminMasterSwitchRoute
   '/admin/notificacoes': typeof AuthenticatedAdminNotificacoesRoute
   '/admin/sorteio': typeof AuthenticatedAdminSorteioRoute
@@ -331,6 +339,7 @@ export interface FileRoutesByTo {
   '/admin/dashboard': typeof AuthenticatedAdminDashboardRoute
   '/admin/financeiro': typeof AuthenticatedAdminFinanceiroRoute
   '/admin/ligas': typeof AuthenticatedAdminLigasRoute
+  '/admin/manifesto': typeof AuthenticatedAdminManifestoRoute
   '/admin/master-switch': typeof AuthenticatedAdminMasterSwitchRoute
   '/admin/notificacoes': typeof AuthenticatedAdminNotificacoesRoute
   '/admin/sorteio': typeof AuthenticatedAdminSorteioRoute
@@ -374,6 +383,7 @@ export interface FileRoutesById {
   '/_authenticated/admin/dashboard': typeof AuthenticatedAdminDashboardRoute
   '/_authenticated/admin/financeiro': typeof AuthenticatedAdminFinanceiroRoute
   '/_authenticated/admin/ligas': typeof AuthenticatedAdminLigasRoute
+  '/_authenticated/admin/manifesto': typeof AuthenticatedAdminManifestoRoute
   '/_authenticated/admin/master-switch': typeof AuthenticatedAdminMasterSwitchRoute
   '/_authenticated/admin/notificacoes': typeof AuthenticatedAdminNotificacoesRoute
   '/_authenticated/admin/sorteio': typeof AuthenticatedAdminSorteioRoute
@@ -417,6 +427,7 @@ export interface FileRouteTypes {
     | '/admin/dashboard'
     | '/admin/financeiro'
     | '/admin/ligas'
+    | '/admin/manifesto'
     | '/admin/master-switch'
     | '/admin/notificacoes'
     | '/admin/sorteio'
@@ -458,6 +469,7 @@ export interface FileRouteTypes {
     | '/admin/dashboard'
     | '/admin/financeiro'
     | '/admin/ligas'
+    | '/admin/manifesto'
     | '/admin/master-switch'
     | '/admin/notificacoes'
     | '/admin/sorteio'
@@ -500,6 +512,7 @@ export interface FileRouteTypes {
     | '/_authenticated/admin/dashboard'
     | '/_authenticated/admin/financeiro'
     | '/_authenticated/admin/ligas'
+    | '/_authenticated/admin/manifesto'
     | '/_authenticated/admin/master-switch'
     | '/_authenticated/admin/notificacoes'
     | '/_authenticated/admin/sorteio'
@@ -789,6 +802,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedAdminMasterSwitchRouteImport
       parentRoute: typeof AuthenticatedAdminRoute
     }
+    '/_authenticated/admin/manifesto': {
+      id: '/_authenticated/admin/manifesto'
+      path: '/manifesto'
+      fullPath: '/admin/manifesto'
+      preLoaderRoute: typeof AuthenticatedAdminManifestoRouteImport
+      parentRoute: typeof AuthenticatedAdminRoute
+    }
     '/_authenticated/admin/ligas': {
       id: '/_authenticated/admin/ligas'
       path: '/ligas'
@@ -824,6 +844,7 @@ interface AuthenticatedAdminRouteChildren {
   AuthenticatedAdminDashboardRoute: typeof AuthenticatedAdminDashboardRoute
   AuthenticatedAdminFinanceiroRoute: typeof AuthenticatedAdminFinanceiroRoute
   AuthenticatedAdminLigasRoute: typeof AuthenticatedAdminLigasRoute
+  AuthenticatedAdminManifestoRoute: typeof AuthenticatedAdminManifestoRoute
   AuthenticatedAdminMasterSwitchRoute: typeof AuthenticatedAdminMasterSwitchRoute
   AuthenticatedAdminNotificacoesRoute: typeof AuthenticatedAdminNotificacoesRoute
   AuthenticatedAdminSorteioRoute: typeof AuthenticatedAdminSorteioRoute
@@ -837,6 +858,7 @@ const AuthenticatedAdminRouteChildren: AuthenticatedAdminRouteChildren = {
   AuthenticatedAdminDashboardRoute: AuthenticatedAdminDashboardRoute,
   AuthenticatedAdminFinanceiroRoute: AuthenticatedAdminFinanceiroRoute,
   AuthenticatedAdminLigasRoute: AuthenticatedAdminLigasRoute,
+  AuthenticatedAdminManifestoRoute: AuthenticatedAdminManifestoRoute,
   AuthenticatedAdminMasterSwitchRoute: AuthenticatedAdminMasterSwitchRoute,
   AuthenticatedAdminNotificacoesRoute: AuthenticatedAdminNotificacoesRoute,
   AuthenticatedAdminSorteioRoute: AuthenticatedAdminSorteioRoute,
@@ -943,13 +965,3 @@ const rootRouteChildren: RootRouteChildren = {
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)
   ._addFileTypes<FileRouteTypes>()
-
-import type { getRouter } from './router.tsx'
-import type { startInstance } from './start.ts'
-declare module '@tanstack/react-start' {
-  interface Register {
-    ssr: true
-    router: Awaited<ReturnType<typeof getRouter>>
-    config: Awaited<ReturnType<typeof startInstance.getOptions>>
-  }
-}
