@@ -12,6 +12,7 @@ import { Route as rootRouteImport } from './routes/__root'
 import { Route as VerificarRouteImport } from './routes/verificar'
 import { Route as TimesRouteImport } from './routes/times'
 import { Route as TermosRouteImport } from './routes/termos'
+import { Route as SumulaExemploRouteImport } from './routes/sumula-exemplo'
 import { Route as SignupRouteImport } from './routes/signup'
 import { Route as ResultadosRouteImport } from './routes/resultados'
 import { Route as ResetPasswordRouteImport } from './routes/reset-password'
@@ -65,6 +66,11 @@ const TimesRoute = TimesRouteImport.update({
 const TermosRoute = TermosRouteImport.update({
   id: '/termos',
   path: '/termos',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const SumulaExemploRoute = SumulaExemploRouteImport.update({
+  id: '/sumula-exemplo',
+  path: '/sumula-exemplo',
   getParentRoute: () => rootRouteImport,
 } as any)
 const SignupRoute = SignupRouteImport.update({
@@ -285,6 +291,7 @@ export interface FileRoutesByFullPath {
   '/reset-password': typeof ResetPasswordRoute
   '/resultados': typeof ResultadosRoute
   '/signup': typeof SignupRoute
+  '/sumula-exemplo': typeof SumulaExemploRoute
   '/termos': typeof TermosRoute
   '/times': typeof TimesRouteWithChildren
   '/verificar': typeof VerificarRoute
@@ -328,6 +335,7 @@ export interface FileRoutesByTo {
   '/reset-password': typeof ResetPasswordRoute
   '/resultados': typeof ResultadosRoute
   '/signup': typeof SignupRoute
+  '/sumula-exemplo': typeof SumulaExemploRoute
   '/termos': typeof TermosRoute
   '/times': typeof TimesRouteWithChildren
   '/verificar': typeof VerificarRoute
@@ -373,6 +381,7 @@ export interface FileRoutesById {
   '/reset-password': typeof ResetPasswordRoute
   '/resultados': typeof ResultadosRoute
   '/signup': typeof SignupRoute
+  '/sumula-exemplo': typeof SumulaExemploRoute
   '/termos': typeof TermosRoute
   '/times': typeof TimesRouteWithChildren
   '/verificar': typeof VerificarRoute
@@ -418,6 +427,7 @@ export interface FileRouteTypes {
     | '/reset-password'
     | '/resultados'
     | '/signup'
+    | '/sumula-exemplo'
     | '/termos'
     | '/times'
     | '/verificar'
@@ -461,6 +471,7 @@ export interface FileRouteTypes {
     | '/reset-password'
     | '/resultados'
     | '/signup'
+    | '/sumula-exemplo'
     | '/termos'
     | '/times'
     | '/verificar'
@@ -505,6 +516,7 @@ export interface FileRouteTypes {
     | '/reset-password'
     | '/resultados'
     | '/signup'
+    | '/sumula-exemplo'
     | '/termos'
     | '/times'
     | '/verificar'
@@ -550,6 +562,7 @@ export interface RootRouteChildren {
   ResetPasswordRoute: typeof ResetPasswordRoute
   ResultadosRoute: typeof ResultadosRoute
   SignupRoute: typeof SignupRoute
+  SumulaExemploRoute: typeof SumulaExemploRoute
   TermosRoute: typeof TermosRoute
   TimesRoute: typeof TimesRouteWithChildren
   VerificarRoute: typeof VerificarRoute
@@ -581,6 +594,13 @@ declare module '@tanstack/react-router' {
       path: '/termos'
       fullPath: '/termos'
       preLoaderRoute: typeof TermosRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/sumula-exemplo': {
+      id: '/sumula-exemplo'
+      path: '/sumula-exemplo'
+      fullPath: '/sumula-exemplo'
+      preLoaderRoute: typeof SumulaExemploRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/signup': {
@@ -974,6 +994,7 @@ const rootRouteChildren: RootRouteChildren = {
   ResetPasswordRoute: ResetPasswordRoute,
   ResultadosRoute: ResultadosRoute,
   SignupRoute: SignupRoute,
+  SumulaExemploRoute: SumulaExemploRoute,
   TermosRoute: TermosRoute,
   TimesRoute: TimesRouteWithChildren,
   VerificarRoute: VerificarRoute,
@@ -986,13 +1007,3 @@ const rootRouteChildren: RootRouteChildren = {
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)
   ._addFileTypes<FileRouteTypes>()
-
-import type { getRouter } from './router.tsx'
-import type { startInstance } from './start.ts'
-declare module '@tanstack/react-start' {
-  interface Register {
-    ssr: true
-    router: Awaited<ReturnType<typeof getRouter>>
-    config: Awaited<ReturnType<typeof startInstance.getOptions>>
-  }
-}
