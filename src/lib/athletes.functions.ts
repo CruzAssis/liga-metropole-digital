@@ -193,10 +193,98 @@ export const listMyTeamAthletes = createServerFn({ method: "GET" })
 
     const { data: athletes, error } = await supabaseAdmin
       .from("athletes")
-      .select("id, full_name, nickname, position, photo_url, verified, cpf_last4, created_at")
+      .select("id, full_name, nickname, position, photo_url, verified, cpf_last4, whatsapp, created_at")
       .eq("team_id", team.id)
       .order("created_at", { ascending: true });
     if (error) throw new Error(error.message);
 
     return { team, athletes: athletes ?? [] };
   });
+
+// =============================================================
+// Director-managed athletes (no CPF): create / update / delete
+// =============================================================
+async function requireMyTeamId(userId: string): Promise<string> {
+  const { data: team, error } = await supabaseAdmin
+    .from("teams")
+    .select("id")
+    .eq("manager_id", userId)
+    .maybeSingle();
+  if (error) throw new Error(error.message);
+  if (!team) {
+    throw new Response(JSON.stringify({ error: "Você precisa ter um time inscrito" }), { status: 400 });
+  }
+  return team.id;
+}
+
+const createAthleteSchema = z.object({
+  full_name: z.string().trim().min(2).max(120),
+  nickname: z.string().trim().min(1).max(40),
+  position: z.string().trim().min(1).max(30),
+  whatsapp: z.string().trim().max(20).optional().nullable(),
+});
+
+export const createDirectorAthlete = createServerFn({ method: "POST" })
+  .middleware([requireSupabaseAuth])
+  .inputValidator((input) => createAthleteSchema.parse(input))
+  .handler(async ({ data, context }) => {
+    const teamId = await requireMyTeamId(context.userId);
+    const { data: row, error } = await supabaseAdmin
+      .from("athletes")
+      .insert({
+        team_id: teamId,
+        full_name: data.full_name,
+        nickname: data.nickname,
+        position: data.position,
+        whatsapp: data.whatsapp || null,
+        verified: false,
+      })
+      .select("id")
+      .single();
+    if (error) throw new Error(error.message);
+    return { id: row.id };
+  });
+
+const updateAthleteSchema = z.object({
+  id: z.string().uuid(),
+  full_name: z.string().trim().min(2).max(120),
+  nickname: z.string().trim().min(1).max(40),
+  position: z.string().trim().min(1).max(30),
+  whatsapp: z.string().trim().max(20).optional().nullable(),
+});
+
+export const updateDirectorAthlete = createServerFn({ method: "POST" })
+  .middleware([requireSupabaseAuth])
+  .inputValidator((input) => updateAthleteSchema.parse(input))
+  .handler(async ({ data, context }) => {
+    const teamId = await requireMyTeamId(context.userId);
+    const { error } = await supabaseAdmin
+      .from("athletes")
+      .update({
+        full_name: data.full_name,
+        nickname: data.nickname,
+        position: data.position,
+        whatsapp: data.whatsapp || null,
+      })
+      .eq("id", data.id)
+      .eq("team_id", teamId);
+    if (error) throw new Error(error.message);
+    return { success: true };
+  });
+
+const deleteAthleteSchema = z.object({ id: z.string().uuid() });
+
+export const deleteDirectorAthlete = createServerFn({ method: "POST" })
+  .middleware([requireSupabaseAuth])
+  .inputValidator((input) => deleteAthleteSchema.parse(input))
+  .handler(async ({ data, context }) => {
+    const teamId = await requireMyTeamId(context.userId);
+    const { error } = await supabaseAdmin
+      .from("athletes")
+      .delete()
+      .eq("id", data.id)
+      .eq("team_id", teamId);
+    if (error) throw new Error(error.message);
+    return { success: true };
+  });
+
