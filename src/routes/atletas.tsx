@@ -236,7 +236,7 @@ function EmptyRanking({ label }: { label: string }) {
   );
 }
 
-function ScorersRanking() {
+function ScorersRanking({ ladoFilter }: { ladoFilter: LadoFilter }) {
   const { data, isLoading } = useRankings();
   if (isLoading) return (
     <div className="space-y-2">
