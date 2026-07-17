@@ -9,9 +9,9 @@ const API_CACHE = 'liga-metropole-api-v1';
 const APP_SHELL = [
   '/',
   '/manifest.json',
-  '/favicon.ico',
-  '/icons/icon-192.svg',
-  '/icons/icon-512.svg',
+  '/favicon.png',
+  '/icons/icon-192.png',
+  '/icons/icon-512.png',
 ];
 
 // ─── Install: cache app shell ─────────────────────────────────────────────────
@@ -134,8 +134,8 @@ self.addEventListener('push', (event) => {
   const data = event.data.json();
   const options = {
     body: data.body || 'Nova notificação da Liga Metrópole',
-    icon: '/icons/icon-192.svg',
-    badge: '/icons/icon-192.svg',
+    icon: '/icons/icon-192.png',
+    badge: '/icons/icon-192.png',
     data: { url: data.url || '/' },
   };
 
