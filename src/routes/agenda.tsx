@@ -1,14 +1,15 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { SkeletonMatchList, EmptyAgenda } from "@/components/AppSkeletons";
-import { useEffect, useState, useRef } from "react";
+import { useEffect, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { PublicShell } from "@/components/PublicShell";
 import { PageHeader } from "@/components/PageHeader";
+import { ConferenceFilter, RoundNav } from "@/components/ui-kit";
 import { Badge } from "@/components/ui/badge";
-import { Button } from "@/components/ui/button";
-import { ChevronLeft, ChevronRight, MapPin, Clock } from "lucide-react";
+import { MapPin, Clock } from "lucide-react";
 
 const TOTAL_ROUNDS = 20;
+
 
 type Match = {
   id: string;
@@ -32,9 +33,8 @@ type Competition = {
   status: string;
 };
 
-const ZONA_LABELS: Record<string, string> = {
-  norte: "Zona Norte", sul: "Zona Sul", leste: "Zona Leste", oeste: "Zona Oeste", centro: "Centro",
-};
+
+
 
 export const Route = createFileRoute("/agenda")({
   component: AgendaPage,
