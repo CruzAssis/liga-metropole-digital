@@ -32,7 +32,7 @@ export function AthleteCard({
     <button
       type="button"
       onClick={onClick}
-      className="text-left rounded-xl border border-border bg-card p-4 hover:border-primary/50 hover:-translate-y-0.5 hover:shadow-[0_8px_24px_-12px_rgba(21,101,245,0.35)] transition-all w-full"
+      className="card-hover text-left rounded-xl border border-border bg-card p-4 w-full"
     >
       <div className="flex items-center gap-3">
         <AthleteAvatar

@@ -71,7 +71,7 @@ function LocaisPage() {
         {venues?.map((v) => (
           <div
             key={v.name}
-            className="group relative rounded-xl border border-border bg-card p-5 flex items-center gap-4 hover:border-primary/40 hover:-translate-y-0.5 hover:shadow-[0_8px_24px_-12px_rgba(21,101,245,0.4)] transition-all overflow-hidden"
+            className="card-hover group relative rounded-xl border border-border bg-card p-5 flex items-center gap-4 overflow-hidden"
           >
             <div className="h-12 w-12 rounded-lg bg-primary/10 grid place-items-center text-primary shrink-0 ring-1 ring-primary/20">
               <MapPin className="h-5 w-5" />
