@@ -74,8 +74,8 @@ export const getAthleteRankings = createServerFn({ method: "GET" }).handler(asyn
     new Set((athletes ?? []).map((a) => a.team_id).filter(Boolean)),
   ) as string[];
   const { data: teams } = teamIds.length
-    ? await supabaseAdmin.from("teams").select("id, name, short_name, slug, logo_url").in("id", teamIds)
-    : { data: [] as { id: string; name: string; short_name: string; slug: string | null; logo_url: string | null }[] };
+    ? await supabaseAdmin.from("teams").select("id, name, short_name, slug, logo_url, lado").in("id", teamIds)
+    : { data: [] as { id: string; name: string; short_name: string; slug: string | null; logo_url: string | null; lado: "A" | "B" | null }[] };
   const teamMap = new Map((teams ?? []).map((t) => [t.id, t]));
 
   const hydrate = (athleteId: string) => {
@@ -89,6 +89,7 @@ export const getAthleteRankings = createServerFn({ method: "GET" }).handler(asyn
       team_name: t?.short_name ?? null,
       team_slug: t?.slug ?? null,
       team_logo: t?.logo_url ?? null,
+      team_lado: (t?.lado ?? null) as "A" | "B" | null,
     };
   };
 

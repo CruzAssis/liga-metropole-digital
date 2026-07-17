@@ -1,6 +1,6 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { SkeletonAthleteGrid, EmptyAtletas } from "@/components/AppSkeletons";
-import { useEffect, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { useServerFn } from "@tanstack/react-start";
 import { supabase } from "@/integrations/supabase/client";
@@ -15,7 +15,35 @@ import { PageHeader } from "@/components/PageHeader";
 import { getAthleteRankings } from "@/lib/stats.functions";
 import { Goal, Square, Star } from "lucide-react";
 
-type Row = AthleteCardData & IDMetropoleData & { team_id: string | null };
+type Row = AthleteCardData & IDMetropoleData & { team_id: string | null; team_lado: "A" | "B" | null };
+
+type LadoFilter = "all" | "A" | "B";
+
+function LadoTabs({ value, onChange, counts }: { value: LadoFilter; onChange: (v: LadoFilter) => void; counts: { all: number; A: number; B: number } }) {
+  const tabs: { key: LadoFilter; label: string }[] = [
+    { key: "all", label: "Todas" },
+    { key: "A", label: "Lado A" },
+    { key: "B", label: "Lado B" },
+  ];
+  return (
+    <div className="mb-4 flex flex-wrap gap-2">
+      {tabs.map((t) => (
+        <button
+          key={t.key}
+          onClick={() => onChange(t.key)}
+          className={[
+            "text-xs font-semibold px-3.5 py-1.5 rounded-full border transition-all",
+            value === t.key
+              ? "bg-primary text-primary-foreground border-primary"
+              : "border-border bg-card text-muted-foreground hover:text-foreground hover:border-primary/40",
+          ].join(" ")}
+        >
+          {t.label} <span className="ml-1 opacity-70">({counts[t.key]})</span>
+        </button>
+      ))}
+    </div>
+  );
+}
 
 export const Route = createFileRoute("/atletas")({
   component: AtletasPage,
@@ -30,6 +58,7 @@ export const Route = createFileRoute("/atletas")({
 function AtletasPage() {
   const [rows, setRows] = useState<Row[] | null>(null);
   const [open, setOpen] = useState<Row | null>(null);
+  const [lado, setLado] = useState<LadoFilter>("all");
 
   useEffect(() => {
     (async () => {
@@ -41,20 +70,39 @@ function AtletasPage() {
         .limit(200);
 
       const teamIds = Array.from(new Set((athletes ?? []).map((a) => a.team_id).filter(Boolean))) as string[];
-      const teamsMap = new Map<string, string>();
+      const teamsMap = new Map<string, { name: string; lado: "A" | "B" | null }>();
       if (teamIds.length > 0) {
-        const { data: teams } = await supabase.from("teams").select("id, name").in("id", teamIds);
-        for (const t of teams ?? []) teamsMap.set(t.id, t.name);
+        const { data: teams } = await supabase.from("teams").select("id, name, lado").in("id", teamIds);
+        for (const t of teams ?? []) teamsMap.set(t.id, { name: t.name, lado: (t.lado ?? null) as "A" | "B" | null });
       }
 
       setRows(
-        (athletes ?? []).map((a) => ({
-          ...a,
-          team_name: a.team_id ? teamsMap.get(a.team_id) ?? null : null,
-        })) as Row[],
+        (athletes ?? []).map((a) => {
+          const t = a.team_id ? teamsMap.get(a.team_id) : undefined;
+          return {
+            ...a,
+            team_name: t?.name ?? null,
+            team_lado: t?.lado ?? null,
+          };
+        }) as Row[],
       );
     })();
   }, []);
+
+  const counts = useMemo(() => {
+    const list = rows ?? [];
+    return {
+      all: list.length,
+      A: list.filter((r) => r.team_lado === "A").length,
+      B: list.filter((r) => r.team_lado === "B").length,
+    };
+  }, [rows]);
+
+  const filteredRows = useMemo(() => {
+    if (!rows) return null;
+    if (lado === "all") return rows;
+    return rows.filter((r) => r.team_lado === lado);
+  }, [rows, lado]);
 
   return (
     <PublicShell>
@@ -64,6 +112,7 @@ function AtletasPage() {
         description="Perfil oficial e estatísticas dos atletas da liga."
       />
 
+      <LadoTabs value={lado} onChange={setLado} counts={counts} />
 
       <Tabs defaultValue="todos" className="mb-6">
         <TabsList>
@@ -74,11 +123,11 @@ function AtletasPage() {
         </TabsList>
 
         <TabsContent value="todos" className="mt-6">
-          {!rows && <SkeletonAthleteGrid count={6} />}
-          {rows && rows.length === 0 && <EmptyAtletas />}
-          {rows && rows.length > 0 && (
+          {!filteredRows && <SkeletonAthleteGrid count={6} />}
+          {filteredRows && filteredRows.length === 0 && <EmptyAtletas />}
+          {filteredRows && filteredRows.length > 0 && (
             <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
-              {rows.map((a) => (
+              {filteredRows.map((a) => (
                 <AthleteCard key={a.id} athlete={a} onClick={() => setOpen(a)} />
               ))}
             </div>
@@ -86,13 +135,13 @@ function AtletasPage() {
         </TabsContent>
 
         <TabsContent value="artilharia" className="mt-6">
-          <ScorersRanking />
+          <ScorersRanking ladoFilter={lado} />
         </TabsContent>
         <TabsContent value="nota" className="mt-6">
-          <RatingsRanking />
+          <RatingsRanking ladoFilter={lado} />
         </TabsContent>
         <TabsContent value="disciplina" className="mt-6">
-          <DisciplineRanking />
+          <DisciplineRanking ladoFilter={lado} />
         </TabsContent>
       </Tabs>
 
@@ -135,7 +184,13 @@ type RankAthlete = {
   team_name: string | null;
   team_slug: string | null;
   team_logo: string | null;
+  team_lado: "A" | "B" | null;
 } | null;
+
+function filterByLado<T extends { athlete: RankAthlete }>(rows: T[], lado: LadoFilter): T[] {
+  if (lado === "all") return rows;
+  return rows.filter((r) => r.athlete?.team_lado === lado);
+}
 
 function AthleteCell({ athlete, position }: { athlete: RankAthlete; position: number }) {
   if (!athlete) return null;
@@ -150,13 +205,22 @@ function AthleteCell({ athlete, position }: { athlete: RankAthlete; position: nu
       </Avatar>
       <div className="min-w-0">
         <div className="font-medium truncate">{athlete.name}</div>
-        <div className="text-xs text-muted-foreground truncate">
+        <div className="text-xs text-muted-foreground truncate flex items-center gap-1.5">
           {athlete.team_slug ? (
             <Link to="/times/$slug" params={{ slug: athlete.team_slug }} className="hover:underline">
               {athlete.team_name ?? "—"}
             </Link>
           ) : (
             athlete.team_name ?? "—"
+          )}
+          {athlete.team_lado && (
+            <span className={`text-[9px] font-bold tracking-widest px-1.5 py-0.5 rounded border ${
+              athlete.team_lado === "A"
+                ? "text-primary border-primary/40 bg-primary/5"
+                : "text-amber-400 border-amber-500/40 bg-amber-500/5"
+            }`}>
+              LADO {athlete.team_lado}
+            </span>
           )}
         </div>
       </div>
@@ -172,7 +236,7 @@ function EmptyRanking({ label }: { label: string }) {
   );
 }
 
-function ScorersRanking() {
+function ScorersRanking({ ladoFilter }: { ladoFilter: LadoFilter }) {
   const { data, isLoading } = useRankings();
   if (isLoading) return (
     <div className="space-y-2">
@@ -186,7 +250,7 @@ function ScorersRanking() {
       ))}
     </div>
   );
-  const rows = data?.topScorers ?? [];
+  const rows = filterByLado(data?.topScorers ?? [], ladoFilter);
   if (rows.length === 0) return <EmptyRanking label="artilharia" />;
   return (
     <div className="rounded-lg border border-border bg-card overflow-hidden">
@@ -211,7 +275,7 @@ function ScorersRanking() {
   );
 }
 
-function RatingsRanking() {
+function RatingsRanking({ ladoFilter }: { ladoFilter: LadoFilter }) {
   const { data, isLoading } = useRankings();
   if (isLoading) return (
     <div className="space-y-2">
@@ -225,7 +289,7 @@ function RatingsRanking() {
       ))}
     </div>
   );
-  const rows = data?.topRated ?? [];
+  const rows = filterByLado(data?.topRated ?? [], ladoFilter);
   if (rows.length === 0) return <EmptyRanking label="Nota Metrópole" />;
   return (
     <div className="rounded-lg border border-border bg-card overflow-hidden">
@@ -253,7 +317,7 @@ function RatingsRanking() {
   );
 }
 
-function DisciplineRanking() {
+function DisciplineRanking({ ladoFilter }: { ladoFilter: LadoFilter }) {
   const { data, isLoading } = useRankings();
   if (isLoading) return (
     <div className="space-y-2">
@@ -267,7 +331,7 @@ function DisciplineRanking() {
       ))}
     </div>
   );
-  const rows = data?.discipline ?? [];
+  const rows = filterByLado(data?.discipline ?? [], ladoFilter);
   if (rows.length === 0) return <EmptyRanking label="disciplina" />;
   return (
     <div className="rounded-lg border border-border bg-card overflow-hidden">
