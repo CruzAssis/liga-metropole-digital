@@ -12,8 +12,11 @@ import { Badge } from "@/components/ui/badge";
 import {
   ClipboardList, ExternalLink, User2, DollarSign,
   CheckCircle, Clock, AlertTriangle, CreditCard,
+  Users, UserPlus, CalendarDays, Copy, Share2,
 } from "lucide-react";
-import { TeamAthletesSection } from "@/components/athletes/TeamAthletesSection";
+import {
+  Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription,
+} from "@/components/ui/dialog";
 import { TeamMatchesSection } from "@/components/matches/TeamMatchesSection";
 import { TeamCustomizationCard } from "@/components/teams/TeamCustomizationCard";
 import { TeamHomeVenueCard } from "@/components/teams/TeamHomeVenueCard";
@@ -22,6 +25,7 @@ import { getMyTeamPagamentos, type PagamentoStatus } from "@/lib/pagamentos.func
 import { formatPhoneBR } from "@/lib/wa";
 import { WelcomeAthleteModal } from "@/components/WelcomeAthleteModal";
 import homeBg from "@/assets/home-bg.png.asset.json";
+
 
 // ─── Ligas abertas para inscrição ────────────────────────────────────────────
 type OpenLeague = {

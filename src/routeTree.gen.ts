@@ -36,6 +36,7 @@ import { Route as ConviteCodeRouteImport } from './routes/convite.$code'
 import { Route as AtletasIdRouteImport } from './routes/atletas.$id'
 import { Route as AuthenticatedMinhaContaRouteImport } from './routes/_authenticated/minha-conta'
 import { Route as AuthenticatedInscricaoRouteImport } from './routes/_authenticated/inscricao'
+import { Route as AuthenticatedElencoRouteImport } from './routes/_authenticated/elenco'
 import { Route as AuthenticatedAdminRouteImport } from './routes/_authenticated/admin'
 import { Route as AuthenticatedMinhaContaExcluirContaRouteImport } from './routes/_authenticated/minha-conta/excluir-conta'
 import { Route as AuthenticatedAdminUsuariosRouteImport } from './routes/_authenticated/admin/usuarios'
@@ -185,6 +186,11 @@ const AuthenticatedInscricaoRoute = AuthenticatedInscricaoRouteImport.update({
   path: '/inscricao',
   getParentRoute: () => AuthenticatedRoute,
 } as any)
+const AuthenticatedElencoRoute = AuthenticatedElencoRouteImport.update({
+  id: '/elenco',
+  path: '/elenco',
+  getParentRoute: () => AuthenticatedRoute,
+} as any)
 const AuthenticatedAdminRoute = AuthenticatedAdminRouteImport.update({
   id: '/admin',
   path: '/admin',
@@ -283,6 +289,7 @@ export interface FileRoutesByFullPath {
   '/times': typeof TimesRouteWithChildren
   '/verificar': typeof VerificarRoute
   '/admin': typeof AuthenticatedAdminRouteWithChildren
+  '/elenco': typeof AuthenticatedElencoRoute
   '/inscricao': typeof AuthenticatedInscricaoRoute
   '/minha-conta': typeof AuthenticatedMinhaContaRouteWithChildren
   '/atletas/$id': typeof AtletasIdRoute
@@ -325,6 +332,7 @@ export interface FileRoutesByTo {
   '/times': typeof TimesRouteWithChildren
   '/verificar': typeof VerificarRoute
   '/admin': typeof AuthenticatedAdminRouteWithChildren
+  '/elenco': typeof AuthenticatedElencoRoute
   '/inscricao': typeof AuthenticatedInscricaoRoute
   '/minha-conta': typeof AuthenticatedMinhaContaRouteWithChildren
   '/atletas/$id': typeof AtletasIdRoute
@@ -369,6 +377,7 @@ export interface FileRoutesById {
   '/times': typeof TimesRouteWithChildren
   '/verificar': typeof VerificarRoute
   '/_authenticated/admin': typeof AuthenticatedAdminRouteWithChildren
+  '/_authenticated/elenco': typeof AuthenticatedElencoRoute
   '/_authenticated/inscricao': typeof AuthenticatedInscricaoRoute
   '/_authenticated/minha-conta': typeof AuthenticatedMinhaContaRouteWithChildren
   '/atletas/$id': typeof AtletasIdRoute
@@ -413,6 +422,7 @@ export interface FileRouteTypes {
     | '/times'
     | '/verificar'
     | '/admin'
+    | '/elenco'
     | '/inscricao'
     | '/minha-conta'
     | '/atletas/$id'
@@ -455,6 +465,7 @@ export interface FileRouteTypes {
     | '/times'
     | '/verificar'
     | '/admin'
+    | '/elenco'
     | '/inscricao'
     | '/minha-conta'
     | '/atletas/$id'
@@ -498,6 +509,7 @@ export interface FileRouteTypes {
     | '/times'
     | '/verificar'
     | '/_authenticated/admin'
+    | '/_authenticated/elenco'
     | '/_authenticated/inscricao'
     | '/_authenticated/minha-conta'
     | '/atletas/$id'
@@ -739,6 +751,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedInscricaoRouteImport
       parentRoute: typeof AuthenticatedRoute
     }
+    '/_authenticated/elenco': {
+      id: '/_authenticated/elenco'
+      path: '/elenco'
+      fullPath: '/elenco'
+      preLoaderRoute: typeof AuthenticatedElencoRouteImport
+      parentRoute: typeof AuthenticatedRoute
+    }
     '/_authenticated/admin': {
       id: '/_authenticated/admin'
       path: '/admin'
@@ -888,12 +907,14 @@ const AuthenticatedMinhaContaRouteWithChildren =
 
 interface AuthenticatedRouteChildren {
   AuthenticatedAdminRoute: typeof AuthenticatedAdminRouteWithChildren
+  AuthenticatedElencoRoute: typeof AuthenticatedElencoRoute
   AuthenticatedInscricaoRoute: typeof AuthenticatedInscricaoRoute
   AuthenticatedMinhaContaRoute: typeof AuthenticatedMinhaContaRouteWithChildren
 }
 
 const AuthenticatedRouteChildren: AuthenticatedRouteChildren = {
   AuthenticatedAdminRoute: AuthenticatedAdminRouteWithChildren,
+  AuthenticatedElencoRoute: AuthenticatedElencoRoute,
   AuthenticatedInscricaoRoute: AuthenticatedInscricaoRoute,
   AuthenticatedMinhaContaRoute: AuthenticatedMinhaContaRouteWithChildren,
 }
