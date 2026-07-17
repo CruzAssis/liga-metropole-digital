@@ -205,13 +205,22 @@ function AthleteCell({ athlete, position }: { athlete: RankAthlete; position: nu
       </Avatar>
       <div className="min-w-0">
         <div className="font-medium truncate">{athlete.name}</div>
-        <div className="text-xs text-muted-foreground truncate">
+        <div className="text-xs text-muted-foreground truncate flex items-center gap-1.5">
           {athlete.team_slug ? (
             <Link to="/times/$slug" params={{ slug: athlete.team_slug }} className="hover:underline">
               {athlete.team_name ?? "—"}
             </Link>
           ) : (
             athlete.team_name ?? "—"
+          )}
+          {athlete.team_lado && (
+            <span className={`text-[9px] font-bold tracking-widest px-1.5 py-0.5 rounded border ${
+              athlete.team_lado === "A"
+                ? "text-primary border-primary/40 bg-primary/5"
+                : "text-amber-400 border-amber-500/40 bg-amber-500/5"
+            }`}>
+              LADO {athlete.team_lado}
+            </span>
           )}
         </div>
       </div>
