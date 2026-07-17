@@ -24,6 +24,8 @@ import { TeamCustomizationCard } from "@/components/teams/TeamCustomizationCard"
 import { TeamHomeVenueCard } from "@/components/teams/TeamHomeVenueCard";
 import { getMyProfile, updateMyProfile } from "@/lib/profile.functions";
 import { getMyTeamPagamentos, type PagamentoStatus } from "@/lib/pagamentos.functions";
+import { updateTeamByDirector } from "@/lib/team-profile.functions";
+
 import { formatPhoneBR } from "@/lib/wa";
 import { WelcomeAthleteModal } from "@/components/WelcomeAthleteModal";
 import homeBg from "@/assets/home-bg.png.asset.json";
