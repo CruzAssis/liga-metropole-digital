@@ -6,7 +6,7 @@ import { Switch } from "@/components/ui/switch";
 import { Label } from "@/components/ui/label";
 import { Input } from "@/components/ui/input";
 import { toast } from "sonner";
-import { Spinner } from "@/components/AppSkeletons";
+import { Spinner, SkeletonAdminPage } from "@/components/AppSkeletons";
 import { KeyRound, Users, Trophy, Clock, TrendingUp } from "lucide-react";
 
 export const Route = createFileRoute("/_authenticated/admin/master-switch")({
@@ -103,11 +103,7 @@ function MasterSwitchPage() {
   }
 
   if (loading) {
-    return (
-      <div className="min-h-screen flex items-center justify-center">
-        <Spinner />
-      </div>
-    );
+    return <SkeletonAdminPage />;
   }
 
   const filledPct = stats

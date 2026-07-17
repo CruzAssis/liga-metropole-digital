@@ -9,6 +9,7 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
+import { SkeletonAdminCardList } from "@/components/AppSkeletons";
 import {
   AlertDialog,
   AlertDialogAction,
@@ -150,7 +151,7 @@ function SorteioPage() {
       <div className="space-y-3">
         <h2 className="font-display text-2xl tracking-wide">Ligas</h2>
         {loading ? (
-          <p className="text-muted-foreground">Carregando...</p>
+          <SkeletonAdminCardList count={3} />
         ) : competitions.length === 0 ? (
           <p className="text-muted-foreground">
             Nenhuma liga criada.{" "}

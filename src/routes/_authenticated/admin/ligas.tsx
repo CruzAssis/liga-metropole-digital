@@ -8,7 +8,7 @@ import { Label } from "@/components/ui/label";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Plus, Settings, Users, CheckCircle, AlertTriangle, MapPin, Trash2 } from "lucide-react";
-import { Spinner } from "@/components/AppSkeletons";
+import { Spinner, SkeletonAdminCardList } from "@/components/AppSkeletons";
 
 const supabaseAny = supabase as any;
 
@@ -487,7 +487,7 @@ function LigasPage() {
       <div className="space-y-3">
         <h2 className="font-display text-2xl tracking-wide">Conferências cadastradas</h2>
         {loading ? (
-          <p className="text-muted-foreground">Buscando ligas...</p>
+          <SkeletonAdminCardList count={3} />
         ) : competitions.length === 0 ? (
           <p className="text-muted-foreground">Nenhuma conferência criada ainda.</p>
         ) : (

@@ -13,6 +13,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
+import { SkeletonAdminList } from "@/components/AppSkeletons";
 import {
   listNotificacoes,
   getNotificacoesStats,
@@ -345,9 +346,8 @@ function AdminNotificacoesPage() {
         </CardHeader>
         <CardContent className="p-0 mt-2">
           {isLoading ? (
-            <div className="py-12 text-center text-zinc-500">
-              <RefreshCw className="w-6 h-6 animate-spin mx-auto mb-2" />
-              Carregando notificações...
+            <div className="p-3">
+              <SkeletonAdminList rows={6} />
             </div>
           ) : logs.length === 0 ? (
             <div className="py-12 text-center text-zinc-500">
