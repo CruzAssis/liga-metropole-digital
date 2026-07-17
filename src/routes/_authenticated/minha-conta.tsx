@@ -270,24 +270,28 @@ function MinhaContaPage() {
         className="pointer-events-none absolute inset-0 -z-10 bg-gradient-to-b from-background/70 via-background/85 to-background"
       />
 
-      <div className="max-w-2xl mx-auto space-y-8">
-      <div>
-        <h1 className="font-display text-4xl tracking-wide">Minha conta</h1>
-        <p className="text-muted-foreground mt-1">Seus dados de contato e o status do seu time.</p>
-        <div className="mt-4 flex gap-3">
-          <Link to="/onboarding" className="inline-flex items-center gap-2 text-sm bg-zinc-800 hover:bg-zinc-700 text-zinc-200 px-4 py-2 rounded-lg transition-colors border border-zinc-700">
-            Completar/Editar perfil
-          </Link>
-          <Link to="/inscricao" className="inline-flex items-center gap-2 text-sm bg-[#1565F5] hover:bg-blue-600 text-white px-4 py-2 rounded-lg transition-colors">
-            Inscrever meu time
-          </Link>
+      <div className="max-w-3xl mx-auto space-y-8">
+
+      {/* ─── HERO: Painel do Diretor (time aprovado) ─── */}
+      {team?.status === "approved" ? (
+        <DirectorHeroCard team={team} />
+      ) : (
+        <div>
+          <h1 className="font-display text-4xl tracking-wide">Minha conta</h1>
+          <p className="text-muted-foreground mt-1">Seus dados de contato e o status do seu time.</p>
+          <div className="mt-4 flex gap-3 flex-wrap">
+            <Link to="/onboarding" className="inline-flex items-center gap-2 text-sm bg-zinc-800 hover:bg-zinc-700 text-zinc-200 px-4 py-2 rounded-lg transition-colors border border-zinc-700">
+              Completar/Editar perfil
+            </Link>
+            <Link to="/inscricao" className="inline-flex items-center gap-2 text-sm bg-[#1565F5] hover:bg-blue-600 text-white px-4 py-2 rounded-lg transition-colors">
+              Inscrever meu time
+            </Link>
+          </div>
         </div>
-      </div>
+      )}
 
       {/* Ligas abertas — visível para diretores com time inscrito */}
-      {team && <OpenLeaguesCard />}
-
-      <DirectorContactCard />
+      {team && team.status !== "approved" && <OpenLeaguesCard />}
 
       {!team ? (
         <div className="rounded-lg border border-border bg-card p-8 text-center">
@@ -296,28 +300,153 @@ function MinhaContaPage() {
           <p className="mt-2 text-muted-foreground">Faça a inscrição para participar da Liga Metrópole.</p>
           <Button asChild className="mt-6"><Link to="/inscricao">Inscrever meu time</Link></Button>
         </div>
-      ) : (
+      ) : team.status !== "approved" ? (
         <TeamCard team={team} />
-      )}
+      ) : null}
 
       {/* Painel Financeiro — visível para diretores de times aprovados */}
       {team?.status === "approved" && <TeamFinanceiroCard />}
 
       {team?.status === "approved" && (
-        <>
-          <TeamCustomizationCard
-            teamId={team.id} logoUrl={team.logo_url} bannerUrl={team.banner_url}
-            primaryColor={team.primary_color} onSaved={loadTeam}
-          />
-          <TeamHomeVenueCard teamId={team.id} />
-          <TeamAthletesSection />
-          <TeamMatchesSection />
-        </>
+        <details className="rounded-lg border border-zinc-800 bg-zinc-900/40 group">
+          <summary className="cursor-pointer list-none px-5 py-4 flex items-center justify-between text-sm font-medium text-zinc-300 hover:text-white">
+            <span>Configurações do time</span>
+            <span className="text-zinc-500 group-open:rotate-180 transition-transform">⌄</span>
+          </summary>
+          <div className="p-4 space-y-6 border-t border-zinc-800">
+            <TeamCustomizationCard
+              teamId={team.id} logoUrl={team.logo_url} bannerUrl={team.banner_url}
+              primaryColor={team.primary_color} onSaved={loadTeam}
+            />
+            <TeamHomeVenueCard teamId={team.id} />
+            <TeamMatchesSection />
+          </div>
+        </details>
       )}
+
+      <DirectorContactCard />
+
       </div>
     </div>
   );
 }
+
+// ─── Hero do Diretor: card central + 3 botões grandes ────────────────────────
+function DirectorHeroCard({ team }: { team: Team }) {
+  const [inviteOpen, setInviteOpen] = useState(false);
+
+  return (
+    <>
+      <div className="rounded-2xl border border-zinc-800 bg-gradient-to-br from-zinc-900 to-black p-6 sm:p-8">
+        <div className="flex items-center gap-4">
+          {team.logo_url ? (
+            <img
+              src={team.logo_url}
+              alt={team.name}
+              className="h-16 w-16 rounded-xl object-cover border border-zinc-700"
+            />
+          ) : (
+            <div className="h-16 w-16 rounded-xl bg-[#1565F5]/20 border border-[#1565F5]/40 flex items-center justify-center font-display text-2xl text-[#5B9BFF]">
+              {team.short_name}
+            </div>
+          )}
+          <div className="flex-1 min-w-0">
+            <p className="text-xs uppercase tracking-widest text-zinc-500 font-medium">Painel do Diretor</p>
+            <h1 className="text-2xl sm:text-4xl font-black tracking-tight text-white truncate">
+              {team.name}
+            </h1>
+          </div>
+        </div>
+
+        <div className="mt-8 grid grid-cols-1 sm:grid-cols-3 gap-3">
+          <Link
+            to="/elenco"
+            className="group flex flex-col items-center justify-center gap-3 rounded-xl bg-[#1565F5] hover:bg-[#0f4fc6] active:bg-[#0d44a8] text-white px-4 py-6 text-center transition-all shadow-lg shadow-[#1565F5]/20 hover:shadow-[#1565F5]/40 hover:-translate-y-0.5"
+          >
+            <Users className="h-8 w-8" />
+            <span className="font-semibold text-base">Meus Jogadores</span>
+          </Link>
+
+          <button
+            onClick={() => setInviteOpen(true)}
+            className="group flex flex-col items-center justify-center gap-3 rounded-xl bg-[#1565F5] hover:bg-[#0f4fc6] active:bg-[#0d44a8] text-white px-4 py-6 text-center transition-all shadow-lg shadow-[#1565F5]/20 hover:shadow-[#1565F5]/40 hover:-translate-y-0.5"
+          >
+            <UserPlus className="h-8 w-8" />
+            <span className="font-semibold text-base">Convidar Atleta</span>
+          </button>
+
+          <Link
+            to="/agenda"
+            className="group flex flex-col items-center justify-center gap-3 rounded-xl bg-[#1565F5] hover:bg-[#0f4fc6] active:bg-[#0d44a8] text-white px-4 py-6 text-center transition-all shadow-lg shadow-[#1565F5]/20 hover:shadow-[#1565F5]/40 hover:-translate-y-0.5"
+          >
+            <CalendarDays className="h-8 w-8" />
+            <span className="font-semibold text-base">Agenda de Jogos</span>
+          </Link>
+        </div>
+      </div>
+
+      <Dialog open={inviteOpen} onOpenChange={setInviteOpen}>
+        <DialogContent className="bg-zinc-950 border-zinc-800 text-white">
+          <DialogHeader>
+            <DialogTitle className="text-white">Convidar atleta</DialogTitle>
+            <DialogDescription className="text-zinc-400">
+              Compartilhe o link. Quem abrir se cadastra e entra automaticamente no {team.name}.
+            </DialogDescription>
+          </DialogHeader>
+          {team.invite_code ? (
+            <InviteShareBox code={team.invite_code} teamName={team.name} />
+          ) : (
+            <p className="text-sm text-zinc-400">Código de convite indisponível.</p>
+          )}
+        </DialogContent>
+      </Dialog>
+    </>
+  );
+}
+
+function InviteShareBox({ code, teamName }: { code: string; teamName: string }) {
+  const origin = typeof window !== "undefined" ? window.location.origin : "";
+  const url = `${origin}/convite/${code}`;
+  const waMessage = encodeURIComponent(
+    `Olá! Você foi convidado(a) para se juntar ao time ${teamName} na Liga Metrópole. Clique no link e crie sua conta de jogador: ${url}`,
+  );
+  const copy = async () => {
+    try {
+      await navigator.clipboard.writeText(url);
+      toast.success("Link copiado!");
+    } catch {
+      toast.error("Não foi possível copiar.");
+    }
+  };
+  return (
+    <div className="space-y-3">
+      <code className="block text-xs font-mono bg-zinc-900 border border-zinc-800 rounded-md px-3 py-2.5 text-zinc-300 break-all">
+        {url}
+      </code>
+      <div className="flex gap-2">
+        <Button
+          onClick={copy}
+          variant="outline"
+          className="flex-1 bg-transparent border-zinc-700 text-zinc-200 hover:bg-white/5 hover:text-white gap-2"
+        >
+          <Copy className="h-4 w-4" /> Copiar link
+        </Button>
+        <Button
+          asChild
+          className="flex-1 bg-emerald-600 hover:bg-emerald-700 text-white gap-2"
+        >
+          <a href={`https://wa.me/?text=${waMessage}`} target="_blank" rel="noopener noreferrer">
+            <Share2 className="h-4 w-4" /> WhatsApp
+          </a>
+        </Button>
+      </div>
+      <p className="text-xs text-zinc-500">
+        Código: <span className="font-mono font-semibold text-zinc-400">{code}</span>
+      </p>
+    </div>
+  );
+}
+
 
 function TeamCard({ team }: { team: Team }) {
   const meta = statusMeta[team.status];
