@@ -219,10 +219,72 @@ function HomePage() {
         </div>
       )}
 
+      {/* Hero de boas-vindas com imagem de fundo + filtro preto */}
+      <section
+        className="relative isolate overflow-hidden w-full"
+        style={{
+          backgroundImage: `url(/__l5e/assets-v1/d438b335-8cbb-4ede-a9d5-743b72546a9f/home-bg.png)`,
+          backgroundSize: 'cover',
+          backgroundPosition: 'center',
+        }}
+      >
+        <div aria-hidden className="absolute inset-0 bg-black/75" />
+        <div className="relative z-10 max-w-5xl mx-auto px-4 py-12 md:py-16 text-center">
+          <span className="inline-flex items-center gap-1.5 mb-4 rounded-full px-3 py-1 text-[11px] font-semibold uppercase tracking-widest"
+            style={{ background: 'rgba(21,101,245,0.18)', border: '1px solid rgba(21,101,245,0.45)', color: '#93BBFF' }}>
+            Temporada 2026 · Zona Norte
+          </span>
+          <h1 className="text-3xl md:text-5xl font-black tracking-tight mb-4 text-white">
+            Bem-vindo de volta à <span className="text-[#4C9BFF]">Liga Metrópole</span>
+          </h1>
+          <p className="text-zinc-300 max-w-2xl mx-auto text-sm md:text-base leading-relaxed">
+            A liga que valoriza a história da várzea. Aqui cada gol vira estatística,
+            cada partida vira legado e cada clube conquista sua vitrine.
+          </p>
+
+          {/* Cards úteis */}
+          <div className="mt-8 grid grid-cols-2 md:grid-cols-4 gap-3 text-left">
+            <Link to="/agenda" className="rounded-xl bg-black/60 backdrop-blur border border-zinc-800 hover:border-[#1565F5]/60 p-4 transition-colors">
+              <Calendar className="h-5 w-5 text-[#4C9BFF] mb-2" />
+              <p className="text-xs uppercase tracking-wider text-zinc-400">Próximos jogos</p>
+              <p className="text-sm font-semibold text-white mt-0.5">Ver agenda</p>
+            </Link>
+            <Link to="/ranking" className="rounded-xl bg-black/60 backdrop-blur border border-zinc-800 hover:border-[#1565F5]/60 p-4 transition-colors">
+              <Trophy className="h-5 w-5 text-[#4C9BFF] mb-2" />
+              <p className="text-xs uppercase tracking-wider text-zinc-400">Classificação</p>
+              <p className="text-sm font-semibold text-white mt-0.5">Ranking geral</p>
+            </Link>
+            <Link to="/times" className="rounded-xl bg-black/60 backdrop-blur border border-zinc-800 hover:border-[#1565F5]/60 p-4 transition-colors">
+              <LayoutDashboard className="h-5 w-5 text-[#4C9BFF] mb-2" />
+              <p className="text-xs uppercase tracking-wider text-zinc-400">Clubes fundadores</p>
+              <p className="text-sm font-semibold text-white mt-0.5">Ver times</p>
+            </Link>
+            <Link to="/atletas" className="rounded-xl bg-black/60 backdrop-blur border border-zinc-800 hover:border-[#1565F5]/60 p-4 transition-colors">
+              <User className="h-5 w-5 text-[#4C9BFF] mb-2" />
+              <p className="text-xs uppercase tracking-wider text-zinc-400">Atletas registrados</p>
+              <p className="text-sm font-semibold text-white mt-0.5">Ver atletas</p>
+            </Link>
+          </div>
+
+          {/* Info rápida sobre a liga */}
+          <div className="mt-6 grid grid-cols-1 md:grid-cols-3 gap-3 text-left">
+            <div className="rounded-xl bg-black/50 backdrop-blur border border-zinc-800 p-4">
+              <p className="text-xs uppercase tracking-wider text-[#4C9BFF] font-semibold">Formato</p>
+              <p className="text-sm text-zinc-200 mt-1">4 conferências regionais com pontos corridos e mata-mata final.</p>
+            </div>
+            <div className="rounded-xl bg-black/50 backdrop-blur border border-zinc-800 p-4">
+              <p className="text-xs uppercase tracking-wider text-[#4C9BFF] font-semibold">Súmula digital</p>
+              <p className="text-sm text-zinc-200 mt-1">Diretores lançam placar, gols e destaques direto pelo app após cada jogo.</p>
+            </div>
+            <div className="rounded-xl bg-black/50 backdrop-blur border border-zinc-800 p-4">
+              <p className="text-xs uppercase tracking-wider text-[#4C9BFF] font-semibold">ID Metrópole</p>
+              <p className="text-sm text-zinc-200 mt-1">Cada atleta ganha um perfil verificado com histórico e estatísticas oficiais.</p>
+            </div>
+          </div>
+        </div>
+      </section>
+
       <section className="flex flex-col items-center text-center px-4 py-12 md:py-16 w-full max-w-5xl mx-auto">
-        <h1 className="text-3xl md:text-4xl font-black tracking-tight mb-8">
-          Bem-vindo de volta
-        </h1>
 
         <div className="w-full space-y-10 text-left">
           {recentMatches.length > 0 && (
