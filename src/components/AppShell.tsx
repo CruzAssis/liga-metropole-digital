@@ -2,7 +2,7 @@ import type { ReactNode } from "react";
 import { Link } from "@tanstack/react-router";
 import { SidebarProvider, SidebarTrigger } from "@/components/ui/sidebar";
 import { AppSidebar } from "./AppSidebar";
-import { Logo } from "./Logo";
+import { BrandLogo } from "./BrandLogo";
 import { useAuth } from "@/hooks/use-auth";
 import { useIsAdmin } from "@/hooks/use-is-admin";
 import { Button } from "@/components/ui/button";
@@ -21,7 +21,11 @@ export function AppShell({ children }: { children: ReactNode }) {
             <div className="flex items-center gap-3 min-w-0">
               <SidebarTrigger className="shrink-0" />
               <Link to="/" className="flex items-center gap-2 min-w-0">
-                <Logo variant="horizontal" size={28} />
+                <BrandLogo className="h-8 w-auto" />
+                <span className="font-black tracking-tight text-sm sm:text-base">
+                  <span className="text-white">LIGA</span>{" "}
+                  <span className="text-[#1565F5]">METRÓPOLE</span>
+                </span>
               </Link>
             </div>
             <div className="flex items-center gap-2 sm:gap-3">

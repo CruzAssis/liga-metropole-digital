@@ -1,6 +1,6 @@
 import { Link, useNavigate, useRouterState } from "@tanstack/react-router";
 import { useState } from "react";
-import { Logo } from "@/components/Logo";
+import { BrandLogo } from "@/components/BrandLogo";
 import { Button } from "@/components/ui/button";
 import { useAuth } from "@/hooks/use-auth";
 import { Menu, X } from "lucide-react";
@@ -36,7 +36,11 @@ export function PublicShell({ children }: { children: React.ReactNode }) {
       >
         <div className="mx-auto flex max-w-6xl items-center justify-between gap-4 px-4 sm:px-6 h-16">
           <Link to="/" className="flex items-center gap-2 shrink-0" aria-label="Liga Metrópole">
-            <Logo variant="horizontal" size={28} />
+            <BrandLogo className="h-9 w-auto" />
+            <span className="font-black tracking-tight text-sm hidden sm:inline">
+              <span className="text-white">LIGA</span>{" "}
+              <span className="text-[#1565F5]">METRÓPOLE</span>
+            </span>
           </Link>
 
           <nav className="hidden lg:flex items-center gap-0.5">
