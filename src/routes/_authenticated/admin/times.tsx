@@ -18,6 +18,7 @@ import { adminUpdateTeam, adminDeleteTeam } from '@/lib/team-profile.functions'
 import { supabase } from '@/integrations/supabase/client'
 import { buildWhatsAppLink, formatPhoneBR } from '@/lib/wa'
 import { toast } from 'sonner'
+import { Skeleton } from '@/components/ui/skeleton'
 
 
 export const Route = createFileRoute('/_authenticated/admin/times')({
