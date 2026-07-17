@@ -15,7 +15,35 @@ import { PageHeader } from "@/components/PageHeader";
 import { getAthleteRankings } from "@/lib/stats.functions";
 import { Goal, Square, Star } from "lucide-react";
 
-type Row = AthleteCardData & IDMetropoleData & { team_id: string | null };
+type Row = AthleteCardData & IDMetropoleData & { team_id: string | null; team_lado: "A" | "B" | null };
+
+type LadoFilter = "all" | "A" | "B";
+
+function LadoTabs({ value, onChange, counts }: { value: LadoFilter; onChange: (v: LadoFilter) => void; counts: { all: number; A: number; B: number } }) {
+  const tabs: { key: LadoFilter; label: string }[] = [
+    { key: "all", label: "Todas" },
+    { key: "A", label: "Lado A" },
+    { key: "B", label: "Lado B" },
+  ];
+  return (
+    <div className="mb-4 flex flex-wrap gap-2">
+      {tabs.map((t) => (
+        <button
+          key={t.key}
+          onClick={() => onChange(t.key)}
+          className={[
+            "text-xs font-semibold px-3.5 py-1.5 rounded-full border transition-all",
+            value === t.key
+              ? "bg-primary text-primary-foreground border-primary"
+              : "border-border bg-card text-muted-foreground hover:text-foreground hover:border-primary/40",
+          ].join(" ")}
+        >
+          {t.label} <span className="ml-1 opacity-70">({counts[t.key]})</span>
+        </button>
+      ))}
+    </div>
+  );
+}
 
 export const Route = createFileRoute("/atletas")({
   component: AtletasPage,
