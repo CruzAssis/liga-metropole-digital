@@ -247,24 +247,25 @@ function FinanceiroPage() {
   ]
 
   return (
-    <div className="p-6 space-y-6 max-w-6xl">
+    <div className="p-4 sm:p-6 space-y-6 max-w-6xl">
       {/* Header */}
-      <div className="flex items-center justify-between flex-wrap gap-4">
-        <div>
-          <h1 className="text-2xl font-bold text-white flex items-center gap-2">
-            <DollarSign className="h-6 w-6 text-[#1565F5]" /> Gestão Financeira
+      <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 sm:flex-wrap">
+        <div className="min-w-0">
+          <h1 className="text-xl sm:text-2xl font-bold text-white flex items-center gap-2">
+            <DollarSign className="h-5 w-5 sm:h-6 sm:w-6 text-[#1565F5] shrink-0" /> Gestão Financeira
           </h1>
-          <p className="text-zinc-400 text-sm mt-1">Controle de mensalidades dos times</p>
+          <p className="text-zinc-400 text-xs sm:text-sm mt-1">Controle de mensalidades dos times</p>
         </div>
-        <div className="flex items-center gap-2">
+        <div className="flex items-center gap-2 flex-wrap">
           <Button variant="outline" size="sm" onClick={exportCSV}
             className="border-zinc-700 text-zinc-300 hover:text-white gap-1">
-            <Download className="h-4 w-4" /> Exportar Inadimplentes
+            <Download className="h-4 w-4" /> <span className="hidden xs:inline sm:inline">Exportar Inadimplentes</span><span className="xs:hidden sm:hidden">Exportar</span>
           </Button>
           <Button variant="outline" size="sm" onClick={load}
             className="border-zinc-700 text-zinc-300">Atualizar</Button>
         </div>
       </div>
+
 
       {/* Seletor de mês */}
       <div className="flex items-center gap-3 bg-zinc-900 border border-zinc-800 rounded-xl px-4 py-3 w-fit">
