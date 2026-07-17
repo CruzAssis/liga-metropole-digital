@@ -75,13 +75,12 @@ export const saveManifesto = createServerFn({ method: 'POST' })
     if (existing) {
       const patch: Record<string, unknown> = { team_name: data.team_name }
       if (logo_url !== undefined) patch.logo_url = logo_url
-      const { error } = await supabaseAdmin
-        .from('manifestos' as never)
+      const { error } = await (supabaseAdmin.from('manifestos' as never) as any)
         .update(patch)
         .eq('slug', data.slug)
       if (error) throw new Error(error.message)
     } else {
-      const { error } = await supabaseAdmin.from('manifestos' as never).insert({
+      const { error } = await (supabaseAdmin.from('manifestos' as never) as any).insert({
         slug: data.slug,
         team_name: data.team_name,
         logo_url: logo_url ?? null,
