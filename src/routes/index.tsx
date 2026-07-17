@@ -270,7 +270,7 @@ function HomePage() {
           <div className="mt-6 grid grid-cols-1 md:grid-cols-3 gap-3 text-left">
             <div className="rounded-xl bg-black/50 backdrop-blur border border-zinc-800 p-4">
               <p className="text-xs uppercase tracking-wider text-[#4C9BFF] font-semibold">Formato</p>
-              <p className="text-sm text-zinc-200 mt-1">4 conferências regionais com pontos corridos e mata-mata final.</p>
+              <p className="text-sm text-zinc-200 mt-1">32 subprefeituras, todas em pontos corridos e mata-mata no final.</p>
             </div>
             <div className="rounded-xl bg-black/50 backdrop-blur border border-zinc-800 p-4">
               <p className="text-xs uppercase tracking-wider text-[#4C9BFF] font-semibold">Súmula digital</p>
