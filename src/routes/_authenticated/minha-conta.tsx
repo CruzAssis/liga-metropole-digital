@@ -249,10 +249,15 @@ function MinhaContaPage() {
     if (!user) return;
     const { data } = await supabase
       .from("teams")
-      .select("id,name,short_name,slug,logo_url,banner_url,primary_color,registration_type,status,rejected_reason,created_at,invite_code")
+      .select("id,name,short_name,slug,logo_url,banner_url,primary_color,registration_type,status,rejected_reason,created_at")
       .eq("manager_id", user.id)
       .maybeSingle();
-    setTeam((data as Team | null) ?? null);
+    if (data) {
+      const { data: code } = await supabase.rpc("get_my_team_invite_code", { _team_id: data.id });
+      setTeam({ ...(data as Team), invite_code: (code as string | null) ?? null });
+    } else {
+      setTeam(null);
+    }
     setLoading(false);
   };
 
