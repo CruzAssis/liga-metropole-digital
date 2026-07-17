@@ -184,7 +184,13 @@ type RankAthlete = {
   team_name: string | null;
   team_slug: string | null;
   team_logo: string | null;
+  team_lado: "A" | "B" | null;
 } | null;
+
+function filterByLado<T extends { athlete: RankAthlete }>(rows: T[], lado: LadoFilter): T[] {
+  if (lado === "all") return rows;
+  return rows.filter((r) => r.athlete?.team_lado === lado);
+}
 
 function AthleteCell({ athlete, position }: { athlete: RankAthlete; position: number }) {
   if (!athlete) return null;
