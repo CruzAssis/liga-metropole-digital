@@ -4,20 +4,16 @@ import criciuma from '@/assets/campos/criciuma-elias.jpeg.asset.json'
 import sporting from '@/assets/campos/sporting.jpeg.asset.json'
 import mazoni from '@/assets/campos/tomas-mazoni.jpeg.asset.json'
 import atlas from '@/assets/campos/atlas.jpeg.asset.json'
-import principes from '@/assets/campos/principes-do-morro.jpeg.asset.json'
 import guacu from '@/assets/campos/arena-guacu.jpeg.asset.json'
-import gremio from '@/assets/campos/arena-gremio.jpeg.asset.json'
 import savik from '@/assets/campos/santinhos-savik.jpeg.asset.json'
 
 const SLIDES = [
-  { url: criciuma.url, name: 'Criciúma Elias' },
-  { url: sporting.url, name: 'Sporting' },
-  { url: mazoni.url, name: 'Tomás Mazoni' },
-  { url: atlas.url, name: 'Atlas' },
-  { url: principes.url, name: 'Príncipes do Morro' },
+  { url: criciuma.url, name: 'CDC Elias' },
   { url: guacu.url, name: 'Arena Guaçu' },
-  { url: gremio.url, name: 'Arena Grêmio' },
-  { url: savik.url, name: 'Santinhos Savik' },
+  { url: mazoni.url, name: 'Thomaz Mazzoni' },
+  { url: savik.url, name: 'Santinhos Savic' },
+  { url: atlas.url, name: 'Atlas' },
+  { url: sporting.url, name: 'Sporting' },
 ]
 
 const INTERVAL_MS = 6000
