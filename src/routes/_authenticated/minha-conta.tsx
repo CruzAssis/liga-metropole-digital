@@ -442,9 +442,163 @@ function DirectorHeroCard({ team, onSaved }: { team: Team; onSaved: () => void |
           )}
         </DialogContent>
       </Dialog>
+
+      <EditTeamDialog
+        open={editOpen}
+        onOpenChange={setEditOpen}
+        team={team}
+        onSaved={onSaved}
+      />
     </>
   );
 }
+
+function EditTeamDialog({
+  open, onOpenChange, team, onSaved,
+}: {
+  open: boolean;
+  onOpenChange: (v: boolean) => void;
+  team: Team;
+  onSaved: () => void | Promise<void>;
+}) {
+  const updateFn = useServerFn(updateTeamByDirector);
+  const [form, setForm] = useState({
+    name: team.name,
+    short_name: team.short_name,
+    lado: "A" as "A" | "B",
+    registration_type: team.registration_type,
+    home_venue: "",
+    home_time: "",
+  });
+  const [saving, setSaving] = useState(false);
+
+  useEffect(() => {
+    if (!open) return;
+    (async () => {
+      const { data } = await supabase
+        .from("teams")
+        .select("lado, home_venue, home_time")
+        .eq("id", team.id)
+        .maybeSingle();
+      const v = data as { lado: "A" | "B" | null; home_venue: string | null; home_time: string | null } | null;
+      setForm({
+        name: team.name,
+        short_name: team.short_name,
+        lado: (v?.lado ?? "A"),
+        registration_type: team.registration_type,
+        home_venue: v?.home_venue ?? "",
+        home_time: v?.home_time ? v.home_time.slice(0, 5) : "",
+      });
+    })();
+  }, [open, team.id, team.name, team.short_name, team.registration_type]);
+
+  const save = async () => {
+    if (!form.name.trim() || !form.short_name.trim()) {
+      toast.error("Preencha nome e sigla.");
+      return;
+    }
+    if (form.registration_type === "host" && !form.home_venue.trim()) {
+      toast.error("Informe o estádio/arena do mandante.");
+      return;
+    }
+    setSaving(true);
+    try {
+      await updateFn({
+        data: {
+          team_id: team.id,
+          name: form.name.trim(),
+          short_name: form.short_name.trim().toUpperCase(),
+          lado: form.lado,
+          registration_type: form.registration_type,
+          home_venue: form.home_venue.trim() || null,
+          home_time: form.home_time || null,
+        },
+      });
+      toast.success("Dados do time atualizados!");
+      onOpenChange(false);
+      await onSaved();
+    } catch (e) {
+      toast.error((e as Error).message);
+    } finally {
+      setSaving(false);
+    }
+  };
+
+  return (
+    <Dialog open={open} onOpenChange={onOpenChange}>
+      <DialogContent className="bg-zinc-950 border-zinc-800 text-white max-w-lg">
+        <DialogHeader>
+          <DialogTitle className="text-white">Editar dados do time</DialogTitle>
+          <DialogDescription className="text-zinc-400">
+            Corrija informações do seu clube. As mudanças refletem imediatamente em rankings e listagens.
+          </DialogDescription>
+        </DialogHeader>
+        <div className="space-y-3">
+          <div>
+            <Label htmlFor="edit-name">Nome do time</Label>
+            <Input id="edit-name" value={form.name} maxLength={80}
+              onChange={(e) => setForm({ ...form, name: e.target.value })} />
+          </div>
+          <div>
+            <Label htmlFor="edit-short">Sigla (2–10 letras)</Label>
+            <Input id="edit-short" value={form.short_name} maxLength={10}
+              onChange={(e) => setForm({ ...form, short_name: e.target.value.toUpperCase() })} />
+          </div>
+          <div>
+            <Label>Conferência (Lado)</Label>
+            <div className="grid grid-cols-2 gap-2 mt-1">
+              {(["A", "B"] as const).map((l) => (
+                <button key={l} type="button" onClick={() => setForm({ ...form, lado: l })}
+                  className={`rounded-lg border px-3 py-2 text-sm font-semibold transition-colors ${
+                    form.lado === l ? "border-[#1565F5] bg-[#1565F5]/15 text-white" : "border-zinc-700 bg-transparent text-zinc-300 hover:border-zinc-500"
+                  }`}>
+                  Lado {l}
+                </button>
+              ))}
+            </div>
+          </div>
+          <div>
+            <Label>Mando</Label>
+            <div className="grid grid-cols-2 gap-2 mt-1">
+              {([["host","Mandante"],["visitor","Visitante"]] as const).map(([v,label]) => (
+                <button key={v} type="button" onClick={() => setForm({ ...form, registration_type: v })}
+                  className={`rounded-lg border px-3 py-2 text-sm font-semibold transition-colors ${
+                    form.registration_type === v ? "border-[#1565F5] bg-[#1565F5]/15 text-white" : "border-zinc-700 bg-transparent text-zinc-300 hover:border-zinc-500"
+                  }`}>
+                  {label}
+                </button>
+              ))}
+            </div>
+          </div>
+          {form.registration_type === "host" && (
+            <>
+              <div>
+                <Label htmlFor="edit-venue">Estádio / Arena</Label>
+                <Input id="edit-venue" value={form.home_venue} maxLength={120}
+                  onChange={(e) => setForm({ ...form, home_venue: e.target.value })} />
+              </div>
+              <div>
+                <Label htmlFor="edit-time">Horário padrão</Label>
+                <Input id="edit-time" type="time" value={form.home_time}
+                  onChange={(e) => setForm({ ...form, home_time: e.target.value })} />
+              </div>
+            </>
+          )}
+          <p className="text-xs text-zinc-500">
+            A subprefeitura é definida pela liga em que o seu time está inscrito. Para trocar de subprefeitura, peça suporte à organização.
+          </p>
+          <div className="flex justify-end gap-2 pt-2">
+            <Button variant="outline" onClick={() => onOpenChange(false)} disabled={saving}>Cancelar</Button>
+            <Button onClick={save} disabled={saving} className="bg-[#1565F5] hover:bg-blue-600 text-white">
+              {saving ? "Salvando..." : "Salvar alterações"}
+            </Button>
+          </div>
+        </div>
+      </DialogContent>
+    </Dialog>
+  );
+}
+
 
 function InviteShareBox({ code, teamName }: { code: string; teamName: string }) {
   const origin = typeof window !== "undefined" ? window.location.origin : "";
