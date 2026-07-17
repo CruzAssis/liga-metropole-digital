@@ -166,9 +166,8 @@ export default function HeroCarousel() {
           Cadastrar meu time →
         </Link>
 
-        {/* Field name */}
-        <div className="absolute bottom-6 left-6 right-6 flex items-center justify-between text-[11px] uppercase tracking-widest text-white/60">
-          <span>{SLIDES[idx].name}</span>
+        {/* Slide dots */}
+        <div className="absolute bottom-6 left-6 right-6 flex items-center justify-end text-[11px] uppercase tracking-widest text-white/60">
           <div className="flex gap-1.5">
             {SLIDES.map((_, i) => (
               <button
