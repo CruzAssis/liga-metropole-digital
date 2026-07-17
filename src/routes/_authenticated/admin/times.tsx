@@ -199,3 +199,194 @@ function StatCard({ label, value, color }: { label: string; value: number; color
     </div>
   )
 }
+
+type EditForm = {
+  name: string
+  short_name: string
+  lado: 'A' | 'B'
+  serie: 'A' | 'B'
+  registration_type: 'host' | 'visitor'
+  status: 'pending' | 'approved' | 'waitlist' | 'rejected'
+  competition_id: string | null
+  home_venue: string
+  home_time: string
+}
+
+function AdminEditTeamDialog({
+  team, onOpenChange, onSaved,
+}: {
+  team: AdminTeamRow | null
+  onOpenChange: (v: boolean) => void
+  onSaved: () => void
+}) {
+  const updateFn = useServerFn(adminUpdateTeam)
+  const [form, setForm] = useState<EditForm | null>(null)
+  const [saving, setSaving] = useState(false)
+  const [comps, setComps] = useState<{ id: string; name: string; subprefeitura: string | null }[]>([])
+
+  useEffect(() => {
+    if (!team) { setForm(null); return }
+    (async () => {
+      const [{ data: full }, { data: cs }] = await Promise.all([
+        supabase.from('teams')
+          .select('name, short_name, lado, serie, registration_type, status, competition_id, home_venue, home_time')
+          .eq('id', team.id).maybeSingle(),
+        supabase.from('competitions').select('id, name, subprefeitura').order('name'),
+      ])
+      const f = full as {
+        name: string; short_name: string;
+        lado: 'A' | 'B' | null; serie: 'A' | 'B' | null;
+        registration_type: 'host' | 'visitor';
+        status: 'pending' | 'approved' | 'waitlist' | 'rejected';
+        competition_id: string | null; home_venue: string | null; home_time: string | null;
+      } | null
+      setForm({
+        name: f?.name ?? team.name,
+        short_name: f?.short_name ?? (team.short_name ?? ''),
+        lado: f?.lado ?? 'A',
+        serie: f?.serie ?? 'A',
+        registration_type: (f?.registration_type ?? 'visitor'),
+        status: (f?.status ?? 'pending'),
+        competition_id: f?.competition_id ?? null,
+        home_venue: f?.home_venue ?? '',
+        home_time: f?.home_time ? f.home_time.slice(0, 5) : '',
+      })
+      setComps((cs ?? []) as { id: string; name: string; subprefeitura: string | null }[])
+    })()
+  }, [team])
+
+  if (!team) return null
+
+  const save = async () => {
+    if (!form) return
+    setSaving(true)
+    try {
+      await updateFn({
+        data: {
+          team_id: team.id,
+          name: form.name.trim(),
+          short_name: form.short_name.trim().toUpperCase(),
+          lado: form.lado,
+          serie: form.serie,
+          registration_type: form.registration_type,
+          status: form.status,
+          competition_id: form.competition_id,
+          home_venue: form.home_venue.trim() || null,
+          home_time: form.home_time || null,
+        },
+      })
+      toast.success('Time atualizado!')
+      onSaved()
+    } catch (e) {
+      toast.error((e as Error).message)
+    } finally {
+      setSaving(false)
+    }
+  }
+
+  return (
+    <Dialog open={!!team} onOpenChange={onOpenChange}>
+      <DialogContent className="bg-zinc-950 border-zinc-800 text-white max-w-xl max-h-[90vh] overflow-y-auto">
+        <DialogHeader>
+          <DialogTitle className="text-white">Editar time (Admin)</DialogTitle>
+          <DialogDescription className="text-zinc-400">
+            Poder total sobre os atributos deste time. Alterações refletem em tempo real.
+          </DialogDescription>
+        </DialogHeader>
+        {!form ? (
+          <p className="text-sm text-zinc-400">Carregando...</p>
+        ) : (
+          <div className="space-y-3">
+            <div className="grid grid-cols-2 gap-3">
+              <div>
+                <Label>Nome</Label>
+                <Input value={form.name} maxLength={80}
+                  onChange={(e) => setForm({ ...form, name: e.target.value })} />
+              </div>
+              <div>
+                <Label>Sigla</Label>
+                <Input value={form.short_name} maxLength={10}
+                  onChange={(e) => setForm({ ...form, short_name: e.target.value.toUpperCase() })} />
+              </div>
+            </div>
+            <div className="grid grid-cols-2 gap-3">
+              <div>
+                <Label>Lado (Conferência)</Label>
+                <Select value={form.lado} onValueChange={(v) => setForm({ ...form, lado: v as 'A' | 'B' })}>
+                  <SelectTrigger className="bg-zinc-900 border-zinc-700"><SelectValue /></SelectTrigger>
+                  <SelectContent><SelectItem value="A">Lado A</SelectItem><SelectItem value="B">Lado B</SelectItem></SelectContent>
+                </Select>
+              </div>
+              <div>
+                <Label>Série</Label>
+                <Select value={form.serie} onValueChange={(v) => setForm({ ...form, serie: v as 'A' | 'B' })}>
+                  <SelectTrigger className="bg-zinc-900 border-zinc-700"><SelectValue /></SelectTrigger>
+                  <SelectContent><SelectItem value="A">Série A</SelectItem><SelectItem value="B">Série B</SelectItem></SelectContent>
+                </Select>
+              </div>
+            </div>
+            <div className="grid grid-cols-2 gap-3">
+              <div>
+                <Label>Mando</Label>
+                <Select value={form.registration_type} onValueChange={(v) => setForm({ ...form, registration_type: v as 'host' | 'visitor' })}>
+                  <SelectTrigger className="bg-zinc-900 border-zinc-700"><SelectValue /></SelectTrigger>
+                  <SelectContent><SelectItem value="host">Mandante</SelectItem><SelectItem value="visitor">Visitante</SelectItem></SelectContent>
+                </Select>
+              </div>
+              <div>
+                <Label>Status</Label>
+                <Select value={form.status} onValueChange={(v) => setForm({ ...form, status: v as EditForm['status'] })}>
+                  <SelectTrigger className="bg-zinc-900 border-zinc-700"><SelectValue /></SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="pending">Pendente</SelectItem>
+                    <SelectItem value="approved">Aprovado</SelectItem>
+                    <SelectItem value="waitlist">Lista de espera</SelectItem>
+                    <SelectItem value="rejected">Reprovado</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
+            </div>
+            <div>
+              <Label>Liga / Subprefeitura</Label>
+              <Select
+                value={form.competition_id ?? '__none__'}
+                onValueChange={(v) => setForm({ ...form, competition_id: v === '__none__' ? null : v })}
+              >
+                <SelectTrigger className="bg-zinc-900 border-zinc-700"><SelectValue placeholder="Sem liga" /></SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="__none__">— Sem liga —</SelectItem>
+                  {comps.map((c) => (
+                    <SelectItem key={c.id} value={c.id}>
+                      {c.name}{c.subprefeitura ? ` · ${c.subprefeitura}` : ''}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            </div>
+            {form.registration_type === 'host' && (
+              <div className="grid grid-cols-2 gap-3">
+                <div>
+                  <Label>Estádio</Label>
+                  <Input value={form.home_venue} maxLength={120}
+                    onChange={(e) => setForm({ ...form, home_venue: e.target.value })} />
+                </div>
+                <div>
+                  <Label>Horário</Label>
+                  <Input type="time" value={form.home_time}
+                    onChange={(e) => setForm({ ...form, home_time: e.target.value })} />
+                </div>
+              </div>
+            )}
+            <div className="flex justify-end gap-2 pt-2">
+              <Button variant="outline" onClick={() => onOpenChange(false)} disabled={saving}>Cancelar</Button>
+              <Button onClick={save} disabled={saving} className="bg-[#1565F5] hover:bg-blue-600 text-white">
+                {saving ? 'Salvando...' : 'Salvar alterações'}
+              </Button>
+            </div>
+          </div>
+        )}
+      </DialogContent>
+    </Dialog>
+  )
+}
+
