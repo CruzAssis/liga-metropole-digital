@@ -79,7 +79,7 @@ function RankingCraquesPage() {
       <div className="max-w-4xl mx-auto px-4 py-8 space-y-6">
         <PageHeader
           title="Ranking de Craques"
-          subtitle={`Jogadores ordenados pela média de estrelas (mínimo ${minEval} avaliações). O histórico segue o atleta mesmo se trocar de time.`}
+          description={`Jogadores ordenados pela média de estrelas (mínimo ${minEval} avaliações). O histórico segue o atleta mesmo se trocar de time.`}
         />
 
         <div className="flex items-center gap-2 flex-wrap">
