@@ -1,70 +1,73 @@
 import { createFileRoute } from '@tanstack/react-router'
-import { useState, useEffect } from 'react'
-import { supabase } from '@/integrations/supabase/client'
+import { useServerFn } from '@tanstack/react-start'
+import { useQuery } from '@tanstack/react-query'
+import { useState } from 'react'
 import { Button } from '@/components/ui/button'
 import { Badge } from '@/components/ui/badge'
 import { Input } from '@/components/ui/input'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
+import { Users, Search, RefreshCw, Shield, MessageCircle, Copy } from 'lucide-react'
+import { listAdminTeams, type AdminTeamRow } from '@/lib/admin-teams.functions'
+import { buildWhatsAppLink, formatPhoneBR } from '@/lib/wa'
 import { toast } from 'sonner'
-import { Users, Search, Filter, RefreshCw, Shield, MapPin, Trophy } from 'lucide-react'
 
 export const Route = createFileRoute('/_authenticated/admin/times')({
   component: AdminTimes,
 })
 
-interface Time {
-  id: string
-  nome: string
-  status: string
-  liga_id: string | null
-  conferencia_id: string | null
-  escudo_url: string | null
-  created_at: string
-  diretor_id: string | null
-  ligas?: { nome: string } | null
+const SENDER_NAME = 'Liga Metrópole'
+const PROPOSAL_URL = 'https://liga-metropole-digital.lovable.app/manifesto/proposta-fundadores'
+
+function inviteMessage(clubName: string) {
+  return `Olá, diretor! Aqui é ${SENDER_NAME}. Analisamos a história do ${clubName} e queremos convidá-los a serem pilares da nossa liga. Confira a proposta aqui: ${PROPOSAL_URL}. Vamos elevar o nível da várzea?`
+}
+
+function statusBadge(status: string) {
+  if (status === 'approved') return <Badge className="bg-green-600 text-white">Aprovado</Badge>
+  if (status === 'pending') return <Badge className="bg-yellow-500 text-black">Pendente</Badge>
+  if (status === 'waitlist') return <Badge className="bg-blue-600 text-white">Lista de espera</Badge>
+  if (status === 'rejected') return <Badge className="bg-red-600 text-white">Reprovado</Badge>
+  return <Badge variant="outline">{status}</Badge>
 }
 
 function AdminTimes() {
-  const [times, setTimes] = useState<Time[]>([])
-  const [loading, setLoading] = useState(true)
+  const listFn = useServerFn(listAdminTeams)
+  const { data, isLoading, refetch, isFetching } = useQuery({
+    queryKey: ['admin', 'teams'],
+    queryFn: () => listFn(),
+  })
   const [search, setSearch] = useState('')
   const [statusFilter, setStatusFilter] = useState('todos')
-  const [refreshing, setRefreshing] = useState(false)
 
-  async function loadTimes() {
-    setLoading(true)
-    // TODO: wire to real teams table; stubbed to keep build green.
-    void supabase
-    setTimes([])
-    setLoading(false)
-  }
-
-  useEffect(() => { loadTimes() }, [])
-
-  async function handleRefresh() {
-    setRefreshing(true)
-    await loadTimes()
-    setRefreshing(false)
-  }
-
-  const filtered = times.filter(t => {
-    const matchSearch = t.nome.toLowerCase().includes(search.toLowerCase())
+  const teams: AdminTeamRow[] = data ?? []
+  const filtered = teams.filter((t) => {
+    const matchSearch = t.name.toLowerCase().includes(search.toLowerCase())
     const matchStatus = statusFilter === 'todos' || t.status === statusFilter
     return matchSearch && matchStatus
   })
 
   const stats = {
-    total: times.length,
-    aprovados: times.filter(t => t.status === 'approved').length,
-    pendentes: times.filter(t => t.status === 'pending').length,
-    reprovados: times.filter(t => t.status === 'rejected').length,
+    total: teams.length,
+    aprovados: teams.filter((t) => t.status === 'approved').length,
+    pendentes: teams.filter((t) => t.status === 'pending').length,
+    waitlist: teams.filter((t) => t.status === 'waitlist').length,
   }
 
-  function statusBadge(status: string) {
-    if (status === 'approved') return <Badge className="bg-green-600 text-white">Aprovado</Badge>
-    if (status === 'pending') return <Badge className="bg-yellow-500 text-white">Pendente</Badge>
-    if (status === 'rejected') return <Badge className="bg-red-600 text-white">Reprovado</Badge>
-    return <Badge variant="outline">{status}</Badge>
+  function handleInvite(t: AdminTeamRow) {
+    const msg = inviteMessage(t.name)
+    const link = buildWhatsAppLink(t.director_phone, msg)
+    if (!link) {
+      // Sem telefone: copia a mensagem para clipboard
+      navigator.clipboard.writeText(msg).then(() => {
+        toast.info('Diretor sem telefone cadastrado. Mensagem copiada para colar.')
+      })
+      return
+    }
+    window.open(link, '_blank', 'noopener,noreferrer')
+  }
+
+  function copyMessage(t: AdminTeamRow) {
+    navigator.clipboard.writeText(inviteMessage(t.name)).then(() => toast.success('Mensagem copiada'))
   }
 
   return (
@@ -73,33 +76,21 @@ function AdminTimes() {
         <div className="flex items-center gap-3">
           <Shield className="h-7 w-7 text-blue-500" />
           <div>
-            <h1 className="text-2xl font-bold text-white">Gestao de Times</h1>
-            <p className="text-gray-400 text-sm">Visualize e gerencie todos os times cadastrados</p>
+            <h1 className="text-2xl font-bold text-white">Times inscritos</h1>
+            <p className="text-gray-400 text-sm">Envie convites via WhatsApp para os diretores</p>
           </div>
         </div>
-        <Button variant="outline" size="sm" onClick={handleRefresh} disabled={refreshing}>
-          <RefreshCw className={"h-4 w-4 mr-2 " + (refreshing ? 'animate-spin' : '')} />
+        <Button variant="outline" size="sm" onClick={() => refetch()} disabled={isFetching}>
+          <RefreshCw className={'h-4 w-4 mr-2 ' + (isFetching ? 'animate-spin' : '')} />
           Atualizar
         </Button>
       </div>
 
       <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-        <div className="bg-gray-800 rounded-lg p-4 flex items-center gap-3">
-          <Users className="h-8 w-8 text-blue-400" />
-          <div><p className="text-2xl font-bold text-white">{stats.total}</p><p className="text-gray-400 text-xs">Total</p></div>
-        </div>
-        <div className="bg-gray-800 rounded-lg p-4 flex items-center gap-3">
-          <Trophy className="h-8 w-8 text-green-400" />
-          <div><p className="text-2xl font-bold text-white">{stats.aprovados}</p><p className="text-gray-400 text-xs">Aprovados</p></div>
-        </div>
-        <div className="bg-gray-800 rounded-lg p-4 flex items-center gap-3">
-          <Filter className="h-8 w-8 text-yellow-400" />
-          <div><p className="text-2xl font-bold text-white">{stats.pendentes}</p><p className="text-gray-400 text-xs">Pendentes</p></div>
-        </div>
-        <div className="bg-gray-800 rounded-lg p-4 flex items-center gap-3">
-          <MapPin className="h-8 w-8 text-red-400" />
-          <div><p className="text-2xl font-bold text-white">{stats.reprovados}</p><p className="text-gray-400 text-xs">Reprovados</p></div>
-        </div>
+        <StatCard label="Total" value={stats.total} color="text-blue-400" />
+        <StatCard label="Aprovados" value={stats.aprovados} color="text-green-400" />
+        <StatCard label="Pendentes" value={stats.pendentes} color="text-yellow-400" />
+        <StatCard label="Espera" value={stats.waitlist} color="text-sky-400" />
       </div>
 
       <div className="flex gap-3 flex-wrap">
@@ -108,79 +99,86 @@ function AdminTimes() {
           <Input
             placeholder="Buscar time..."
             value={search}
-            onChange={e => setSearch(e.target.value)}
+            onChange={(e) => setSearch(e.target.value)}
             className="pl-9 bg-gray-800 border-gray-700 text-white"
           />
         </div>
         <Select value={statusFilter} onValueChange={setStatusFilter}>
-          <SelectTrigger className="w-[160px] bg-gray-800 border-gray-700 text-white">
+          <SelectTrigger className="w-[180px] bg-gray-800 border-gray-700 text-white">
             <SelectValue placeholder="Status" />
           </SelectTrigger>
           <SelectContent>
             <SelectItem value="todos">Todos os status</SelectItem>
             <SelectItem value="approved">Aprovados</SelectItem>
             <SelectItem value="pending">Pendentes</SelectItem>
+            <SelectItem value="waitlist">Lista de espera</SelectItem>
             <SelectItem value="rejected">Reprovados</SelectItem>
           </SelectContent>
         </Select>
       </div>
 
-      {loading ? (
+      {isLoading ? (
         <div className="space-y-3">
-          {[1,2,3,4,5].map(i => (
-            <div key={i} className="bg-gray-800 rounded-lg p-4 animate-pulse">
-              <div className="h-5 bg-gray-700 rounded w-1/3 mb-2" />
-              <div className="h-4 bg-gray-700 rounded w-1/4" />
-            </div>
+          {[1, 2, 3, 4].map((i) => (
+            <div key={i} className="bg-gray-800 rounded-lg p-4 animate-pulse h-20" />
           ))}
         </div>
       ) : filtered.length === 0 ? (
         <div className="text-center py-16 text-gray-400">
           <Users className="h-12 w-12 mx-auto mb-3 opacity-40" />
           <p className="text-lg font-medium">Nenhum time encontrado</p>
-          <p className="text-sm mt-1">
-            {search || statusFilter !== 'todos'
-              ? 'Tente ajustar os filtros de busca.'
-              : 'Ainda nao ha times cadastrados.'}
-          </p>
         </div>
       ) : (
         <div className="space-y-3">
-          {filtered.map(time => (
+          {filtered.map((t) => (
             <div
-              key={time.id}
-              className="bg-gray-800 rounded-lg p-4 flex items-center gap-4 hover:bg-gray-750 transition-colors"
+              key={t.id}
+              className="bg-gray-800 rounded-lg p-4 flex flex-col md:flex-row md:items-center gap-4 hover:bg-gray-750 transition-colors"
             >
-              {time.escudo_url ? (
-                <img
-                  src={time.escudo_url}
-                  alt={time.nome}
-                  className="h-12 w-12 rounded-full object-cover border-2 border-gray-600"
-                />
+              {t.logo_url ? (
+                <img src={t.logo_url} alt={t.name} className="h-12 w-12 rounded-full object-cover border-2 border-gray-600" />
               ) : (
-                <div className="h-12 w-12 rounded-full bg-blue-600 flex items-center justify-center text-white font-bold text-lg">
-                  {time.nome.charAt(0)}
+                <div className="h-12 w-12 rounded-full bg-blue-600 flex items-center justify-center text-white font-bold text-lg shrink-0">
+                  {t.name.charAt(0).toUpperCase()}
                 </div>
               )}
               <div className="flex-1 min-w-0">
-                <p className="text-white font-semibold truncate">{time.nome}</p>
-                <p className="text-gray-400 text-sm">
-                  {time.ligas ? time.ligas.nome : 'Sem liga'} &bull; {new Date(time.created_at).toLocaleDateString('pt-BR')}
+                <div className="flex items-center gap-2 flex-wrap">
+                  <p className="text-white font-semibold truncate">{t.name}</p>
+                  {statusBadge(t.status)}
+                  {t.registration_type === 'host' && <Badge variant="outline" className="text-xs">Mandante</Badge>}
+                </div>
+                <p className="text-gray-400 text-sm mt-1">
+                  Diretor: {t.director_name ?? '—'}
+                  {t.director_phone ? ` · ${formatPhoneBR(t.director_phone)}` : ' · sem telefone'}
                 </p>
               </div>
-              <div className="shrink-0">
-                {statusBadge(time.status)}
+              <div className="flex gap-2 shrink-0">
+                <Button variant="outline" size="sm" onClick={() => copyMessage(t)}>
+                  <Copy className="h-4 w-4" />
+                </Button>
+                <Button
+                  size="sm"
+                  onClick={() => handleInvite(t)}
+                  className="bg-[#25D366] hover:bg-[#1ebe5a] text-white font-semibold"
+                >
+                  <MessageCircle className="h-4 w-4 mr-2" />
+                  Convite WhatsApp
+                </Button>
               </div>
             </div>
           ))}
         </div>
       )}
-
-      {!loading && filtered.length > 0 && (
-        <p className="text-gray-500 text-sm text-center">
-          Exibindo {filtered.length} de {times.length} times
-        </p>
-      )}
     </div>
   )
-         }
+}
+
+function StatCard({ label, value, color }: { label: string; value: number; color: string }) {
+  return (
+    <div className="bg-gray-800 rounded-lg p-4">
+      <p className={`text-2xl font-bold ${color}`}>{value}</p>
+      <p className="text-gray-400 text-xs uppercase tracking-wider">{label}</p>
+    </div>
+  )
+}
