@@ -13,6 +13,7 @@ import {
   ClipboardList, ExternalLink, User2, DollarSign,
   CheckCircle, Clock, AlertTriangle, CreditCard,
   Users, UserPlus, CalendarDays, Copy, Share2,
+  Shield, Trophy,
 } from "lucide-react";
 import {
   Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription,
@@ -381,6 +382,32 @@ function DirectorHeroCard({ team }: { team: Team }) {
           >
             <CalendarDays className="h-8 w-8" />
             <span className="font-semibold text-base">Agenda de Jogos</span>
+          </Link>
+        </div>
+
+        <div className="mt-3 grid grid-cols-1 sm:grid-cols-2 gap-3">
+          {team.slug ? (
+            <Link
+              to="/times/$slug"
+              params={{ slug: team.slug }}
+              className="group flex items-center justify-center gap-3 rounded-xl bg-zinc-900 hover:bg-zinc-800 border border-zinc-700 hover:border-[#1565F5]/60 text-white px-4 py-4 text-center transition-all"
+            >
+              <Shield className="h-6 w-6 text-[#5B9BFF]" />
+              <span className="font-semibold text-base">Meu Time</span>
+            </Link>
+          ) : (
+            <div className="flex items-center justify-center gap-3 rounded-xl bg-zinc-900/60 border border-zinc-800 text-zinc-500 px-4 py-4 text-center cursor-not-allowed">
+              <Shield className="h-6 w-6" />
+              <span className="font-semibold text-base">Meu Time</span>
+            </div>
+          )}
+
+          <Link
+            to="/ranking"
+            className="group flex items-center justify-center gap-3 rounded-xl bg-zinc-900 hover:bg-zinc-800 border border-zinc-700 hover:border-[#1565F5]/60 text-white px-4 py-4 text-center transition-all"
+          >
+            <Trophy className="h-6 w-6 text-[#5B9BFF]" />
+            <span className="font-semibold text-base">Ranking da Conferência</span>
           </Link>
         </div>
       </div>
