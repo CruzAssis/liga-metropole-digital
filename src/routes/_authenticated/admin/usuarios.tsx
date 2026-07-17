@@ -9,6 +9,7 @@ import { Switch } from "@/components/ui/switch";
 import { Badge } from "@/components/ui/badge";
 import { useIsAdmin } from "@/hooks/use-is-admin";
 import { listUsers, setUserRole, type AdminUser } from "@/lib/users.functions";
+import { Skeleton } from "@/components/ui/skeleton";
 
 export const Route = createFileRoute("/_authenticated/admin/usuarios")({
   component: UsuariosPage,
@@ -84,13 +85,17 @@ function UsuariosPage() {
               </tr>
             </thead>
             <tbody>
-              {isLoading && (
-                <tr>
-                  <td colSpan={6} className="px-4 py-8 text-center text-muted-foreground">
-                    Buscando usuarios...
-                  </td>
-                </tr>
-              )}
+              {isLoading &&
+                Array.from({ length: 5 }).map((_, i) => (
+                  <tr key={`sk-${i}`} className="border-b border-zinc-800 last:border-0">
+                    <td className="px-4 py-3"><Skeleton className="h-4 w-40 rounded" /></td>
+                    <td className="px-4 py-3"><Skeleton className="h-4 w-32 rounded" /></td>
+                    <td className="px-4 py-3"><Skeleton className="h-4 w-28 rounded" /></td>
+                    <td className="px-4 py-3"><Skeleton className="h-5 w-16 rounded" /></td>
+                    <td className="px-4 py-3 text-center"><Skeleton className="h-5 w-10 rounded mx-auto" /></td>
+                    <td className="px-4 py-3 text-center"><Skeleton className="h-5 w-10 rounded mx-auto" /></td>
+                  </tr>
+                ))}
               {!isLoading && filtered.length === 0 && (
                 <tr>
                   <td colSpan={6} className="px-4 py-8 text-center text-muted-foreground">

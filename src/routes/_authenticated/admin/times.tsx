@@ -352,7 +352,14 @@ function AdminEditTeamDialog({
           </DialogDescription>
         </DialogHeader>
         {!form ? (
-          <p className="text-sm text-zinc-400">Carregando...</p>
+          <div className="space-y-3">
+            {Array.from({ length: 5 }).map((_, i) => (
+              <div key={i} className="space-y-2">
+                <Skeleton className="h-3 w-20 rounded" />
+                <Skeleton className="h-9 w-full rounded" />
+              </div>
+            ))}
+          </div>
         ) : (
           <div className="space-y-3">
             <div className="grid grid-cols-2 gap-3">
