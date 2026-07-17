@@ -6,7 +6,7 @@ import { Badge } from '@/components/ui/badge'
 import { Input } from '@/components/ui/input'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
 import { toast } from 'sonner'
-import { Spinner } from '@/components/AppSkeletons'
+import { Spinner, SkeletonAdminPage } from '@/components/AppSkeletons'
 import { AlertTriangle, CheckCircle2, Clock, MapPin, Phone, RotateCcw, Search, XCircle } from 'lucide-react'
 
 export const Route = createFileRoute('/_authenticated/admin/triagem')({
@@ -260,7 +260,7 @@ function TriagemPage() {
     }))
   }
 
-  if (loading) return <div className="p-8 text-zinc-400">Carregando...</div>
+  if (loading) return <SkeletonAdminPage />
 
   const counts: Record<TeamStatus, number> = {
     pending: teams.filter(t => t.status === 'pending').length,

@@ -8,6 +8,7 @@ import { Label } from '@/components/ui/label'
 import { Upload, Copy, Check, ImageIcon, Save, Trash2, ExternalLink } from 'lucide-react'
 import { toast } from 'sonner'
 import { saveManifesto, listManifestos, deleteManifesto } from '@/lib/manifestos.functions'
+import { SkeletonAdminList } from '@/components/AppSkeletons'
 
 export const Route = createFileRoute('/_authenticated/admin/manifesto')({
   component: AdminManifestoPage,
@@ -290,7 +291,7 @@ function AdminManifestoPage() {
         <section className="mt-16">
           <h2 className="text-lg font-bold mb-4">Manifestos salvos</h2>
           {loadingList ? (
-            <p className="text-sm text-zinc-500">Carregando…</p>
+            <SkeletonAdminList rows={4} />
           ) : items.length === 0 ? (
             <p className="text-sm text-zinc-500">Nenhum manifesto salvo ainda.</p>
           ) : (
