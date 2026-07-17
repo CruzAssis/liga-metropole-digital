@@ -320,7 +320,7 @@ export const adminUpdateTeam = createServerFn({ method: "POST" })
     if (data.home_venue !== undefined) patch.home_venue = data.home_venue?.trim() || null;
     if (data.home_time !== undefined) patch.home_time = data.home_time || null;
 
-    const { error } = await supabaseAdmin.from("teams").update(patch).eq("id", data.team_id);
+    const { error } = await supabaseAdmin.from("teams").update(patch as never).eq("id", data.team_id);
     if (error) throw new Error(error.message);
     return { ok: true };
   });
