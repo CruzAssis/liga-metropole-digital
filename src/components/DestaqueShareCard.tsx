@@ -69,10 +69,13 @@ export function DestaqueShareCard({ data, fullCard = true }: DestaqueShareCardPr
       {/* Header — Liga branding */}
       <div className="bg-[#1565F5] px-5 py-3 flex items-center justify-between">
         <div className="flex items-center gap-2">
-          {/* LM Logo mark */}
-          <div className="w-8 h-8 rounded-full bg-white/20 flex items-center justify-center">
-            <span className="text-white font-black text-sm leading-none">LM</span>
-          </div>
+          {/* Liga Metrópole shield */}
+          <img
+            src="/__l5e/assets-v1/3c66aee9-99bb-4064-8206-4d8a7d43a64d/liga-metropole-logo.png"
+            alt="Liga Metrópole"
+            className="w-8 h-8 object-contain shrink-0"
+            draggable={false}
+          />
           <span className="text-white font-bold text-sm tracking-wide uppercase">
             Liga Metrópole
           </span>

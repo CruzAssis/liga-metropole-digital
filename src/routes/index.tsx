@@ -4,7 +4,7 @@ import { useEffect, useState } from 'react'
 import { useAuth } from '@/hooks/use-auth'
 import { supabase } from '@/integrations/supabase/client'
 import { Trophy, Calendar, ChevronRight, Menu, X, LayoutDashboard, User } from 'lucide-react'
-import Logo from '@/components/Logo'
+import { BrandLogo } from '@/components/BrandLogo'
 import AnimatedStats from '@/components/home/AnimatedStats'
 import HeroCarousel from '@/components/home/HeroCarousel'
 
