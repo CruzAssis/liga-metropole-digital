@@ -118,6 +118,29 @@ function SumulaVisualPage() {
 
   useEffect(() => { load() }, [load])
 
+  // Realtime: qualquer UPDATE na partida (envio de placar, validação, contestação) refaz o load
+  useEffect(() => {
+    const channel = supabase
+      .channel(`match-sumula-${partidaId}`)
+      .on(
+        'postgres_changes',
+        { event: 'UPDATE', schema: 'public', table: 'matches', filter: `id=eq.${partidaId}` },
+        () => { load() },
+      )
+      .on(
+        'postgres_changes',
+        { event: '*', schema: 'public', table: 'match_events', filter: `match_id=eq.${partidaId}` },
+        () => { load() },
+      )
+      .on(
+        'postgres_changes',
+        { event: '*', schema: 'public', table: 'match_best_own_votes', filter: `match_id=eq.${partidaId}` },
+        () => { load() },
+      )
+      .subscribe()
+    return () => { supabase.removeChannel(channel) }
+  }, [partidaId, load])
+
   if (loading) {
     return (
       <div className="min-h-screen bg-zinc-950 flex items-center justify-center text-zinc-400">
