@@ -161,6 +161,9 @@ function AdminTimes() {
                 </p>
               </div>
               <div className="flex gap-2 shrink-0">
+                <Button variant="outline" size="sm" onClick={() => setEditing(t)} title="Editar time">
+                  <Pencil className="h-4 w-4" />
+                </Button>
                 <Button variant="outline" size="sm" onClick={() => copyMessage(t)}>
                   <Copy className="h-4 w-4" />
                 </Button>
@@ -177,6 +180,13 @@ function AdminTimes() {
           ))}
         </div>
       )}
+
+      <AdminEditTeamDialog
+        team={editing}
+        onOpenChange={(v) => { if (!v) setEditing(null) }}
+        onSaved={() => { setEditing(null); refetch() }}
+      />
+
     </div>
   )
 }
