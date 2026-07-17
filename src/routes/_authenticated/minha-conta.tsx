@@ -20,6 +20,7 @@ import { TeamHomeVenueCard } from "@/components/teams/TeamHomeVenueCard";
 import { getMyProfile, updateMyProfile } from "@/lib/profile.functions";
 import { getMyTeamPagamentos, type PagamentoStatus } from "@/lib/pagamentos.functions";
 import { formatPhoneBR } from "@/lib/wa";
+import { WelcomeAthleteModal } from "@/components/WelcomeAthleteModal";
 import homeBg from "@/assets/home-bg.png.asset.json";
 
 // ─── Ligas abertas para inscrição ────────────────────────────────────────────
@@ -253,6 +254,7 @@ function MinhaContaPage() {
 
   return (
     <div className="relative -mx-4 -my-6 sm:-mx-6 px-4 sm:px-6 py-6 min-h-screen">
+      <WelcomeAthleteModal name={user?.user_metadata?.full_name as string | undefined} />
       {/* Background image */}
       <div
         aria-hidden
