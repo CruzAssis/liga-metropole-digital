@@ -171,6 +171,15 @@ function AdminTimes() {
                 <Button variant="outline" size="sm" onClick={() => setEditing(t)} title="Editar time">
                   <Pencil className="h-4 w-4" />
                 </Button>
+                <Button
+                  variant="outline"
+                  size="sm"
+                  onClick={() => setDeleting(t)}
+                  title="Excluir time"
+                  className="border-red-700 text-red-400 hover:bg-red-950 hover:text-red-300"
+                >
+                  <Trash2 className="h-4 w-4" />
+                </Button>
                 <Button variant="outline" size="sm" onClick={() => copyMessage(t)}>
                   <Copy className="h-4 w-4" />
                 </Button>
