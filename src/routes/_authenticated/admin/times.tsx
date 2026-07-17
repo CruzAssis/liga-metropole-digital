@@ -148,27 +148,29 @@ function AdminTimes() {
           {filtered.map((t) => (
             <div
               key={t.id}
-              className="bg-gray-800 rounded-lg p-4 flex flex-col md:flex-row md:items-center gap-4 hover:bg-gray-750 transition-colors"
+              className="bg-gray-800 rounded-lg p-4 flex flex-col sm:flex-row sm:items-center gap-3 sm:gap-4 hover:bg-gray-750 transition-colors"
             >
-              {t.logo_url ? (
-                <img src={t.logo_url} alt={t.name} className="h-12 w-12 rounded-full object-cover border-2 border-gray-600" />
-              ) : (
-                <div className="h-12 w-12 rounded-full bg-blue-600 flex items-center justify-center text-white font-bold text-lg shrink-0">
-                  {t.name.charAt(0).toUpperCase()}
+              <div className="flex items-center gap-3 min-w-0 flex-1">
+                {t.logo_url ? (
+                  <img src={t.logo_url} alt={t.name} className="h-12 w-12 rounded-full object-cover border-2 border-gray-600 shrink-0" />
+                ) : (
+                  <div className="h-12 w-12 rounded-full bg-blue-600 flex items-center justify-center text-white font-bold text-lg shrink-0">
+                    {t.name.charAt(0).toUpperCase()}
+                  </div>
+                )}
+                <div className="flex-1 min-w-0">
+                  <div className="flex items-center gap-2 flex-wrap">
+                    <p className="text-white font-semibold truncate">{t.name}</p>
+                    {statusBadge(t.status)}
+                    {t.registration_type === 'host' && <Badge variant="outline" className="text-xs">Mandante</Badge>}
+                  </div>
+                  <p className="text-gray-400 text-xs sm:text-sm mt-1 break-words">
+                    Diretor: {t.director_name ?? '—'}
+                    {t.director_phone ? ` · ${formatPhoneBR(t.director_phone)}` : ' · sem telefone'}
+                  </p>
                 </div>
-              )}
-              <div className="flex-1 min-w-0">
-                <div className="flex items-center gap-2 flex-wrap">
-                  <p className="text-white font-semibold truncate">{t.name}</p>
-                  {statusBadge(t.status)}
-                  {t.registration_type === 'host' && <Badge variant="outline" className="text-xs">Mandante</Badge>}
-                </div>
-                <p className="text-gray-400 text-sm mt-1">
-                  Diretor: {t.director_name ?? '—'}
-                  {t.director_phone ? ` · ${formatPhoneBR(t.director_phone)}` : ' · sem telefone'}
-                </p>
               </div>
-              <div className="flex gap-2 shrink-0">
+              <div className="flex gap-2 flex-wrap sm:shrink-0">
                 <Button variant="outline" size="sm" onClick={() => setEditing(t)} title="Editar time">
                   <Pencil className="h-4 w-4" />
                 </Button>
@@ -187,15 +189,16 @@ function AdminTimes() {
                 <Button
                   size="sm"
                   onClick={() => handleInvite(t)}
-                  className="bg-[#25D366] hover:bg-[#1ebe5a] text-white font-semibold"
+                  className="bg-[#25D366] hover:bg-[#1ebe5a] text-white font-semibold flex-1 sm:flex-none"
                 >
                   <MessageCircle className="h-4 w-4 mr-2" />
-                  Convite WhatsApp
+                  <span className="truncate">Convite WhatsApp</span>
                 </Button>
               </div>
             </div>
           ))}
         </div>
+
       )}
 
       <AdminEditTeamDialog
