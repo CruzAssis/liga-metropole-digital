@@ -13,6 +13,7 @@ import {
   ClipboardList, ExternalLink, User2, DollarSign,
   CheckCircle, Clock, AlertTriangle, CreditCard,
   Users, UserPlus, CalendarDays, Copy, Share2,
+  Shield, Trophy,
 } from "lucide-react";
 import {
   Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription,
