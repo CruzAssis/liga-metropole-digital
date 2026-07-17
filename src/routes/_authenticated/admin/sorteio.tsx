@@ -110,15 +110,16 @@ function SorteioPage() {
   };
 
   return (
-    <div className="space-y-6 p-6">
+    <div className="space-y-6 p-4 sm:p-6">
       <div>
-        <h1 className="font-display text-4xl tracking-wide">Sorteio</h1>
-        <p className="text-muted-foreground">
+        <h1 className="font-display text-3xl sm:text-4xl tracking-wide">Sorteio</h1>
+        <p className="text-muted-foreground text-sm sm:text-base mt-1">
           Execute o sorteio quando uma liga estiver completa (status: Pronta p/ sorteio).
           Para configurar uma nova liga, acesse{" "}
           <Link to="/admin/ligas" className="underline text-primary">Configuracao de Ligas</Link>.
         </p>
       </div>
+
 
       {/* Draw calendar config */}
       <Card>
