@@ -248,8 +248,10 @@ export function SkeletonAdminCardList({ count = 3 }: { count?: number }) {
 
 // ── Admin: stats row skeleton (financeiro, master-switch)
 export function SkeletonStatsRow({ count = 4 }: { count?: number }) {
+  const gridCls =
+    count === 2 ? "grid-cols-2" : count === 3 ? "grid-cols-2 lg:grid-cols-3" : "grid-cols-2 lg:grid-cols-4";
   return (
-    <div className={`grid gap-3 sm:gap-4 grid-cols-2 lg:grid-cols-${count}`}>
+    <div className={`grid gap-3 sm:gap-4 ${gridCls}`}>
       {Array.from({ length: count }).map((_, i) => (
         <div key={i} className="rounded-xl border border-zinc-800 bg-zinc-900 p-4 sm:p-5 space-y-3">
           <Skeleton className="h-3 w-20 rounded" />
