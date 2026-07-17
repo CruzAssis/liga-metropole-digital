@@ -8,9 +8,13 @@ import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from '@/components/ui/dialog'
-import { Users, Search, RefreshCw, Shield, MessageCircle, Copy, Pencil } from 'lucide-react'
+import {
+  AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent,
+  AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle,
+} from '@/components/ui/alert-dialog'
+import { Users, Search, RefreshCw, Shield, MessageCircle, Copy, Pencil, Trash2 } from 'lucide-react'
 import { listAdminTeams, type AdminTeamRow } from '@/lib/admin-teams.functions'
-import { adminUpdateTeam } from '@/lib/team-profile.functions'
+import { adminUpdateTeam, adminDeleteTeam } from '@/lib/team-profile.functions'
 import { supabase } from '@/integrations/supabase/client'
 import { buildWhatsAppLink, formatPhoneBR } from '@/lib/wa'
 import { toast } from 'sonner'
@@ -44,6 +48,9 @@ function AdminTimes() {
   const [search, setSearch] = useState('')
   const [statusFilter, setStatusFilter] = useState('todos')
   const [editing, setEditing] = useState<AdminTeamRow | null>(null)
+  const [deleting, setDeleting] = useState<AdminTeamRow | null>(null)
+  const [deleteBusy, setDeleteBusy] = useState(false)
+  const deleteFn = useServerFn(adminDeleteTeam)
 
 
   const teams: AdminTeamRow[] = data ?? []
@@ -164,6 +171,15 @@ function AdminTimes() {
                 <Button variant="outline" size="sm" onClick={() => setEditing(t)} title="Editar time">
                   <Pencil className="h-4 w-4" />
                 </Button>
+                <Button
+                  variant="outline"
+                  size="sm"
+                  onClick={() => setDeleting(t)}
+                  title="Excluir time"
+                  className="border-red-700 text-red-400 hover:bg-red-950 hover:text-red-300"
+                >
+                  <Trash2 className="h-4 w-4" />
+                </Button>
                 <Button variant="outline" size="sm" onClick={() => copyMessage(t)}>
                   <Copy className="h-4 w-4" />
                 </Button>
@@ -186,6 +202,44 @@ function AdminTimes() {
         onOpenChange={(v) => { if (!v) setEditing(null) }}
         onSaved={() => { setEditing(null); refetch() }}
       />
+
+      <AlertDialog open={!!deleting} onOpenChange={(v) => { if (!v && !deleteBusy) setDeleting(null) }}>
+        <AlertDialogContent className="bg-zinc-950 border-zinc-800 text-white">
+          <AlertDialogHeader>
+            <AlertDialogTitle className="text-white">Excluir time</AlertDialogTitle>
+            <AlertDialogDescription className="text-zinc-400">
+              Tem certeza que deseja excluir <span className="font-semibold text-white">{deleting?.name}</span>?
+              Esta ação é irreversível e removerá o time de todas as listagens, rankings e agenda.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel disabled={deleteBusy} className="bg-zinc-800 border-zinc-700 text-white hover:bg-zinc-700">
+              Cancelar
+            </AlertDialogCancel>
+            <AlertDialogAction
+              disabled={deleteBusy}
+              onClick={async (e) => {
+                e.preventDefault()
+                if (!deleting) return
+                setDeleteBusy(true)
+                try {
+                  await deleteFn({ data: { team_id: deleting.id } })
+                  toast.success(`${deleting.name} foi excluído.`)
+                  setDeleting(null)
+                  refetch()
+                } catch (err) {
+                  toast.error((err as Error).message)
+                } finally {
+                  setDeleteBusy(false)
+                }
+              }}
+              className="bg-red-600 hover:bg-red-700 text-white"
+            >
+              {deleteBusy ? 'Excluindo...' : 'Excluir definitivamente'}
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
 
     </div>
   )

@@ -325,3 +325,43 @@ export const adminUpdateTeam = createServerFn({ method: "POST" })
     return { ok: true };
   });
 
+// ─── Admin: delete a team and its dependent data ─────────────────────────────
+const adminDeleteSchema = z.object({ team_id: z.string().uuid() });
+
+export const adminDeleteTeam = createServerFn({ method: "POST" })
+  .middleware([requireSupabaseAuth])
+  .inputValidator((input) => adminDeleteSchema.parse(input))
+  .handler(async ({ data, context }) => {
+    const { data: isAdmin } = await context.supabase.rpc("has_role", {
+      _user_id: context.userId,
+      _role: "admin",
+    });
+    if (!isAdmin) throw new Error("Apenas administradores podem excluir times.");
+
+    const teamId = data.team_id;
+
+    // Collect match ids to delete their events/votes first
+    const { data: matches } = await supabaseAdmin
+      .from("matches")
+      .select("id")
+      .or(`host_team_id.eq.${teamId},visitor_team_id.eq.${teamId}`);
+    const matchIds = (matches ?? []).map((m) => m.id);
+
+    if (matchIds.length) {
+      await supabaseAdmin.from("match_events").delete().in("match_id", matchIds);
+      await supabaseAdmin.from("match_best_opponent_votes").delete().in("match_id", matchIds);
+      await supabaseAdmin.from("matches").delete().in("id", matchIds);
+    }
+
+    // Remove team from groups, supporters, members, athletes
+    await supabaseAdmin.from("group_teams").delete().eq("team_id", teamId);
+    await supabaseAdmin.from("team_supporters").delete().eq("team_id", teamId);
+    await supabaseAdmin.from("team_members").delete().eq("team_id", teamId);
+    await supabaseAdmin.from("athletes").delete().eq("team_id", teamId);
+
+    const { error } = await supabaseAdmin.from("teams").delete().eq("id", teamId);
+    if (error) throw new Error(error.message);
+
+    return { ok: true };
+  });
+
