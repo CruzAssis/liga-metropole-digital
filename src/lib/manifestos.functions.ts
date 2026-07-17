@@ -57,9 +57,10 @@ export const saveManifesto = createServerFn({ method: 'POST' })
         throw new Error('Imagem muito grande (máx 3MB).')
       }
       const path = `manifestos/${data.slug}-${Date.now()}.${decoded.ext}`
+      const blob = new Blob([decoded.bytes], { type: decoded.contentType })
       const { error: upErr } = await supabaseAdmin.storage
         .from('team-logos')
-        .upload(path, decoded.bytes, { contentType: decoded.contentType, upsert: true })
+        .upload(path, blob, { contentType: decoded.contentType, upsert: true })
       if (upErr) throw new Error(`Erro ao enviar escudo: ${upErr.message}`)
       const { data: pub } = supabaseAdmin.storage.from('team-logos').getPublicUrl(path)
       logo_url = pub.publicUrl
