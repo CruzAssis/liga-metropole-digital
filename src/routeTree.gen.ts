@@ -28,6 +28,7 @@ import { Route as AuthenticatedRouteImport } from './routes/_authenticated'
 import { Route as IndexRouteImport } from './routes/index'
 import { Route as TimesSlugRouteImport } from './routes/times.$slug'
 import { Route as SumulaPartidaIdRouteImport } from './routes/sumula.$partidaId'
+import { Route as SumulaVisualPartidaIdRouteImport } from './routes/sumula-visual.$partidaId'
 import { Route as PartidasIdRouteImport } from './routes/partidas.$id'
 import { Route as OnboardingTorcedorRouteImport } from './routes/onboarding.torcedor'
 import { Route as OnboardingJogadorRouteImport } from './routes/onboarding.jogador'
@@ -145,6 +146,11 @@ const TimesSlugRoute = TimesSlugRouteImport.update({
 const SumulaPartidaIdRoute = SumulaPartidaIdRouteImport.update({
   id: '/sumula/$partidaId',
   path: '/sumula/$partidaId',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const SumulaVisualPartidaIdRoute = SumulaVisualPartidaIdRouteImport.update({
+  id: '/sumula-visual/$partidaId',
+  path: '/sumula-visual/$partidaId',
   getParentRoute: () => rootRouteImport,
 } as any)
 const PartidasIdRoute = PartidasIdRouteImport.update({
@@ -306,6 +312,7 @@ export interface FileRoutesByFullPath {
   '/onboarding/jogador': typeof OnboardingJogadorRoute
   '/onboarding/torcedor': typeof OnboardingTorcedorRoute
   '/partidas/$id': typeof PartidasIdRoute
+  '/sumula-visual/$partidaId': typeof SumulaVisualPartidaIdRoute
   '/sumula/$partidaId': typeof SumulaPartidaIdRoute
   '/times/$slug': typeof TimesSlugRoute
   '/admin/dashboard': typeof AuthenticatedAdminDashboardRoute
@@ -350,6 +357,7 @@ export interface FileRoutesByTo {
   '/onboarding/jogador': typeof OnboardingJogadorRoute
   '/onboarding/torcedor': typeof OnboardingTorcedorRoute
   '/partidas/$id': typeof PartidasIdRoute
+  '/sumula-visual/$partidaId': typeof SumulaVisualPartidaIdRoute
   '/sumula/$partidaId': typeof SumulaPartidaIdRoute
   '/times/$slug': typeof TimesSlugRoute
   '/admin/dashboard': typeof AuthenticatedAdminDashboardRoute
@@ -396,6 +404,7 @@ export interface FileRoutesById {
   '/onboarding/jogador': typeof OnboardingJogadorRoute
   '/onboarding/torcedor': typeof OnboardingTorcedorRoute
   '/partidas/$id': typeof PartidasIdRoute
+  '/sumula-visual/$partidaId': typeof SumulaVisualPartidaIdRoute
   '/sumula/$partidaId': typeof SumulaPartidaIdRoute
   '/times/$slug': typeof TimesSlugRoute
   '/_authenticated/admin/dashboard': typeof AuthenticatedAdminDashboardRoute
@@ -442,6 +451,7 @@ export interface FileRouteTypes {
     | '/onboarding/jogador'
     | '/onboarding/torcedor'
     | '/partidas/$id'
+    | '/sumula-visual/$partidaId'
     | '/sumula/$partidaId'
     | '/times/$slug'
     | '/admin/dashboard'
@@ -486,6 +496,7 @@ export interface FileRouteTypes {
     | '/onboarding/jogador'
     | '/onboarding/torcedor'
     | '/partidas/$id'
+    | '/sumula-visual/$partidaId'
     | '/sumula/$partidaId'
     | '/times/$slug'
     | '/admin/dashboard'
@@ -531,6 +542,7 @@ export interface FileRouteTypes {
     | '/onboarding/jogador'
     | '/onboarding/torcedor'
     | '/partidas/$id'
+    | '/sumula-visual/$partidaId'
     | '/sumula/$partidaId'
     | '/times/$slug'
     | '/_authenticated/admin/dashboard'
@@ -569,6 +581,7 @@ export interface RootRouteChildren {
   ConviteCodeRoute: typeof ConviteCodeRoute
   ManifestoSlugRoute: typeof ManifestoSlugRoute
   PartidasIdRoute: typeof PartidasIdRoute
+  SumulaVisualPartidaIdRoute: typeof SumulaVisualPartidaIdRoute
   SumulaPartidaIdRoute: typeof SumulaPartidaIdRoute
   ApiPublicHooksWoCheckerRoute: typeof ApiPublicHooksWoCheckerRoute
 }
@@ -706,6 +719,13 @@ declare module '@tanstack/react-router' {
       path: '/sumula/$partidaId'
       fullPath: '/sumula/$partidaId'
       preLoaderRoute: typeof SumulaPartidaIdRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/sumula-visual/$partidaId': {
+      id: '/sumula-visual/$partidaId'
+      path: '/sumula-visual/$partidaId'
+      fullPath: '/sumula-visual/$partidaId'
+      preLoaderRoute: typeof SumulaVisualPartidaIdRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/partidas/$id': {
@@ -1001,6 +1021,7 @@ const rootRouteChildren: RootRouteChildren = {
   ConviteCodeRoute: ConviteCodeRoute,
   ManifestoSlugRoute: ManifestoSlugRoute,
   PartidasIdRoute: PartidasIdRoute,
+  SumulaVisualPartidaIdRoute: SumulaVisualPartidaIdRoute,
   SumulaPartidaIdRoute: SumulaPartidaIdRoute,
   ApiPublicHooksWoCheckerRoute: ApiPublicHooksWoCheckerRoute,
 }
