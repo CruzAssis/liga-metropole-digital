@@ -1,4 +1,6 @@
 import { BrandLogo } from '@/components/BrandLogo'
+import { Link } from '@tanstack/react-router'
+import { Download, UserPlus } from 'lucide-react'
 
 export type ManifestoTeam = {
   name: string
