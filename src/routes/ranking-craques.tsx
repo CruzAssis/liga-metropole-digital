@@ -52,6 +52,20 @@ function RankingCraquesPage() {
   const [loading, setLoading] = useState(true);
   const [minEval, setMinEval] = useState<number>(MIN_EVAL_DEFAULT);
 
+  const load = async (showSpinner = false) => {
+    if (showSpinner) setLoading(true);
+    const { data, error } = await supabase.rpc("get_ranking_craques", {
+      _min_evaluations: minEval,
+    });
+    if (error) {
+      console.error(error);
+      setRows([]);
+    } else {
+      setRows((data ?? []) as RankRow[]);
+    }
+    if (showSpinner) setLoading(false);
+  };
+
   useEffect(() => {
     let cancelled = false;
     (async () => {
@@ -73,6 +87,29 @@ function RankingCraquesPage() {
       cancelled = true;
     };
   }, [minEval]);
+
+  // Realtime: refresh ranking when a súmula is homologated or votes/events change
+  useEffect(() => {
+    const refresh = () => { load(false); };
+    const channel = supabase
+      .channel("ranking-craques-realtime")
+      .on("postgres_changes", { event: "UPDATE", schema: "public", table: "matches" }, (payload: any) => {
+        const newStatus = payload?.new?.status;
+        const oldStatus = payload?.old?.status;
+        if (newStatus === "closed" || newStatus === "confirmed" || oldStatus === "closed" || oldStatus === "confirmed") {
+          refresh();
+        }
+      })
+      .on("postgres_changes", { event: "*", schema: "public", table: "match_best_opponent_votes" }, refresh)
+      .on("postgres_changes", { event: "*", schema: "public", table: "match_events" }, refresh)
+      .subscribe();
+    return () => {
+      supabase.removeChannel(channel);
+    };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [minEval]);
+
+
 
   return (
     <PublicShell>
