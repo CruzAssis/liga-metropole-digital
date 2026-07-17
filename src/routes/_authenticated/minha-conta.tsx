@@ -361,7 +361,16 @@ function DirectorHeroCard({ team, onSaved }: { team: Team; onSaved: () => void |
               {team.name}
             </h1>
           </div>
+          <button
+            onClick={() => setEditOpen(true)}
+            title="Editar dados do time"
+            className="shrink-0 inline-flex items-center gap-2 rounded-lg border border-zinc-700 bg-zinc-900 hover:bg-zinc-800 hover:border-[#1565F5]/60 text-white px-3 py-2 text-sm transition-colors"
+          >
+            <Pencil className="h-4 w-4" />
+            <span className="hidden sm:inline">Editar Dados do Time</span>
+          </button>
         </div>
+
 
         <div className="mt-8 grid grid-cols-1 sm:grid-cols-3 gap-3">
           <Link
