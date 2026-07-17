@@ -750,6 +750,14 @@ export type Database = {
           total_evaluations: number
         }[]
       }
+      get_my_team_invite_code: { Args: { _team_id: string }; Returns: string }
+      get_public_registration_flags: {
+        Args: never
+        Returns: {
+          host_slots_limit: number
+          master_registration_open: boolean
+        }[]
+      }
       get_ranking_craques: {
         Args: { _min_evaluations?: number }
         Returns: {
@@ -777,6 +785,13 @@ export type Database = {
           secondary_color: string
           short_name: string
           status: string
+        }[]
+      }
+      get_team_supporter_counts: {
+        Args: never
+        Returns: {
+          supporter_count: number
+          team_id: string
         }[]
       }
       has_role: {
