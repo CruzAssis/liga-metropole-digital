@@ -331,7 +331,7 @@ function DisciplineRanking({ ladoFilter }: { ladoFilter: LadoFilter }) {
       ))}
     </div>
   );
-  const rows = data?.discipline ?? [];
+  const rows = filterByLado(data?.discipline ?? [], ladoFilter);
   if (rows.length === 0) return <EmptyRanking label="disciplina" />;
   return (
     <div className="rounded-lg border border-border bg-card overflow-hidden">
