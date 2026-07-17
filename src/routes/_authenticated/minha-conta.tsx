@@ -275,7 +275,8 @@ function MinhaContaPage() {
 
       {/* ─── HERO: Painel do Diretor (time aprovado) ─── */}
       {team?.status === "approved" ? (
-        <DirectorHeroCard team={team} />
+        <DirectorHeroCard team={team} onSaved={loadTeam} />
+
       ) : (
         <div>
           <h1 className="font-display text-4xl tracking-wide">Minha conta</h1>
