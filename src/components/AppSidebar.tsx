@@ -55,9 +55,9 @@ export function AppSidebar() {
       <SidebarHeader className="border-b border-sidebar-border">
         <div className="flex items-center gap-2 px-2 py-3">
           {collapsed ? (
-            <Logo variant="symbol" size={28} />
+            <BrandLogo className="h-8 w-8" />
           ) : (
-            <Logo variant="horizontal" size={28} />
+            <BrandLogo className="h-9 w-auto" />
           )}
         </div>
       </SidebarHeader>
