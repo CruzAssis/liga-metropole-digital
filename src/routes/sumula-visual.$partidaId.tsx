@@ -424,39 +424,100 @@ function ConfirmarPlacar({ match, isHost, isVisitor, onRefresh }: {
 }) {
   const [loading, setLoading] = useState(false)
   const [erro, setErro] = useState('')
+  const [showModal, setShowModal] = useState(false)
+  const [justConfirmed, setJustConfirmed] = useState(false)
   const confirmFn = useServerFn(confirmSumulaScore)
 
   async function confirmar() {
     setLoading(true); setErro('')
-    try { await confirmFn({ data: { match_id: match.id } }); onRefresh() }
-    catch (e) { setErro(e instanceof Error ? e.message : 'Erro') }
+    try {
+      await confirmFn({ data: { match_id: match.id } })
+      setShowModal(false)
+      setJustConfirmed(true)
+      // Give user a moment to see the success state before refreshing
+      setTimeout(() => onRefresh(), 1500)
+    } catch (e) { setErro(e instanceof Error ? e.message : 'Erro') }
     finally { setLoading(false) }
   }
 
-  return (
-    <div className="rounded-xl border border-amber-500/40 bg-amber-500/10 p-5 space-y-3">
-      <div className="flex items-start gap-3">
-        <Clock className="h-6 w-6 text-amber-400 flex-shrink-0 animate-pulse" />
-        <div className="flex-1">
-          <p className="text-amber-200 font-semibold">
-            {isHost ? 'Confirme o placar reportado pelo visitante' : 'Aguardando Adversário'}
-          </p>
-          <p className="text-amber-400/70 text-sm mt-1">
-            Placar: <strong className="text-white">{match.host_score} × {match.visitor_score}</strong>
+  // Success flash after host validates
+  if (justConfirmed) {
+    return (
+      <div className="rounded-xl border border-green-500/40 bg-green-500/10 p-5 flex items-start gap-3 animate-in fade-in slide-in-from-top-2 duration-300">
+        <CheckCircle2 className="h-6 w-6 text-green-400 flex-shrink-0" />
+        <div>
+          <p className="text-green-200 font-semibold">Súmula validada com sucesso!</p>
+          <p className="text-green-400/70 text-sm mt-1">
+            Placar confirmado: <strong className="text-white">{match.host_score} × {match.visitor_score}</strong>.
+            A súmula foi homologada e o ranking será atualizado automaticamente.
           </p>
         </div>
       </div>
-      {isHost && (
-        <Button onClick={confirmar} disabled={loading}
-          className="w-full bg-[#1565F5] hover:bg-[#0f4fd1] text-white">
-          {loading ? 'Confirmando...' : 'Confirmar Placar'}
-        </Button>
+    )
+  }
+
+  return (
+    <>
+      <div className="rounded-xl border border-amber-500/40 bg-amber-500/10 p-5 space-y-4">
+        <div className="flex items-start gap-3">
+          <Clock className="h-6 w-6 text-amber-400 flex-shrink-0 animate-pulse" />
+          <div className="flex-1">
+            <div className="flex items-center gap-2 flex-wrap">
+              <Badge className="bg-amber-500/20 text-amber-200 border border-amber-500/40 gap-1">
+                <Clock className="h-3 w-3" /> Aguardando Adversário
+              </Badge>
+            </div>
+            <p className="text-amber-200 font-semibold mt-2">
+              {isHost
+                ? 'Sua validação é necessária para homologar a súmula'
+                : 'Aguardando confirmação do Mandante'}
+            </p>
+            <p className="text-amber-400/80 text-sm mt-1">
+              O visitante <strong className="text-white">{match.visitor_team.name}</strong> lançou o placar:{' '}
+              <strong className="text-white">{match.host_score} × {match.visitor_score}</strong>
+            </p>
+            {isHost && (
+              <p className="text-amber-400/60 text-xs mt-2">
+                Revise o placar e, se estiver correto, valide a súmula. Se discordar, use a opção de contestação.
+              </p>
+            )}
+          </div>
+        </div>
+        {isHost && (
+          <Button onClick={() => setShowModal(true)} disabled={loading}
+            className="w-full h-12 bg-[#1565F5] hover:bg-[#0f4fd1] text-white font-semibold rounded-xl">
+            <CheckCircle2 className="h-4 w-4 mr-2" />
+            Validar e Homologar Súmula
+          </Button>
+        )}
+        {isVisitor && (
+          <p className="text-zinc-400 text-xs">
+            Sua súmula foi enviada. O mandante precisará validar para homologar o ranking.
+          </p>
+        )}
+        {erro && <p className="text-red-400 text-sm">{erro}</p>}
+      </div>
+
+      {showModal && (
+        <ConfirmModal
+          title="Validar súmula"
+          body={<>
+            <p>
+              Você está confirmando o placar{' '}
+              <strong className="text-white">{match.host_score} × {match.visitor_score}</strong>{' '}
+              reportado por <strong className="text-white">{match.visitor_team.name}</strong>.
+            </p>
+            <p className="mt-2 text-zinc-500 text-xs">
+              Ao validar, a súmula será <strong className="text-green-300">homologada</strong> e o ranking
+              atualizado automaticamente. Esta ação não pode ser desfeita.
+            </p>
+          </>}
+          loading={loading} erro={erro}
+          onCancel={() => setShowModal(false)}
+          onConfirm={confirmar}
+        />
       )}
-      {isVisitor && (
-        <p className="text-zinc-400 text-xs">Aguardando confirmação do Mandante.</p>
-      )}
-      {erro && <p className="text-red-400 text-sm">{erro}</p>}
-    </div>
+    </>
   )
 }
 
