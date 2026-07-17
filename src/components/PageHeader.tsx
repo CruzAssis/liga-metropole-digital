@@ -17,7 +17,8 @@ export function PageHeader({
   return (
     <header
       className={cn(
-        "mb-10 pb-6 border-b border-border/60 grid grid-cols-[minmax(0,1fr)_auto] items-end gap-4",
+        "mb-8 sm:mb-10 pb-4 sm:pb-6 border-b border-border/60",
+        "flex flex-col gap-4 sm:grid sm:grid-cols-[minmax(0,1fr)_auto] sm:items-end sm:gap-4",
         className,
       )}
     >
@@ -25,12 +26,15 @@ export function PageHeader({
         {eyebrow && <div className="kicker mb-3">{eyebrow}</div>}
         <h1 className="display-title text-foreground">{title}</h1>
         {description && (
-          <p className="mt-4 text-sm sm:text-base text-muted-foreground max-w-2xl leading-relaxed">
+          <p className="mt-3 sm:mt-4 text-sm sm:text-base text-muted-foreground max-w-2xl leading-relaxed">
             {description}
           </p>
         )}
       </div>
-      {actions && <div className="shrink-0 flex items-center gap-2">{actions}</div>}
+      {actions && (
+        <div className="flex flex-wrap items-center gap-2 sm:shrink-0">{actions}</div>
+      )}
     </header>
   );
 }
+
