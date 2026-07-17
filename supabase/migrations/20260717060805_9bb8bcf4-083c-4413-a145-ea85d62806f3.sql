@@ -1,0 +1,4 @@
+ALTER TABLE public.matches
+  ADD COLUMN IF NOT EXISTS dispute_reason TEXT,
+  ADD COLUMN IF NOT EXISTS disputed_at TIMESTAMPTZ,
+  ADD COLUMN IF NOT EXISTS disputed_by UUID;
