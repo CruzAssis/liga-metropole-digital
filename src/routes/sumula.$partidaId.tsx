@@ -116,6 +116,8 @@ function Etapa1Placar({ match, myTeamId, onRefresh }: { match: Match; myTeamId: 
   const [questionamento, setQuestionamento] = useState(match.questionamento_arbitragem ?? '')
   const [loading, setLoading] = useState(false)
   const [erro, setErro] = useState('')
+  const [showContestForm, setShowContestForm] = useState(false)
+  const [contestReason, setContestReason] = useState('')
 
   const submitFn = useServerFn(submitSumulaScore)
   const confirmFn = useServerFn(confirmSumulaScore)
@@ -123,6 +125,7 @@ function Etapa1Placar({ match, myTeamId, onRefresh }: { match: Match; myTeamId: 
 
   const lancado = !!match.host_filled_at
   const confirmado = !!match.visitor_confirmed_at
+  const isDisputed = match.status === 'disputed'
 
   const etapa1Status: EtapaStatus = confirmado ? 'concluido' : lancado ? 'em_andamento' : 'pendente'
 
@@ -141,8 +144,12 @@ function Etapa1Placar({ match, myTeamId, onRefresh }: { match: Match; myTeamId: 
     finally { setLoading(false) }
   }
   async function contestar() {
+    if (contestReason.trim().length < 10) {
+      setErro('Justifique a contestação com pelo menos 10 caracteres.')
+      return
+    }
     setLoading(true); setErro('')
-    try { await disputeFn({ data: { match_id: match.id } }); onRefresh() }
+    try { await disputeFn({ data: { match_id: match.id, reason: contestReason.trim() } }); onRefresh() }
     catch (e) { setErro(e instanceof Error ? e.message : 'Erro') }
     finally { setLoading(false) }
   }
