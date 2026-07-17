@@ -203,6 +203,44 @@ function AdminTimes() {
         onSaved={() => { setEditing(null); refetch() }}
       />
 
+      <AlertDialog open={!!deleting} onOpenChange={(v) => { if (!v && !deleteBusy) setDeleting(null) }}>
+        <AlertDialogContent className="bg-zinc-950 border-zinc-800 text-white">
+          <AlertDialogHeader>
+            <AlertDialogTitle className="text-white">Excluir time</AlertDialogTitle>
+            <AlertDialogDescription className="text-zinc-400">
+              Tem certeza que deseja excluir <span className="font-semibold text-white">{deleting?.name}</span>?
+              Esta ação é irreversível e removerá o time de todas as listagens, rankings e agenda.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel disabled={deleteBusy} className="bg-zinc-800 border-zinc-700 text-white hover:bg-zinc-700">
+              Cancelar
+            </AlertDialogCancel>
+            <AlertDialogAction
+              disabled={deleteBusy}
+              onClick={async (e) => {
+                e.preventDefault()
+                if (!deleting) return
+                setDeleteBusy(true)
+                try {
+                  await deleteFn({ data: { team_id: deleting.id } })
+                  toast.success(`${deleting.name} foi excluído.`)
+                  setDeleting(null)
+                  refetch()
+                } catch (err) {
+                  toast.error((err as Error).message)
+                } finally {
+                  setDeleteBusy(false)
+                }
+              }}
+              className="bg-red-600 hover:bg-red-700 text-white"
+            >
+              {deleteBusy ? 'Excluindo...' : 'Excluir definitivamente'}
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
+
     </div>
   )
 }
