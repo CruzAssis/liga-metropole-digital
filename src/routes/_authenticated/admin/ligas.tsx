@@ -8,7 +8,7 @@ import { Label } from "@/components/ui/label";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Plus, Settings, Users, CheckCircle, AlertTriangle, MapPin, Trash2 } from "lucide-react";
-import { Spinner } from "@/components/AppSkeletons";
+import { Spinner, SkeletonAdminCardList } from "@/components/AppSkeletons";
 
 const supabaseAny = supabase as any;
 
