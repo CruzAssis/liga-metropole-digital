@@ -1,4 +1,4 @@
-import logoAsset from "@/assets/liga-metropole-logo.jpeg.asset.json";
+import logoAsset from "@/assets/liga-metropole-logo.png.asset.json";
 import { cn } from "@/lib/utils";
 
 export function BrandLogo({
