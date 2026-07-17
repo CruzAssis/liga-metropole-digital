@@ -273,13 +273,14 @@ function LigasPage() {
   const zonas = ["norte", "leste", "sul", "oeste", "centro"] as const;
 
   return (
-    <div className="space-y-6 p-6">
+    <div className="space-y-6 p-4 sm:p-6">
       <div>
-        <h1 className="font-display text-4xl tracking-wide">Configuração de Conferências</h1>
-        <p className="text-muted-foreground">
+        <h1 className="font-display text-3xl sm:text-4xl tracking-wide">Configuração de Conferências</h1>
+        <p className="text-muted-foreground text-sm sm:text-base mt-1">
           Crie e configure conferências por subprefeitura. A Liga Metrópole cobre 32 subprefeituras de SP.
         </p>
       </div>
+
 
       {/* Create / Edit form */}
       <Card>
