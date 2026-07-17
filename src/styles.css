@@ -207,3 +207,58 @@
   }
 }
 
+/* Editorial / sports magazine utilities */
+
+@utility display-title {
+  font-family: var(--font-display);
+  font-weight: 400;
+  font-size: clamp(2.75rem, 6.5vw, 5.5rem);
+  line-height: 0.9;
+  letter-spacing: 0.01em;
+  text-transform: uppercase;
+}
+
+@utility stat-number {
+  font-family: var(--font-display);
+  font-weight: 400;
+  font-variant-numeric: tabular-nums;
+  letter-spacing: 0.01em;
+  line-height: 1;
+}
+
+@utility kicker {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.625rem;
+  font-size: 0.6875rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.18em;
+  color: var(--color-primary);
+  &::before {
+    content: "";
+    display: inline-block;
+    width: 1.75rem;
+    height: 2px;
+    background: currentColor;
+  }
+}
+
+@utility rank-medal-gold {
+  background: linear-gradient(135deg, #fbbf24 0%, #d97706 100%);
+  color: #1a1a1a;
+  box-shadow: 0 0 0 1px rgba(251, 191, 36, 0.3), 0 2px 8px -2px rgba(217, 119, 6, 0.6);
+}
+@utility rank-medal-silver {
+  background: linear-gradient(135deg, #e5e7eb 0%, #9ca3af 100%);
+  color: #1a1a1a;
+  box-shadow: 0 0 0 1px rgba(229, 231, 235, 0.3), 0 2px 8px -2px rgba(156, 163, 175, 0.5);
+}
+@utility rank-medal-bronze {
+  background: linear-gradient(135deg, #d97706 0%, #78350f 100%);
+  color: #fef3c7;
+  box-shadow: 0 0 0 1px rgba(217, 119, 6, 0.3), 0 2px 8px -2px rgba(120, 53, 15, 0.6);
+}
+
+
+

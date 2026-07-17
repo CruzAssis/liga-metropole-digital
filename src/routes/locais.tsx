@@ -71,20 +71,26 @@ function LocaisPage() {
         {venues?.map((v) => (
           <div
             key={v.name}
-            className="group rounded-xl border border-border bg-card p-4 flex items-start gap-3 hover:border-primary/40 hover:-translate-y-0.5 hover:shadow-[0_8px_24px_-12px_rgba(21,101,245,0.4)] transition-all"
+            className="group relative rounded-xl border border-border bg-card p-5 flex items-center gap-4 hover:border-primary/40 hover:-translate-y-0.5 hover:shadow-[0_8px_24px_-12px_rgba(21,101,245,0.4)] transition-all overflow-hidden"
           >
-            <div className="h-10 w-10 rounded-lg bg-primary/10 grid place-items-center text-primary shrink-0">
+            <div className="h-12 w-12 rounded-lg bg-primary/10 grid place-items-center text-primary shrink-0 ring-1 ring-primary/20">
               <MapPin className="h-5 w-5" />
             </div>
             <div className="min-w-0 flex-1">
-              <div className="font-semibold truncate">{v.name}</div>
-              <div className="text-xs text-muted-foreground mt-0.5">
-                {v.matches} {v.matches === 1 ? "partida" : "partidas"}
+              <div className="font-display text-lg tracking-wide uppercase leading-tight truncate">
+                {v.name}
               </div>
+              <div className="text-[11px] uppercase tracking-widest text-muted-foreground mt-1 font-semibold">
+                {v.matches === 1 ? "partida" : "partidas"}
+              </div>
+            </div>
+            <div className="stat-number text-4xl text-foreground/90 tabular-nums shrink-0 pr-1">
+              {v.matches}
             </div>
           </div>
         ))}
       </div>
+
     </PublicShell>
   );
 }

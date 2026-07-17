@@ -21,7 +21,7 @@ export function AthleteCard({
     <button
       type="button"
       onClick={onClick}
-      className="text-left rounded-lg border border-border bg-card p-4 hover:border-primary/60 transition-colors w-full"
+      className="text-left rounded-xl border border-border bg-card p-4 hover:border-primary/50 hover:-translate-y-0.5 hover:shadow-[0_8px_24px_-12px_rgba(21,101,245,0.35)] transition-all w-full"
     >
       <div className="flex items-center gap-3">
         <AthleteAvatar
@@ -32,10 +32,10 @@ export function AthleteCard({
           size={56}
         />
         <div className="min-w-0">
-          <div className="font-display text-xl tracking-wide truncate">
+          <div className="font-display text-2xl tracking-wide uppercase leading-none truncate">
             {athlete.nickname || athlete.full_name || "Atleta sem nome"}
           </div>
-          <div className="text-xs text-muted-foreground truncate">
+          <div className="text-[11px] uppercase tracking-widest text-muted-foreground truncate mt-1.5 font-semibold">
             {athlete.team_name ?? "Sem time"}
             {athlete.position ? ` · ${athlete.position}` : ""}
           </div>
@@ -54,8 +54,9 @@ export function AthleteCard({
 function Stat({ label, value }: { label: string; value: string }) {
   return (
     <div className="rounded-md border border-border bg-background/50 py-2">
-      <div className="font-display text-lg leading-none">{value}</div>
-      <div className="text-[10px] uppercase tracking-wider text-muted-foreground mt-1">{label}</div>
+      <div className="stat-number text-xl">{value}</div>
+      <div className="text-[10px] uppercase tracking-widest text-muted-foreground mt-1 font-semibold">{label}</div>
     </div>
   );
 }
+

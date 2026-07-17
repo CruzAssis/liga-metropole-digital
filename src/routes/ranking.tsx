@@ -170,23 +170,25 @@ function StandingsTable({
                 key={r.team.id}
                 className={`border-b border-border/60 last:border-0 hover:bg-muted/30 transition-colors ${rowCls}`}
               >
-                <td className="p-3 tabular-nums font-mono">
-                  <span
-                    className={
-                      pos <= 3
-                        ? "inline-flex h-6 w-6 items-center justify-center rounded-full bg-primary/15 text-primary font-bold text-xs"
-                        : "text-muted-foreground"
-                    }
-                  >
-                    {pos}
-                  </span>
+                <td className="p-3 tabular-nums">
+                  {pos <= 3 ? (
+                    <span
+                      className={`inline-flex h-8 w-8 items-center justify-center rounded-full stat-number text-base ${
+                        pos === 1 ? "rank-medal-gold" : pos === 2 ? "rank-medal-silver" : "rank-medal-bronze"
+                      }`}
+                    >
+                      {pos}
+                    </span>
+                  ) : (
+                    <span className="stat-number text-lg text-muted-foreground pl-2">{pos}</span>
+                  )}
                 </td>
                 <td className="p-3 font-medium">
                   <div className="flex items-center gap-2.5 min-w-0">
                     {r.team.logo_url ? (
-                      <img src={r.team.logo_url} alt="" className="h-7 w-7 rounded-md object-cover ring-1 ring-border shrink-0" />
+                      <img src={r.team.logo_url} alt="" className="h-8 w-8 rounded-md object-cover ring-1 ring-border shrink-0" />
                     ) : (
-                      <div className="h-7 w-7 rounded-md bg-muted grid place-items-center text-[10px] font-bold text-muted-foreground shrink-0">
+                      <div className="h-8 w-8 rounded-md bg-muted grid place-items-center text-[11px] font-bold text-muted-foreground shrink-0">
                         {r.team.short_name?.[0] ?? "?"}
                       </div>
                     )}
@@ -197,9 +199,9 @@ function StandingsTable({
                     )}
                   </div>
                 </td>
-                <td className="text-center p-2 font-bold text-primary tabular-nums text-base">{r.points}</td>
+                <td className="text-center p-2 stat-number text-2xl text-primary">{r.points}</td>
                 <td className="text-center p-2 tabular-nums text-muted-foreground">{r.played}</td>
-                <td className="text-center p-2 tabular-nums">{r.wins}</td>
+                <td className="text-center p-2 tabular-nums font-semibold">{r.wins}</td>
                 <td className="text-center p-2 tabular-nums text-muted-foreground">{r.draws}</td>
                 <td className="text-center p-2 tabular-nums text-muted-foreground">{r.losses}</td>
                 <td className="text-center p-2 tabular-nums">{r.gf}</td>
@@ -209,6 +211,7 @@ function StandingsTable({
                 </td>
                 <td className="text-center p-2 tabular-nums hidden sm:table-cell text-muted-foreground">{r.supporters}</td>
               </tr>
+
             );
           })}
         </tbody>

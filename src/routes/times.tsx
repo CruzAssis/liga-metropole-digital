@@ -29,16 +29,16 @@ export const Route = createFileRoute("/times")({
 function TeamCard({ t }: { t: Team }) {
   const inner = (
     <>
-      <div className="h-14 w-14 rounded-xl bg-muted overflow-hidden grid place-items-center ring-1 ring-border shrink-0 group-hover:ring-primary/40 transition-all">
+      <div className="h-16 w-16 rounded-xl bg-muted overflow-hidden grid place-items-center ring-1 ring-border shrink-0 group-hover:ring-primary/40 transition-all">
         {t.logo_url ? (
           <img src={t.logo_url} alt={t.name} className="h-full w-full object-cover" />
         ) : (
-          <span className="font-display text-2xl text-muted-foreground">{t.short_name?.[0] ?? "?"}</span>
+          <span className="font-display text-3xl text-muted-foreground">{t.short_name?.[0] ?? "?"}</span>
         )}
       </div>
       <div className="min-w-0 flex-1">
-        <div className="font-semibold text-foreground truncate">{t.name}</div>
-        <div className="text-xs text-muted-foreground font-mono tracking-wider uppercase mt-0.5">
+        <div className="font-display text-xl tracking-wide uppercase leading-tight truncate">{t.name}</div>
+        <div className="text-[11px] text-muted-foreground font-mono tracking-widest uppercase mt-1 font-semibold">
           {t.short_name}
         </div>
       </div>
@@ -49,7 +49,8 @@ function TeamCard({ t }: { t: Team }) {
   );
 
   const baseCls =
-    "group flex items-center gap-3 rounded-xl border border-border bg-card p-4 transition-all";
+    "group flex items-center gap-4 rounded-xl border border-border bg-card p-4 transition-all";
+
   const linkCls = `${baseCls} hover:border-primary/40 hover:shadow-[0_8px_24px_-12px_rgba(21,101,245,0.4)] hover:-translate-y-0.5`;
 
   return t.slug ? (
