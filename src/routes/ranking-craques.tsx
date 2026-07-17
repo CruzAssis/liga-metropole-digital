@@ -4,6 +4,8 @@ import { supabase } from "@/integrations/supabase/client";
 import { PublicShell } from "@/components/PublicShell";
 import { PageHeader } from "@/components/PageHeader";
 import { AthleteAvatar } from "@/components/athletes/AthleteAvatar";
+import { FilterPill } from "@/components/ui-kit";
+import { SkeletonAthleteCard } from "@/components/AppSkeletons";
 import { Badge } from "@/components/ui/badge";
 import { Star, Trophy, Target, Crown, Medal } from "lucide-react";
 
@@ -124,23 +126,22 @@ function RankingCraquesPage() {
             Mínimo de avaliações:
           </span>
           {[3, 5, 10].map((n) => (
-            <button
+            <FilterPill
               key={n}
+              active={minEval === n}
               onClick={() => setMinEval(n)}
-              className={`px-3 py-1 rounded-full text-xs font-semibold border transition ${
-                minEval === n
-                  ? "bg-primary text-primary-foreground border-primary"
-                  : "bg-card text-muted-foreground border-border hover:border-primary/50"
-              }`}
+              className="text-xs"
             >
               {n}+
-            </button>
+            </FilterPill>
           ))}
         </div>
 
         {loading ? (
-          <div className="text-center text-muted-foreground text-sm py-16">
-            Carregando ranking...
+          <div className="space-y-3">
+            {[1, 2, 3, 4, 5].map((i) => (
+              <SkeletonAthleteCard key={i} />
+            ))}
           </div>
         ) : rows.length === 0 ? (
           <div className="rounded-xl border border-border bg-card p-8 text-center space-y-3">
@@ -179,7 +180,7 @@ function RankItem({ row, position }: { row: RankRow; position: number }) {
     <Link
       to="/atletas/$id"
       params={{ id: row.athlete_id }}
-      className="flex items-center gap-4 rounded-xl border border-border bg-card p-4 hover:border-primary/50 hover:-translate-y-0.5 hover:shadow-[0_8px_24px_-12px_rgba(21,101,245,0.35)] transition-all"
+      className="card-hover flex items-center gap-4 rounded-xl border border-border bg-card p-4"
     >
       <div className={`w-10 text-center font-black text-2xl tabular-nums ${podium}`}>
         {position <= 3 ? (

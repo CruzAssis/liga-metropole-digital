@@ -1,123 +1,81 @@
-## Escopo
+## Polimento profundo — App público (rotas visitante)
 
-Tornar 100% responsivas todas as rotas e componentes existentes, sem remover features nem mudar o design. Foco em: eliminar overflow horizontal, melhorar leitura e toque no mobile, adaptar tabelas/modais/formulários, manter consistência visual do desktop ao ultrawide.
+Prioridade: **consistência de componentes**. Escopo: rotas públicas (`/`, `/agenda`, `/ranking`, `/ranking-craques`, `/times`, `/atletas`, `/manifesto/$slug`, `/resultados`, `/partidas/$id`, `/times/$slug`, `/atletas/$id`, `/locais`) e o shell (`PublicShell`, `PageHeader`). Identidade "Estádio Noturno" preservada — Bebas Neue/Barlow, azul #1565F5, dark. Sem tocar em auth/admin/sumula/onboarding.
 
-## Fase 1 — Auditoria (só leitura)
+### Fase 1 — Tokens e primitives (base compartilhada)
 
-Vou varrer o código para catalogar problemas antes de editar:
+**`src/styles.css`**: sem novas cores. Adicionar tokens semânticos que hoje faltam:
+- `--surface-1` / `--surface-2` / `--surface-3` (base, card, elevated)
+- `--border-subtle` / `--border-strong`
+- `--radius-card: 14px`, `--radius-pill: 999px`
+- `--shadow-card`, `--shadow-card-hover`
+- `--ring-focus` (2px `--primary` @ 50%)
+- Utilities novos: `@utility surface-card`, `@utility surface-elevated`, `@utility focus-ring`, `@utility hairline` (borda de 1px consistente)
+- Escala de título: `.h-display` (Bebas, clamp responsivo), `.h-section`, `.h-card`, `.eyebrow` (small caps Barlow Condensed)
+- Anima: reaproveitar `animate-fade-in` já existente; adicionar `@utility card-hover` (translate-y sutil + shadow)
 
-- Overflow horizontal: buscar por `w-[<valor px>]`, `min-w-[<valor px>]`, `whitespace-nowrap`, tabelas sem wrapper com scroll, `overflow-x-*` mal usado.
-- Widths fixos: `w-[NNNpx]`, `min-w-[NNNpx]`, `max-w-[NNNpx]` sem contrapartida responsiva.
-- Headers/rows quebrando: `flex flex-wrap` com texto + widgets (padrão errado documentado no projeto — deve virar grid `grid-cols-[minmax(0,1fr)_auto] sm:flex`).
-- Tabelas: componentes `<Table>` usados sem wrapper `overflow-x-auto` no mobile — decidir entre scroll horizontal em wrapper ou virar cards no mobile.
-- Modais/Dialogs: verificar `Dialog` que não usa `max-h-[90vh]` + `overflow-y-auto`, e formulários dentro deles.
-- Tipografia: `text-4xl`+ sem escala `text-2xl sm:text-3xl md:text-4xl`.
-- Sidebar admin: comportamento em mobile (`AppSidebar` já é shadcn `collapsible="icon"` — validar trigger visível no header).
-- Imagens: `<img>` sem `max-width:100%` (Tailwind classes ausentes).
-- Botões `size="icon"` como alvo principal de toque (< 44px).
+### Fase 2 — Kit unificado de componentes (novos wrappers)
 
-Rotas para revisar em ordem de tráfego/impacto:
-1. Públicas de alto tráfego: `index`, `ranking`, `ranking-craques`, `resultados`, `atletas`, `atletas.$id`, `times`, `times.$slug`, `agenda`, `partidas.$id`, `sumula-visual.$partidaId`.
-2. Onboarding/auth: `login`, `signup`, `forgot-password`, `reset-password`, `onboarding.*`, `convite.$code`.
-3. Autenticadas do usuário: `minha-conta`, `minha-conta/excluir-conta`, `elenco`, `inscricao`.
-4. Admin: `admin/dashboard`, `admin/times`, `admin/sumulas`, `admin/usuarios`, `admin/triagem`, `admin/notificacoes`, `admin/financeiro`, `admin/ligas`, `admin/sorteio`, `admin/master-switch`, `admin/manifesto`.
-5. Institucionais: `manifesto.$slug`, `termos`, `privacidade`, `locais`, `verificar`, `sumula-exemplo`.
+Todos em `src/components/ui-kit/`, wrapping shadcn — não substituem, padronizam uso:
 
-Componentes para revisar:
-- `AppShell`, `AppSidebar`, `PublicShell`, `PageHeader` (base do layout — impacto em todas as rotas).
-- `athletes/*`, `matches/*`, `teams/*`, `home/*`, `DestaqueShareCard`, `WelcomeAthleteModal`, `ManifestoContent`.
+1. `SectionHeader` — eyebrow + título + subtítulo + slot de ações. Substitui variantes ad-hoc de header dentro das páginas (não confundir com `PageHeader` global, que fica).
+2. `StatCard` — número grande Bebas + label Barlow Condensed uppercase + ícone opcional. Padrão único para KPIs do home/ranking/times.
+3. `MetaBadge` — badge padronizado (status, série, rodada). Variants: neutral, primary, success, warn, danger.
+4. `EmptyState` — já existe em `AppSkeletons`; extrair para ui-kit com CTA opcional e usar em todas as listas.
+5. `DataCard` — card genérico com header/footer opcionais, hover state consistente, radius/shadow tokens.
+6. `Chip` / `FilterPill` — para filtros de rodada/categoria (agenda, ranking, resultados).
+7. `IconTile` — quadrado com ícone (usado em CTAs do home, feature strip).
 
-Entregável da auditoria: lista concreta de arquivos + problemas encontrados (sem código ainda), agrupada por categoria.
+Regra: nenhum `bg-zinc-*`/`bg-[#...]` novo. Sempre tokens.
 
-## Fase 2 — Correções (por categoria, não por arquivo)
+### Fase 3 — Aplicação por rota
 
-Aplicar padrões consistentes usando os utilitários que o projeto já usa (Tailwind v4 + shadcn):
+- **`PublicShell`**: garantir max-w consistente (`max-w-7xl`), gutters `px-4 sm:px-6 lg:px-8`, safe-area no mobile, focus outline visível na navegação.
+- **`PageHeader`**: alinhar tipografia (`.h-display` + subtítulo `.text-muted-foreground`), ações wrapam consistentes.
+- **`/` (index)**: hero mantém, seções abaixo migram para `SectionHeader` + `DataCard`/`StatCard`. Feature strip usa `IconTile`. CTA único destacado.
+- **`/agenda`, `/resultados`**: filtros de rodada viram `FilterPill`; cards de partida com `DataCard` + `MetaBadge`. Empty state via `EmptyState`.
+- **`/ranking`, `/ranking-craques`**: tabs padronizadas (`Tabs` shadcn com `MetaBadge` de série). Tabela com header sticky, zebra sutil, avatar `size-8`, badge de posição consistente.
+- **`/times`**: grid responsivo `grid-cols-1 sm:2 lg:3 xl:4`, `DataCard` com escudo grande + nome (`.h-card`) + `MetaBadge` série + linha de meta (jogadores / diretores).
+- **`/atletas`**: mesmo grid, `AthleteCard` refinado (avatar consistente, badge de posição, chip de time). Filtros via `FilterPill`.
+- **`/manifesto/$slug`**: tipografia editorial (título display + lead), largura de leitura `max-w-prose`, spacing entre parágrafos consistente.
+- **`/partidas/$id`, `/times/$slug`, `/atletas/$id`**: header com escudo/avatar grande, meta em `MetaBadge`, seções separadas por `SectionHeader`.
+- **`/locais`**: cards padronizados via `DataCard` com foto + endereço + CTA.
 
-### 2.1 Shell e navegação
-- Garantir que o layout base (`AppShell`/`PublicShell`) tenha `min-h-screen w-full overflow-x-hidden` no wrapper e paddings responsivos (`px-4 sm:px-6 lg:px-8`).
-- Header com `SidebarTrigger` sempre visível no mobile (área ≥ 44×44).
-- Menus/dropdowns em Radix (shadcn) já são responsivos; só ajustar largura máx e `max-h-[80vh] overflow-y-auto` onde faltar.
+### Fase 4 — Estados
 
-### 2.2 Headers de página
-Padronizar linhas título + ações com o padrão documentado do projeto:
+- **Loading**: já usamos `AppSkeletons`. Verificar que toda rota pública usa skeleton estruturado (nada textual).
+- **Empty**: `EmptyState` em toda lista sem dados (ranking sem temporada, times vazios, atletas sem filtro).
+- **Erro**: `errorComponent` das rotas com `EmptyState` variant "danger" + botão retry (`router.invalidate()`).
+- **Hover/focus**: tokens únicos aplicados via `card-hover` e `focus-ring`.
 
-```tsx
-<header className="grid grid-cols-[minmax(0,1fr)_auto] items-center gap-3 sm:flex sm:flex-wrap sm:justify-between">
-  <div className="flex min-w-0 items-center gap-3">
-    <Avatar className="shrink-0" />
-    <h1 className="truncate text-xl font-bold sm:text-2xl md:text-3xl">…</h1>
-  </div>
-  <Actions />
-</header>
-```
+### Fase 5 — Microinterações
 
-### 2.3 Grids de cartões (times, atletas, ranking, agenda, resultados)
-- Padrão: `grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4 sm:gap-6`.
-- Cartão em si com `min-w-0` e texto com `truncate` ou `line-clamp-2`.
+- `card-hover` em todos os `DataCard`
+- `animate-fade-in` em listas quando dados chegam
+- Toast de sonner: variant único (não misturar `toast()` e `toast.success()` com estilos diferentes)
+- Transição de tab / filtro: `transition-colors` 150ms
+- Sem animações pesadas.
 
-### 2.4 Tabelas (admin/triagem, admin/times, admin/sumulas, admin/usuarios, admin/financeiro, ranking, resultados)
-Duas abordagens dependendo da densidade:
-- Densidade baixa/média: envolver em `<div className="overflow-x-auto -mx-4 sm:mx-0 px-4 sm:px-0">` para permitir scroll horizontal no mobile sem quebrar o layout ao redor.
-- Densidade alta com muitas colunas: manter tabela em `md:` e renderizar variação em cards no mobile (`md:hidden` cards + `hidden md:block` tabela). Aplicar só onde a tabela hoje sofre — não em todas.
+### Fase 6 — Validação
 
-### 2.5 Modais/Dialogs (SumulaDialog, ConfirmSumulaDialog, WelcomeAthleteModal, dialogs internos de admin)
-- `DialogContent` com `max-h-[90dvh] overflow-y-auto w-[min(100%,32rem)] sm:max-w-lg` (ajustar tamanho por caso).
-- Formulários internos: `grid grid-cols-1 sm:grid-cols-2 gap-4` quando fizer sentido; caso contrário empilhados.
-- Botões de ação em `flex flex-col-reverse gap-2 sm:flex-row sm:justify-end`.
+- Typecheck + build limpos
+- Playwright em 3 viewports (390/820/1440) nas 6 rotas principais, screenshots antes/depois para inspeção visual
+- Auditar `rg "bg-zinc-|bg-\[#"` nas rotas alteradas: zero ocorrências novas
 
-### 2.6 Formulários (login, signup, onboarding.*, inscricao, admin/*)
-- Inputs full-width no mobile (padrão shadcn já cobre; validar containers pai).
-- Botões primários `w-full sm:w-auto` em fluxos de submissão longos.
-- Espaçamento vertical `space-y-4 sm:space-y-6`.
+### Fora do escopo
 
-### 2.7 Tipografia
-- Escala de títulos: `text-2xl sm:text-3xl md:text-4xl` para h1 de página; `text-lg sm:text-xl` para h2 de seção.
-- Números grandes de destaque (ranking, home stats): `text-3xl sm:text-4xl md:text-5xl` com `tabular-nums`.
-- Quebra segura: adicionar `break-words` em nomes/labels que possam ser longos; `truncate` só quando houver tooltip/expandir alternativo.
+- Rotas autenticadas, admin, súmula, onboarding, auth (login/signup/reset/verificar/convite)
+- Mudança de paleta, fontes ou logo
+- Refactor de dados, RLS, server functions
+- SEO/head (já configurado)
 
-### 2.8 Imagens e mídia
-- `<img>` sempre com `className="w-full h-auto"` ou dentro de `aspect-*` com `size-full object-cover`.
-- HeroCarousel: garantir alturas fluidas por breakpoint em vez de fixas.
-- DestaqueShareCard e MatchdayFlyer (renderizados para compartilhar): manter dimensões fixas de exportação, mas envolver no preview com `overflow-auto` no mobile.
+### Ordem de execução
 
-### 2.9 Contêineres e overflow
-- `main` global com `overflow-x-hidden` para segurar bugs de estouro; nunca o oposto (`overflow-x-auto`) no `body`.
-- Substituir `w-[NNNpx]` por `w-full max-w-[NNNpx]` onde encontrado.
+1. Tokens + utilities em `src/styles.css` (Fase 1)
+2. Criar `src/components/ui-kit/` com 7 componentes (Fase 2)
+3. Refatorar `PublicShell`/`PageHeader` (Fase 3)
+4. Rotas por criticidade: index → ranking → agenda → times → atletas → manifesto → resto (Fase 3)
+5. Estados + microinterações inline por rota (Fases 4/5)
+6. Validação final (Fase 6)
 
-### 2.10 Alvos de toque
-- Botões `size="icon"` que são o alvo principal (fechar dialog, abrir menu): promover para `min-h-11 min-w-11`.
-- Espaçar chips/links adjacentes com `gap-2` mínimo.
-
-## Fase 3 — Validação
-
-- Build da app + typecheck (automático do harness).
-- Playwright headless: abrir preview local em 3 viewports (`390×844` mobile, `820×1180` tablet, `1440×900` desktop) e rodar por 5–6 rotas críticas (`/`, `/ranking`, `/times`, `/agenda`, `/minha-conta` autenticado, `/admin/times` como admin se possível). Screenshot de cada uma.
-- Checar: sem scroll horizontal (`document.documentElement.scrollWidth === clientWidth`), header sem sobreposição, tabelas navegáveis, modais críticos abrem sem cortar botões.
-
-## Detalhes técnicos
-
-- Stack: Tailwind v4 (via `@import "tailwindcss"` em `src/styles.css`, tokens em `@theme`), shadcn/ui, TanStack Router com file-based routing em `src/routes/`.
-- Breakpoints usados: os defaults do Tailwind (`sm 640 / md 768 / lg 1024 / xl 1280 / 2xl 1536`). Não vou introduzir breakpoints custom para manter consistência.
-- `dvh`/`svh` para alturas de tela cheia (barra do Safari mobile) onde relevante.
-- Nada de `@media` manual em CSS quando o utilitário Tailwind resolve.
-
-## Regras que vou seguir
-
-- Não altero lógica de negócio, RLS, server functions, nem tipos.
-- Não removo componentes/páginas.
-- Não introduzo libs novas.
-- Mudanças em lote por categoria de problema para manter o diff coerente.
-- Cada edit mantém o design base — mesmas cores, mesmos tokens, mesmos ícones.
-
-## Fora do escopo
-
-- Acessibilidade profunda (ARIA, foco de teclado além do que shadcn já entrega): mencionarei se encontrar problemas críticos, mas não é o pedido.
-- Otimização de performance (bundle, imagens): idem.
-- Reescrever tabelas complexas de admin como grids de cards (só faço quando a tabela realmente estoura no mobile e não há solução via scroll).
-
-## Sequência de entrega
-
-1. Rodar auditoria concreta e devolver a lista de arquivos afetados agrupada por categoria (5–10 min de leitura).
-2. Aplicar correções em ordem: shell/nav → headers → grids → tabelas → dialogs → formulários → tipografia/imagens.
-3. Rodar Playwright multi-viewport nas rotas críticas e anexar screenshots.
-4. Fechar com um resumo do que mudou e o que ficou fora.
+Tempo total estimado: 1 sessão longa. Posso pausar após qualquer fase para você revisar.

@@ -244,41 +244,41 @@ function HomePage() {
 
           {/* Cards úteis */}
           <div className="mt-8 grid grid-cols-2 md:grid-cols-4 gap-3 text-left">
-            <Link to="/agenda" className="rounded-xl bg-black/60 backdrop-blur border border-zinc-800 hover:border-[#1565F5]/60 p-4 transition-colors">
-              <Calendar className="h-5 w-5 text-[#4C9BFF] mb-2" />
-              <p className="text-xs uppercase tracking-wider text-zinc-400">Próximos jogos</p>
-              <p className="text-sm font-semibold text-white mt-0.5">Ver agenda</p>
+            <Link to="/agenda" className="card-hover rounded-xl bg-black/60 backdrop-blur border border-border p-4">
+              <Calendar className="h-5 w-5 text-primary mb-2" />
+              <p className="text-xs uppercase tracking-wider text-muted-foreground">Próximos jogos</p>
+              <p className="text-sm font-semibold text-foreground mt-0.5">Ver agenda</p>
             </Link>
-            <Link to="/ranking" className="rounded-xl bg-black/60 backdrop-blur border border-zinc-800 hover:border-[#1565F5]/60 p-4 transition-colors">
-              <Trophy className="h-5 w-5 text-[#4C9BFF] mb-2" />
-              <p className="text-xs uppercase tracking-wider text-zinc-400">Classificação</p>
-              <p className="text-sm font-semibold text-white mt-0.5">Ranking geral</p>
+            <Link to="/ranking" className="card-hover rounded-xl bg-black/60 backdrop-blur border border-border p-4">
+              <Trophy className="h-5 w-5 text-primary mb-2" />
+              <p className="text-xs uppercase tracking-wider text-muted-foreground">Classificação</p>
+              <p className="text-sm font-semibold text-foreground mt-0.5">Ranking geral</p>
             </Link>
-            <Link to="/times" className="rounded-xl bg-black/60 backdrop-blur border border-zinc-800 hover:border-[#1565F5]/60 p-4 transition-colors">
-              <LayoutDashboard className="h-5 w-5 text-[#4C9BFF] mb-2" />
-              <p className="text-xs uppercase tracking-wider text-zinc-400">Clubes fundadores</p>
-              <p className="text-sm font-semibold text-white mt-0.5">Ver times</p>
+            <Link to="/times" className="card-hover rounded-xl bg-black/60 backdrop-blur border border-border p-4">
+              <LayoutDashboard className="h-5 w-5 text-primary mb-2" />
+              <p className="text-xs uppercase tracking-wider text-muted-foreground">Clubes fundadores</p>
+              <p className="text-sm font-semibold text-foreground mt-0.5">Ver times</p>
             </Link>
-            <Link to="/atletas" className="rounded-xl bg-black/60 backdrop-blur border border-zinc-800 hover:border-[#1565F5]/60 p-4 transition-colors">
-              <User className="h-5 w-5 text-[#4C9BFF] mb-2" />
-              <p className="text-xs uppercase tracking-wider text-zinc-400">Atletas registrados</p>
-              <p className="text-sm font-semibold text-white mt-0.5">Ver atletas</p>
+            <Link to="/atletas" className="card-hover rounded-xl bg-black/60 backdrop-blur border border-border p-4">
+              <User className="h-5 w-5 text-primary mb-2" />
+              <p className="text-xs uppercase tracking-wider text-muted-foreground">Atletas registrados</p>
+              <p className="text-sm font-semibold text-foreground mt-0.5">Ver atletas</p>
             </Link>
           </div>
 
           {/* Info rápida sobre a liga */}
           <div className="mt-6 grid grid-cols-1 md:grid-cols-3 gap-3 text-left">
-            <div className="rounded-xl bg-black/50 backdrop-blur border border-zinc-800 p-4">
-              <p className="text-xs uppercase tracking-wider text-[#4C9BFF] font-semibold">Formato</p>
-              <p className="text-sm text-zinc-200 mt-1">32 subprefeituras, todas em pontos corridos e mata-mata no final.</p>
+            <div className="rounded-xl bg-black/50 backdrop-blur border border-border p-4">
+              <p className="text-xs uppercase tracking-wider text-primary font-semibold">Formato</p>
+              <p className="text-sm text-foreground/90 mt-1">32 subprefeituras, todas em pontos corridos e mata-mata no final.</p>
             </div>
-            <div className="rounded-xl bg-black/50 backdrop-blur border border-zinc-800 p-4">
-              <p className="text-xs uppercase tracking-wider text-[#4C9BFF] font-semibold">Súmula digital</p>
-              <p className="text-sm text-zinc-200 mt-1">Diretores lançam placar, gols e destaques direto pelo app após cada jogo.</p>
+            <div className="rounded-xl bg-black/50 backdrop-blur border border-border p-4">
+              <p className="text-xs uppercase tracking-wider text-primary font-semibold">Súmula digital</p>
+              <p className="text-sm text-foreground/90 mt-1">Diretores lançam placar, gols e destaques direto pelo app após cada jogo.</p>
             </div>
-            <div className="rounded-xl bg-black/50 backdrop-blur border border-zinc-800 p-4">
-              <p className="text-xs uppercase tracking-wider text-[#4C9BFF] font-semibold">ID Metrópole</p>
-              <p className="text-sm text-zinc-200 mt-1">Cada atleta ganha um perfil verificado com histórico e estatísticas oficiais.</p>
+            <div className="rounded-xl bg-black/50 backdrop-blur border border-border p-4">
+              <p className="text-xs uppercase tracking-wider text-primary font-semibold">ID Metrópole</p>
+              <p className="text-sm text-foreground/90 mt-1">Cada atleta ganha um perfil verificado com histórico e estatísticas oficiais.</p>
             </div>
           </div>
         </div>
@@ -291,21 +291,21 @@ function HomePage() {
             <div>
               <div className="flex items-center justify-between mb-4">
                 <h2 className="text-xl font-bold flex items-center gap-2">
-                  <Trophy className="h-5 w-5 text-[#1565F5]" />Últimos Resultados
+                  <Trophy className="h-5 w-5 text-primary" />Últimos Resultados
                 </h2>
-                <Link to="/resultados" className="text-sm text-[#1565F5] hover:underline flex items-center gap-1">
+                <Link to="/resultados" className="text-sm text-primary hover:underline flex items-center gap-1">
                   Ver todos <ChevronRight className="h-4 w-4" />
                 </Link>
               </div>
               <div className="space-y-3">
                 {recentMatches.map((m) => (
-                  <div key={m.id} className="bg-zinc-900 border border-zinc-800 rounded-xl p-4 flex items-center justify-between">
-                    <div className="flex-1 text-right"><span className="font-semibold text-zinc-100 text-sm">{m.home_team}</span></div>
+                  <div key={m.id} className="card-hover bg-card border border-border rounded-xl p-4 flex items-center justify-between">
+                    <div className="flex-1 text-right"><span className="font-semibold text-foreground text-sm">{m.home_team}</span></div>
                     <div className="mx-4 text-center">
-                      <span className="text-2xl font-bold text-white tabular-nums">{m.home_score ?? '-'} x {m.away_score ?? '-'}</span>
-                      <p className="text-xs text-zinc-500 mt-0.5">{m.conference_name}</p>
+                      <span className="text-2xl font-bold text-foreground tabular-nums">{m.home_score ?? '-'} x {m.away_score ?? '-'}</span>
+                      <p className="text-xs text-muted-foreground mt-0.5">{m.conference_name}</p>
                     </div>
-                    <div className="flex-1 text-left"><span className="font-semibold text-zinc-100 text-sm">{m.away_team}</span></div>
+                    <div className="flex-1 text-left"><span className="font-semibold text-foreground text-sm">{m.away_team}</span></div>
                   </div>
                 ))}
               </div>
@@ -315,9 +315,9 @@ function HomePage() {
             <div>
               <div className="flex items-center justify-between mb-4">
                 <h2 className="text-xl font-bold flex items-center gap-2">
-                  <Calendar className="h-5 w-5 text-[#1565F5]" />Próximos Jogos
+                  <Calendar className="h-5 w-5 text-primary" />Próximos Jogos
                 </h2>
-                <Link to="/agenda" className="text-sm text-[#1565F5] hover:underline flex items-center gap-1">
+                <Link to="/agenda" className="text-sm text-primary hover:underline flex items-center gap-1">
                   Ver agenda <ChevronRight className="h-4 w-4" />
                 </Link>
               </div>
@@ -327,15 +327,15 @@ function HomePage() {
                   const dateStr = dt.toLocaleDateString('pt-BR', { weekday: 'short', day: '2-digit', month: '2-digit' })
                   const timeStr = dt.toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' })
                   return (
-                    <div key={m.id} className="bg-zinc-900 border border-zinc-800 rounded-xl p-4">
+                    <div key={m.id} className="card-hover bg-card border border-border rounded-xl p-4">
                       <div className="flex items-center justify-between mb-2">
-                        <span className="text-xs text-[#1565F5] font-medium">{m.conference_name}</span>
-                        <span className="text-xs text-zinc-400">{dateStr} - {timeStr}</span>
+                        <span className="text-xs text-primary font-medium">{m.conference_name}</span>
+                        <span className="text-xs text-muted-foreground">{dateStr} - {timeStr}</span>
                       </div>
                       <div className="flex items-center justify-between">
-                        <span className="font-semibold text-zinc-100 text-sm">{m.home_team}</span>
-                        <span className="text-zinc-600 font-bold text-lg mx-3">x</span>
-                        <span className="font-semibold text-zinc-100 text-sm text-right">{m.away_team}</span>
+                        <span className="font-semibold text-foreground text-sm">{m.home_team}</span>
+                        <span className="text-muted-foreground font-bold text-lg mx-3">x</span>
+                        <span className="font-semibold text-foreground text-sm text-right">{m.away_team}</span>
                       </div>
                     </div>
                   )
@@ -344,7 +344,7 @@ function HomePage() {
             </div>
           )}
           {recentMatches.length === 0 && upcomingMatches.length === 0 && (
-            <p className="text-zinc-500 text-center py-8">Nenhum jogo disponível no momento.</p>
+            <p className="text-muted-foreground text-center py-8">Nenhum jogo disponível no momento.</p>
           )}
         </div>
       </section>

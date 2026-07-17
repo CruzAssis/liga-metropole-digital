@@ -86,7 +86,7 @@ function ManifestoPage() {
 
   if (loading) {
     return (
-      <div className="min-h-screen bg-black flex items-center justify-center text-zinc-400">
+      <div className="min-h-screen bg-background flex items-center justify-center text-muted-foreground">
         Carregando manifesto...
       </div>
     )
@@ -94,11 +94,11 @@ function ManifestoPage() {
 
   if (error || !team) {
     return (
-      <div className="min-h-screen bg-black flex items-center justify-center px-4">
+      <div className="min-h-screen bg-background flex items-center justify-center px-4">
         <div className="text-center space-y-4 max-w-md">
-          <AlertCircle className="mx-auto h-10 w-10 text-red-400" />
-          <p className="text-red-400 text-sm">{error || 'Clube não encontrado.'}</p>
-          <Link to="/" className="inline-block text-sm text-[#1565F5] hover:underline">
+          <AlertCircle className="mx-auto h-10 w-10 text-destructive" />
+          <p className="text-destructive text-sm">{error || 'Clube não encontrado.'}</p>
+          <Link to="/" className="inline-block text-sm text-primary hover:underline">
             Voltar para o início
           </Link>
         </div>
@@ -114,11 +114,11 @@ function ManifestoPage() {
 
 function ManifestoError() {
   return (
-    <div className="min-h-screen bg-black flex items-center justify-center px-4">
+    <div className="min-h-screen bg-background flex items-center justify-center px-4">
       <div className="text-center space-y-3">
-        <AlertCircle className="mx-auto h-10 w-10 text-red-400" />
-        <p className="text-red-400 text-sm">Não conseguimos carregar este manifesto.</p>
-        <Link to="/" className="text-[#1565F5] text-sm hover:underline">
+        <AlertCircle className="mx-auto h-10 w-10 text-destructive" />
+        <p className="text-destructive text-sm">Não conseguimos carregar este manifesto.</p>
+        <Link to="/" className="text-primary text-sm hover:underline">
           Voltar para o início
         </Link>
       </div>
@@ -128,11 +128,11 @@ function ManifestoError() {
 
 function ManifestoNotFound() {
   return (
-    <div className="min-h-screen bg-black flex items-center justify-center px-4">
+    <div className="min-h-screen bg-background flex items-center justify-center px-4">
       <div className="text-center space-y-3">
-        <AlertCircle className="mx-auto h-10 w-10 text-zinc-500" />
-        <p className="text-zinc-400 text-sm">Clube não encontrado.</p>
-        <Link to="/" className="text-[#1565F5] text-sm hover:underline">
+        <AlertCircle className="mx-auto h-10 w-10 text-muted-foreground" />
+        <p className="text-muted-foreground text-sm">Clube não encontrado.</p>
+        <Link to="/" className="text-primary text-sm hover:underline">
           Voltar para o início
         </Link>
       </div>

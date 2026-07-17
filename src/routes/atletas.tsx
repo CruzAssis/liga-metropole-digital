@@ -12,6 +12,7 @@ import { Badge } from "@/components/ui/badge";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { PublicShell } from "@/components/PublicShell";
 import { PageHeader } from "@/components/PageHeader";
+import { FilterPill } from "@/components/ui-kit";
 import { getAthleteRankings } from "@/lib/stats.functions";
 import { Goal, Square, Star } from "lucide-react";
 
@@ -28,18 +29,14 @@ function LadoTabs({ value, onChange, counts }: { value: LadoFilter; onChange: (v
   return (
     <div className="mb-4 flex flex-wrap gap-2">
       {tabs.map((t) => (
-        <button
+        <FilterPill
           key={t.key}
+          active={value === t.key}
           onClick={() => onChange(t.key)}
-          className={[
-            "text-xs font-semibold px-3.5 py-1.5 rounded-full border transition-all",
-            value === t.key
-              ? "bg-primary text-primary-foreground border-primary"
-              : "border-border bg-card text-muted-foreground hover:text-foreground hover:border-primary/40",
-          ].join(" ")}
+          count={counts[t.key]}
         >
-          {t.label} <span className="ml-1 opacity-70">({counts[t.key]})</span>
-        </button>
+          {t.label}
+        </FilterPill>
       ))}
     </div>
   );

@@ -85,8 +85,8 @@ function TeamCard({ t }: { t: Team }) {
   );
 
   const baseCls =
-    "group flex items-center gap-4 rounded-xl border border-border bg-card p-4 transition-all";
-  const linkCls = `${baseCls} hover:border-primary/40 hover:shadow-[0_8px_24px_-12px_rgba(21,101,245,0.4)] hover:-translate-y-0.5`;
+    "group flex items-center gap-4 rounded-xl border border-border bg-card p-4";
+  const linkCls = `${baseCls} card-hover`;
 
   return t.slug ? (
     <Link key={t.id} to="/times/$slug" params={{ slug: t.slug }} className={linkCls}>

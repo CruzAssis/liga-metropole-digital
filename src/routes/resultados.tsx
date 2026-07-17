@@ -1,15 +1,15 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
-import { SkeletonMatchList, EmptyResultados } from "@/components/AppSkeletons";
-import { useEffect, useState, useRef } from "react";
+import { SkeletonMatchList } from "@/components/AppSkeletons";
+import { useEffect, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { PublicShell } from "@/components/PublicShell";
 import { PageHeader } from "@/components/PageHeader";
+import { ConferenceFilter, RoundNav } from "@/components/ui-kit";
 import { Badge } from "@/components/ui/badge";
-import { Button } from "@/components/ui/button";
-import { ChevronLeft, ChevronRight, MapPin } from "lucide-react";
 
 const TOTAL_ROUNDS = 20;
 const FINISHED = ["confirmed", "wo", "finished"];
+
 
 type Match = {
   id: string;
@@ -35,9 +35,8 @@ type Competition = {
   status: string;
 };
 
-const ZONA_LABELS: Record<string, string> = {
-  norte: "Zona Norte", sul: "Zona Sul", leste: "Zona Leste", oeste: "Zona Oeste", centro: "Centro",
-};
+
+
 
 export const Route = createFileRoute("/resultados")({
   component: ResultadosPage,
@@ -56,7 +55,6 @@ function ResultadosPage() {
   const [matches, setMatches] = useState<Match[] | null>(null);
   const [teams, setTeams] = useState<Map<string, string>>(new Map());
   const [loadingMatches, setLoadingMatches] = useState(false);
-  const navRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
     (async () => {
@@ -101,17 +99,6 @@ function ResultadosPage() {
     })();
   }, [selectedComp, selectedRound]);
 
-  useEffect(() => {
-    if (!navRef.current) return;
-    const active = navRef.current.querySelector('[data-active="true"]') as HTMLElement | null;
-    active?.scrollIntoView({ behavior: "smooth", block: "nearest", inline: "center" });
-  }, [selectedRound]);
-
-  const prevRound = () => setSelectedRound((r) => Math.max(1, r - 1));
-  const nextRound = () => setSelectedRound((r) => Math.min(TOTAL_ROUNDS, r + 1));
-
-  const activeComp = competitions.find((c) => c.id === selectedComp);
-
   return (
     <PublicShell>
       <PageHeader
@@ -120,78 +107,18 @@ function ResultadosPage() {
         description="Partidas confirmadas da temporada."
       />
 
+      <ConferenceFilter
+        competitions={competitions}
+        selectedId={selectedComp}
+        onSelect={(id) => { setSelectedComp(id); setSelectedRound(1); }}
+      />
 
-      {/* Conference filter */}
-      {competitions.length > 0 && (
-        <div className="mb-4 space-y-2">
-          <label className="text-xs uppercase tracking-wider text-muted-foreground flex items-center gap-1">
-            <MapPin className="h-3 w-3" /> Conferência
-          </label>
-          <div className="flex flex-wrap gap-2">
-            {competitions.map((c) => (
-              <button
-                key={c.id}
-                onClick={() => { setSelectedComp(c.id); setSelectedRound(1); }}
-                className={[
-                  "text-sm font-semibold px-3.5 py-2 rounded-full border transition-all",
-                  selectedComp === c.id
-                    ? "bg-primary text-primary-foreground border-primary shadow-[0_0_20px_-6px_rgba(21,101,245,0.6)]"
-                    : "border-border bg-card text-muted-foreground hover:text-foreground hover:border-primary/40",
-                ].join(" ")}
-              >
-                {c.conference_name ?? c.name}{c.season ? ` ${c.season}` : ""}
-              </button>
-            ))}
-          </div>
-
-          {activeComp?.subprefeitura && (
-            <p className="text-xs text-muted-foreground flex items-center gap-1">
-              <MapPin className="h-3 w-3" />
-              {activeComp.subprefeitura}
-              {activeComp.zona && ` · ${ZONA_LABELS[activeComp.zona] ?? activeComp.zona}`}
-            </p>
-          )}
-        </div>
-      )}
-
-      {/* Round navigation bar */}
       {selectedComp && (
-        <div className="mb-6">
-          <div className="flex items-center gap-2">
-            <Button variant="outline" size="icon" onClick={prevRound} disabled={selectedRound === 1} className="shrink-0 h-9 w-9">
-              <ChevronLeft className="h-4 w-4" />
-            </Button>
-            <div
-              ref={navRef}
-              className="flex-1 overflow-x-auto scrollbar-none flex gap-1.5 py-1"
-            >
-              {Array.from({ length: TOTAL_ROUNDS }, (_, i) => i + 1).map((r) => (
-                <button
-                  key={r}
-                  data-active={selectedRound === r ? "true" : "false"}
-                  onClick={() => setSelectedRound(r)}
-                  className={[
-                    "shrink-0 px-3.5 py-1.5 rounded-full text-sm font-semibold transition-all",
-                    selectedRound === r
-                      ? "bg-primary text-primary-foreground shadow-[0_0_20px_-6px_rgba(21,101,245,0.6)]"
-                      : "bg-card border border-border text-muted-foreground hover:text-foreground hover:border-primary/40",
-                  ].join(" ")}
-                >
-                  Rod. {r}
-                </button>
-              ))}
-            </div>
-            <Button variant="outline" size="icon" onClick={nextRound} disabled={selectedRound === TOTAL_ROUNDS} className="shrink-0 h-9 w-9">
-              <ChevronRight className="h-4 w-4" />
-            </Button>
-          </div>
-          <p className="text-xs text-muted-foreground mt-2 text-center font-medium">Rodada {selectedRound} de {TOTAL_ROUNDS}</p>
-        </div>
+        <RoundNav total={TOTAL_ROUNDS} value={selectedRound} onChange={setSelectedRound} />
       )}
-
 
       {!selectedComp && competitions.length === 0 && (
-        <div className="rounded-lg border border-border bg-card p-8 text-center text-muted-foreground">
+        <div className="rounded-xl border border-border bg-card p-8 text-center text-muted-foreground">
           Nenhuma conferência ativa. Crie uma liga no painel admin.
         </div>
       )}
@@ -199,11 +126,10 @@ function ResultadosPage() {
       {loadingMatches && <SkeletonMatchList count={5} />}
 
       {!loadingMatches && matches && matches.length === 0 && (
-        <div className="rounded-lg border border-border bg-card p-8 text-center text-muted-foreground">
+        <div className="rounded-xl border border-border bg-card p-8 text-center text-muted-foreground">
           Nenhum resultado para a Rodada {selectedRound} ainda.
         </div>
       )}
-
       <div className="space-y-3">
         {matches?.map((m) => {
           const isWO = m.status === "wo";
@@ -214,7 +140,7 @@ function ResultadosPage() {
               key={m.id}
               to="/partidas/$id"
               params={{ id: m.id }}
-              className="group block rounded-xl border border-border bg-card p-4 hover:border-primary/40 hover:shadow-[0_8px_24px_-12px_rgba(21,101,245,0.4)] hover:-translate-y-0.5 transition-all"
+              className="card-hover group block rounded-xl border border-border bg-card p-4"
             >
               <div className="flex items-center justify-between gap-2 mb-3">
                 <div className="flex items-center gap-2 min-w-0">

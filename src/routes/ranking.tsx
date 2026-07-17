@@ -4,9 +4,10 @@ import { useEffect, useMemo, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { PublicShell } from "@/components/PublicShell";
 import { PageHeader } from "@/components/PageHeader";
+import { ConferenceFilter } from "@/components/ui-kit";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Badge } from "@/components/ui/badge";
-import { MapPin } from "lucide-react";
+
 
 type Match = {
   host_team_id: string;
@@ -55,9 +56,8 @@ type Standing = {
 
 const FINISHED = ["confirmed", "closed", "wo"];
 
-const ZONA_LABELS: Record<string, string> = {
-  norte: "Zona Norte", sul: "Zona Sul", leste: "Zona Leste", oeste: "Zona Oeste", centro: "Centro",
-};
+
+
 
 export const Route = createFileRoute("/ranking")({
   component: RankingPage,
@@ -313,44 +313,19 @@ function RankingPage() {
         description="Fase regular · 20 rodadas · pontos corridos. Vitória 3 · Empate 1 · Derrota 0."
       />
 
-      {/* Conference filter */}
-      {competitions.length > 0 && (
-        <div className="mb-6 space-y-3">
-          <label className="text-[11px] uppercase tracking-[0.14em] text-muted-foreground font-semibold flex items-center gap-1.5">
-            <MapPin className="h-3 w-3" /> Conferência
-          </label>
-          <div className="flex flex-wrap gap-2">
-            {competitions.map((c) => (
-              <button
-                key={c.id}
-                onClick={() => { setSelectedComp(c.id); setMatches(null); }}
-                className={[
-                  "text-sm font-semibold px-3.5 py-2 rounded-full border transition-all",
-                  selectedComp === c.id
-                    ? "bg-primary text-primary-foreground border-primary shadow-[0_0_20px_-6px_rgba(21,101,245,0.6)]"
-                    : "border-border bg-card text-muted-foreground hover:text-foreground hover:border-primary/40",
-                ].join(" ")}
-              >
-                {c.conference_name ?? c.name}
-                {c.season ? ` ${c.season}` : ""}
-              </button>
-            ))}
-          </div>
-          {compsLoaded && competitions.length === 0 && (
+      <ConferenceFilter
+        competitions={competitions}
+        selectedId={selectedComp}
+        onSelect={(id) => { setSelectedComp(id); setMatches(null); }}
+      />
+
+      {compsLoaded && competitions.length === 0 && (
         <div className="mb-8 rounded-xl border border-border bg-card p-8 text-center">
           <p className="text-foreground text-lg font-semibold">Nenhuma conferência ativa</p>
           <p className="text-muted-foreground text-sm mt-2">Crie uma liga no painel admin para visualizar o ranking.</p>
         </div>
       )}
-      {activeComp?.subprefeitura && (
-            <p className="text-xs text-muted-foreground flex items-center gap-1.5">
-              <MapPin className="h-3 w-3" />
-              {activeComp.subprefeitura}
-              {activeComp.zona && ` · ${ZONA_LABELS[activeComp.zona] ?? activeComp.zona}`}
-            </p>
-          )}
-        </div>
-      )}
+
 
 
       {!matches && <SkeletonRankingPage />}
