@@ -6,6 +6,7 @@ import { supabase } from '@/integrations/supabase/client'
 import { Trophy, Calendar, ChevronRight, Menu, X, LayoutDashboard, User } from 'lucide-react'
 import Logo from '@/components/Logo'
 import AnimatedStats from '@/components/home/AnimatedStats'
+import HeroCarousel from '@/components/home/HeroCarousel'
 
 export const Route = createFileRoute('/')({
   component: HomePage,
@@ -121,93 +122,8 @@ function HomePage() {
         </nav>
 
         {/* HERO */}
-        <section
-          className="relative px-4 py-20 md:py-32 text-center overflow-hidden"
-          style={{
-            background:
-              'radial-gradient(ellipse at 50% 0%, rgba(21,101,245,0.12) 0%, transparent 60%), linear-gradient(180deg, #111113 0%, #09090B 60%)',
-          }}
-        >
-          <div className="relative mx-auto max-w-3xl flex flex-col items-center">
-            <span
-              className="inline-flex items-center gap-1.5 mb-8"
-              style={{
-                background: 'rgba(21,101,245,0.12)',
-                border: '1px solid rgba(21,101,245,0.3)',
-                color: '#60A5FA',
-                fontSize: 12,
-                fontWeight: 600,
-                borderRadius: 999,
-                padding: '4px 14px',
-                letterSpacing: '0.02em',
-              }}
-            >
-              ⚽ São Paulo · Zona Norte · Temporada 2026
-            </span>
+        <HeroCarousel />
 
-            <h1
-              style={{
-                fontWeight: 900,
-                fontSize: 'clamp(40px, 8vw, 72px)',
-                lineHeight: 1.0,
-                letterSpacing: '-0.02em',
-                marginBottom: 24,
-                color: '#FAFAFA',
-              }}
-            >
-              O futebol de várzea
-              <br />
-              que <span style={{ color: '#1565F5' }}>MERECIA</span>
-              <br />
-              uma liga real.
-            </h1>
-
-            <p
-              style={{
-                fontSize: 16,
-                color: '#71717A',
-                maxWidth: 480,
-                margin: '0 auto 32px',
-                lineHeight: 1.6,
-              }}
-            >
-              Dados, estatísticas, súmula digital e vitrine para cada jogo. Bem-vindo à Liga Metrópole.
-            </p>
-
-            <div className="flex flex-col sm:flex-row items-center justify-center gap-3 w-full sm:w-auto">
-              <Link
-                to="/signup"
-                search={{ perfil: 'diretor' }}
-                className="w-full sm:w-auto text-center transition-all hover:brightness-110"
-                style={{
-                  background: '#1565F5',
-                  color: '#FFFFFF',
-                  borderRadius: 8,
-                  padding: '12px 24px',
-                  fontWeight: 700,
-                  fontSize: 15,
-                }}
-              >
-                Inscrever meu time →
-              </Link>
-              <Link
-                to="/ranking"
-                className="w-full sm:w-auto text-center transition-colors hover:text-white"
-                style={{
-                  background: 'transparent',
-                  border: '1px solid #27272A',
-                  color: '#A1A1AA',
-                  borderRadius: 8,
-                  padding: '12px 24px',
-                  fontWeight: 600,
-                  fontSize: 15,
-                }}
-              >
-                Ver como funciona
-              </Link>
-            </div>
-          </div>
-        </section>
 
         {/* STATS */}
         <AnimatedStats />
