@@ -140,11 +140,12 @@ function AdminSumulasPage() {
   };
 
   return (
-    <div className="p-6 space-y-8 max-w-4xl">
+    <div className="p-4 sm:p-6 space-y-6 sm:space-y-8 max-w-4xl">
       <div>
-        <h1 className="font-display text-3xl text-white">Sumulas Digitais</h1>
-        <p className="text-zinc-400 text-sm mt-1">Gerencie sumulas abertas, em andamento e concluidas</p>
+        <h1 className="font-display text-2xl sm:text-3xl text-white">Sumulas Digitais</h1>
+        <p className="text-zinc-400 text-xs sm:text-sm mt-1">Gerencie sumulas abertas, em andamento e concluidas</p>
       </div>
+
 
       {isLoading && (
         <div className="flex justify-center py-12"><Spinner /></div>
