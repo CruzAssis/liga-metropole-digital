@@ -222,6 +222,36 @@ export type Database = {
           },
         ]
       }
+      manifestos: {
+        Row: {
+          created_at: string
+          created_by: string | null
+          id: string
+          logo_url: string | null
+          slug: string
+          team_name: string
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          created_by?: string | null
+          id?: string
+          logo_url?: string | null
+          slug: string
+          team_name: string
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          created_by?: string | null
+          id?: string
+          logo_url?: string | null
+          slug?: string
+          team_name?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
       match_best_opponent_votes: {
         Row: {
           created_at: string
