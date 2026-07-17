@@ -9,10 +9,10 @@ import savik from '@/assets/campos/santinhos-savik.jpeg.asset.json'
 
 const SLIDES = [
   { url: criciuma.url, name: 'CDC Elias' },
-  { url: guacu.url, name: 'Arena Guaçu' },
+  { url: guacu.url, name: 'Atlas' },
   { url: mazoni.url, name: 'Thomaz Mazzoni' },
-  { url: savik.url, name: 'Santinhos Savic' },
-  { url: atlas.url, name: 'Atlas' },
+  { url: savik.url, name: 'Savic' },
+  { url: atlas.url, name: 'Santinhos' },
   { url: sporting.url, name: 'Sporting' },
 ]
 
