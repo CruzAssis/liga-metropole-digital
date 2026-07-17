@@ -45,6 +45,24 @@ function ManifestoPage() {
   useEffect(() => {
     let cancelled = false
     async function load() {
+      // 1) Manifesto salvo (fonte principal)
+      const { data: m, error: mErr } = await (supabase.from('manifestos' as never) as any)
+        .select('team_name, logo_url')
+        .eq('slug', slug)
+        .maybeSingle()
+      if (cancelled) return
+      if (!mErr && m) {
+        setTeam({
+          id: slug,
+          name: m.team_name,
+          short_name: null,
+          logo_url: m.logo_url,
+          primary_color: null,
+        })
+        setLoading(false)
+        return
+      }
+      // 2) Fallback: time cadastrado com esse slug
       const { data, error: err } = await supabase
         .from('teams')
         .select('id, name, short_name, logo_url, primary_color')
@@ -54,7 +72,7 @@ function ManifestoPage() {
       if (err) {
         setError('Não conseguimos carregar o clube. Tente novamente em instantes.')
       } else if (!data) {
-        setError('Clube não encontrado.')
+        setError('Manifesto não encontrado.')
       } else {
         setTeam(data as Team)
       }
