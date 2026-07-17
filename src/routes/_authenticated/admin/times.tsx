@@ -8,9 +8,13 @@ import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from '@/components/ui/dialog'
-import { Users, Search, RefreshCw, Shield, MessageCircle, Copy, Pencil } from 'lucide-react'
+import {
+  AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent,
+  AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle,
+} from '@/components/ui/alert-dialog'
+import { Users, Search, RefreshCw, Shield, MessageCircle, Copy, Pencil, Trash2 } from 'lucide-react'
 import { listAdminTeams, type AdminTeamRow } from '@/lib/admin-teams.functions'
-import { adminUpdateTeam } from '@/lib/team-profile.functions'
+import { adminUpdateTeam, adminDeleteTeam } from '@/lib/team-profile.functions'
 import { supabase } from '@/integrations/supabase/client'
 import { buildWhatsAppLink, formatPhoneBR } from '@/lib/wa'
 import { toast } from 'sonner'
