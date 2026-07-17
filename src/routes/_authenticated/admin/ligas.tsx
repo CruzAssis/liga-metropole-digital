@@ -487,7 +487,7 @@ function LigasPage() {
       <div className="space-y-3">
         <h2 className="font-display text-2xl tracking-wide">Conferências cadastradas</h2>
         {loading ? (
-          <p className="text-muted-foreground">Buscando ligas...</p>
+          <SkeletonAdminCardList count={3} />
         ) : competitions.length === 0 ? (
           <p className="text-muted-foreground">Nenhuma conferência criada ainda.</p>
         ) : (
