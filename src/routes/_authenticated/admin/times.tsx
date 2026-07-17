@@ -43,6 +43,8 @@ function AdminTimes() {
   })
   const [search, setSearch] = useState('')
   const [statusFilter, setStatusFilter] = useState('todos')
+  const [editing, setEditing] = useState<AdminTeamRow | null>(null)
+
 
   const teams: AdminTeamRow[] = data ?? []
   const filtered = teams.filter((t) => {
