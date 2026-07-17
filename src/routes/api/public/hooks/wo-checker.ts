@@ -14,8 +14,15 @@ export const Route = createFileRoute("/api/public/hooks/wo-checker")({
   server: {
     handlers: {
       POST: async ({ request }) => {
-        const apiKey = request.headers.get("apikey");
-        if (!apiKey || apiKey !== process.env.SUPABASE_PUBLISHABLE_KEY) {
+        const provided = request.headers.get("x-cron-secret") ?? "";
+        const expected = process.env.CRON_SECRET ?? "";
+        const a = Buffer.from(provided);
+        const b = Buffer.from(expected);
+        if (!expected || a.length !== b.length) {
+          return new Response("Unauthorized", { status: 401 });
+        }
+        const { timingSafeEqual } = await import("crypto");
+        if (!timingSafeEqual(a, b)) {
           return new Response("Unauthorized", { status: 401 });
         }
 
