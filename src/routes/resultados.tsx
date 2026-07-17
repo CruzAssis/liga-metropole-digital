@@ -130,16 +130,6 @@ function ResultadosPage() {
           Nenhum resultado para a Rodada {selectedRound} ainda.
         </div>
       )}
-
-
-      {loadingMatches && <SkeletonMatchList count={5} />}
-
-      {!loadingMatches && matches && matches.length === 0 && (
-        <div className="rounded-lg border border-border bg-card p-8 text-center text-muted-foreground">
-          Nenhum resultado para a Rodada {selectedRound} ainda.
-        </div>
-      )}
-
       <div className="space-y-3">
         {matches?.map((m) => {
           const isWO = m.status === "wo";
@@ -150,7 +140,7 @@ function ResultadosPage() {
               key={m.id}
               to="/partidas/$id"
               params={{ id: m.id }}
-              className="group block rounded-xl border border-border bg-card p-4 hover:border-primary/40 hover:shadow-[0_8px_24px_-12px_rgba(21,101,245,0.4)] hover:-translate-y-0.5 transition-all"
+              className="card-hover group block rounded-xl border border-border bg-card p-4"
             >
               <div className="flex items-center justify-between gap-2 mb-3">
                 <div className="flex items-center gap-2 min-w-0">
