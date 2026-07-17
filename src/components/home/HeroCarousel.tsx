@@ -26,9 +26,36 @@ const FOUNDER_TOTAL = 20
 
 export default function HeroCarousel() {
   const [idx, setIdx] = useState(0)
+  // Track which slides have been "activated" so we only mount <img> tags for them.
+  // Start with slide 0 (LCP) eagerly; the next slide is prefetched on mount.
+  const [loaded, setLoaded] = useState<Set<number>>(() => new Set([0]))
 
   useEffect(() => {
-    const t = setInterval(() => setIdx((i) => (i + 1) % SLIDES.length), INTERVAL_MS)
+    // Prefetch the next slide right after mount so the first transition is smooth.
+    setLoaded((prev) => {
+      if (prev.has(1)) return prev
+      const next = new Set(prev)
+      next.add(1)
+      return next
+    })
+  }, [])
+
+  useEffect(() => {
+    const t = setInterval(() => {
+      setIdx((i) => {
+        const nextIdx = (i + 1) % SLIDES.length
+        // Preload the slide after the one we're about to show.
+        const prefetchIdx = (nextIdx + 1) % SLIDES.length
+        setLoaded((prev) => {
+          if (prev.has(nextIdx) && prev.has(prefetchIdx)) return prev
+          const next = new Set(prev)
+          next.add(nextIdx)
+          next.add(prefetchIdx)
+          return next
+        })
+        return nextIdx
+      })
+    }, INTERVAL_MS)
     return () => clearInterval(t)
   }, [])
 
@@ -37,21 +64,36 @@ export default function HeroCarousel() {
   return (
     <section className="relative isolate overflow-hidden h-[90vh] min-h-[600px] w-full">
       {/* Slides */}
-      {SLIDES.map((s, i) => (
-        <div
-          key={s.url}
-          aria-hidden={i !== idx}
-          className="absolute inset-0 transition-opacity duration-[1500ms] ease-in-out"
-          style={{
-            opacity: i === idx ? 1 : 0,
-            backgroundImage: `url("${s.url}")`,
-            backgroundSize: 'cover',
-            backgroundPosition: 'center',
-            transform: i === idx ? 'scale(1.05)' : 'scale(1)',
-            transition: 'opacity 1500ms ease-in-out, transform 7000ms ease-out',
-          }}
-        />
-      ))}
+      {SLIDES.map((s, i) => {
+        const isActive = i === idx
+        const shouldMount = loaded.has(i)
+        return (
+          <div
+            key={s.url}
+            aria-hidden={!isActive}
+            className="absolute inset-0 transition-opacity duration-[1500ms] ease-in-out"
+            style={{
+              opacity: isActive ? 1 : 0,
+              transform: isActive ? 'scale(1.05)' : 'scale(1)',
+              transition: 'opacity 1500ms ease-in-out, transform 7000ms ease-out',
+            }}
+          >
+            {shouldMount && (
+              <img
+                src={s.url}
+                alt={`Campo ${s.name}`}
+                loading={i === 0 ? 'eager' : 'lazy'}
+                decoding={i === 0 ? 'sync' : 'async'}
+                // @ts-expect-error fetchpriority is a valid HTML attribute
+                fetchpriority={i === 0 ? 'high' : 'low'}
+                draggable={false}
+                sizes="100vw"
+                className="absolute inset-0 h-full w-full object-cover select-none"
+              />
+            )}
+          </div>
+        )
+      })}
 
       {/* Overlay: black + royal blue at 65% */}
       <div
@@ -135,7 +177,15 @@ export default function HeroCarousel() {
             {SLIDES.map((_, i) => (
               <button
                 key={i}
-                onClick={() => setIdx(i)}
+                onClick={() => {
+                  setLoaded((prev) => {
+                    if (prev.has(i)) return prev
+                    const next = new Set(prev)
+                    next.add(i)
+                    return next
+                  })
+                  setIdx(i)
+                }}
                 aria-label={`Ir para slide ${i + 1}`}
                 className="h-1 rounded-full transition-all"
                 style={{
