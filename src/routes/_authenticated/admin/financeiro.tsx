@@ -2,7 +2,7 @@ import { createFileRoute } from '@tanstack/react-router'
 import { useState, useEffect, useMemo } from 'react'
 import { useServerFn } from '@tanstack/react-start'
 import { toast } from 'sonner'
-import { Spinner } from '@/components/AppSkeletons'
+import { Spinner, SkeletonStatsRow, SkeletonAdminList } from '@/components/AppSkeletons'
 import { Button } from '@/components/ui/button'
 import { Badge } from '@/components/ui/badge'
 import {
