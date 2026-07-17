@@ -6,6 +6,7 @@ import { supabase } from '@/integrations/supabase/client'
 import { Trophy, Calendar, ChevronRight, Menu, X, LayoutDashboard, User } from 'lucide-react'
 import Logo from '@/components/Logo'
 import AnimatedStats from '@/components/home/AnimatedStats'
+import HeroCarousel from '@/components/home/HeroCarousel'
 
 export const Route = createFileRoute('/')({
   component: HomePage,
