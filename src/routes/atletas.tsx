@@ -289,7 +289,7 @@ function RatingsRanking({ ladoFilter }: { ladoFilter: LadoFilter }) {
       ))}
     </div>
   );
-  const rows = data?.topRated ?? [];
+  const rows = filterByLado(data?.topRated ?? [], ladoFilter);
   if (rows.length === 0) return <EmptyRanking label="Nota Metrópole" />;
   return (
     <div className="rounded-lg border border-border bg-card overflow-hidden">
