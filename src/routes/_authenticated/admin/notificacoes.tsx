@@ -225,24 +225,25 @@ function AdminNotificacoesPage() {
   return (
     <div className="min-h-screen bg-zinc-950 text-white p-4 md:p-8">
       {/* Header */}
-      <div className="flex items-center justify-between mb-6">
-        <div className="flex items-center gap-3">
-          <Bell className="w-6 h-6 text-[#1565F5]" />
-          <div>
-            <h1 className="text-2xl font-bold">Notificações</h1>
-            <p className="text-sm text-zinc-400">Histórico de emails e alertas enviados</p>
+      <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 mb-6">
+        <div className="flex items-center gap-3 min-w-0">
+          <Bell className="w-6 h-6 text-[#1565F5] shrink-0" />
+          <div className="min-w-0">
+            <h1 className="text-xl sm:text-2xl font-bold truncate">Notificações</h1>
+            <p className="text-xs sm:text-sm text-zinc-400">Histórico de emails e alertas enviados</p>
           </div>
         </div>
         <Button
           variant="outline"
           size="sm"
           onClick={handleRefresh}
-          className="border-zinc-700 text-zinc-300 hover:bg-zinc-800 gap-2"
+          className="self-start sm:self-auto border-zinc-700 text-zinc-300 hover:bg-zinc-800 gap-2"
         >
           <RefreshCw className="w-4 h-4" />
           Atualizar
         </Button>
       </div>
+
 
       {/* Stats */}
       {statsData && (
