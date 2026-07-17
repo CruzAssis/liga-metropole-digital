@@ -57,7 +57,7 @@ export const saveManifesto = createServerFn({ method: 'POST' })
         throw new Error('Imagem muito grande (máx 3MB).')
       }
       const path = `manifestos/${data.slug}-${Date.now()}.${decoded.ext}`
-      const blob = new Blob([decoded.bytes], { type: decoded.contentType })
+      const blob = new Blob([decoded.bytes as BlobPart], { type: decoded.contentType })
       const { error: upErr } = await supabaseAdmin.storage
         .from('team-logos')
         .upload(path, blob, { contentType: decoded.contentType, upsert: true })
