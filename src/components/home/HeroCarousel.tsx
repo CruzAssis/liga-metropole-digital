@@ -6,6 +6,7 @@ import mazoni from '@/assets/campos/tomas-mazoni.jpeg.asset.json'
 import atlas from '@/assets/campos/atlas.jpeg.asset.json'
 import guacu from '@/assets/campos/arena-guacu.jpeg.asset.json'
 import savik from '@/assets/campos/santinhos-savik.jpeg.asset.json'
+import campoNovo from '@/assets/campos/campo-novo.jpeg.asset.json'
 
 const SLIDES = [
   { url: criciuma.url, name: 'CDC Elias' },
@@ -14,6 +15,7 @@ const SLIDES = [
   { url: savik.url, name: 'Savic' },
   { url: atlas.url, name: 'Santinhos' },
   { url: sporting.url, name: 'Sporting' },
+  { url: campoNovo.url, name: 'Campo Zona Norte' },
 ]
 
 const INTERVAL_MS = 6000
