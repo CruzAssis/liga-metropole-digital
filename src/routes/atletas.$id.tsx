@@ -201,7 +201,7 @@ function AtletaPerfilPage() {
                 level="M"
                 includeMargin={false}
                 imageSettings={{
-                  src: "/icons/icon-192.svg",
+                  src: "/icons/icon-192.png",
                   height: 28,
                   width: 28,
                   excavate: true,

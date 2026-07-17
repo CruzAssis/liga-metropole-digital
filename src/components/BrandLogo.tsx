@@ -1,4 +1,4 @@
-import logoUrl from "@/assets/liga-metropole-logo.png";
+import logoAsset from "@/assets/liga-metropole-logo.jpeg.asset.json";
 import { cn } from "@/lib/utils";
 
 export function BrandLogo({
@@ -10,7 +10,7 @@ export function BrandLogo({
 }) {
   return (
     <img
-      src={logoUrl}
+      src={logoAsset.url}
       alt={alt}
       className={cn("object-contain shrink-0", className)}
       draggable={false}
