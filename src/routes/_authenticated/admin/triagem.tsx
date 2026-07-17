@@ -278,16 +278,17 @@ function TriagemPage() {
     })
 
   return (
-    <div className="p-6 space-y-6">
-      <div className="flex items-center justify-between flex-wrap gap-3">
-        <div>
-          <h1 className="text-2xl font-bold text-white">Triagem de Inscrições</h1>
-          <p className="text-zinc-400 text-sm mt-1">
+    <div className="p-4 sm:p-6 space-y-6">
+      <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 sm:flex-wrap">
+        <div className="min-w-0">
+          <h1 className="text-xl sm:text-2xl font-bold text-white">Triagem de Inscrições</h1>
+          <p className="text-zinc-400 text-xs sm:text-sm mt-1">
             Aprove, mova para lista de espera ou reprove inscrições e vincule cada time a uma conferência.
           </p>
         </div>
-        <Button variant="outline" onClick={loadAll} className="border-zinc-700 text-zinc-300">Atualizar</Button>
+        <Button variant="outline" onClick={loadAll} className="self-start sm:self-auto border-zinc-700 text-zinc-300">Atualizar</Button>
       </div>
+
 
       {!masterOpen && (
         <div className="rounded-lg border border-yellow-500/40 bg-yellow-500/10 p-3 text-sm text-yellow-200 flex items-start gap-2">
