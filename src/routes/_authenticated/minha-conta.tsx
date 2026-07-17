@@ -334,8 +334,10 @@ function MinhaContaPage() {
 }
 
 // ─── Hero do Diretor: card central + 3 botões grandes ────────────────────────
-function DirectorHeroCard({ team }: { team: Team }) {
+function DirectorHeroCard({ team, onSaved }: { team: Team; onSaved: () => void | Promise<void> }) {
   const [inviteOpen, setInviteOpen] = useState(false);
+  const [editOpen, setEditOpen] = useState(false);
+
 
   return (
     <>
