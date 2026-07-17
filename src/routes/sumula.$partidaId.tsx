@@ -40,6 +40,8 @@ type Match = {
   host_filled_at: string | null
   visitor_confirmed_at: string | null
   questionamento_arbitragem?: string | null
+  dispute_reason?: string | null
+  disputed_at?: string | null
   stage: string
   round: number
   host_team: Team
