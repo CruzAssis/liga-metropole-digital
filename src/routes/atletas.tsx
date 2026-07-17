@@ -250,7 +250,7 @@ function ScorersRanking({ ladoFilter }: { ladoFilter: LadoFilter }) {
       ))}
     </div>
   );
-  const rows = data?.topScorers ?? [];
+  const rows = filterByLado(data?.topScorers ?? [], ladoFilter);
   if (rows.length === 0) return <EmptyRanking label="artilharia" />;
   return (
     <div className="rounded-lg border border-border bg-card overflow-hidden">
