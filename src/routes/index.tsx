@@ -86,8 +86,12 @@ function HomePage() {
             borderBottom: '1px solid #27272A',
           }}
         >
-          <Link to="/" aria-label="Liga Metrópole">
-            <Logo variant="horizontal" size={28} />
+          <Link to="/" aria-label="Liga Metrópole" className="flex items-center gap-2">
+            <BrandLogo className="h-9 w-auto" />
+            <span className="font-black tracking-tight text-sm hidden sm:inline">
+              <span className="text-white">LIGA</span>{' '}
+              <span className="text-[#1565F5]">METRÓPOLE</span>
+            </span>
           </Link>
 
           <div className="hidden md:flex items-center gap-1">
@@ -157,8 +161,12 @@ function HomePage() {
   return (
     <div className="min-h-screen bg-black text-white flex flex-col">
       <header className="flex items-center justify-between px-4 md:px-6 py-4 border-b border-zinc-800 sticky top-0 bg-black/95 backdrop-blur-sm z-50">
-        <Link to="/" aria-label="Liga Metrópole">
-          <Logo variant="horizontal" size={28} />
+        <Link to="/" aria-label="Liga Metrópole" className="flex items-center gap-2">
+          <BrandLogo className="h-9 w-auto" />
+          <span className="font-black tracking-tight text-sm hidden sm:inline">
+            <span className="text-white">LIGA</span>{' '}
+            <span className="text-[#1565F5]">METRÓPOLE</span>
+          </span>
         </Link>
 
         {!loading && user && (
