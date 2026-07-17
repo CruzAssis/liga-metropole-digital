@@ -354,6 +354,9 @@ export type Database = {
           bracket_position: number | null
           competition_id: string
           created_at: string
+          dispute_reason: string | null
+          disputed_at: string | null
+          disputed_by: string | null
           group_label: string | null
           host_filled_at: string | null
           host_score: number | null
@@ -373,6 +376,9 @@ export type Database = {
           bracket_position?: number | null
           competition_id: string
           created_at?: string
+          dispute_reason?: string | null
+          disputed_at?: string | null
+          disputed_by?: string | null
           group_label?: string | null
           host_filled_at?: string | null
           host_score?: number | null
@@ -392,6 +398,9 @@ export type Database = {
           bracket_position?: number | null
           competition_id?: string
           created_at?: string
+          dispute_reason?: string | null
+          disputed_at?: string | null
+          disputed_by?: string | null
           group_label?: string | null
           host_filled_at?: string | null
           host_score?: number | null

@@ -77,13 +77,22 @@ export const confirmSumulaScore = createServerFn({ method: "POST" })
 
 export const disputeSumulaScore = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
-  .inputValidator((input) => z.object({ match_id: z.string().uuid() }).parse(input))
+  .inputValidator((input) =>
+    z.object({
+      match_id: z.string().uuid(),
+      reason: z.string().trim().min(10, "Descreva a contestação com pelo menos 10 caracteres").max(2000),
+    }).parse(input))
   .handler(async ({ data, context }) => {
     const match = await loadMatchOr404(data.match_id);
     await assertIsDirector(context.userId, match.host_team_id);
-    const { error } = await supabaseAdmin.from("matches").update({
-      host_score: null, visitor_score: null, host_filled_at: null,
-      visitor_confirmed_at: null, status: "scheduled",
+    if (match.status === "closed" || match.status === "wo") {
+      throw new Error("Súmula já encerrada — não pode ser contestada");
+    }
+    const { error } = await adminDb.from("matches").update({
+      status: "disputed",
+      dispute_reason: data.reason,
+      disputed_at: new Date().toISOString(),
+      disputed_by: context.userId,
     }).eq("id", data.match_id);
     if (error) throw new Error(error.message);
     return { ok: true };

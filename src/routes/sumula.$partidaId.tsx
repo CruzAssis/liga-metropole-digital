@@ -40,6 +40,8 @@ type Match = {
   host_filled_at: string | null
   visitor_confirmed_at: string | null
   questionamento_arbitragem?: string | null
+  dispute_reason?: string | null
+  disputed_at?: string | null
   stage: string
   round: number
   host_team: Team
@@ -116,6 +118,8 @@ function Etapa1Placar({ match, myTeamId, onRefresh }: { match: Match; myTeamId: 
   const [questionamento, setQuestionamento] = useState(match.questionamento_arbitragem ?? '')
   const [loading, setLoading] = useState(false)
   const [erro, setErro] = useState('')
+  const [showContestForm, setShowContestForm] = useState(false)
+  const [contestReason, setContestReason] = useState('')
 
   const submitFn = useServerFn(submitSumulaScore)
   const confirmFn = useServerFn(confirmSumulaScore)
@@ -123,6 +127,7 @@ function Etapa1Placar({ match, myTeamId, onRefresh }: { match: Match; myTeamId: 
 
   const lancado = !!match.host_filled_at
   const confirmado = !!match.visitor_confirmed_at
+  const isDisputed = match.status === 'disputed'
 
   const etapa1Status: EtapaStatus = confirmado ? 'concluido' : lancado ? 'em_andamento' : 'pendente'
 
@@ -141,8 +146,12 @@ function Etapa1Placar({ match, myTeamId, onRefresh }: { match: Match; myTeamId: 
     finally { setLoading(false) }
   }
   async function contestar() {
+    if (contestReason.trim().length < 10) {
+      setErro('Justifique a contestação com pelo menos 10 caracteres.')
+      return
+    }
     setLoading(true); setErro('')
-    try { await disputeFn({ data: { match_id: match.id } }); onRefresh() }
+    try { await disputeFn({ data: { match_id: match.id, reason: contestReason.trim() } }); onRefresh() }
     catch (e) { setErro(e instanceof Error ? e.message : 'Erro') }
     finally { setLoading(false) }
   }
@@ -189,7 +198,7 @@ function Etapa1Placar({ match, myTeamId, onRefresh }: { match: Match; myTeamId: 
         </div>
       )}
 
-      {lancado && !confirmado && (
+      {lancado && !confirmado && !isDisputed && (
         <div className="space-y-3">
           <div className="bg-zinc-800 rounded-xl p-5 text-center">
             <p className="text-zinc-400 text-xs mb-2">Placar lançado pelo Visitante</p>
@@ -202,14 +211,34 @@ function Etapa1Placar({ match, myTeamId, onRefresh }: { match: Match; myTeamId: 
               <p className="text-zinc-300 text-sm">{match.questionamento_arbitragem}</p>
             </div>
           )}
-          {isHost && (
+          {isHost && !showContestForm && (
             <div className="grid grid-cols-2 gap-3">
-              <Button variant="outline" onClick={contestar} disabled={loading} className="border-red-800/60 text-red-400 hover:bg-red-900/20">
+              <Button variant="outline" onClick={() => setShowContestForm(true)} disabled={loading} className="border-red-800/60 text-red-400 hover:bg-red-900/20">
                 Contestar
               </Button>
               <Button onClick={confirmar} disabled={loading} className="bg-[#1565F5] text-white">
-                {loading ? 'Salvando...' : 'Confirmar Placar'}
+                {loading ? 'Salvando...' : 'Confirmar Súmula'}
               </Button>
+            </div>
+          )}
+          {isHost && showContestForm && (
+            <div className="space-y-2 rounded-lg border border-red-800/40 bg-red-950/20 p-3">
+              <label className="text-red-300 text-xs font-semibold">Justifique a contestação (obrigatório)</label>
+              <textarea
+                value={contestReason}
+                onChange={e => setContestReason(e.target.value)}
+                rows={3} maxLength={2000}
+                placeholder="Descreva o motivo da contestação (placar incorreto, gol não computado, etc). O administrador da liga será notificado."
+                className="w-full bg-zinc-900 border border-zinc-700 text-white rounded-lg px-3 py-2 text-sm resize-none"
+              />
+              <div className="grid grid-cols-2 gap-2">
+                <Button variant="outline" onClick={() => { setShowContestForm(false); setContestReason(''); setErro('') }} disabled={loading}>
+                  Cancelar
+                </Button>
+                <Button onClick={contestar} disabled={loading || contestReason.trim().length < 10} className="bg-red-600 hover:bg-red-700 text-white">
+                  {loading ? 'Enviando...' : 'Enviar Contestação'}
+                </Button>
+              </div>
             </div>
           )}
           {isVisitor && <p className="text-zinc-400 text-sm text-center">Aguardando confirmação do Mandante.</p>}
@@ -219,6 +248,26 @@ function Etapa1Placar({ match, myTeamId, onRefresh }: { match: Match; myTeamId: 
               <span className="leading-snug">{erro}</span>
             </div>
           )}
+        </div>
+      )}
+
+      {isDisputed && (
+        <div className="space-y-3">
+          <div className="bg-zinc-800 rounded-xl p-4 text-center">
+            <p className="text-zinc-400 text-xs mb-1">Placar reportado</p>
+            <p className="text-white text-3xl font-black">{match.host_score ?? '—'} × {match.visitor_score ?? '—'}</p>
+          </div>
+          <div className="rounded-lg border border-red-800/60 bg-red-950/40 p-4 space-y-2">
+            <div className="flex items-center gap-2 text-red-300 font-semibold text-sm">
+              <AlertCircle className="h-4 w-4" /> Súmula contestada
+            </div>
+            {match.dispute_reason && (
+              <p className="text-zinc-300 text-sm whitespace-pre-wrap">{match.dispute_reason}</p>
+            )}
+            <p className="text-zinc-500 text-xs">
+              O ranking está travado para esta partida. O administrador da liga foi notificado e vai resolver a pendência.
+            </p>
+          </div>
         </div>
       )}
 
@@ -733,8 +782,21 @@ function SumulaDigitalPage() {
             <Badge className="bg-zinc-800 text-zinc-300 border-zinc-700 text-xs">
               Súmula Digital
             </Badge>
-            {isWO && <Badge className="bg-red-900/30 text-red-400 border-red-800/40 text-xs">WO Automático</Badge>}
-            {isClosed && <Badge className="bg-green-900/30 text-green-400 border-green-800/40 text-xs">Encerrada</Badge>}
+            {match.status === 'confirmed' || match.status === 'closed' ? (
+              <Badge className="bg-green-900/40 text-green-300 border-green-700/50 text-xs">
+                ✓ Súmula Homologada
+              </Badge>
+            ) : match.status === 'disputed' ? (
+              <Badge className="bg-red-900/40 text-red-300 border-red-700/50 text-xs">
+                ⚠ Contestada — Ranking Travado
+              </Badge>
+            ) : match.status === 'wo' ? (
+              <Badge className="bg-red-900/30 text-red-400 border-red-800/40 text-xs">WO Automático</Badge>
+            ) : (
+              <Badge className="bg-amber-900/40 text-amber-300 border-amber-700/50 text-xs">
+                ⏳ Pendente Validação
+              </Badge>
+            )}
           </div>
 
           <div className="grid grid-cols-3 items-center gap-4 text-center">
