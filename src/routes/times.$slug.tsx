@@ -87,8 +87,19 @@ function TeamProfilePage() {
             <div className="flex flex-wrap items-center gap-2 mt-2">
               <Badge variant="outline" className="font-mono">{team.short_name}</Badge>
               <Badge variant={team.registration_type === "host" ? "default" : "secondary"} className="uppercase">
-                {team.registration_type === "host" ? "Mandante" : "Visitante"} · Lado {team.lado}
+                {team.registration_type === "host" ? "Mandante" : "Visitante"}
               </Badge>
+              {team.lado && (
+                <Badge
+                  className={`uppercase font-bold tracking-widest ${
+                    team.lado === "A"
+                      ? "bg-primary/15 text-primary border border-primary/40 hover:bg-primary/20"
+                      : "bg-amber-500/15 text-amber-400 border border-amber-500/40 hover:bg-amber-500/20"
+                  }`}
+                >
+                  Conferência: Lado {team.lado}
+                </Badge>
+              )}
               {groupLabel && <Badge variant="outline">Grupo {groupLabel}</Badge>}
               <Badge variant="outline" className="gap-1">
                 <span className="text-primary">●</span> {supporterCount} torcedor{supporterCount === 1 ? "" : "es"}
