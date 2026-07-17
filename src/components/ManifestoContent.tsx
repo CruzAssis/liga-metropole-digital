@@ -1,4 +1,6 @@
 import { BrandLogo } from '@/components/BrandLogo'
+import { Link } from '@tanstack/react-router'
+import { Download, UserPlus } from 'lucide-react'
 
 export type ManifestoTeam = {
   name: string
@@ -119,6 +121,26 @@ export function ManifestoContent({ team }: { team: ManifestoTeam }) {
               Seja um <span className="text-[#1565F5]">Clube Fundador</span>.
             </p>
           </div>
+        </div>
+
+        <div className="mt-12 flex flex-col sm:flex-row gap-3 print:hidden">
+          <Link
+            to="/signup"
+            className="flex-1 inline-flex items-center justify-center gap-2 rounded-xl bg-[#1565F5] hover:bg-[#1565F5]/90 text-white font-bold py-4 px-6 transition-colors"
+          >
+            <UserPlus className="h-5 w-5" />
+            Cadastrar equipe
+          </Link>
+          <button
+            type="button"
+            onClick={() => {
+              if (typeof window !== 'undefined') window.print()
+            }}
+            className="flex-1 inline-flex items-center justify-center gap-2 rounded-xl border border-zinc-700 hover:border-[#1565F5] hover:bg-zinc-900 text-white font-semibold py-4 px-6 transition-colors"
+          >
+            <Download className="h-5 w-5" />
+            Baixar em PDF
+          </button>
         </div>
 
         <footer className="mt-16 pt-8 border-t border-zinc-800">
