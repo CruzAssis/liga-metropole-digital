@@ -233,7 +233,10 @@ function AdminManifestoPage() {
               type="file"
               accept="image/*"
               className="hidden"
-              onChange={(e) => handleFile(e.target.files?.[0] ?? null)}
+              onChange={(e) => {
+                handleFile(e.target.files?.[0] ?? null)
+                e.target.value = ''
+              }}
             />
             <button
               type="button"
