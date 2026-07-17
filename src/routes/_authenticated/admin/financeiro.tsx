@@ -281,7 +281,10 @@ function FinanceiroPage() {
       </div>
 
       {/* Totalizadores */}
-      <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 sm:gap-4">
+      {loading ? (
+        <SkeletonStatsRow count={3} />
+      ) : (
+        <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 sm:gap-4">
         <div className="bg-zinc-900 border border-zinc-800 rounded-xl p-5">
           <div className="flex items-center gap-2 text-green-400 mb-2">
             <TrendingUp className="h-4 w-4" />
@@ -306,7 +309,8 @@ function FinanceiroPage() {
           <p className="text-3xl font-black text-white">{fmtBRL(totais.atrasado)}</p>
           <p className="text-zinc-500 text-xs mt-1">{totais.totalAtrasados} inadimplente{totais.totalAtrasados !== 1 ? 's' : ''}</p>
         </div>
-      </div>
+        </div>
+      )}
 
       {/* Filtros */}
       <div className="flex items-center gap-2 flex-wrap">
