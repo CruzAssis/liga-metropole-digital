@@ -328,10 +328,7 @@ function FinanceiroPage() {
 
       {/* Tabela */}
       {loading ? (
-        <div className="bg-zinc-900 border border-zinc-800 rounded-xl p-12 text-center">
-          <div className="w-6 h-6 border-2 border-[#1565F5] border-t-transparent rounded-full animate-spin mx-auto mb-3" />
-          <p className="text-zinc-400 text-sm">Carregando...</p>
-        </div>
+        <SkeletonAdminList rows={6} />
       ) : filtered.length === 0 ? (
         <div className="bg-zinc-900 border border-zinc-800 rounded-xl p-12 text-center">
           <p className="text-zinc-400">Nenhum time encontrado para este filtro.</p>
