@@ -111,26 +111,46 @@ function SignupPage() {
       })
       if (error) throw error
 
-      // Auto-confirm ativo: garantir sessão imediata sem etapa de verificação.
-      if (!data.session) {
-        await supabase.auth.signInWithPassword({
-          email: form.email,
-          password: form.password,
+      // Garantir sessão ativa antes de redirecionar (idempotente com auto-confirm).
+      let session = data.session
+      if (!session) {
+        try {
+          const { data: signIn } = await supabase.auth.signInWithPassword({
+            email: form.email,
+            password: form.password,
+          })
+          session = signIn.session ?? null
+        } catch {
+          session = null
+        }
+      }
+      if (!session) {
+        // Aguarda o listener do onAuthStateChange propagar a sessão (até 2s).
+        session = await new Promise((resolve) => {
+          const sub = supabase.auth.onAuthStateChange((_e, s) => {
+            if (s) {
+              clearTimeout(timer)
+              sub.data.subscription.unsubscribe()
+              resolve(s)
+            }
+          })
+          const timer = setTimeout(() => {
+            sub.data.subscription.unsubscribe()
+            resolve(null)
+          }, 2000)
         })
       }
 
+      // Redirecionamento consistente para a tela de Boas-vindas, independente do retorno.
       const perfil = selectedPerfil || perfilParam
+      toast.success('Conta criada!')
       if (perfil === 'diretor') {
-        toast.success('Conta criada! Agora cadastre seu time.')
         navigate({ to: '/onboarding/diretor', replace: true })
       } else if (perfil === 'jogador') {
-        toast.success('Conta criada! Agora crie seu perfil de atleta.')
         navigate({ to: '/onboarding/jogador', replace: true })
       } else if (perfil === 'torcedor') {
-        toast.success('Conta criada! Agora escolha seu time.')
         navigate({ to: '/onboarding/torcedor', replace: true })
       } else {
-        toast.success('Conta criada! Agora escolha seu perfil.')
         navigate({ to: '/onboarding', replace: true })
       }
     } catch (err) {
