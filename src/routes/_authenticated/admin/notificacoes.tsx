@@ -13,6 +13,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
+import { SkeletonAdminList } from "@/components/AppSkeletons";
 import {
   listNotificacoes,
   getNotificacoesStats,
