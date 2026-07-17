@@ -58,6 +58,7 @@ export const Route = createFileRoute("/atletas")({
 function AtletasPage() {
   const [rows, setRows] = useState<Row[] | null>(null);
   const [open, setOpen] = useState<Row | null>(null);
+  const [lado, setLado] = useState<LadoFilter>("all");
 
   useEffect(() => {
     (async () => {
@@ -69,20 +70,39 @@ function AtletasPage() {
         .limit(200);
 
       const teamIds = Array.from(new Set((athletes ?? []).map((a) => a.team_id).filter(Boolean))) as string[];
-      const teamsMap = new Map<string, string>();
+      const teamsMap = new Map<string, { name: string; lado: "A" | "B" | null }>();
       if (teamIds.length > 0) {
-        const { data: teams } = await supabase.from("teams").select("id, name").in("id", teamIds);
-        for (const t of teams ?? []) teamsMap.set(t.id, t.name);
+        const { data: teams } = await supabase.from("teams").select("id, name, lado").in("id", teamIds);
+        for (const t of teams ?? []) teamsMap.set(t.id, { name: t.name, lado: (t.lado ?? null) as "A" | "B" | null });
       }
 
       setRows(
-        (athletes ?? []).map((a) => ({
-          ...a,
-          team_name: a.team_id ? teamsMap.get(a.team_id) ?? null : null,
-        })) as Row[],
+        (athletes ?? []).map((a) => {
+          const t = a.team_id ? teamsMap.get(a.team_id) : undefined;
+          return {
+            ...a,
+            team_name: t?.name ?? null,
+            team_lado: t?.lado ?? null,
+          };
+        }) as Row[],
       );
     })();
   }, []);
+
+  const counts = useMemo(() => {
+    const list = rows ?? [];
+    return {
+      all: list.length,
+      A: list.filter((r) => r.team_lado === "A").length,
+      B: list.filter((r) => r.team_lado === "B").length,
+    };
+  }, [rows]);
+
+  const filteredRows = useMemo(() => {
+    if (!rows) return null;
+    if (lado === "all") return rows;
+    return rows.filter((r) => r.team_lado === lado);
+  }, [rows, lado]);
 
   return (
     <PublicShell>
@@ -92,6 +112,7 @@ function AtletasPage() {
         description="Perfil oficial e estatísticas dos atletas da liga."
       />
 
+      <LadoTabs value={lado} onChange={setLado} counts={counts} />
 
       <Tabs defaultValue="todos" className="mb-6">
         <TabsList>
@@ -102,11 +123,11 @@ function AtletasPage() {
         </TabsList>
 
         <TabsContent value="todos" className="mt-6">
-          {!rows && <SkeletonAthleteGrid count={6} />}
-          {rows && rows.length === 0 && <EmptyAtletas />}
-          {rows && rows.length > 0 && (
+          {!filteredRows && <SkeletonAthleteGrid count={6} />}
+          {filteredRows && filteredRows.length === 0 && <EmptyAtletas />}
+          {filteredRows && filteredRows.length > 0 && (
             <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
-              {rows.map((a) => (
+              {filteredRows.map((a) => (
                 <AthleteCard key={a.id} athlete={a} onClick={() => setOpen(a)} />
               ))}
             </div>
@@ -114,13 +135,13 @@ function AtletasPage() {
         </TabsContent>
 
         <TabsContent value="artilharia" className="mt-6">
-          <ScorersRanking />
+          <ScorersRanking ladoFilter={lado} />
         </TabsContent>
         <TabsContent value="nota" className="mt-6">
-          <RatingsRanking />
+          <RatingsRanking ladoFilter={lado} />
         </TabsContent>
         <TabsContent value="disciplina" className="mt-6">
-          <DisciplineRanking />
+          <DisciplineRanking ladoFilter={lado} />
         </TabsContent>
       </Tabs>
 
