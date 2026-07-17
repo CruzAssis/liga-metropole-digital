@@ -16,8 +16,8 @@ export type Database = {
     Tables: {
       athletes: {
         Row: {
-          cpf_hash: string
-          cpf_last4: string
+          cpf_hash: string | null
+          cpf_last4: string | null
           created_at: string
           full_name: string | null
           id: string
@@ -33,8 +33,8 @@ export type Database = {
           whatsapp: string | null
         }
         Insert: {
-          cpf_hash: string
-          cpf_last4: string
+          cpf_hash?: string | null
+          cpf_last4?: string | null
           created_at?: string
           full_name?: string | null
           id?: string
@@ -50,8 +50,8 @@ export type Database = {
           whatsapp?: string | null
         }
         Update: {
-          cpf_hash?: string
-          cpf_last4?: string
+          cpf_hash?: string | null
+          cpf_last4?: string | null
           created_at?: string
           full_name?: string | null
           id?: string
@@ -465,27 +465,48 @@ export type Database = {
       profiles: {
         Row: {
           avatar_url: string | null
-          cpf: string
+          club_name: string | null
+          cpf: string | null
           created_at: string
+          date_of_birth: string | null
+          director_role: string | null
           full_name: string
           id: string
+          nickname: string | null
           phone: string | null
+          position: string | null
+          profile_type: string | null
+          whatsapp: string | null
         }
         Insert: {
           avatar_url?: string | null
-          cpf: string
+          club_name?: string | null
+          cpf?: string | null
           created_at?: string
+          date_of_birth?: string | null
+          director_role?: string | null
           full_name: string
           id: string
+          nickname?: string | null
           phone?: string | null
+          position?: string | null
+          profile_type?: string | null
+          whatsapp?: string | null
         }
         Update: {
           avatar_url?: string | null
-          cpf?: string
+          club_name?: string | null
+          cpf?: string | null
           created_at?: string
+          date_of_birth?: string | null
+          director_role?: string | null
           full_name?: string
           id?: string
+          nickname?: string | null
           phone?: string | null
+          position?: string | null
+          profile_type?: string | null
+          whatsapp?: string | null
         }
         Relationships: []
       }

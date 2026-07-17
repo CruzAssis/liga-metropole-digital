@@ -54,7 +54,7 @@ export const preRegisterAthletes = createServerFn({ method: "POST" })
 
       let alreadyExists = false;
       for (const c of candidates ?? []) {
-        if (await bcrypt.compare(cpf, c.cpf_hash)) {
+        if (c.cpf_hash && await bcrypt.compare(cpf, c.cpf_hash)) {
           alreadyExists = true;
           break;
         }
@@ -102,7 +102,7 @@ export const findAthleteByCpf = createServerFn({ method: "POST" })
     if (error) throw new Error(error.message);
 
     for (const c of candidates ?? []) {
-      if (await bcrypt.compare(cpf, c.cpf_hash)) {
+      if (c.cpf_hash && await bcrypt.compare(cpf, c.cpf_hash)) {
         // strip cpf_hash before returning
         const { cpf_hash: _omit, ...safe } = c;
         return { found: true as const, athlete: safe };
@@ -143,7 +143,7 @@ export const verifyAthlete = createServerFn({ method: "POST" })
 
     let match: { id: string; verified: boolean; user_id: string | null } | null = null;
     for (const c of candidates ?? []) {
-      if (await bcrypt.compare(cpf, c.cpf_hash)) {
+      if (c.cpf_hash && await bcrypt.compare(cpf, c.cpf_hash)) {
         match = { id: c.id, verified: c.verified, user_id: c.user_id };
         break;
       }
