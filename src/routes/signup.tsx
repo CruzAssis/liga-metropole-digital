@@ -111,24 +111,27 @@ function SignupPage() {
       })
       if (error) throw error
 
-      if (data.session) {
-        const perfil = selectedPerfil || perfilParam
-        if (perfil === 'diretor') {
-          toast.success('Conta criada! Agora cadastre seu time.')
-          navigate({ to: '/onboarding/diretor', replace: true })
-        } else if (perfil === 'jogador') {
-          toast.success('Conta criada! Agora crie seu perfil de atleta.')
-          navigate({ to: '/onboarding/jogador', replace: true })
-        } else if (perfil === 'torcedor') {
-          toast.success('Conta criada! Agora escolha seu time.')
-          navigate({ to: '/onboarding/torcedor', replace: true })
-        } else {
-          toast.success('Conta criada! Agora escolha seu perfil.')
-          navigate({ to: '/onboarding', replace: true })
-        }
+      // Auto-confirm ativo: garantir sessão imediata sem etapa de verificação.
+      if (!data.session) {
+        await supabase.auth.signInWithPassword({
+          email: form.email,
+          password: form.password,
+        })
+      }
+
+      const perfil = selectedPerfil || perfilParam
+      if (perfil === 'diretor') {
+        toast.success('Conta criada! Agora cadastre seu time.')
+        navigate({ to: '/onboarding/diretor', replace: true })
+      } else if (perfil === 'jogador') {
+        toast.success('Conta criada! Agora crie seu perfil de atleta.')
+        navigate({ to: '/onboarding/jogador', replace: true })
+      } else if (perfil === 'torcedor') {
+        toast.success('Conta criada! Agora escolha seu time.')
+        navigate({ to: '/onboarding/torcedor', replace: true })
       } else {
-        toast.success('Conta criada! Verifique seu email para confirmar o cadastro.')
-        navigate({ to: '/login', replace: true })
+        toast.success('Conta criada! Agora escolha seu perfil.')
+        navigate({ to: '/onboarding', replace: true })
       }
     } catch (err) {
       const msg = err instanceof Error ? err.message : 'Erro ao criar conta'
