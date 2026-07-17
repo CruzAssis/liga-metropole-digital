@@ -21,6 +21,15 @@ serve(async (req) => {
     return new Response("ok", { headers: corsHeaders });
   }
 
+  const provided = req.headers.get("x-notify-secret") ?? "";
+  const expected = Deno.env.get("NOTIFY_SECRET") ?? "";
+  if (!expected || provided.length !== expected.length || provided !== expected) {
+    return new Response(
+      JSON.stringify({ error: "Unauthorized" }),
+      { status: 401, headers: { ...corsHeaders, "Content-Type": "application/json" } }
+    );
+  }
+
   const supabaseAdmin = createClient(
     Deno.env.get("SUPABASE_URL") ?? "",
     Deno.env.get("SUPABASE_SERVICE_ROLE_KEY") ?? "",
