@@ -138,10 +138,10 @@ function MasterSwitchPage() {
           isOpen ? "border-green-500/50 bg-green-500/5" : "border-yellow-500/50 bg-yellow-500/5"
         }`}
       >
-        <div className="flex items-center justify-between gap-4">
-          <div>
+        <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
+          <div className="min-w-0">
             <div className="text-sm text-muted-foreground">Estado atual</div>
-            <div className={`text-2xl font-bold ${isOpen ? "text-green-500" : "text-yellow-500"}`}>
+            <div className={`text-xl sm:text-2xl font-bold ${isOpen ? "text-green-500" : "text-yellow-500"}`}>
               {isOpen ? "LIGA ABERTA" : "MODO DE ESPERA"}
             </div>
             <p className="text-xs text-muted-foreground mt-1 max-w-md">
@@ -150,11 +150,12 @@ function MasterSwitchPage() {
                 : "Novos cadastros ficam em lista de espera até você virar a chave."}
             </p>
           </div>
-          <div className="flex items-center gap-3">
+          <div className="flex items-center gap-3 self-start sm:self-auto">
             <Switch checked={isOpen} disabled={saving} onCheckedChange={toggleMaster} />
             <Label className="text-sm font-medium">{isOpen ? "ON" : "OFF"}</Label>
           </div>
         </div>
+
       </div>
 
       {/* Dashboard cards */}
