@@ -62,7 +62,7 @@ export default function HeroCarousel() {
   const pct = (FOUNDER_TAKEN / FOUNDER_TOTAL) * 100
 
   return (
-    <section className="relative isolate overflow-hidden h-[90vh] min-h-[600px] w-full">
+    <section className="relative isolate overflow-hidden h-[70svh] min-h-[460px] sm:h-[85vh] sm:min-h-[600px] w-full">
       {/* Slides */}
       {SLIDES.map((s, i) => {
         const isActive = i === idx
