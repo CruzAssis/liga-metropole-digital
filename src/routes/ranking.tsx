@@ -279,13 +279,13 @@ function RankingPage() {
           .select("host_team_id, visitor_team_id, host_score, visitor_score, status, competition_id")
           .eq("competition_id", selectedComp)
           .in("status", FINISHED),
-        supabase.from("team_supporters").select("team_id"),
+        supabase.rpc("get_team_supporter_counts"),
       ]);
       setTeams((tdata ?? []) as Team[]);
       setMatches((mdata ?? []) as Match[]);
       const sup = new Map<string, number>();
-      for (const row of (sdata ?? []) as { team_id: string }[]) {
-        sup.set(row.team_id, (sup.get(row.team_id) ?? 0) + 1);
+      for (const row of (sdata ?? []) as { team_id: string; supporter_count: number }[]) {
+        sup.set(row.team_id, row.supporter_count);
       }
       setSupporters(sup);
     })();
