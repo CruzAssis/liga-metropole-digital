@@ -16,6 +16,7 @@ import { Route as SumulaExemploRouteImport } from './routes/sumula-exemplo'
 import { Route as SignupRouteImport } from './routes/signup'
 import { Route as ResultadosRouteImport } from './routes/resultados'
 import { Route as ResetPasswordRouteImport } from './routes/reset-password'
+import { Route as RankingCraquesRouteImport } from './routes/ranking-craques'
 import { Route as RankingRouteImport } from './routes/ranking'
 import { Route as PrivacidadeRouteImport } from './routes/privacidade'
 import { Route as OnboardingRouteImport } from './routes/onboarding'
@@ -87,6 +88,11 @@ const ResultadosRoute = ResultadosRouteImport.update({
 const ResetPasswordRoute = ResetPasswordRouteImport.update({
   id: '/reset-password',
   path: '/reset-password',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const RankingCraquesRoute = RankingCraquesRouteImport.update({
+  id: '/ranking-craques',
+  path: '/ranking-craques',
   getParentRoute: () => rootRouteImport,
 } as any)
 const RankingRoute = RankingRouteImport.update({
@@ -294,6 +300,7 @@ export interface FileRoutesByFullPath {
   '/onboarding': typeof OnboardingRouteWithChildren
   '/privacidade': typeof PrivacidadeRoute
   '/ranking': typeof RankingRoute
+  '/ranking-craques': typeof RankingCraquesRoute
   '/reset-password': typeof ResetPasswordRoute
   '/resultados': typeof ResultadosRoute
   '/signup': typeof SignupRoute
@@ -339,6 +346,7 @@ export interface FileRoutesByTo {
   '/onboarding': typeof OnboardingRouteWithChildren
   '/privacidade': typeof PrivacidadeRoute
   '/ranking': typeof RankingRoute
+  '/ranking-craques': typeof RankingCraquesRoute
   '/reset-password': typeof ResetPasswordRoute
   '/resultados': typeof ResultadosRoute
   '/signup': typeof SignupRoute
@@ -386,6 +394,7 @@ export interface FileRoutesById {
   '/onboarding': typeof OnboardingRouteWithChildren
   '/privacidade': typeof PrivacidadeRoute
   '/ranking': typeof RankingRoute
+  '/ranking-craques': typeof RankingCraquesRoute
   '/reset-password': typeof ResetPasswordRoute
   '/resultados': typeof ResultadosRoute
   '/signup': typeof SignupRoute
@@ -433,6 +442,7 @@ export interface FileRouteTypes {
     | '/onboarding'
     | '/privacidade'
     | '/ranking'
+    | '/ranking-craques'
     | '/reset-password'
     | '/resultados'
     | '/signup'
@@ -478,6 +488,7 @@ export interface FileRouteTypes {
     | '/onboarding'
     | '/privacidade'
     | '/ranking'
+    | '/ranking-craques'
     | '/reset-password'
     | '/resultados'
     | '/signup'
@@ -524,6 +535,7 @@ export interface FileRouteTypes {
     | '/onboarding'
     | '/privacidade'
     | '/ranking'
+    | '/ranking-craques'
     | '/reset-password'
     | '/resultados'
     | '/signup'
@@ -571,6 +583,7 @@ export interface RootRouteChildren {
   OnboardingRoute: typeof OnboardingRouteWithChildren
   PrivacidadeRoute: typeof PrivacidadeRoute
   RankingRoute: typeof RankingRoute
+  RankingCraquesRoute: typeof RankingCraquesRoute
   ResetPasswordRoute: typeof ResetPasswordRoute
   ResultadosRoute: typeof ResultadosRoute
   SignupRoute: typeof SignupRoute
@@ -635,6 +648,13 @@ declare module '@tanstack/react-router' {
       path: '/reset-password'
       fullPath: '/reset-password'
       preLoaderRoute: typeof ResetPasswordRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/ranking-craques': {
+      id: '/ranking-craques'
+      path: '/ranking-craques'
+      fullPath: '/ranking-craques'
+      preLoaderRoute: typeof RankingCraquesRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/ranking': {
@@ -1011,6 +1031,7 @@ const rootRouteChildren: RootRouteChildren = {
   OnboardingRoute: OnboardingRouteWithChildren,
   PrivacidadeRoute: PrivacidadeRoute,
   RankingRoute: RankingRoute,
+  RankingCraquesRoute: RankingCraquesRoute,
   ResetPasswordRoute: ResetPasswordRoute,
   ResultadosRoute: ResultadosRoute,
   SignupRoute: SignupRoute,
