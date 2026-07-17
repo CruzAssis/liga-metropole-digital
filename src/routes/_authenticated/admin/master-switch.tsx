@@ -120,16 +120,17 @@ function MasterSwitchPage() {
   const isOpen = settings?.master_registration_open ?? false;
 
   return (
-    <div className="max-w-4xl mx-auto p-6 space-y-6">
+    <div className="max-w-4xl mx-auto p-4 sm:p-6 space-y-6">
       <div>
-        <h1 className="text-2xl font-bold flex items-center gap-2">
-          <KeyRound className="h-6 w-6 text-primary" />
-          Chave Mestra da Liga
+        <h1 className="text-xl sm:text-2xl font-bold flex items-center gap-2">
+          <KeyRound className="h-5 w-5 sm:h-6 sm:w-6 text-primary shrink-0" />
+          <span className="min-w-0 truncate">Chave Mestra da Liga</span>
         </h1>
-        <p className="text-sm text-muted-foreground mt-1">
+        <p className="text-xs sm:text-sm text-muted-foreground mt-1">
           Controle exclusivo do Super-Admin para abrir/fechar cadastros e acompanhar as vagas.
         </p>
       </div>
+
 
       {/* Master switch */}
       <div
@@ -137,10 +138,10 @@ function MasterSwitchPage() {
           isOpen ? "border-green-500/50 bg-green-500/5" : "border-yellow-500/50 bg-yellow-500/5"
         }`}
       >
-        <div className="flex items-center justify-between gap-4">
-          <div>
+        <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
+          <div className="min-w-0">
             <div className="text-sm text-muted-foreground">Estado atual</div>
-            <div className={`text-2xl font-bold ${isOpen ? "text-green-500" : "text-yellow-500"}`}>
+            <div className={`text-xl sm:text-2xl font-bold ${isOpen ? "text-green-500" : "text-yellow-500"}`}>
               {isOpen ? "LIGA ABERTA" : "MODO DE ESPERA"}
             </div>
             <p className="text-xs text-muted-foreground mt-1 max-w-md">
@@ -149,11 +150,12 @@ function MasterSwitchPage() {
                 : "Novos cadastros ficam em lista de espera até você virar a chave."}
             </p>
           </div>
-          <div className="flex items-center gap-3">
+          <div className="flex items-center gap-3 self-start sm:self-auto">
             <Switch checked={isOpen} disabled={saving} onCheckedChange={toggleMaster} />
             <Label className="text-sm font-medium">{isOpen ? "ON" : "OFF"}</Label>
           </div>
         </div>
+
       </div>
 
       {/* Dashboard cards */}

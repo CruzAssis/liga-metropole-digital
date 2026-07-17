@@ -195,16 +195,17 @@ function AdminManifestoPage() {
   return (
     <div className="min-h-screen bg-black text-white">
       <div className="absolute top-0 left-0 right-0 h-1.5 bg-[#1565F5]" aria-hidden />
-      <div className="max-w-xl mx-auto px-6 py-16">
-        <p className="text-xs uppercase tracking-[0.3em] text-[#1565F5] font-semibold mb-3">
+      <div className="max-w-xl mx-auto px-4 sm:px-6 py-10 sm:py-16">
+        <p className="text-[10px] sm:text-xs uppercase tracking-[0.3em] text-[#1565F5] font-semibold mb-3">
           Admin — Carta Convite
         </p>
-        <h1 className="text-3xl font-black mb-2">Gerar Manifesto</h1>
-        <p className="text-zinc-400 text-sm mb-10">
+        <h1 className="text-2xl sm:text-3xl font-black mb-2">Gerar Manifesto</h1>
+        <p className="text-zinc-400 text-xs sm:text-sm mb-8 sm:mb-10 break-words">
           Envie o escudo do time e informe o nome. O manifesto fica salvo em{' '}
           <span className="text-[#1565F5]">/manifesto/{'{'}slug{'}'}</span> para
           reaproveitar depois.
         </p>
+
 
         <form onSubmit={handleGenerate} className="space-y-6">
           <div className="space-y-2">
