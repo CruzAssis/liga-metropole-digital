@@ -1,15 +1,20 @@
 import { createFileRoute } from '@tanstack/react-router'
 import { useServerFn } from '@tanstack/react-start'
 import { useQuery } from '@tanstack/react-query'
-import { useState } from 'react'
+import { useEffect, useState } from 'react'
 import { Button } from '@/components/ui/button'
 import { Badge } from '@/components/ui/badge'
 import { Input } from '@/components/ui/input'
+import { Label } from '@/components/ui/label'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
-import { Users, Search, RefreshCw, Shield, MessageCircle, Copy } from 'lucide-react'
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from '@/components/ui/dialog'
+import { Users, Search, RefreshCw, Shield, MessageCircle, Copy, Pencil } from 'lucide-react'
 import { listAdminTeams, type AdminTeamRow } from '@/lib/admin-teams.functions'
+import { adminUpdateTeam } from '@/lib/team-profile.functions'
+import { supabase } from '@/integrations/supabase/client'
 import { buildWhatsAppLink, formatPhoneBR } from '@/lib/wa'
 import { toast } from 'sonner'
+
 
 export const Route = createFileRoute('/_authenticated/admin/times')({
   component: AdminTimes,
