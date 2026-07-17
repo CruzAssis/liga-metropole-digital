@@ -742,6 +742,31 @@ export type Database = {
         }[]
       }
       generate_team_invite_code: { Args: never; Returns: string }
+      get_athlete_stats: {
+        Args: { _athlete_id: string }
+        Returns: {
+          avg_rating: number
+          goals: number
+          total_evaluations: number
+        }[]
+      }
+      get_ranking_craques: {
+        Args: { _min_evaluations?: number }
+        Returns: {
+          athlete_id: string
+          avg_rating: number
+          full_name: string
+          goals: number
+          nickname: string
+          photo_url: string
+          position: string
+          team_id: string
+          team_name: string
+          team_primary_color: string
+          team_short_name: string
+          total_evaluations: number
+        }[]
+      }
       get_team_by_invite_code: {
         Args: { _code: string }
         Returns: {
