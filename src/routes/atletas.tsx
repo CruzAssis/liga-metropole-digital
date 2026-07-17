@@ -275,7 +275,7 @@ function ScorersRanking({ ladoFilter }: { ladoFilter: LadoFilter }) {
   );
 }
 
-function RatingsRanking() {
+function RatingsRanking({ ladoFilter }: { ladoFilter: LadoFilter }) {
   const { data, isLoading } = useRankings();
   if (isLoading) return (
     <div className="space-y-2">
