@@ -7,6 +7,7 @@ import { Label } from '@/components/ui/label'
 import { toast } from 'sonner'
 import { StepHeader } from '@/components/ui/step-header'
 import { PrimaryCTA } from '@/components/ui/primary-cta'
+import { markAthleteWelcomePending } from '@/components/WelcomeAthleteModal'
 
 export const Route = createFileRoute('/onboarding/jogador')({
   component: JogadorOnboarding,
@@ -85,6 +86,7 @@ function JogadorOnboarding() {
       })
       if (error) throw error
       toast.success(mode === 'market' ? 'Você está no mercado de jogadores!' : 'Perfil de jogador criado!')
+      markAthleteWelcomePending()
       navigate({ to: '/minha-conta', replace: true })
     } catch (err) {
       const msg = err instanceof Error ? err.message : 'Erro ao criar perfil'
