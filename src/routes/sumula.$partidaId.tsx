@@ -782,8 +782,21 @@ function SumulaDigitalPage() {
             <Badge className="bg-zinc-800 text-zinc-300 border-zinc-700 text-xs">
               Súmula Digital
             </Badge>
-            {isWO && <Badge className="bg-red-900/30 text-red-400 border-red-800/40 text-xs">WO Automático</Badge>}
-            {isClosed && <Badge className="bg-green-900/30 text-green-400 border-green-800/40 text-xs">Encerrada</Badge>}
+            {match.status === 'confirmed' || match.status === 'closed' ? (
+              <Badge className="bg-green-900/40 text-green-300 border-green-700/50 text-xs">
+                ✓ Súmula Homologada
+              </Badge>
+            ) : match.status === 'disputed' ? (
+              <Badge className="bg-red-900/40 text-red-300 border-red-700/50 text-xs">
+                ⚠ Contestada — Ranking Travado
+              </Badge>
+            ) : match.status === 'wo' ? (
+              <Badge className="bg-red-900/30 text-red-400 border-red-800/40 text-xs">WO Automático</Badge>
+            ) : (
+              <Badge className="bg-amber-900/40 text-amber-300 border-amber-700/50 text-xs">
+                ⏳ Pendente Validação
+              </Badge>
+            )}
           </div>
 
           <div className="grid grid-cols-3 items-center gap-4 text-center">
