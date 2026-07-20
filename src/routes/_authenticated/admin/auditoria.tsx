@@ -41,10 +41,16 @@ function AuditoriaPage() {
   const listFn = useServerFn(adminListAuditLog);
   const [actionFilter, setActionFilter] = useState<string>("todos");
   const [search, setSearch] = useState("");
+  const [fromDate, setFromDate] = useState<string>("");
+  const [toDate, setToDate] = useState<string>("");
+
+  const fromIso = fromDate ? new Date(fromDate + "T00:00:00").toISOString() : undefined;
+  const toIso = toDate ? new Date(toDate + "T23:59:59.999").toISOString() : undefined;
 
   const { data, isLoading, refetch, isFetching } = useQuery<AuditRow[]>({
-    queryKey: ["admin", "audit-log"],
-    queryFn: () => listFn({ data: {} }) as unknown as Promise<AuditRow[]>,
+    queryKey: ["admin", "audit-log", fromIso ?? "", toIso ?? ""],
+    queryFn: () =>
+      listFn({ data: { from: fromIso ?? null, to: toIso ?? null } }) as unknown as Promise<AuditRow[]>,
   });
 
   const rows: AuditRow[] = data ?? [];
