@@ -262,6 +262,68 @@ function EstatisticasPage() {
               />
             </div>
           )}
+
+          {trends && trends.length > 0 && (
+            <div className="mt-6 grid gap-4 lg:grid-cols-2">
+              <Card>
+                <CardHeader className="pb-2">
+                  <CardTitle className="text-sm uppercase tracking-wider text-muted-foreground">
+                    Gols por rodada
+                  </CardTitle>
+                </CardHeader>
+                <CardContent className="h-64">
+                  <ResponsiveContainer width="100%" height="100%">
+                    <LineChart data={trends} margin={{ top: 8, right: 12, left: -12, bottom: 0 }}>
+                      <CartesianGrid strokeDasharray="3 3" stroke="hsl(var(--border))" />
+                      <XAxis dataKey="label" tick={{ fill: "hsl(var(--muted-foreground))", fontSize: 11 }} />
+                      <YAxis tick={{ fill: "hsl(var(--muted-foreground))", fontSize: 11 }} allowDecimals={false} />
+                      <RechartsTooltip
+                        contentStyle={{
+                          background: "hsl(var(--popover))",
+                          border: "1px solid hsl(var(--border))",
+                          borderRadius: 8,
+                          fontSize: 12,
+                        }}
+                        labelStyle={{ color: "hsl(var(--foreground))" }}
+                      />
+                      <Legend wrapperStyle={{ fontSize: 11 }} />
+                      <Line type="monotone" dataKey="goals" name="Gols" stroke="hsl(var(--primary))" strokeWidth={2} dot={{ r: 3 }} />
+                      <Line type="monotone" dataKey="matches" name="Partidas" stroke="hsl(var(--muted-foreground))" strokeDasharray="4 4" strokeWidth={1.5} dot={false} />
+                    </LineChart>
+                  </ResponsiveContainer>
+                </CardContent>
+              </Card>
+
+              <Card>
+                <CardHeader className="pb-2">
+                  <CardTitle className="text-sm uppercase tracking-wider text-muted-foreground">
+                    Cartões por rodada
+                  </CardTitle>
+                </CardHeader>
+                <CardContent className="h-64">
+                  <ResponsiveContainer width="100%" height="100%">
+                    <BarChart data={trends} margin={{ top: 8, right: 12, left: -12, bottom: 0 }}>
+                      <CartesianGrid strokeDasharray="3 3" stroke="hsl(var(--border))" />
+                      <XAxis dataKey="label" tick={{ fill: "hsl(var(--muted-foreground))", fontSize: 11 }} />
+                      <YAxis tick={{ fill: "hsl(var(--muted-foreground))", fontSize: 11 }} allowDecimals={false} />
+                      <RechartsTooltip
+                        contentStyle={{
+                          background: "hsl(var(--popover))",
+                          border: "1px solid hsl(var(--border))",
+                          borderRadius: 8,
+                          fontSize: 12,
+                        }}
+                        labelStyle={{ color: "hsl(var(--foreground))" }}
+                      />
+                      <Legend wrapperStyle={{ fontSize: 11 }} />
+                      <Bar dataKey="yellow" name="Amarelos" stackId="c" fill="#f59e0b" radius={[2, 2, 0, 0]} />
+                      <Bar dataKey="red" name="Vermelhos" stackId="c" fill="#ef4444" radius={[2, 2, 0, 0]} />
+                    </BarChart>
+                  </ResponsiveContainer>
+                </CardContent>
+              </Card>
+            </div>
+          )}
         </TabsContent>
 
         <TabsContent value="times" className="mt-6">
