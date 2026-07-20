@@ -50,8 +50,13 @@ function TeamProfilePage() {
   const data = Route.useLoaderData() as LoaderData;
   const { team, groupLabel, athletes, matches, supporterCount } = data;
 
-  const upcoming = matches.filter((m: Match) => ["scheduled", "awaiting_confirmation"].includes(m.status)).slice(0, 5);
-  const results = matches.filter((m: Match) => ["confirmed", "wo"].includes(m.status)).slice(-5).reverse();
+  const upcoming = matches.filter((m: Match) => ["scheduled", "awaiting_confirmation"].includes(m.status));
+  const results = matches.filter((m: Match) => ["confirmed", "wo"].includes(m.status)).slice().reverse();
+
+  const [athletesVisible, setAthletesVisible] = useState(8);
+  const [upcomingVisible, setUpcomingVisible] = useState(5);
+  const [resultsVisible, setResultsVisible] = useState(5);
+
 
   const primaryStyle = team.primary_color
     ? ({ ["--team-primary" as string]: team.primary_color } as React.CSSProperties)
