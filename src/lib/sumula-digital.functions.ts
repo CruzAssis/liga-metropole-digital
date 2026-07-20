@@ -173,6 +173,8 @@ export const disputeSumulaScore = createServerFn({ method: "POST" })
     if (!updated) throw new Error("O status da partida mudou; recarregue e tente novamente");
     return { ok: true };
   });
+
+export const saveSumulaGoalsAndDestaque = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
   .inputValidator((input) =>
     z.object({
