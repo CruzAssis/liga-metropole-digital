@@ -51,6 +51,7 @@ import { Route as AuthenticatedAdminSumulasRouteImport } from './routes/_authent
 import { Route as AuthenticatedAdminSorteioRouteImport } from './routes/_authenticated/admin/sorteio'
 import { Route as AuthenticatedAdminPartidasRouteImport } from './routes/_authenticated/admin/partidas'
 import { Route as AuthenticatedAdminNotificacoesRouteImport } from './routes/_authenticated/admin/notificacoes'
+import { Route as AuthenticatedAdminMidiaRouteImport } from './routes/_authenticated/admin/midia'
 import { Route as AuthenticatedAdminMasterSwitchRouteImport } from './routes/_authenticated/admin/master-switch'
 import { Route as AuthenticatedAdminManifestoRouteImport } from './routes/_authenticated/admin/manifesto'
 import { Route as AuthenticatedAdminLocaisRouteImport } from './routes/_authenticated/admin/locais'
@@ -280,6 +281,11 @@ const AuthenticatedAdminNotificacoesRoute =
     path: '/notificacoes',
     getParentRoute: () => AuthenticatedAdminRoute,
   } as any)
+const AuthenticatedAdminMidiaRoute = AuthenticatedAdminMidiaRouteImport.update({
+  id: '/midia',
+  path: '/midia',
+  getParentRoute: () => AuthenticatedAdminRoute,
+} as any)
 const AuthenticatedAdminMasterSwitchRoute =
   AuthenticatedAdminMasterSwitchRouteImport.update({
     id: '/master-switch',
@@ -389,6 +395,7 @@ export interface FileRoutesByFullPath {
   '/admin/locais': typeof AuthenticatedAdminLocaisRoute
   '/admin/manifesto': typeof AuthenticatedAdminManifestoRoute
   '/admin/master-switch': typeof AuthenticatedAdminMasterSwitchRoute
+  '/admin/midia': typeof AuthenticatedAdminMidiaRoute
   '/admin/notificacoes': typeof AuthenticatedAdminNotificacoesRoute
   '/admin/partidas': typeof AuthenticatedAdminPartidasRoute
   '/admin/sorteio': typeof AuthenticatedAdminSorteioRoute
@@ -443,6 +450,7 @@ export interface FileRoutesByTo {
   '/admin/locais': typeof AuthenticatedAdminLocaisRoute
   '/admin/manifesto': typeof AuthenticatedAdminManifestoRoute
   '/admin/master-switch': typeof AuthenticatedAdminMasterSwitchRoute
+  '/admin/midia': typeof AuthenticatedAdminMidiaRoute
   '/admin/notificacoes': typeof AuthenticatedAdminNotificacoesRoute
   '/admin/partidas': typeof AuthenticatedAdminPartidasRoute
   '/admin/sorteio': typeof AuthenticatedAdminSorteioRoute
@@ -499,6 +507,7 @@ export interface FileRoutesById {
   '/_authenticated/admin/locais': typeof AuthenticatedAdminLocaisRoute
   '/_authenticated/admin/manifesto': typeof AuthenticatedAdminManifestoRoute
   '/_authenticated/admin/master-switch': typeof AuthenticatedAdminMasterSwitchRoute
+  '/_authenticated/admin/midia': typeof AuthenticatedAdminMidiaRoute
   '/_authenticated/admin/notificacoes': typeof AuthenticatedAdminNotificacoesRoute
   '/_authenticated/admin/partidas': typeof AuthenticatedAdminPartidasRoute
   '/_authenticated/admin/sorteio': typeof AuthenticatedAdminSorteioRoute
@@ -555,6 +564,7 @@ export interface FileRouteTypes {
     | '/admin/locais'
     | '/admin/manifesto'
     | '/admin/master-switch'
+    | '/admin/midia'
     | '/admin/notificacoes'
     | '/admin/partidas'
     | '/admin/sorteio'
@@ -609,6 +619,7 @@ export interface FileRouteTypes {
     | '/admin/locais'
     | '/admin/manifesto'
     | '/admin/master-switch'
+    | '/admin/midia'
     | '/admin/notificacoes'
     | '/admin/partidas'
     | '/admin/sorteio'
@@ -664,6 +675,7 @@ export interface FileRouteTypes {
     | '/_authenticated/admin/locais'
     | '/_authenticated/admin/manifesto'
     | '/_authenticated/admin/master-switch'
+    | '/_authenticated/admin/midia'
     | '/_authenticated/admin/notificacoes'
     | '/_authenticated/admin/partidas'
     | '/_authenticated/admin/sorteio'
@@ -1000,6 +1012,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedAdminNotificacoesRouteImport
       parentRoute: typeof AuthenticatedAdminRoute
     }
+    '/_authenticated/admin/midia': {
+      id: '/_authenticated/admin/midia'
+      path: '/midia'
+      fullPath: '/admin/midia'
+      preLoaderRoute: typeof AuthenticatedAdminMidiaRouteImport
+      parentRoute: typeof AuthenticatedAdminRoute
+    }
     '/_authenticated/admin/master-switch': {
       id: '/_authenticated/admin/master-switch'
       path: '/master-switch'
@@ -1091,6 +1110,7 @@ interface AuthenticatedAdminRouteChildren {
   AuthenticatedAdminLocaisRoute: typeof AuthenticatedAdminLocaisRoute
   AuthenticatedAdminManifestoRoute: typeof AuthenticatedAdminManifestoRoute
   AuthenticatedAdminMasterSwitchRoute: typeof AuthenticatedAdminMasterSwitchRoute
+  AuthenticatedAdminMidiaRoute: typeof AuthenticatedAdminMidiaRoute
   AuthenticatedAdminNotificacoesRoute: typeof AuthenticatedAdminNotificacoesRoute
   AuthenticatedAdminPartidasRoute: typeof AuthenticatedAdminPartidasRoute
   AuthenticatedAdminSorteioRoute: typeof AuthenticatedAdminSorteioRoute
@@ -1111,6 +1131,7 @@ const AuthenticatedAdminRouteChildren: AuthenticatedAdminRouteChildren = {
   AuthenticatedAdminLocaisRoute: AuthenticatedAdminLocaisRoute,
   AuthenticatedAdminManifestoRoute: AuthenticatedAdminManifestoRoute,
   AuthenticatedAdminMasterSwitchRoute: AuthenticatedAdminMasterSwitchRoute,
+  AuthenticatedAdminMidiaRoute: AuthenticatedAdminMidiaRoute,
   AuthenticatedAdminNotificacoesRoute: AuthenticatedAdminNotificacoesRoute,
   AuthenticatedAdminPartidasRoute: AuthenticatedAdminPartidasRoute,
   AuthenticatedAdminSorteioRoute: AuthenticatedAdminSorteioRoute,
