@@ -350,3 +350,79 @@ export const getHeadToHead = createServerFn({ method: "GET" })
       summary: { winsA, winsB, draws, goalsA, goalsB, total: matches?.length ?? 0 },
     };
   });
+
+// ============================================================
+// Estatísticas por jogador: artilharia e disciplina
+// ============================================================
+export const getPlayerStats = createServerFn({ method: "GET" })
+  .inputValidator((data) =>
+    z.object({ competition_id: z.string().uuid().nullable().optional() }).parse(data ?? {}),
+  )
+  .handler(async ({ data }) => {
+    const { matches, teams } = await loadCompetition(data.competition_id ?? null);
+    const matchIds = matches.map((m) => m.id);
+    if (!matchIds.length) return { scorers: [], discipline: [] };
+
+    const { data: events } = await supabaseAdmin
+      .from("match_events")
+      .select("athlete_id, team_id, kind")
+      .in("match_id", matchIds)
+      .in("kind", ["goal", "yellow_card", "red_card"])
+      .not("athlete_id", "is", null)
+      .limit(20000);
+
+    const athleteIds = Array.from(new Set((events ?? []).map((e) => e.athlete_id).filter(Boolean))) as string[];
+    let athletes: Array<{ id: string; full_name: string; nickname: string | null; photo_url: string | null; team_id: string | null; position: string | null }> = [];
+    if (athleteIds.length) {
+      const { data: aRows } = await supabaseAdmin
+        .from("athletes")
+        .select("id, full_name, nickname, photo_url, team_id, position")
+        .in("id", athleteIds);
+      athletes = (aRows ?? []) as any;
+    }
+    const teamById = new Map(teams.map((t) => [t.id, t]));
+    const athleteById = new Map(athletes.map((a) => [a.id, a]));
+
+    type Agg = { athlete_id: string; goals: number; yellow: number; red: number };
+    const map = new Map<string, Agg>();
+    for (const e of events ?? []) {
+      if (!e.athlete_id) continue;
+      const cur = map.get(e.athlete_id) ?? { athlete_id: e.athlete_id, goals: 0, yellow: 0, red: 0 };
+      if (e.kind === "goal") cur.goals++;
+      else if (e.kind === "yellow_card") cur.yellow++;
+      else if (e.kind === "red_card") cur.red++;
+      map.set(e.athlete_id, cur);
+    }
+
+    const enrich = (a: Agg) => {
+      const ath = athleteById.get(a.athlete_id);
+      const team = ath?.team_id ? teamById.get(ath.team_id) : null;
+      return {
+        athlete_id: a.athlete_id,
+        full_name: ath?.full_name ?? "—",
+        nickname: ath?.nickname ?? null,
+        photo_url: ath?.photo_url ?? null,
+        position: ath?.position ?? null,
+        team: team
+          ? { id: team.id, name: team.name, short_name: team.short_name, logo_url: team.logo_url, lado: team.lado }
+          : null,
+        goals: a.goals,
+        yellow: a.yellow,
+        red: a.red,
+      };
+    };
+
+    const scorers = Array.from(map.values())
+      .filter((a) => a.goals > 0)
+      .sort((a, b) => b.goals - a.goals)
+      .slice(0, 25)
+      .map(enrich);
+
+    const discipline = Array.from(map.values())
+      .filter((a) => a.yellow + a.red > 0)
+      .sort((a, b) => (b.red * 3 + b.yellow) - (a.red * 3 + a.yellow))
+      .slice(0, 25)
+      .map(enrich);
+
+    return { scorers, discipline };
+  });

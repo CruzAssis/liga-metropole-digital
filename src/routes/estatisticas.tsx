@@ -7,6 +7,7 @@ import {
   getLeagueKpis,
   getHeadToHead,
   getLeagueTrends,
+  getPlayerStats,
 } from "@/lib/estatisticas.functions";
 import {
   ResponsiveContainer,
@@ -35,7 +36,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { BarChart3, Goal, Trophy, ShieldAlert, Target, Swords } from "lucide-react";
+import { BarChart3, Goal, Trophy, ShieldAlert, Target, Swords, Users, Download } from "lucide-react";
 
 type Competition = {
   id: string;
@@ -143,6 +144,18 @@ function KpiCard({
   );
 }
 
+type PlayerAgg = {
+  athlete_id: string;
+  full_name: string;
+  nickname: string | null;
+  photo_url: string | null;
+  position: string | null;
+  team: { id: string; name: string; short_name: string; logo_url: string | null; lado: "A" | "B" | null } | null;
+  goals: number;
+  yellow: number;
+  red: number;
+};
+
 function EstatisticasPage() {
   const [comps, setComps] = useState<Competition[]>([]);
   const [selectedComp, setSelectedComp] = useState<string | null>(null);
@@ -151,11 +164,13 @@ function EstatisticasPage() {
   const [trends, setTrends] = useState<
     { key: string; label: string; goals: number; matches: number; yellow: number; red: number }[] | null
   >(null);
+  const [players, setPlayers] = useState<{ scorers: PlayerAgg[]; discipline: PlayerAgg[] } | null>(null);
 
   const fetchKpis = useServerFn(getLeagueKpis);
   const fetchAdv = useServerFn(getAdvancedTeamStats);
   const fetchH2H = useServerFn(getHeadToHead);
   const fetchTrends = useServerFn(getLeagueTrends);
+  const fetchPlayers = useServerFn(getPlayerStats);
 
   useEffect(() => {
     (async () => {
@@ -172,14 +187,16 @@ function EstatisticasPage() {
 
   useEffect(() => {
     (async () => {
-      const [k, r, t] = await Promise.all([
+      const [k, r, t, p] = await Promise.all([
         fetchKpis({ data: { competition_id: selectedComp } }),
         fetchAdv({ data: { competition_id: selectedComp } }),
         fetchTrends({ data: { competition_id: selectedComp } }),
+        fetchPlayers({ data: { competition_id: selectedComp } }),
       ]);
       setKpis(k as Kpis);
       setRows(r as TeamAdvanced[]);
       setTrends(t as any);
+      setPlayers(p as any);
     })();
   }, [selectedComp]);
 
@@ -193,6 +210,27 @@ function EstatisticasPage() {
     if (!teamA || !teamB || teamA === teamB) return;
     const res = await fetchH2H({ data: { team_a: teamA, team_b: teamB } });
     setH2h(res);
+  };
+
+  const exportTeamsCsv = () => {
+    if (!rows || rows.length === 0) return;
+    const headers = ["Pos", "Time", "Sigla", "Lado", "J", "V", "E", "D", "GP", "GC", "SG", "Pts", "Aprov%", "Clean", "S/marcar", "Amarelos", "Vermelhos", "Forma"];
+    const lines = [headers.join(";")];
+    rows.forEach((r, i) => {
+      lines.push([
+        i + 1, `"${r.team.name.replace(/"/g, '""')}"`, r.team.short_name, r.team.lado ?? "",
+        r.played, r.wins, r.draws, r.losses, r.gf, r.ga, r.gd, r.points,
+        r.aproveitamento, r.clean_sheets, r.failed_to_score, r.yellow, r.red,
+        r.form.join(""),
+      ].join(";"));
+    });
+    const blob = new Blob(["\uFEFF" + lines.join("\n")], { type: "text/csv;charset=utf-8;" });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement("a");
+    a.href = url;
+    a.download = `classificacao-${new Date().toISOString().slice(0, 10)}.csv`;
+    a.click();
+    URL.revokeObjectURL(url);
   };
 
   return (
@@ -227,6 +265,9 @@ function EstatisticasPage() {
           </TabsTrigger>
           <TabsTrigger value="times">
             <Trophy className="h-4 w-4 mr-1" /> Times
+          </TabsTrigger>
+          <TabsTrigger value="jogadores">
+            <Users className="h-4 w-4 mr-1" /> Jogadores
           </TabsTrigger>
           <TabsTrigger value="confronto">
             <Swords className="h-4 w-4 mr-1" /> Confronto direto
@@ -327,6 +368,17 @@ function EstatisticasPage() {
         </TabsContent>
 
         <TabsContent value="times" className="mt-6 space-y-6">
+          {rows && rows.length > 0 && (
+            <div className="flex justify-end">
+              <button
+                onClick={exportTeamsCsv}
+                className="inline-flex items-center gap-2 h-9 px-3 rounded-md border border-border bg-card hover:bg-muted/50 text-sm font-medium transition-colors"
+              >
+                <Download className="h-4 w-4" />
+                Exportar CSV
+              </button>
+            </div>
+          )}
           {rows && rows.length > 0 && (
             <div className="grid gap-4 lg:grid-cols-2">
               <Card>
@@ -468,6 +520,138 @@ function EstatisticasPage() {
                   ))}
                 </tbody>
               </table>
+            </div>
+          )}
+        </TabsContent>
+
+        <TabsContent value="jogadores" className="mt-6 space-y-6">
+          {!players ? (
+            <div className="text-sm text-muted-foreground">Carregando…</div>
+          ) : players.scorers.length === 0 && players.discipline.length === 0 ? (
+            <div className="text-sm text-muted-foreground">Sem eventos registrados ainda nesta conferência.</div>
+          ) : (
+            <div className="grid gap-6 lg:grid-cols-2">
+              <Card>
+                <CardHeader className="pb-2 flex-row items-center justify-between space-y-0">
+                  <CardTitle className="text-sm uppercase tracking-wider text-muted-foreground">
+                    Artilharia
+                  </CardTitle>
+                  <Goal className="h-4 w-4 text-primary" />
+                </CardHeader>
+                <CardContent className="p-0">
+                  {players.scorers.length === 0 ? (
+                    <p className="text-sm text-muted-foreground p-4">Sem gols registrados.</p>
+                  ) : (
+                    <div className="overflow-x-auto">
+                      <table className="w-full text-sm">
+                        <thead className="text-[11px] uppercase text-muted-foreground border-b border-border bg-muted/30">
+                          <tr>
+                            <th className="text-center p-2 w-8">#</th>
+                            <th className="text-left p-2">Jogador</th>
+                            <th className="text-left p-2 hidden sm:table-cell">Time</th>
+                            <th className="text-center p-2">Gols</th>
+                          </tr>
+                        </thead>
+                        <tbody>
+                          {players.scorers.map((p, i) => (
+                            <tr key={p.athlete_id} className="border-b border-border/60 last:border-0 hover:bg-muted/30">
+                              <td className="text-center p-2 tabular-nums text-muted-foreground">{i + 1}</td>
+                              <td className="p-2">
+                                <div className="flex items-center gap-2.5 min-w-0">
+                                  {p.photo_url ? (
+                                    <img src={p.photo_url} alt="" className="h-8 w-8 rounded-full object-cover ring-1 ring-border" />
+                                  ) : (
+                                    <div className="h-8 w-8 rounded-full bg-muted grid place-items-center text-[11px] font-bold">
+                                      {(p.nickname ?? p.full_name)[0]}
+                                    </div>
+                                  )}
+                                  <div className="min-w-0">
+                                    <div className="font-medium truncate">{p.nickname ?? p.full_name}</div>
+                                    {p.position && (
+                                      <div className="text-[11px] text-muted-foreground">{p.position}</div>
+                                    )}
+                                  </div>
+                                </div>
+                              </td>
+                              <td className="p-2 hidden sm:table-cell">
+                                {p.team ? (
+                                  <div className="flex items-center gap-2">
+                                    {p.team.logo_url && <img src={p.team.logo_url} alt="" className="h-5 w-5 rounded object-cover" />}
+                                    <span className="text-xs">{p.team.short_name}</span>
+                                    {p.team.lado && <Badge variant="outline" className="text-[10px]">{p.team.lado}</Badge>}
+                                  </div>
+                                ) : (
+                                  <span className="text-muted-foreground">—</span>
+                                )}
+                              </td>
+                              <td className="text-center p-2 tabular-nums font-bold text-primary">{p.goals}</td>
+                            </tr>
+                          ))}
+                        </tbody>
+                      </table>
+                    </div>
+                  )}
+                </CardContent>
+              </Card>
+
+              <Card>
+                <CardHeader className="pb-2 flex-row items-center justify-between space-y-0">
+                  <CardTitle className="text-sm uppercase tracking-wider text-muted-foreground">
+                    Disciplina
+                  </CardTitle>
+                  <ShieldAlert className="h-4 w-4 text-amber-400" />
+                </CardHeader>
+                <CardContent className="p-0">
+                  {players.discipline.length === 0 ? (
+                    <p className="text-sm text-muted-foreground p-4">Sem cartões registrados.</p>
+                  ) : (
+                    <div className="overflow-x-auto">
+                      <table className="w-full text-sm">
+                        <thead className="text-[11px] uppercase text-muted-foreground border-b border-border bg-muted/30">
+                          <tr>
+                            <th className="text-center p-2 w-8">#</th>
+                            <th className="text-left p-2">Jogador</th>
+                            <th className="text-left p-2 hidden sm:table-cell">Time</th>
+                            <th className="text-center p-2">🟨</th>
+                            <th className="text-center p-2">🟥</th>
+                          </tr>
+                        </thead>
+                        <tbody>
+                          {players.discipline.map((p, i) => (
+                            <tr key={p.athlete_id} className="border-b border-border/60 last:border-0 hover:bg-muted/30">
+                              <td className="text-center p-2 tabular-nums text-muted-foreground">{i + 1}</td>
+                              <td className="p-2">
+                                <div className="flex items-center gap-2.5 min-w-0">
+                                  {p.photo_url ? (
+                                    <img src={p.photo_url} alt="" className="h-8 w-8 rounded-full object-cover ring-1 ring-border" />
+                                  ) : (
+                                    <div className="h-8 w-8 rounded-full bg-muted grid place-items-center text-[11px] font-bold">
+                                      {(p.nickname ?? p.full_name)[0]}
+                                    </div>
+                                  )}
+                                  <div className="font-medium truncate">{p.nickname ?? p.full_name}</div>
+                                </div>
+                              </td>
+                              <td className="p-2 hidden sm:table-cell">
+                                {p.team ? (
+                                  <div className="flex items-center gap-2">
+                                    {p.team.logo_url && <img src={p.team.logo_url} alt="" className="h-5 w-5 rounded object-cover" />}
+                                    <span className="text-xs">{p.team.short_name}</span>
+                                  </div>
+                                ) : (
+                                  <span className="text-muted-foreground">—</span>
+                                )}
+                              </td>
+                              <td className="text-center p-2 tabular-nums text-amber-400 font-semibold">{p.yellow}</td>
+                              <td className="text-center p-2 tabular-nums text-red-400 font-semibold">{p.red}</td>
+                            </tr>
+                          ))}
+                        </tbody>
+                      </table>
+                    </div>
+                  )}
+                </CardContent>
+              </Card>
             </div>
           )}
         </TabsContent>
