@@ -6,6 +6,9 @@ import { useQuery } from "@tanstack/react-query";
 import { QRCodeSVG } from "qrcode.react";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Badge } from "@/components/ui/badge";
+import { Button } from "@/components/ui/button";
+import { Skeleton } from "@/components/ui/skeleton";
+import { EmptyState } from "@/components/AppSkeletons";
 import { PublicShell } from "@/components/PublicShell";
 import { getAtletaPublicProfile } from "@/lib/atleta-profile.functions";
 import {
@@ -15,6 +18,7 @@ import {
   Trophy,
   Users,
   Calendar,
+  CalendarX,
   Instagram,
   QrCode,
   ChevronLeft,
@@ -33,6 +37,7 @@ export const Route = createFileRoute("/atletas/$id")({
     ],
   }),
 });
+
 
 function useAtletaProfile(id: string) {
   const fn = useServerFn(getAtletaPublicProfile);
