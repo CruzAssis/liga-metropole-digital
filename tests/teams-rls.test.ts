@@ -204,14 +204,24 @@ describe("anon — no read/write on teams", () => {
 });
 
 describe("manager — full read/update on own team only", () => {
-  test("manager reads their own pending team", async () => {
-    const { data, error } = await mgrClient
+  test("manager2 reads their own pending team", async () => {
+    const { data, error } = await mgr2Client
       .from("teams")
       .select("id, status, home_venue")
       .eq("id", PENDING_TEAM_ID)
       .single();
     expect(error).toBeNull();
     expect(data?.status).toBe("pending");
+  });
+
+  test("manager (of APPROVED) cannot see pending team of manager2", async () => {
+    const { data, error } = await mgrClient
+      .from("teams")
+      .select("id")
+      .eq("id", PENDING_TEAM_ID);
+    expect(error).toBeNull();
+    // Pending team is not readable by other authenticated users, even other managers.
+    expect(data ?? []).toHaveLength(0);
   });
 
   test("manager can update safe fields on own team", async () => {
@@ -229,8 +239,8 @@ describe("manager — full read/update on own team only", () => {
     expect(data?.primary_color).toBe("#123456");
   });
 
-  test("manager can update status on own team", async () => {
-    const { error } = await mgrClient
+  test("manager2 can update status on own team", async () => {
+    const { error } = await mgr2Client
       .from("teams")
       .update({ status: "waitlist" })
       .eq("id", PENDING_TEAM_ID);
