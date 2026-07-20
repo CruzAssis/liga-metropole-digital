@@ -391,14 +391,17 @@ function HomePage() {
       </section>
 
       <footer className="border-t border-zinc-800 px-6 py-4 text-center mt-auto">
-        <div className="flex flex-col sm:flex-row items-center justify-center gap-2 sm:gap-4 text-zinc-600 text-sm">
-          <span>© 2026 Liga Metrópole</span>
+        <div className="flex flex-col sm:flex-row items-center justify-center gap-2 sm:gap-4 text-zinc-600 text-sm flex-wrap">
+          <span>© {new Date().getFullYear()} {leagueName}</span>
           <span className="hidden sm:inline">·</span>
           <Link to="/privacidade" className="hover:text-zinc-400 transition-colors">Privacidade</Link>
           <span>·</span>
           <Link to="/termos" className="hover:text-zinc-400 transition-colors">Termos</Link>
+          {contactEmail && (<><span>·</span><a href={`mailto:${contactEmail}`} className="hover:text-zinc-400 transition-colors">{contactEmail}</a></>)}
+          {instagram && (<><span>·</span><a href={`https://instagram.com/${instagram.replace('@','')}`} target="_blank" rel="noreferrer" className="hover:text-zinc-400 transition-colors">{instagram.startsWith('@') ? instagram : `@${instagram}`}</a></>)}
         </div>
       </footer>
+
     </div>
   )
 }
