@@ -1,6 +1,7 @@
 import { createServerFn } from "@tanstack/react-start";
 import { z } from "zod";
 import { requireSupabaseAuth } from "@/integrations/supabase/auth-middleware";
+import { logAudit } from "@/lib/audit.server";
 
 async function assertAdmin(supabase: any, userId: string) {
   const { data, error } = await supabase.rpc("has_role", { _user_id: userId, _role: "admin" });
@@ -49,6 +50,13 @@ export const adminUpdateAthlete = createServerFn({ method: "POST" })
     if (data.verified !== undefined) patch.verified = data.verified;
     const { error } = await supabaseAdmin.from("athletes").update(patch).eq("id", data.id);
     if (error) throw new Error(error.message);
+    await logAudit({
+      claims: context.claims,
+      action: "athlete.update",
+      entity_type: "athlete",
+      entity_id: data.id,
+      metadata: { full_name: data.full_name, nickname: data.nickname, team_id: data.team_id ?? null },
+    });
     return { success: true };
   });
 
@@ -60,5 +68,11 @@ export const adminDeleteAthlete = createServerFn({ method: "POST" })
     const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
     const { error } = await supabaseAdmin.from("athletes").delete().eq("id", data.id);
     if (error) throw new Error(error.message);
+    await logAudit({
+      claims: context.claims,
+      action: "athlete.delete",
+      entity_type: "athlete",
+      entity_id: data.id,
+    });
     return { success: true };
   });

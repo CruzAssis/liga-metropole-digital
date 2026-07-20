@@ -2,6 +2,7 @@ import { createServerFn } from "@tanstack/react-start";
 import { z } from "zod";
 import { requireSupabaseAuth } from "@/integrations/supabase/auth-middleware";
 import { supabaseAdmin } from "@/integrations/supabase/client.server";
+import { logAudit } from "@/lib/audit.server";
 
 async function assertCallerIsAdmin(userId: string) {
   const { data, error } = await supabaseAdmin
@@ -112,6 +113,13 @@ export const setUserRole = createServerFn({ method: "POST" })
       if (error) throw new Error(error.message);
     }
 
+    await logAudit({
+      claims: context.claims,
+      action: data.enabled ? "user.role.grant" : "user.role.revoke",
+      entity_type: "user",
+      entity_id: data.user_id,
+      metadata: { role: data.role },
+    });
     return { success: true };
   });
 
@@ -131,6 +139,13 @@ export const sendPasswordReset = createServerFn({ method: "POST" })
       redirectTo: `${process.env.SITE_URL ?? "https://liga-metropole-digital.lovable.app"}/reset-password`,
     });
     if (error) throw new Error(error.message);
+    await logAudit({
+      claims: context.claims,
+      action: "user.password_reset",
+      entity_type: "user",
+      entity_id: data.user_id,
+      metadata: { email },
+    });
     return { success: true, email };
   });
 
@@ -170,6 +185,12 @@ export const deleteUser = createServerFn({ method: "POST" })
 
     const { error } = await supabaseAdmin.auth.admin.deleteUser(data.user_id);
     if (error) throw new Error(error.message);
+    await logAudit({
+      claims: context.claims,
+      action: "user.delete",
+      entity_type: "user",
+      entity_id: data.user_id,
+    });
     return { success: true };
   });
 
@@ -212,5 +233,12 @@ export const transferTeamOwnership = createServerFn({ method: "POST" })
         { onConflict: "team_id,user_id" },
       );
 
+    await logAudit({
+      claims: context.claims,
+      action: "team.transfer",
+      entity_type: "team",
+      entity_id: data.team_id,
+      metadata: { new_manager_id: data.new_manager_id },
+    });
     return { success: true };
   });

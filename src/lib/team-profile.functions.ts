@@ -2,6 +2,7 @@ import { createServerFn } from "@tanstack/react-start";
 import { z } from "zod";
 import { requireSupabaseAuth } from "@/integrations/supabase/auth-middleware";
 import { supabaseAdmin } from "@/integrations/supabase/client.server";
+import { logAudit } from "@/lib/audit.server";
 
 const slugSchema = z.object({ slug: z.string().min(1).max(120) });
 
@@ -322,6 +323,13 @@ export const adminUpdateTeam = createServerFn({ method: "POST" })
 
     const { error } = await supabaseAdmin.from("teams").update(patch as never).eq("id", data.team_id);
     if (error) throw new Error(error.message);
+    await logAudit({
+      claims: context.claims,
+      action: "team.update",
+      entity_type: "team",
+      entity_id: data.team_id,
+      metadata: { fields: Object.keys(patch) },
+    });
     return { ok: true };
   });
 
@@ -362,6 +370,12 @@ export const adminDeleteTeam = createServerFn({ method: "POST" })
     const { error } = await supabaseAdmin.from("teams").delete().eq("id", teamId);
     if (error) throw new Error(error.message);
 
+    await logAudit({
+      claims: context.claims,
+      action: "team.delete",
+      entity_type: "team",
+      entity_id: teamId,
+    });
     return { ok: true };
   });
 

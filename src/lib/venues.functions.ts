@@ -1,6 +1,7 @@
 import { createServerFn } from "@tanstack/react-start";
 import { z } from "zod";
 import { requireSupabaseAuth } from "@/integrations/supabase/auth-middleware";
+import { logAudit } from "@/lib/audit.server";
 
 async function assertAdmin(supabase: any, userId: string) {
   const { data, error } = await supabase.rpc("has_role", { _user_id: userId, _role: "admin" });
@@ -94,6 +95,13 @@ export const adminUpsertVenue = createServerFn({ method: "POST" })
     if (data.id) {
       const { error } = await supabaseAdmin.from("venues").update(patch).eq("id", data.id);
       if (error) throw new Error(error.message);
+      await logAudit({
+        claims: context.claims,
+        action: "venue.upsert",
+        entity_type: "venue",
+        entity_id: data.id,
+        metadata: { name: data.name, op: "update" },
+      });
       return { success: true, id: data.id };
     }
     const { data: inserted, error } = await supabaseAdmin
@@ -102,6 +110,13 @@ export const adminUpsertVenue = createServerFn({ method: "POST" })
       .select("id")
       .single();
     if (error) throw new Error(error.message);
+    await logAudit({
+      claims: context.claims,
+      action: "venue.upsert",
+      entity_type: "venue",
+      entity_id: inserted.id,
+      metadata: { name: data.name, op: "insert" },
+    });
     return { success: true, id: inserted.id };
   });
 
@@ -113,5 +128,11 @@ export const adminDeleteVenue = createServerFn({ method: "POST" })
     const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
     const { error } = await supabaseAdmin.from("venues").delete().eq("id", data.id);
     if (error) throw new Error(error.message);
+    await logAudit({
+      claims: context.claims,
+      action: "venue.delete",
+      entity_type: "venue",
+      entity_id: data.id,
+    });
     return { success: true };
   });
