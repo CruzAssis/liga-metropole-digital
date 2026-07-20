@@ -48,6 +48,13 @@ export const adminUpdateMatch = createServerFn({ method: "POST" })
   .handler(async ({ data, context }) => {
     await assertAdmin(context.supabase, context.userId);
     const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
+
+    const { data: prev } = await supabaseAdmin
+      .from("matches")
+      .select("id, scheduled_at, host_team_id, visitor_team_id, venue")
+      .eq("id", data.id).maybeSingle();
+    const prevScheduled = (prev as any)?.scheduled_at ?? null;
+
     const patch: any = {};
     if (data.scheduled_at !== undefined) patch.scheduled_at = data.scheduled_at;
     if (data.venue !== undefined) patch.venue = data.venue;
@@ -63,6 +70,44 @@ export const adminUpdateMatch = createServerFn({ method: "POST" })
       entity_id: data.id,
       metadata: patch,
     });
+
+    // Notificar diretores se scheduled_at foi alterado
+    if (patch.scheduled_at !== undefined && patch.scheduled_at !== prevScheduled && prev) {
+      try {
+        const { enqueueWhatsapp, fetchTeamManagerContact } = await import("@/lib/notify.server");
+        const p = prev as any;
+        const isReschedule = !!prevScheduled;
+        const dt = patch.scheduled_at
+          ? new Date(patch.scheduled_at).toLocaleString("pt-BR", {
+              timeZone: "America/Sao_Paulo",
+              day: "2-digit", month: "2-digit", hour: "2-digit", minute: "2-digit",
+            })
+          : "data a definir";
+        const venueTxt = patch.venue ?? p.venue ?? "";
+        for (const teamId of [p.host_team_id, p.visitor_team_id].filter(Boolean)) {
+          const c = await fetchTeamManagerContact(teamId as string);
+          if (!c) continue;
+          const opponentId = teamId === p.host_team_id ? p.visitor_team_id : p.host_team_id;
+          const { data: opp } = await supabaseAdmin
+            .from("teams").select("name").eq("id", opponentId).maybeSingle();
+          const oppName = (opp as any)?.name ?? "adversário";
+          const msg = `🏆 *Liga Metrópole* — ${isReschedule ? "Jogo remarcado" : "Novo jogo agendado"}\n\n${c.team_name} x ${oppName}\n📅 ${dt}${venueTxt ? `\n📍 ${venueTxt}` : ""}\n\nAcesse o app para detalhes.`;
+          await enqueueWhatsapp({
+            tipo: "jogo_agendado",
+            destinatario_id: c.id,
+            destinatario_nome: c.name,
+            destinatario_phone: c.phone,
+            assunto: `Jogo ${isReschedule ? "remarcado" : "agendado"}`,
+            mensagem: msg,
+            payload: { match_id: data.id, scheduled_at: patch.scheduled_at, is_reschedule: isReschedule },
+            created_by: context.userId,
+          });
+        }
+      } catch (err) {
+        console.error("[notify:jogo_agendado]", err);
+      }
+    }
+
     return { success: true };
   });
 

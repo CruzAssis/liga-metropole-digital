@@ -480,6 +480,69 @@ export type Database = {
           },
         ]
       }
+      notificacoes_log: {
+        Row: {
+          assunto: string | null
+          canal: string
+          corpo_preview: string | null
+          created_at: string
+          created_by: string | null
+          destinatario_email: string | null
+          destinatario_id: string | null
+          destinatario_nome: string | null
+          destinatario_phone: string | null
+          enviado_em: string | null
+          erro_mensagem: string | null
+          id: string
+          payload: Json
+          send_count: number
+          status: string
+          tipo: string
+          whatsapp_template: string | null
+          whatsapp_url: string | null
+        }
+        Insert: {
+          assunto?: string | null
+          canal: string
+          corpo_preview?: string | null
+          created_at?: string
+          created_by?: string | null
+          destinatario_email?: string | null
+          destinatario_id?: string | null
+          destinatario_nome?: string | null
+          destinatario_phone?: string | null
+          enviado_em?: string | null
+          erro_mensagem?: string | null
+          id?: string
+          payload?: Json
+          send_count?: number
+          status?: string
+          tipo: string
+          whatsapp_template?: string | null
+          whatsapp_url?: string | null
+        }
+        Update: {
+          assunto?: string | null
+          canal?: string
+          corpo_preview?: string | null
+          created_at?: string
+          created_by?: string | null
+          destinatario_email?: string | null
+          destinatario_id?: string | null
+          destinatario_nome?: string | null
+          destinatario_phone?: string | null
+          enviado_em?: string | null
+          erro_mensagem?: string | null
+          id?: string
+          payload?: Json
+          send_count?: number
+          status?: string
+          tipo?: string
+          whatsapp_template?: string | null
+          whatsapp_url?: string | null
+        }
+        Relationships: []
+      }
       notification_log: {
         Row: {
           id: string
