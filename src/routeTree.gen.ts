@@ -23,6 +23,7 @@ import { Route as OnboardingRouteImport } from './routes/onboarding'
 import { Route as LoginRouteImport } from './routes/login'
 import { Route as LocaisRouteImport } from './routes/locais'
 import { Route as ForgotPasswordRouteImport } from './routes/forgot-password'
+import { Route as EstatisticasRouteImport } from './routes/estatisticas'
 import { Route as AtletasRouteImport } from './routes/atletas'
 import { Route as AgendaRouteImport } from './routes/agenda'
 import { Route as AuthenticatedRouteImport } from './routes/_authenticated'
@@ -128,6 +129,11 @@ const LocaisRoute = LocaisRouteImport.update({
 const ForgotPasswordRoute = ForgotPasswordRouteImport.update({
   id: '/forgot-password',
   path: '/forgot-password',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const EstatisticasRoute = EstatisticasRouteImport.update({
+  id: '/estatisticas',
+  path: '/estatisticas',
   getParentRoute: () => rootRouteImport,
 } as any)
 const AtletasRoute = AtletasRouteImport.update({
@@ -329,6 +335,7 @@ export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
   '/agenda': typeof AgendaRoute
   '/atletas': typeof AtletasRouteWithChildren
+  '/estatisticas': typeof EstatisticasRoute
   '/forgot-password': typeof ForgotPasswordRoute
   '/locais': typeof LocaisRoute
   '/login': typeof LoginRoute
@@ -380,6 +387,7 @@ export interface FileRoutesByTo {
   '/': typeof IndexRoute
   '/agenda': typeof AgendaRoute
   '/atletas': typeof AtletasRouteWithChildren
+  '/estatisticas': typeof EstatisticasRoute
   '/forgot-password': typeof ForgotPasswordRoute
   '/locais': typeof LocaisRoute
   '/login': typeof LoginRoute
@@ -433,6 +441,7 @@ export interface FileRoutesById {
   '/_authenticated': typeof AuthenticatedRouteWithChildren
   '/agenda': typeof AgendaRoute
   '/atletas': typeof AtletasRouteWithChildren
+  '/estatisticas': typeof EstatisticasRoute
   '/forgot-password': typeof ForgotPasswordRoute
   '/locais': typeof LocaisRoute
   '/login': typeof LoginRoute
@@ -486,6 +495,7 @@ export interface FileRouteTypes {
     | '/'
     | '/agenda'
     | '/atletas'
+    | '/estatisticas'
     | '/forgot-password'
     | '/locais'
     | '/login'
@@ -537,6 +547,7 @@ export interface FileRouteTypes {
     | '/'
     | '/agenda'
     | '/atletas'
+    | '/estatisticas'
     | '/forgot-password'
     | '/locais'
     | '/login'
@@ -589,6 +600,7 @@ export interface FileRouteTypes {
     | '/_authenticated'
     | '/agenda'
     | '/atletas'
+    | '/estatisticas'
     | '/forgot-password'
     | '/locais'
     | '/login'
@@ -642,6 +654,7 @@ export interface RootRouteChildren {
   AuthenticatedRoute: typeof AuthenticatedRouteWithChildren
   AgendaRoute: typeof AgendaRoute
   AtletasRoute: typeof AtletasRouteWithChildren
+  EstatisticasRoute: typeof EstatisticasRoute
   ForgotPasswordRoute: typeof ForgotPasswordRoute
   LocaisRoute: typeof LocaisRoute
   LoginRoute: typeof LoginRoute
@@ -762,6 +775,13 @@ declare module '@tanstack/react-router' {
       path: '/forgot-password'
       fullPath: '/forgot-password'
       preLoaderRoute: typeof ForgotPasswordRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/estatisticas': {
+      id: '/estatisticas'
+      path: '/estatisticas'
+      fullPath: '/estatisticas'
+      preLoaderRoute: typeof EstatisticasRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/atletas': {
@@ -1135,6 +1155,7 @@ const rootRouteChildren: RootRouteChildren = {
   AuthenticatedRoute: AuthenticatedRouteWithChildren,
   AgendaRoute: AgendaRoute,
   AtletasRoute: AtletasRouteWithChildren,
+  EstatisticasRoute: EstatisticasRoute,
   ForgotPasswordRoute: ForgotPasswordRoute,
   LocaisRoute: LocaisRoute,
   LoginRoute: LoginRoute,
