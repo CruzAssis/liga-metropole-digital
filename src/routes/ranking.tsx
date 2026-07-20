@@ -1,7 +1,9 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { SkeletonRankingPage, EmptyRanking } from "@/components/AppSkeletons";
 import { useEffect, useMemo, useState } from "react";
+import { useServerFn } from "@tanstack/react-start";
 import { supabase } from "@/integrations/supabase/client";
+import { getTeamSupporterCounts } from "@/lib/stats.functions";
 import { PublicShell } from "@/components/PublicShell";
 import { PageHeader } from "@/components/PageHeader";
 import { ConferenceFilter } from "@/components/ui-kit";
@@ -248,6 +250,7 @@ function RankingPage() {
   const [matches, setMatches] = useState<Match[] | null>(null);
   const [teams, setTeams] = useState<Team[]>([]);
   const [supporters, setSupporters] = useState<Map<string, number>>(new Map());
+  const fetchSupporterCounts = useServerFn(getTeamSupporterCounts);
 
   // Load competitions that have active/finished status
   useEffect(() => {
@@ -268,7 +271,7 @@ function RankingPage() {
   useEffect(() => {
     if (!selectedComp) return;
     (async () => {
-      const [{ data: tdata }, { data: mdata }, { data: sdata }] = await Promise.all([
+      const [{ data: tdata }, { data: mdata }, sdata] = await Promise.all([
         supabase
           .from("teams")
           .select("id, name, short_name, logo_url, registration_type, lado, competition_id")
@@ -279,7 +282,10 @@ function RankingPage() {
           .select("host_team_id, visitor_team_id, host_score, visitor_score, status, competition_id")
           .eq("competition_id", selectedComp)
           .in("status", FINISHED),
-        supabase.rpc("get_team_supporter_counts"),
+        fetchSupporterCounts().catch((err) => {
+          console.error(err);
+          return [] as { team_id: string; supporter_count: number }[];
+        }),
       ]);
       setTeams((tdata ?? []) as Team[]);
       setMatches((mdata ?? []) as Match[]);

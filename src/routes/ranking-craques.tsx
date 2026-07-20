@@ -1,6 +1,8 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { useEffect, useState } from "react";
+import { useServerFn } from "@tanstack/react-start";
 import { supabase } from "@/integrations/supabase/client";
+import { getRankingCraques } from "@/lib/stats.functions";
 import { PublicShell } from "@/components/PublicShell";
 import { PageHeader } from "@/components/PageHeader";
 import { AthleteAvatar } from "@/components/athletes/AthleteAvatar";
@@ -53,17 +55,16 @@ function RankingCraquesPage() {
   const [rows, setRows] = useState<RankRow[]>([]);
   const [loading, setLoading] = useState(true);
   const [minEval, setMinEval] = useState<number>(MIN_EVAL_DEFAULT);
+  const fetchRanking = useServerFn(getRankingCraques);
 
   const load = async (showSpinner = false) => {
     if (showSpinner) setLoading(true);
-    const { data, error } = await supabase.rpc("get_ranking_craques", {
-      _min_evaluations: minEval,
-    });
-    if (error) {
+    try {
+      const data = await fetchRanking({ data: { min_evaluations: minEval } });
+      setRows((data ?? []) as RankRow[]);
+    } catch (error) {
       console.error(error);
       setRows([]);
-    } else {
-      setRows((data ?? []) as RankRow[]);
     }
     if (showSpinner) setLoading(false);
   };
@@ -72,18 +73,16 @@ function RankingCraquesPage() {
     let cancelled = false;
     (async () => {
       setLoading(true);
-      const { data, error } = await supabase.rpc("get_ranking_craques", {
-        _min_evaluations: minEval,
-      });
-      if (!cancelled) {
-        if (error) {
+      try {
+        const data = await fetchRanking({ data: { min_evaluations: minEval } });
+        if (!cancelled) setRows((data ?? []) as RankRow[]);
+      } catch (error) {
+        if (!cancelled) {
           console.error(error);
           setRows([]);
-        } else {
-          setRows((data ?? []) as RankRow[]);
         }
-        setLoading(false);
       }
+      if (!cancelled) setLoading(false);
     })();
     return () => {
       cancelled = true;
