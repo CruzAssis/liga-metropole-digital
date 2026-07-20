@@ -148,10 +148,14 @@ function EstatisticasPage() {
   const [selectedComp, setSelectedComp] = useState<string | null>(null);
   const [kpis, setKpis] = useState<Kpis | null>(null);
   const [rows, setRows] = useState<TeamAdvanced[] | null>(null);
+  const [trends, setTrends] = useState<
+    { key: string; label: string; goals: number; matches: number; yellow: number; red: number }[] | null
+  >(null);
 
   const fetchKpis = useServerFn(getLeagueKpis);
   const fetchAdv = useServerFn(getAdvancedTeamStats);
   const fetchH2H = useServerFn(getHeadToHead);
+  const fetchTrends = useServerFn(getLeagueTrends);
 
   useEffect(() => {
     (async () => {
@@ -168,12 +172,14 @@ function EstatisticasPage() {
 
   useEffect(() => {
     (async () => {
-      const [k, r] = await Promise.all([
+      const [k, r, t] = await Promise.all([
         fetchKpis({ data: { competition_id: selectedComp } }),
         fetchAdv({ data: { competition_id: selectedComp } }),
+        fetchTrends({ data: { competition_id: selectedComp } }),
       ]);
       setKpis(k as Kpis);
       setRows(r as TeamAdvanced[]);
+      setTrends(t as any);
     })();
   }, [selectedComp]);
 
