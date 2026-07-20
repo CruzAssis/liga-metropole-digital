@@ -239,3 +239,59 @@ export const broadcastWhatsapp = createServerFn({ method: "POST" })
     if (error) throw new Error(error.message);
     return { ok: true, count: rows.length };
   });
+
+// ─── Templates ────────────────────────────────────────────────────────────────
+
+export interface NotificationTemplate {
+  tipo: NotificacaoTipo;
+  assunto: string | null;
+  mensagem: string;
+  variables: string[];
+  updated_at: string;
+}
+
+/** Variáveis disponíveis por tipo (documentação para o admin). */
+export const TEMPLATE_VARIABLES: Record<NotificacaoTipo, string[]> = {
+  team_approved: ["diretor", "time", "status", "status_label"],
+  jogo_agendado: ["diretor", "time", "adversario", "data", "local", "tipo_evento"],
+  sumula_disponivel: ["diretor", "time", "adversario", "placar_casa", "placar_visitante"],
+  sumula_prazo_alerta: ["diretor", "time", "adversario", "horas_restantes"],
+  destaque_publicado: ["diretor", "time", "atleta", "nota"],
+  broadcast: ["diretor", "mensagem"],
+};
+
+export const listTemplates = createServerFn({ method: "GET" })
+  .middleware([requireSupabaseAuth])
+  .handler(async ({ context }) => {
+    await assertAdmin(context.userId);
+    const { data, error } = await adminDb
+      .from("notification_templates")
+      .select("*")
+      .order("tipo");
+    if (error) throw new Error(error.message);
+    return { templates: (data ?? []) as NotificationTemplate[] };
+  });
+
+const upsertTemplateSchema = z.object({
+  tipo: z.enum(TIPO_ENUM),
+  assunto: z.string().max(300).nullable().optional(),
+  mensagem: z.string().min(1).max(2000),
+});
+
+export const upsertTemplate = createServerFn({ method: "POST" })
+  .middleware([requireSupabaseAuth])
+  .inputValidator((i) => upsertTemplateSchema.parse(i))
+  .handler(async ({ data, context }) => {
+    await assertAdmin(context.userId);
+    const { error } = await adminDb
+      .from("notification_templates")
+      .update({
+        assunto: data.assunto ?? null,
+        mensagem: data.mensagem,
+        updated_by: context.userId,
+      })
+      .eq("tipo", data.tipo);
+    if (error) throw new Error(error.message);
+    return { ok: true };
+  });
+
