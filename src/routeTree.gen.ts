@@ -37,6 +37,7 @@ import { Route as OnboardingJogadorRouteImport } from './routes/onboarding.jogad
 import { Route as OnboardingDiretorRouteImport } from './routes/onboarding.diretor'
 import { Route as ManifestoSlugRouteImport } from './routes/manifesto.$slug'
 import { Route as ConviteCodeRouteImport } from './routes/convite.$code'
+import { Route as ChaveamentoCompetitionIdRouteImport } from './routes/chaveamento.$competitionId'
 import { Route as AtletasIdRouteImport } from './routes/atletas.$id'
 import { Route as AuthenticatedMinhaContaRouteImport } from './routes/_authenticated/minha-conta'
 import { Route as AuthenticatedInscricaoRouteImport } from './routes/_authenticated/inscricao'
@@ -201,6 +202,12 @@ const ConviteCodeRoute = ConviteCodeRouteImport.update({
   path: '/convite/$code',
   getParentRoute: () => rootRouteImport,
 } as any)
+const ChaveamentoCompetitionIdRoute =
+  ChaveamentoCompetitionIdRouteImport.update({
+    id: '/chaveamento/$competitionId',
+    path: '/chaveamento/$competitionId',
+    getParentRoute: () => rootRouteImport,
+  } as any)
 const AtletasIdRoute = AtletasIdRouteImport.update({
   id: '/$id',
   path: '/$id',
@@ -362,6 +369,7 @@ export interface FileRoutesByFullPath {
   '/inscricao': typeof AuthenticatedInscricaoRoute
   '/minha-conta': typeof AuthenticatedMinhaContaRouteWithChildren
   '/atletas/$id': typeof AtletasIdRoute
+  '/chaveamento/$competitionId': typeof ChaveamentoCompetitionIdRoute
   '/convite/$code': typeof ConviteCodeRoute
   '/manifesto/$slug': typeof ManifestoSlugRoute
   '/onboarding/diretor': typeof OnboardingDiretorRoute
@@ -415,6 +423,7 @@ export interface FileRoutesByTo {
   '/inscricao': typeof AuthenticatedInscricaoRoute
   '/minha-conta': typeof AuthenticatedMinhaContaRouteWithChildren
   '/atletas/$id': typeof AtletasIdRoute
+  '/chaveamento/$competitionId': typeof ChaveamentoCompetitionIdRoute
   '/convite/$code': typeof ConviteCodeRoute
   '/manifesto/$slug': typeof ManifestoSlugRoute
   '/onboarding/diretor': typeof OnboardingDiretorRoute
@@ -470,6 +479,7 @@ export interface FileRoutesById {
   '/_authenticated/inscricao': typeof AuthenticatedInscricaoRoute
   '/_authenticated/minha-conta': typeof AuthenticatedMinhaContaRouteWithChildren
   '/atletas/$id': typeof AtletasIdRoute
+  '/chaveamento/$competitionId': typeof ChaveamentoCompetitionIdRoute
   '/convite/$code': typeof ConviteCodeRoute
   '/manifesto/$slug': typeof ManifestoSlugRoute
   '/onboarding/diretor': typeof OnboardingDiretorRoute
@@ -525,6 +535,7 @@ export interface FileRouteTypes {
     | '/inscricao'
     | '/minha-conta'
     | '/atletas/$id'
+    | '/chaveamento/$competitionId'
     | '/convite/$code'
     | '/manifesto/$slug'
     | '/onboarding/diretor'
@@ -578,6 +589,7 @@ export interface FileRouteTypes {
     | '/inscricao'
     | '/minha-conta'
     | '/atletas/$id'
+    | '/chaveamento/$competitionId'
     | '/convite/$code'
     | '/manifesto/$slug'
     | '/onboarding/diretor'
@@ -632,6 +644,7 @@ export interface FileRouteTypes {
     | '/_authenticated/inscricao'
     | '/_authenticated/minha-conta'
     | '/atletas/$id'
+    | '/chaveamento/$competitionId'
     | '/convite/$code'
     | '/manifesto/$slug'
     | '/onboarding/diretor'
@@ -682,6 +695,7 @@ export interface RootRouteChildren {
   TermosRoute: typeof TermosRoute
   TimesRoute: typeof TimesRouteWithChildren
   VerificarRoute: typeof VerificarRoute
+  ChaveamentoCompetitionIdRoute: typeof ChaveamentoCompetitionIdRoute
   ConviteCodeRoute: typeof ConviteCodeRoute
   ManifestoSlugRoute: typeof ManifestoSlugRoute
   PartidasIdRoute: typeof PartidasIdRoute
@@ -886,6 +900,13 @@ declare module '@tanstack/react-router' {
       path: '/convite/$code'
       fullPath: '/convite/$code'
       preLoaderRoute: typeof ConviteCodeRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/chaveamento/$competitionId': {
+      id: '/chaveamento/$competitionId'
+      path: '/chaveamento/$competitionId'
+      fullPath: '/chaveamento/$competitionId'
+      preLoaderRoute: typeof ChaveamentoCompetitionIdRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/atletas/$id': {
@@ -1192,6 +1213,7 @@ const rootRouteChildren: RootRouteChildren = {
   TermosRoute: TermosRoute,
   TimesRoute: TimesRouteWithChildren,
   VerificarRoute: VerificarRoute,
+  ChaveamentoCompetitionIdRoute: ChaveamentoCompetitionIdRoute,
   ConviteCodeRoute: ConviteCodeRoute,
   ManifestoSlugRoute: ManifestoSlugRoute,
   PartidasIdRoute: PartidasIdRoute,
