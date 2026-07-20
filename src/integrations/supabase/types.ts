@@ -757,6 +757,61 @@ export type Database = {
         }
         Relationships: []
       }
+      supporter_votes: {
+        Row: {
+          athlete_id: string
+          created_at: string
+          id: string
+          match_id: string
+          rating: number
+          team_id: string
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          athlete_id: string
+          created_at?: string
+          id?: string
+          match_id: string
+          rating: number
+          team_id: string
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          athlete_id?: string
+          created_at?: string
+          id?: string
+          match_id?: string
+          rating?: number
+          team_id?: string
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "supporter_votes_athlete_id_fkey"
+            columns: ["athlete_id"]
+            isOneToOne: false
+            referencedRelation: "athletes"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "supporter_votes_match_id_fkey"
+            columns: ["match_id"]
+            isOneToOne: false
+            referencedRelation: "matches"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "supporter_votes_team_id_fkey"
+            columns: ["team_id"]
+            isOneToOne: false
+            referencedRelation: "teams"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       system_settings: {
         Row: {
           host_slots_limit: number
@@ -1102,6 +1157,18 @@ export type Database = {
           team_primary_color: string
           team_short_name: string
           total_evaluations: number
+        }[]
+      }
+      get_supporter_mvp: {
+        Args: { _match_id: string }
+        Returns: {
+          athlete_id: string
+          avg_rating: number
+          full_name: string
+          nickname: string
+          photo_url: string
+          team_id: string
+          total_votes: number
         }[]
       }
       get_team_by_invite_code: {
