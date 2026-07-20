@@ -114,22 +114,31 @@ export type Database = {
           conference_name: string | null
           conference_number: number | null
           created_at: string
+          double_round: boolean
           draw_executed_at: string | null
           full_notified_at: string | null
           host_slots: number
           id: string
+          knockout_leg_count: number
+          matches_per_opponent: number
           max_teams: number
+          min_teams: number
           monthly_fee_brl: number | null
           name: string
+          points_draw: number
+          points_loss: number
+          points_win: number
           qualified_count: number
           qualified_per_group: number
           registration_status: string
+          regulation_notes: string | null
           relegated_count: number
           season: number
           starts_at: string | null
           status: string
           subprefeitura: string | null
           sumula_confirm_window_hours: number | null
+          tiebreakers: string[]
           use_sides: boolean
           visitor_slots: number
           wo_fine_brl: number | null
@@ -140,22 +149,31 @@ export type Database = {
           conference_name?: string | null
           conference_number?: number | null
           created_at?: string
+          double_round?: boolean
           draw_executed_at?: string | null
           full_notified_at?: string | null
           host_slots?: number
           id?: string
+          knockout_leg_count?: number
+          matches_per_opponent?: number
           max_teams?: number
+          min_teams?: number
           monthly_fee_brl?: number | null
           name: string
+          points_draw?: number
+          points_loss?: number
+          points_win?: number
           qualified_count?: number
           qualified_per_group?: number
           registration_status?: string
+          regulation_notes?: string | null
           relegated_count?: number
           season: number
           starts_at?: string | null
           status?: string
           subprefeitura?: string | null
           sumula_confirm_window_hours?: number | null
+          tiebreakers?: string[]
           use_sides?: boolean
           visitor_slots?: number
           wo_fine_brl?: number | null
@@ -166,22 +184,31 @@ export type Database = {
           conference_name?: string | null
           conference_number?: number | null
           created_at?: string
+          double_round?: boolean
           draw_executed_at?: string | null
           full_notified_at?: string | null
           host_slots?: number
           id?: string
+          knockout_leg_count?: number
+          matches_per_opponent?: number
           max_teams?: number
+          min_teams?: number
           monthly_fee_brl?: number | null
           name?: string
+          points_draw?: number
+          points_loss?: number
+          points_win?: number
           qualified_count?: number
           qualified_per_group?: number
           registration_status?: string
+          regulation_notes?: string | null
           relegated_count?: number
           season?: number
           starts_at?: string | null
           status?: string
           subprefeitura?: string | null
           sumula_confirm_window_hours?: number | null
+          tiebreakers?: string[]
           use_sides?: boolean
           visitor_slots?: number
           wo_fine_brl?: number | null
