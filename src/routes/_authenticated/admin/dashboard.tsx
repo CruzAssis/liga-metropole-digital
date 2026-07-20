@@ -477,6 +477,24 @@ function AdminDashboard() {
               <Users className="h-4 w-4" /> Usuários
             </Link>
           </Button>
+          <Button
+            asChild
+            variant="outline"
+            className="border-zinc-700 text-zinc-200 hover:bg-zinc-800 gap-2"
+          >
+            <Link to="/admin/atletas">
+              <UserCheck className="h-4 w-4" /> Atletas
+            </Link>
+          </Button>
+          <Button
+            asChild
+            variant="outline"
+            className="border-zinc-700 text-zinc-200 hover:bg-zinc-800 gap-2"
+          >
+            <Link to="/admin/partidas">
+              <Calendar className="h-4 w-4" /> Partidas
+            </Link>
+          </Button>
         </div>
       </div>
 
