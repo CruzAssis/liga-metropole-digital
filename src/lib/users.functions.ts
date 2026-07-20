@@ -113,6 +113,13 @@ export const setUserRole = createServerFn({ method: "POST" })
       if (error) throw new Error(error.message);
     }
 
+    await logAudit({
+      claims: context.claims,
+      action: data.enabled ? "user.role.grant" : "user.role.revoke",
+      entity_type: "user",
+      entity_id: data.user_id,
+      metadata: { role: data.role },
+    });
     return { success: true };
   });
 
@@ -132,6 +139,13 @@ export const sendPasswordReset = createServerFn({ method: "POST" })
       redirectTo: `${process.env.SITE_URL ?? "https://liga-metropole-digital.lovable.app"}/reset-password`,
     });
     if (error) throw new Error(error.message);
+    await logAudit({
+      claims: context.claims,
+      action: "user.password_reset",
+      entity_type: "user",
+      entity_id: data.user_id,
+      metadata: { email },
+    });
     return { success: true, email };
   });
 
