@@ -1,5 +1,6 @@
 // @ts-nocheck
 import { createFileRoute, useNavigate } from '@tanstack/react-router'
+import { useServerFn } from '@tanstack/react-start'
 import { useState, useRef, useEffect } from 'react'
 import { supabase } from '@/integrations/supabase/client'
 import { Input } from '@/components/ui/input'
@@ -8,22 +9,24 @@ import { toast } from 'sonner'
 import { StepHeader } from '@/components/ui/step-header'
 import { PrimaryCTA } from '@/components/ui/primary-cta'
 import { Upload, X, MapPin } from 'lucide-react'
+import { createTeamRegistration } from '@/lib/team-registration.functions'
 
 export const Route = createFileRoute('/onboarding/diretor')({
   component: DiretorOnboarding,
 })
 
 const SUBPREFEITURAS = [
-  'Aricanduva/Formosa/Carrão', 'Butantã', 'Campo Limpo', 'Casa Verde/Cachoeirinha',
+  'Aricanduva/Formosa/Carrão', 'Butantã', 'Campo Limpo', 'Capela do Socorro', 'Casa Verde/Cachoeirinha',
   'Cidade Ademar', 'Cidade Tiradentes', 'Ermelino Matarazzo', 'Freguesia/Brasilândia',
   'Guaianases', 'Ipiranga', 'Itaim Paulista', 'Itaquera', 'Jabaquara', 'Jaçanã/Tremembé',
-  'Lapa', "M'Boi Mirim", 'Mooca', 'Parelheiros', 'Penha', 'Perus', 'Pinheiros',
+  'Lapa', "M'Boi Mirim", 'Mooca', 'Parelheiros', 'Penha', 'Perus/Anhanguera', 'Pinheiros',
   'Pirituba/Jaraguá', 'Santana/Tucuruvi', 'Santo Amaro', 'São Mateus', 'São Miguel',
-  'Sapopemba', 'Sé', 'Socorro', 'Vila Maria/Vila Guilherme', 'Vila Mariana', 'Vila Prudente',
+  'Sapopemba', 'Sé', 'Vila Maria/Vila Guilherme', 'Vila Mariana', 'Vila Prudente',
 ]
 
 function DiretorOnboarding() {
   const navigate = useNavigate()
+  const submitRegistration = useServerFn(createTeamRegistration)
   const [loading, setLoading] = useState(false)
   const [logoFile, setLogoFile] = useState(null)
   const [logoPreview, setLogoPreview] = useState(null)
@@ -40,6 +43,7 @@ function DiretorOnboarding() {
     name: '',
     short_name: '',
     registration_type: 'host',
+    lado: 'A',
     bairro: '',
     home_venue: '',
     home_address: '',
@@ -105,24 +109,26 @@ function DiretorOnboarding() {
         }
       }
       const homeVenueStr = form.registration_type === 'host'
-        ? [form.home_venue, form.home_address].filter(Boolean).join(' — ')
+        ? [form.home_venue, form.home_address].filter(Boolean).join(' — ') || null
         : null
-      const { error } = await supabase.from('teams').insert({
-        name: form.name.trim(),
-        short_name: form.short_name.trim().toUpperCase(),
-        registration_type: form.registration_type,
-        home_venue: homeVenueStr,
-        primary_color: form.primary_color,
-        secondary_color: form.secondary_color,
-        logo_url,
-        manager_id: userId,
-        status: 'pending',
-        serie: 'A',
-        lado: 'A',
-        slug: form.name.trim().toLowerCase().replace(/\s+/g, '-').replace(/[^a-z0-9-]/g, ''),
+
+      await submitRegistration({
+        data: {
+          name: form.name.trim(),
+          short_name: form.short_name.trim().toUpperCase(),
+          registration_type: form.registration_type,
+          lado: form.lado,
+          subprefeitura: form.subprefeitura,
+          bairro: form.bairro.trim() || null,
+          maps_link: form.maps_link.trim() || null,
+          logo_url,
+          home_venue: homeVenueStr,
+          primary_color: form.primary_color,
+          secondary_color: form.secondary_color,
+        },
       })
-      if (error) throw error
-      toast.success('Time enviado para aprovacao!')
+
+      toast.success('Time enviado para aprovação!')
       navigate({ to: '/minha-conta', replace: true })
     } catch (err) {
       const msg = err instanceof Error ? err.message : 'Erro ao cadastrar time'
@@ -164,6 +170,17 @@ function DiretorOnboarding() {
               {[{ value: 'host', label: 'Mandante' }, { value: 'visitor', label: 'Visitante' }].map(opt => (
                 <label key={opt.value} className="flex items-center gap-2 cursor-pointer">
                   <input type="radio" name="registration_type" value={opt.value} checked={form.registration_type === opt.value} onChange={handleChange} className="accent-blue-500" />
+                  <span className="text-white text-sm">{opt.label}</span>
+                </label>
+              ))}
+            </div>
+          </div>
+          <div>
+            <Label className="text-zinc-300">Conferência</Label>
+            <div className="mt-2 flex gap-4">
+              {[{ value: 'A', label: 'Lado A' }, { value: 'B', label: 'Lado B' }].map(opt => (
+                <label key={opt.value} className="flex items-center gap-2 cursor-pointer">
+                  <input type="radio" name="lado" value={opt.value} checked={form.lado === opt.value} onChange={handleChange} className="accent-blue-500" />
                   <span className="text-white text-sm">{opt.label}</span>
                 </label>
               ))}
