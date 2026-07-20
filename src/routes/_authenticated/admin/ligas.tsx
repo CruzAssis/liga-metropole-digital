@@ -93,7 +93,13 @@ type Competition = {
   qualified_per_group: number;
   relegated_count: number;
   use_sides: boolean;
+  double_round: boolean;
+  points_win: number;
+  points_draw: number;
+  points_loss: number;
+  regulation_notes: string | null;
 };
+
 
 type FillStats = {
   total_approved: number;
