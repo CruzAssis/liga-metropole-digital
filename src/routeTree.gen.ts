@@ -59,6 +59,7 @@ import { Route as AuthenticatedAdminManifestoRouteImport } from './routes/_authe
 import { Route as AuthenticatedAdminLocaisRouteImport } from './routes/_authenticated/admin/locais'
 import { Route as AuthenticatedAdminLigasRouteImport } from './routes/_authenticated/admin/ligas'
 import { Route as AuthenticatedAdminFinanceiroRouteImport } from './routes/_authenticated/admin/financeiro'
+import { Route as AuthenticatedAdminDisciplinaRouteImport } from './routes/_authenticated/admin/disciplina'
 import { Route as AuthenticatedAdminDashboardRouteImport } from './routes/_authenticated/admin/dashboard'
 import { Route as AuthenticatedAdminConfiguracoesRouteImport } from './routes/_authenticated/admin/configuracoes'
 import { Route as AuthenticatedAdminCalendarioRouteImport } from './routes/_authenticated/admin/calendario'
@@ -328,6 +329,12 @@ const AuthenticatedAdminFinanceiroRoute =
     path: '/financeiro',
     getParentRoute: () => AuthenticatedAdminRoute,
   } as any)
+const AuthenticatedAdminDisciplinaRoute =
+  AuthenticatedAdminDisciplinaRouteImport.update({
+    id: '/disciplina',
+    path: '/disciplina',
+    getParentRoute: () => AuthenticatedAdminRoute,
+  } as any)
 const AuthenticatedAdminDashboardRoute =
   AuthenticatedAdminDashboardRouteImport.update({
     id: '/dashboard',
@@ -411,6 +418,7 @@ export interface FileRoutesByFullPath {
   '/admin/calendario': typeof AuthenticatedAdminCalendarioRoute
   '/admin/configuracoes': typeof AuthenticatedAdminConfiguracoesRoute
   '/admin/dashboard': typeof AuthenticatedAdminDashboardRoute
+  '/admin/disciplina': typeof AuthenticatedAdminDisciplinaRoute
   '/admin/financeiro': typeof AuthenticatedAdminFinanceiroRoute
   '/admin/ligas': typeof AuthenticatedAdminLigasRoute
   '/admin/locais': typeof AuthenticatedAdminLocaisRoute
@@ -469,6 +477,7 @@ export interface FileRoutesByTo {
   '/admin/calendario': typeof AuthenticatedAdminCalendarioRoute
   '/admin/configuracoes': typeof AuthenticatedAdminConfiguracoesRoute
   '/admin/dashboard': typeof AuthenticatedAdminDashboardRoute
+  '/admin/disciplina': typeof AuthenticatedAdminDisciplinaRoute
   '/admin/financeiro': typeof AuthenticatedAdminFinanceiroRoute
   '/admin/ligas': typeof AuthenticatedAdminLigasRoute
   '/admin/locais': typeof AuthenticatedAdminLocaisRoute
@@ -529,6 +538,7 @@ export interface FileRoutesById {
   '/_authenticated/admin/calendario': typeof AuthenticatedAdminCalendarioRoute
   '/_authenticated/admin/configuracoes': typeof AuthenticatedAdminConfiguracoesRoute
   '/_authenticated/admin/dashboard': typeof AuthenticatedAdminDashboardRoute
+  '/_authenticated/admin/disciplina': typeof AuthenticatedAdminDisciplinaRoute
   '/_authenticated/admin/financeiro': typeof AuthenticatedAdminFinanceiroRoute
   '/_authenticated/admin/ligas': typeof AuthenticatedAdminLigasRoute
   '/_authenticated/admin/locais': typeof AuthenticatedAdminLocaisRoute
@@ -589,6 +599,7 @@ export interface FileRouteTypes {
     | '/admin/calendario'
     | '/admin/configuracoes'
     | '/admin/dashboard'
+    | '/admin/disciplina'
     | '/admin/financeiro'
     | '/admin/ligas'
     | '/admin/locais'
@@ -647,6 +658,7 @@ export interface FileRouteTypes {
     | '/admin/calendario'
     | '/admin/configuracoes'
     | '/admin/dashboard'
+    | '/admin/disciplina'
     | '/admin/financeiro'
     | '/admin/ligas'
     | '/admin/locais'
@@ -706,6 +718,7 @@ export interface FileRouteTypes {
     | '/_authenticated/admin/calendario'
     | '/_authenticated/admin/configuracoes'
     | '/_authenticated/admin/dashboard'
+    | '/_authenticated/admin/disciplina'
     | '/_authenticated/admin/financeiro'
     | '/_authenticated/admin/ligas'
     | '/_authenticated/admin/locais'
@@ -1107,6 +1120,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedAdminFinanceiroRouteImport
       parentRoute: typeof AuthenticatedAdminRoute
     }
+    '/_authenticated/admin/disciplina': {
+      id: '/_authenticated/admin/disciplina'
+      path: '/disciplina'
+      fullPath: '/admin/disciplina'
+      preLoaderRoute: typeof AuthenticatedAdminDisciplinaRouteImport
+      parentRoute: typeof AuthenticatedAdminRoute
+    }
     '/_authenticated/admin/dashboard': {
       id: '/_authenticated/admin/dashboard'
       path: '/dashboard'
@@ -1165,6 +1185,7 @@ interface AuthenticatedAdminRouteChildren {
   AuthenticatedAdminCalendarioRoute: typeof AuthenticatedAdminCalendarioRoute
   AuthenticatedAdminConfiguracoesRoute: typeof AuthenticatedAdminConfiguracoesRoute
   AuthenticatedAdminDashboardRoute: typeof AuthenticatedAdminDashboardRoute
+  AuthenticatedAdminDisciplinaRoute: typeof AuthenticatedAdminDisciplinaRoute
   AuthenticatedAdminFinanceiroRoute: typeof AuthenticatedAdminFinanceiroRoute
   AuthenticatedAdminLigasRoute: typeof AuthenticatedAdminLigasRoute
   AuthenticatedAdminLocaisRoute: typeof AuthenticatedAdminLocaisRoute
@@ -1186,6 +1207,7 @@ const AuthenticatedAdminRouteChildren: AuthenticatedAdminRouteChildren = {
   AuthenticatedAdminCalendarioRoute: AuthenticatedAdminCalendarioRoute,
   AuthenticatedAdminConfiguracoesRoute: AuthenticatedAdminConfiguracoesRoute,
   AuthenticatedAdminDashboardRoute: AuthenticatedAdminDashboardRoute,
+  AuthenticatedAdminDisciplinaRoute: AuthenticatedAdminDisciplinaRoute,
   AuthenticatedAdminFinanceiroRoute: AuthenticatedAdminFinanceiroRoute,
   AuthenticatedAdminLigasRoute: AuthenticatedAdminLigasRoute,
   AuthenticatedAdminLocaisRoute: AuthenticatedAdminLocaisRoute,
