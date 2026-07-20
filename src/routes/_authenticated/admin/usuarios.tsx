@@ -126,11 +126,12 @@ function UsuariosPage() {
                     <td className="px-4 py-3"><Skeleton className="h-5 w-16 rounded" /></td>
                     <td className="px-4 py-3 text-center"><Skeleton className="h-5 w-10 rounded mx-auto" /></td>
                     <td className="px-4 py-3 text-center"><Skeleton className="h-5 w-10 rounded mx-auto" /></td>
+                    <td className="px-4 py-3 text-right"><Skeleton className="h-8 w-24 rounded ml-auto" /></td>
                   </tr>
                 ))}
               {!isLoading && filtered.length === 0 && (
                 <tr>
-                  <td colSpan={6} className="px-4 py-8 text-center text-muted-foreground">
+                  <td colSpan={7} className="px-4 py-8 text-center text-muted-foreground">
                     Nenhum usuário encontrado
                   </td>
                 </tr>
