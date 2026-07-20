@@ -23,6 +23,8 @@ const listSchema = z.object({
   action: z.string().trim().max(80).optional().nullable(),
   entity_type: z.string().trim().max(80).optional().nullable(),
   search: z.string().trim().max(120).optional().nullable(),
+  from: z.string().trim().max(40).optional().nullable(),
+  to: z.string().trim().max(40).optional().nullable(),
   limit: z.number().int().min(1).max(500).optional(),
 });
 
@@ -40,6 +42,8 @@ export const adminListAuditLog = createServerFn({ method: "GET" })
     if (data.action) q = q.eq("action", data.action);
     if (data.entity_type) q = q.eq("entity_type", data.entity_type);
     if (data.search) q = q.ilike("actor_email", `%${data.search}%`);
+    if (data.from) q = q.gte("created_at", data.from);
+    if (data.to) q = q.lte("created_at", data.to);
     const { data: rows, error } = await q;
     if (error) throw new Error(error.message);
     return (rows ?? []) as unknown as AuditRow[];
