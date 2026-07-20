@@ -3,10 +3,12 @@ import { createFileRoute, Link, useNavigate } from '@tanstack/react-router'
 import { useEffect, useState } from 'react'
 import { useAuth } from '@/hooks/use-auth'
 import { supabase } from '@/integrations/supabase/client'
-import { Trophy, Calendar, ChevronRight, Menu, X, LayoutDashboard, User } from 'lucide-react'
+import { Trophy, Calendar, ChevronRight, Menu, X, LayoutDashboard, User, Instagram, Mail, MessageCircle, FileText } from 'lucide-react'
 import { BrandLogo } from '@/components/BrandLogo'
 import AnimatedStats from '@/components/home/AnimatedStats'
 import HeroCarousel from '@/components/home/HeroCarousel'
+import { useLeagueConfig } from '@/hooks/use-league-config'
+
 
 export const Route = createFileRoute('/')({
   component: HomePage,
