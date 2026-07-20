@@ -6,7 +6,23 @@ import {
   getAdvancedTeamStats,
   getLeagueKpis,
   getHeadToHead,
+  getLeagueTrends,
 } from "@/lib/estatisticas.functions";
+import {
+  ResponsiveContainer,
+  LineChart,
+  Line,
+  BarChart,
+  Bar,
+  XAxis,
+  YAxis,
+  CartesianGrid,
+  Tooltip as RechartsTooltip,
+  Legend,
+  PieChart,
+  Pie,
+  Cell,
+} from "recharts";
 import { PublicShell } from "@/components/PublicShell";
 import { PageHeader } from "@/components/PageHeader";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
@@ -132,10 +148,14 @@ function EstatisticasPage() {
   const [selectedComp, setSelectedComp] = useState<string | null>(null);
   const [kpis, setKpis] = useState<Kpis | null>(null);
   const [rows, setRows] = useState<TeamAdvanced[] | null>(null);
+  const [trends, setTrends] = useState<
+    { key: string; label: string; goals: number; matches: number; yellow: number; red: number }[] | null
+  >(null);
 
   const fetchKpis = useServerFn(getLeagueKpis);
   const fetchAdv = useServerFn(getAdvancedTeamStats);
   const fetchH2H = useServerFn(getHeadToHead);
+  const fetchTrends = useServerFn(getLeagueTrends);
 
   useEffect(() => {
     (async () => {
@@ -152,12 +172,14 @@ function EstatisticasPage() {
 
   useEffect(() => {
     (async () => {
-      const [k, r] = await Promise.all([
+      const [k, r, t] = await Promise.all([
         fetchKpis({ data: { competition_id: selectedComp } }),
         fetchAdv({ data: { competition_id: selectedComp } }),
+        fetchTrends({ data: { competition_id: selectedComp } }),
       ]);
       setKpis(k as Kpis);
       setRows(r as TeamAdvanced[]);
+      setTrends(t as any);
     })();
   }, [selectedComp]);
 
@@ -240,9 +262,150 @@ function EstatisticasPage() {
               />
             </div>
           )}
+
+          {trends && trends.length > 0 && (
+            <div className="mt-6 grid gap-4 lg:grid-cols-2">
+              <Card>
+                <CardHeader className="pb-2">
+                  <CardTitle className="text-sm uppercase tracking-wider text-muted-foreground">
+                    Gols por rodada
+                  </CardTitle>
+                </CardHeader>
+                <CardContent className="h-64">
+                  <ResponsiveContainer width="100%" height="100%">
+                    <LineChart data={trends} margin={{ top: 8, right: 12, left: -12, bottom: 0 }}>
+                      <CartesianGrid strokeDasharray="3 3" stroke="hsl(var(--border))" />
+                      <XAxis dataKey="label" tick={{ fill: "hsl(var(--muted-foreground))", fontSize: 11 }} />
+                      <YAxis tick={{ fill: "hsl(var(--muted-foreground))", fontSize: 11 }} allowDecimals={false} />
+                      <RechartsTooltip
+                        contentStyle={{
+                          background: "hsl(var(--popover))",
+                          border: "1px solid hsl(var(--border))",
+                          borderRadius: 8,
+                          fontSize: 12,
+                        }}
+                        labelStyle={{ color: "hsl(var(--foreground))" }}
+                      />
+                      <Legend wrapperStyle={{ fontSize: 11 }} />
+                      <Line type="monotone" dataKey="goals" name="Gols" stroke="hsl(var(--primary))" strokeWidth={2} dot={{ r: 3 }} />
+                      <Line type="monotone" dataKey="matches" name="Partidas" stroke="hsl(var(--muted-foreground))" strokeDasharray="4 4" strokeWidth={1.5} dot={false} />
+                    </LineChart>
+                  </ResponsiveContainer>
+                </CardContent>
+              </Card>
+
+              <Card>
+                <CardHeader className="pb-2">
+                  <CardTitle className="text-sm uppercase tracking-wider text-muted-foreground">
+                    Cartões por rodada
+                  </CardTitle>
+                </CardHeader>
+                <CardContent className="h-64">
+                  <ResponsiveContainer width="100%" height="100%">
+                    <BarChart data={trends} margin={{ top: 8, right: 12, left: -12, bottom: 0 }}>
+                      <CartesianGrid strokeDasharray="3 3" stroke="hsl(var(--border))" />
+                      <XAxis dataKey="label" tick={{ fill: "hsl(var(--muted-foreground))", fontSize: 11 }} />
+                      <YAxis tick={{ fill: "hsl(var(--muted-foreground))", fontSize: 11 }} allowDecimals={false} />
+                      <RechartsTooltip
+                        contentStyle={{
+                          background: "hsl(var(--popover))",
+                          border: "1px solid hsl(var(--border))",
+                          borderRadius: 8,
+                          fontSize: 12,
+                        }}
+                        labelStyle={{ color: "hsl(var(--foreground))" }}
+                      />
+                      <Legend wrapperStyle={{ fontSize: 11 }} />
+                      <Bar dataKey="yellow" name="Amarelos" stackId="c" fill="#f59e0b" radius={[2, 2, 0, 0]} />
+                      <Bar dataKey="red" name="Vermelhos" stackId="c" fill="#ef4444" radius={[2, 2, 0, 0]} />
+                    </BarChart>
+                  </ResponsiveContainer>
+                </CardContent>
+              </Card>
+            </div>
+          )}
         </TabsContent>
 
-        <TabsContent value="times" className="mt-6">
+        <TabsContent value="times" className="mt-6 space-y-6">
+          {rows && rows.length > 0 && (
+            <div className="grid gap-4 lg:grid-cols-2">
+              <Card>
+                <CardHeader className="pb-2">
+                  <CardTitle className="text-sm uppercase tracking-wider text-muted-foreground">
+                    Top 8 ataques (gols marcados)
+                  </CardTitle>
+                </CardHeader>
+                <CardContent className="h-72">
+                  <ResponsiveContainer width="100%" height="100%">
+                    <BarChart
+                      data={[...rows].sort((a, b) => b.gf - a.gf).slice(0, 8).map((r) => ({
+                        name: r.team.short_name,
+                        gols: r.gf,
+                        sofridos: r.ga,
+                      }))}
+                      margin={{ top: 8, right: 12, left: -12, bottom: 0 }}
+                    >
+                      <CartesianGrid strokeDasharray="3 3" stroke="hsl(var(--border))" />
+                      <XAxis dataKey="name" tick={{ fill: "hsl(var(--muted-foreground))", fontSize: 11 }} />
+                      <YAxis tick={{ fill: "hsl(var(--muted-foreground))", fontSize: 11 }} allowDecimals={false} />
+                      <RechartsTooltip
+                        contentStyle={{
+                          background: "hsl(var(--popover))",
+                          border: "1px solid hsl(var(--border))",
+                          borderRadius: 8,
+                          fontSize: 12,
+                        }}
+                      />
+                      <Legend wrapperStyle={{ fontSize: 11 }} />
+                      <Bar dataKey="gols" name="Marcados" fill="hsl(var(--primary))" radius={[3, 3, 0, 0]} />
+                      <Bar dataKey="sofridos" name="Sofridos" fill="hsl(var(--muted-foreground))" radius={[3, 3, 0, 0]} />
+                    </BarChart>
+                  </ResponsiveContainer>
+                </CardContent>
+              </Card>
+
+              <Card>
+                <CardHeader className="pb-2">
+                  <CardTitle className="text-sm uppercase tracking-wider text-muted-foreground">
+                    Distribuição de resultados (liga)
+                  </CardTitle>
+                </CardHeader>
+                <CardContent className="h-72">
+                  <ResponsiveContainer width="100%" height="100%">
+                    <PieChart>
+                      <Pie
+                        data={[
+                          { name: "Vitórias", value: rows.reduce((s, r) => s + r.wins, 0), fill: "#10b981" },
+                          { name: "Empates", value: rows.reduce((s, r) => s + r.draws, 0), fill: "#f59e0b" },
+                          { name: "Derrotas", value: rows.reduce((s, r) => s + r.losses, 0), fill: "#ef4444" },
+                        ]}
+                        dataKey="value"
+                        nameKey="name"
+                        innerRadius={50}
+                        outerRadius={90}
+                        paddingAngle={2}
+                      >
+                        {["#10b981", "#f59e0b", "#ef4444"].map((c, i) => (
+                          <Cell key={i} fill={c} />
+                        ))}
+                      </Pie>
+                      <RechartsTooltip
+                        contentStyle={{
+                          background: "hsl(var(--popover))",
+                          border: "1px solid hsl(var(--border))",
+                          borderRadius: 8,
+                          fontSize: 12,
+                        }}
+                      />
+                      <Legend wrapperStyle={{ fontSize: 11 }} />
+                    </PieChart>
+                  </ResponsiveContainer>
+                </CardContent>
+              </Card>
+            </div>
+          )}
+
+
           {!rows ? (
             <div className="text-sm text-muted-foreground">Carregando…</div>
           ) : rows.length === 0 ? (

@@ -105,6 +105,82 @@ export const getLeagueKpis = createServerFn({ method: "GET" })
   });
 
 // ============================================================
+// Tendências: gols e cartões por rodada (ou por data quando não houver)
+// ============================================================
+export const getLeagueTrends = createServerFn({ method: "GET" })
+  .inputValidator((data) =>
+    z.object({ competition_id: z.string().uuid().nullable().optional() }).parse(data ?? {}),
+  )
+  .handler(async ({ data }) => {
+    const { matches } = await loadCompetition(data.competition_id ?? null);
+
+    // Busca round das partidas
+    const ids = matches.map((m) => m.id);
+    const roundById = new Map<string, number | null>();
+    if (ids.length) {
+      const { data: rounds } = await supabaseAdmin
+        .from("matches")
+        .select("id, round")
+        .in("id", ids);
+      for (const r of rounds ?? []) roundById.set(r.id as string, (r as any).round ?? null);
+    }
+
+    // Eventos por partida (cartões)
+    const yellowByMatch = new Map<string, number>();
+    const redByMatch = new Map<string, number>();
+    if (ids.length) {
+      const { data: events } = await supabaseAdmin
+        .from("match_events")
+        .select("match_id, kind")
+        .in("match_id", ids)
+        .in("kind", ["yellow_card", "red_card"])
+        .limit(20000);
+      for (const e of events ?? []) {
+        if (e.kind === "yellow_card")
+          yellowByMatch.set(e.match_id, (yellowByMatch.get(e.match_id) ?? 0) + 1);
+        else if (e.kind === "red_card")
+          redByMatch.set(e.match_id, (redByMatch.get(e.match_id) ?? 0) + 1);
+      }
+    }
+
+    const buckets = new Map<
+      string,
+      { key: string; label: string; order: number; goals: number; matches: number; yellow: number; red: number }
+    >();
+
+    for (const m of matches) {
+      const r = roundById.get(m.id) ?? null;
+      let key: string;
+      let label: string;
+      let order: number;
+      if (r != null) {
+        key = `r${r}`;
+        label = `R${r}`;
+        order = r;
+      } else if (m.scheduled_at) {
+        const d = new Date(m.scheduled_at);
+        key = d.toISOString().slice(0, 10);
+        label = d.toLocaleDateString("pt-BR", { day: "2-digit", month: "2-digit" });
+        order = d.getTime() / 1e9;
+      } else {
+        key = "sd";
+        label = "S/ data";
+        order = 9e9;
+      }
+      const b = buckets.get(key) ?? { key, label, order, goals: 0, matches: 0, yellow: 0, red: 0 };
+      b.goals += (m.host_score ?? 0) + (m.visitor_score ?? 0);
+      b.matches += 1;
+      b.yellow += yellowByMatch.get(m.id) ?? 0;
+      b.red += redByMatch.get(m.id) ?? 0;
+      buckets.set(key, b);
+    }
+
+    return Array.from(buckets.values())
+      .sort((a, b) => a.order - b.order)
+      .map(({ order: _o, ...rest }) => rest);
+  });
+
+// ============================================================
 // Estatísticas avançadas por time: forma, aproveitamento, cartões, clean sheets
 // ============================================================
 type TeamAdvanced = {
