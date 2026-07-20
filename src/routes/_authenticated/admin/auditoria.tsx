@@ -8,7 +8,7 @@ import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { adminListAuditLog, type AuditRow } from "@/lib/audit.functions";
-import { RefreshCw, Search, FileClock } from "lucide-react";
+import { RefreshCw, Search, FileClock, Download } from "lucide-react";
 import { SkeletonAdminPage } from "@/components/AppSkeletons";
 
 export const Route = createFileRoute("/_authenticated/admin/auditoria")({
@@ -35,6 +35,40 @@ const ACTION_LABELS: Record<string, { label: string; tone: string }> = {
 function formatDateTime(iso: string) {
   const d = new Date(iso);
   return d.toLocaleString("pt-BR", { dateStyle: "short", timeStyle: "short" });
+}
+
+function csvEscape(v: unknown): string {
+  if (v === null || v === undefined) return "";
+  const s = typeof v === "string" ? v : JSON.stringify(v);
+  if (/[",\n\r]/.test(s)) return `"${s.replace(/"/g, '""')}"`;
+  return s;
+}
+
+function downloadAuditCsv(rows: AuditRow[]) {
+  const headers = ["created_at", "action", "actor_email", "actor_id", "entity_type", "entity_id", "metadata"];
+  const lines = [headers.join(",")];
+  for (const r of rows) {
+    lines.push(
+      [
+        r.created_at,
+        r.action,
+        r.actor_email ?? "",
+        r.actor_id ?? "",
+        r.entity_type ?? "",
+        r.entity_id ?? "",
+        r.metadata ?? {},
+      ].map(csvEscape).join(","),
+    );
+  }
+  const blob = new Blob(["\ufeff" + lines.join("\n")], { type: "text/csv;charset=utf-8;" });
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement("a");
+  a.href = url;
+  a.download = `auditoria-${new Date().toISOString().slice(0, 10)}.csv`;
+  document.body.appendChild(a);
+  a.click();
+  document.body.removeChild(a);
+  URL.revokeObjectURL(url);
 }
 
 function AuditoriaPage() {
@@ -92,10 +126,21 @@ function AuditoriaPage() {
             </p>
           </div>
         </div>
-        <Button variant="outline" size="sm" onClick={() => refetch()} disabled={isFetching}>
-          <RefreshCw className={"h-4 w-4 mr-2 " + (isFetching ? "animate-spin" : "")} />
-          Atualizar
-        </Button>
+        <div className="flex items-center gap-2">
+          <Button
+            variant="outline"
+            size="sm"
+            onClick={() => downloadAuditCsv(filtered)}
+            disabled={filtered.length === 0}
+          >
+            <Download className="h-4 w-4 mr-2" />
+            Exportar CSV
+          </Button>
+          <Button variant="outline" size="sm" onClick={() => refetch()} disabled={isFetching}>
+            <RefreshCw className={"h-4 w-4 mr-2 " + (isFetching ? "animate-spin" : "")} />
+            Atualizar
+          </Button>
+        </div>
       </div>
 
       <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-[1fr_200px_180px_180px]">
