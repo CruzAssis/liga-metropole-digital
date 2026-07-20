@@ -36,7 +36,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { BarChart3, Goal, Trophy, ShieldAlert, Target, Swords } from "lucide-react";
+import { BarChart3, Goal, Trophy, ShieldAlert, Target, Swords, Users, Download } from "lucide-react";
 
 type Competition = {
   id: string;
