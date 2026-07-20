@@ -310,6 +310,10 @@ export const adminUpdateTeam = createServerFn({ method: "POST" })
     });
     if (!isAdmin) throw new Error("Apenas administradores podem editar times.");
 
+    const { data: previous } = await supabaseAdmin
+      .from("teams").select("status").eq("id", data.team_id).maybeSingle();
+    const prevStatus = (previous as { status?: string } | null)?.status ?? null;
+
     const patch: Record<string, unknown> = {};
     if (data.name !== undefined) patch.name = data.name.trim();
     if (data.short_name !== undefined) patch.short_name = data.short_name.trim().toUpperCase();
@@ -330,6 +334,33 @@ export const adminUpdateTeam = createServerFn({ method: "POST" })
       entity_id: data.team_id,
       metadata: { fields: Object.keys(patch) },
     });
+
+    // Notificação automática: mudança para approved / waitlist
+    if (data.status && data.status !== prevStatus &&
+        (data.status === "approved" || data.status === "waitlist")) {
+      try {
+        const { enqueueWhatsapp, fetchTeamManagerContact } = await import("@/lib/notify.server");
+        const contact = await fetchTeamManagerContact(data.team_id);
+        if (contact) {
+          const msg = data.status === "approved"
+            ? `⚽ Parabéns! O time *${contact.team_name}* foi *APROVADO* na Liga Metrópole. Acesse o app para conferir os próximos passos.`
+            : `⏳ Olá! O time *${contact.team_name}* entrou na *lista de espera* da Liga Metrópole. Você será avisado assim que uma vaga abrir.`;
+          await enqueueWhatsapp({
+            tipo: "team_approved",
+            destinatario_id: contact.id,
+            destinatario_nome: contact.name,
+            destinatario_phone: contact.phone,
+            assunto: `Status do time: ${data.status}`,
+            mensagem: msg,
+            payload: { team_id: data.team_id, new_status: data.status },
+            created_by: context.userId,
+          });
+        }
+      } catch (err) {
+        console.error("[notify:team_approved]", err);
+      }
+    }
+
     return { ok: true };
   });
 
