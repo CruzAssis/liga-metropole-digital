@@ -616,6 +616,7 @@ export type Database = {
       teams: {
         Row: {
           approved_at: string | null
+          bairro: string | null
           banner_url: string | null
           competition_id: string | null
           created_at: string
@@ -626,6 +627,7 @@ export type Database = {
           lado: Database["public"]["Enums"]["team_side"]
           logo_url: string | null
           manager_id: string
+          maps_link: string | null
           name: string
           primary_color: string | null
           registration_type: string
@@ -635,10 +637,12 @@ export type Database = {
           short_name: string
           slug: string | null
           status: string
+          subprefeitura: string | null
           tertiary_color: string | null
         }
         Insert: {
           approved_at?: string | null
+          bairro?: string | null
           banner_url?: string | null
           competition_id?: string | null
           created_at?: string
@@ -649,6 +653,7 @@ export type Database = {
           lado?: Database["public"]["Enums"]["team_side"]
           logo_url?: string | null
           manager_id: string
+          maps_link?: string | null
           name: string
           primary_color?: string | null
           registration_type: string
@@ -658,10 +663,12 @@ export type Database = {
           short_name: string
           slug?: string | null
           status?: string
+          subprefeitura?: string | null
           tertiary_color?: string | null
         }
         Update: {
           approved_at?: string | null
+          bairro?: string | null
           banner_url?: string | null
           competition_id?: string | null
           created_at?: string
@@ -672,6 +679,7 @@ export type Database = {
           lado?: Database["public"]["Enums"]["team_side"]
           logo_url?: string | null
           manager_id?: string
+          maps_link?: string | null
           name?: string
           primary_color?: string | null
           registration_type?: string
@@ -681,6 +689,7 @@ export type Database = {
           short_name?: string
           slug?: string | null
           status?: string
+          subprefeitura?: string | null
           tertiary_color?: string | null
         }
         Relationships: [
