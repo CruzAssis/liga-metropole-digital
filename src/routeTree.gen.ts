@@ -20,6 +20,7 @@ import { Route as RankingCraquesRouteImport } from './routes/ranking-craques'
 import { Route as RankingRouteImport } from './routes/ranking'
 import { Route as PrivacidadeRouteImport } from './routes/privacidade'
 import { Route as OnboardingRouteImport } from './routes/onboarding'
+import { Route as MidiaRouteImport } from './routes/midia'
 import { Route as LoginRouteImport } from './routes/login'
 import { Route as LocaisRouteImport } from './routes/locais'
 import { Route as ForgotPasswordRouteImport } from './routes/forgot-password'
@@ -117,6 +118,11 @@ const PrivacidadeRoute = PrivacidadeRouteImport.update({
 const OnboardingRoute = OnboardingRouteImport.update({
   id: '/onboarding',
   path: '/onboarding',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const MidiaRoute = MidiaRouteImport.update({
+  id: '/midia',
+  path: '/midia',
   getParentRoute: () => rootRouteImport,
 } as any)
 const LoginRoute = LoginRouteImport.update({
@@ -359,6 +365,7 @@ export interface FileRoutesByFullPath {
   '/forgot-password': typeof ForgotPasswordRoute
   '/locais': typeof LocaisRoute
   '/login': typeof LoginRoute
+  '/midia': typeof MidiaRoute
   '/onboarding': typeof OnboardingRouteWithChildren
   '/privacidade': typeof PrivacidadeRoute
   '/ranking': typeof RankingRoute
@@ -414,6 +421,7 @@ export interface FileRoutesByTo {
   '/forgot-password': typeof ForgotPasswordRoute
   '/locais': typeof LocaisRoute
   '/login': typeof LoginRoute
+  '/midia': typeof MidiaRoute
   '/onboarding': typeof OnboardingRouteWithChildren
   '/privacidade': typeof PrivacidadeRoute
   '/ranking': typeof RankingRoute
@@ -471,6 +479,7 @@ export interface FileRoutesById {
   '/forgot-password': typeof ForgotPasswordRoute
   '/locais': typeof LocaisRoute
   '/login': typeof LoginRoute
+  '/midia': typeof MidiaRoute
   '/onboarding': typeof OnboardingRouteWithChildren
   '/privacidade': typeof PrivacidadeRoute
   '/ranking': typeof RankingRoute
@@ -528,6 +537,7 @@ export interface FileRouteTypes {
     | '/forgot-password'
     | '/locais'
     | '/login'
+    | '/midia'
     | '/onboarding'
     | '/privacidade'
     | '/ranking'
@@ -583,6 +593,7 @@ export interface FileRouteTypes {
     | '/forgot-password'
     | '/locais'
     | '/login'
+    | '/midia'
     | '/onboarding'
     | '/privacidade'
     | '/ranking'
@@ -639,6 +650,7 @@ export interface FileRouteTypes {
     | '/forgot-password'
     | '/locais'
     | '/login'
+    | '/midia'
     | '/onboarding'
     | '/privacidade'
     | '/ranking'
@@ -696,6 +708,7 @@ export interface RootRouteChildren {
   ForgotPasswordRoute: typeof ForgotPasswordRoute
   LocaisRoute: typeof LocaisRoute
   LoginRoute: typeof LoginRoute
+  MidiaRoute: typeof MidiaRoute
   OnboardingRoute: typeof OnboardingRouteWithChildren
   PrivacidadeRoute: typeof PrivacidadeRoute
   RankingRoute: typeof RankingRoute
@@ -793,6 +806,13 @@ declare module '@tanstack/react-router' {
       path: '/onboarding'
       fullPath: '/onboarding'
       preLoaderRoute: typeof OnboardingRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/midia': {
+      id: '/midia'
+      path: '/midia'
+      fullPath: '/midia'
+      preLoaderRoute: typeof MidiaRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/login': {
@@ -1223,6 +1243,7 @@ const rootRouteChildren: RootRouteChildren = {
   ForgotPasswordRoute: ForgotPasswordRoute,
   LocaisRoute: LocaisRoute,
   LoginRoute: LoginRoute,
+  MidiaRoute: MidiaRoute,
   OnboardingRoute: OnboardingRouteWithChildren,
   PrivacidadeRoute: PrivacidadeRoute,
   RankingRoute: RankingRoute,
