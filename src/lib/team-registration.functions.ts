@@ -13,6 +13,11 @@ const schema = z.object({
   name: z.string().min(2).max(80),
   short_name: z.string().min(1).max(8).optional(),
   registration_type: z.enum(["host", "visitor"]),
+  lado: z.enum(["A", "B"]).optional(),
+  subprefeitura: z.string().max(120).optional().nullable(),
+  bairro: z.string().max(120).optional().nullable(),
+  maps_link: z.string().max(500).optional().nullable(),
+  logo_url: z.string().max(500).optional().nullable(),
   home_venue: z.string().max(255).optional().nullable(),
   home_time: z
     .string()
@@ -98,16 +103,30 @@ export const createTeamRegistration = createServerFn({ method: "POST" })
       }
     }
 
+    const slug = data.name
+      .trim()
+      .toLowerCase()
+      .normalize("NFD")
+      .replace(/[\u0300-\u036f]/g, "")
+      .replace(/\s+/g, "-")
+      .replace(/[^a-z0-9-]/g, "")
+      .slice(0, 60);
+
     const { data: team, error: teamErr } = await supabaseAdmin
       .from("teams")
       .insert({
         name: data.name.trim(),
         short_name,
+        slug: slug || null,
         manager_id: userId,
         registration_type: data.registration_type,
         status: initialStatus,
-        lado: "A",
+        lado: data.lado ?? "A",
         serie: "A",
+        subprefeitura: data.subprefeitura?.trim() || null,
+        bairro: data.bairro?.trim() || null,
+        maps_link: data.maps_link?.trim() || null,
+        logo_url: data.logo_url?.trim() || null,
         home_venue: data.home_venue?.trim() || null,
         home_time: data.registration_type === "host" ? data.home_time || null : null,
         primary_color: data.primary_color || null,
