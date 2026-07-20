@@ -128,3 +128,25 @@ export const getAthleteRankings = createServerFn({ method: "GET" }).handler(asyn
 
   return { topScorers, discipline, topRated };
 });
+
+// Public proxy for ranking of top-rated athletes ("Craques").
+// Uses the service-role client so we can keep the underlying SECURITY DEFINER
+// function restricted from anon.
+import { z } from "zod";
+
+export const getRankingCraques = createServerFn({ method: "GET" })
+  .inputValidator((data) => z.object({ min_evaluations: z.number().int().min(1).max(50).default(3) }).parse(data))
+  .handler(async ({ data }) => {
+    const { data: rows, error } = await supabaseAdmin.rpc("get_ranking_craques", {
+      _min_evaluations: data.min_evaluations,
+    });
+    if (error) throw new Error(error.message);
+    return rows ?? [];
+  });
+
+// Public proxy for aggregate supporter counts per team.
+export const getTeamSupporterCounts = createServerFn({ method: "GET" }).handler(async () => {
+  const { data, error } = await supabaseAdmin.rpc("get_team_supporter_counts");
+  if (error) throw new Error(error.message);
+  return data ?? [];
+});
