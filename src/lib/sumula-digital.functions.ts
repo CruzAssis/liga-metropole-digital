@@ -61,19 +61,26 @@ export const submitSumulaScore = createServerFn({ method: "POST" })
 
     // Notifica diretor mandante que precisa validar a súmula
     try {
-      const { enqueueWhatsapp, fetchTeamManagerContact } = await import("@/lib/notify.server");
+      const { enqueueWhatsapp, fetchTeamManagerContact, renderTemplate } = await import("@/lib/notify.server");
       const c = await fetchTeamManagerContact(match.host_team_id);
       if (c) {
         const { data: opp } = await supabaseAdmin
           .from("teams").select("name").eq("id", match.visitor_team_id).maybeSingle();
         const oppName = (opp as any)?.name ?? "adversário";
+        const { assunto, mensagem } = await renderTemplate("sumula_disponivel", {
+          diretor: c.name ?? "diretor(a)",
+          time: c.team_name ?? "",
+          adversario: oppName,
+          placar_casa: data.host_score,
+          placar_visitante: data.visitor_score,
+        });
         await enqueueWhatsapp({
           tipo: "sumula_disponivel",
           destinatario_id: c.id,
           destinatario_nome: c.name,
           destinatario_phone: c.phone,
-          assunto: "Súmula aguardando sua validação",
-          mensagem: `📋 *Súmula pendente* — ${c.team_name} x ${oppName}\n\nPlacar informado: ${data.host_score} x ${data.visitor_score}\n\nAcesse o app para *validar ou contestar* em até 72h.`,
+          assunto,
+          mensagem,
           payload: { match_id: data.match_id, host_score: data.host_score, visitor_score: data.visitor_score },
           created_by: context.userId,
         });
