@@ -264,3 +264,16 @@ export const getMySupporterVote = createServerFn({ method: "GET" })
       .maybeSingle();
     return v ?? null;
   });
+
+// ─── Admin: fechar votações expiradas e disparar notificações de craque ─────
+export const runCloseVotingAndNotify = createServerFn({ method: "POST" })
+  .middleware([requireSupabaseAuth])
+  .handler(async ({ context }) => {
+    const { data: isAdmin } = await context.supabase.rpc("has_role", {
+      _user_id: context.userId,
+      _role: "admin",
+    });
+    if (!isAdmin) throw new Error("Apenas administradores podem executar esta ação.");
+    const { closeExpiredVotingAndNotify } = await import("@/lib/mvp-notify.server");
+    return await closeExpiredVotingAndNotify();
+  });
