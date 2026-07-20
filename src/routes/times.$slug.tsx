@@ -130,83 +130,111 @@ function TeamProfilePage() {
       {/* Athletes */}
       <Section title={`Elenco (${athletes.length})`}>
         {athletes.length === 0 ? (
-          <EmptyText>Nenhum atleta cadastrado.</EmptyText>
+          <EmptyState icon={<Users className="h-7 w-7" />} title="Nenhum atleta cadastrado" description="O elenco aparecerá aqui assim que os atletas concluírem o ID Metrópole." />
         ) : (
-          <div className="grid gap-3 grid-cols-2 sm:grid-cols-3 lg:grid-cols-4">
-            {athletes.map((a: Athlete) => (
-              <div key={a.id} className="rounded-lg border border-border bg-card p-3 flex items-center gap-3">
-                <div className="h-12 w-12 rounded-full bg-muted overflow-hidden shrink-0">
-                  {a.photo_url ? (
-                    <img src={a.photo_url} alt={a.full_name ?? ""} className="h-full w-full object-cover" />
-                  ) : null}
-                </div>
-                <div className="min-w-0">
-                  <div className="text-sm font-medium truncate flex items-center gap-1">
-                    {a.nickname || a.full_name}
-                    {a.verified && <CheckCircle2 className="h-3 w-3 text-primary shrink-0" />}
+          <>
+            <div className="grid gap-3 grid-cols-2 sm:grid-cols-3 lg:grid-cols-4">
+              {athletes.slice(0, athletesVisible).map((a: Athlete) => (
+                <div key={a.id} className="rounded-lg border border-border bg-card p-3 flex items-center gap-3">
+                  <div className="h-12 w-12 rounded-full bg-muted overflow-hidden shrink-0">
+                    {a.photo_url ? (
+                      <img src={a.photo_url} alt={a.full_name ?? ""} className="h-full w-full object-cover" />
+                    ) : null}
                   </div>
-                  {a.position && <div className="text-xs text-muted-foreground truncate">{a.position}</div>}
+                  <div className="min-w-0">
+                    <div className="text-sm font-medium truncate flex items-center gap-1">
+                      {a.nickname || a.full_name}
+                      {a.verified && <CheckCircle2 className="h-3 w-3 text-primary shrink-0" />}
+                    </div>
+                    {a.position && <div className="text-xs text-muted-foreground truncate">{a.position}</div>}
+                  </div>
                 </div>
+              ))}
+            </div>
+            {athletesVisible < athletes.length && (
+              <div className="mt-4 flex justify-center">
+                <Button variant="outline" size="sm" onClick={() => setAthletesVisible((v) => v + 8)}>
+                  Ver mais ({athletes.length - athletesVisible})
+                </Button>
               </div>
-            ))}
-          </div>
+            )}
+          </>
         )}
       </Section>
 
       {/* Upcoming */}
       <Section title="Próximos jogos">
         {upcoming.length === 0 ? (
-          <EmptyText>Sem jogos agendados.</EmptyText>
+          <EmptyState icon={<CalendarX className="h-7 w-7" />} title="Sem jogos agendados" description="Assim que o sorteio da próxima rodada sair, os jogos aparecem aqui." />
         ) : (
-          <ul className="divide-y divide-border rounded-lg border border-border bg-card">
-            {upcoming.map((m: Match) => (
-              <li key={m.id} className="p-3 flex flex-wrap items-center justify-between gap-2 text-sm">
-                <div className="flex items-center gap-2 min-w-0">
-                  <Badge variant="outline" className="text-xs">Rod. {m.round}</Badge>
-                  <span className="font-medium truncate">{m.host?.short_name}</span>
-                  <span className="text-muted-foreground">×</span>
-                  <span className="font-medium truncate">{m.visitor?.short_name}</span>
-                </div>
-                <div className="text-xs text-muted-foreground flex items-center gap-2">
-                  {m.scheduled_at && (
-                    <span className="flex items-center gap-1">
-                      <Calendar className="h-3 w-3" />
-                      {new Date(m.scheduled_at).toLocaleDateString("pt-BR")}
-                    </span>
-                  )}
-                  {m.venue && (
-                    <span className="flex items-center gap-1">
-                      <MapPin className="h-3 w-3" /> {m.venue}
-                    </span>
-                  )}
-                </div>
-              </li>
-            ))}
-          </ul>
+          <>
+            <ul className="divide-y divide-border rounded-lg border border-border bg-card">
+              {upcoming.slice(0, upcomingVisible).map((m: Match) => (
+                <li key={m.id} className="p-3 flex flex-wrap items-center justify-between gap-2 text-sm">
+                  <div className="flex items-center gap-2 min-w-0">
+                    <Badge variant="outline" className="text-xs">Rod. {m.round}</Badge>
+                    <span className="font-medium truncate">{m.host?.short_name}</span>
+                    <span className="text-muted-foreground">×</span>
+                    <span className="font-medium truncate">{m.visitor?.short_name}</span>
+                  </div>
+                  <div className="text-xs text-muted-foreground flex items-center gap-2">
+                    {m.scheduled_at && (
+                      <span className="flex items-center gap-1">
+                        <Calendar className="h-3 w-3" />
+                        {new Date(m.scheduled_at).toLocaleDateString("pt-BR")}
+                      </span>
+                    )}
+                    {m.venue && (
+                      <span className="flex items-center gap-1">
+                        <MapPin className="h-3 w-3" /> {m.venue}
+                      </span>
+                    )}
+                  </div>
+                </li>
+              ))}
+            </ul>
+            {upcomingVisible < upcoming.length && (
+              <div className="mt-4 flex justify-center">
+                <Button variant="outline" size="sm" onClick={() => setUpcomingVisible((v) => v + 5)}>
+                  Ver mais ({upcoming.length - upcomingVisible})
+                </Button>
+              </div>
+            )}
+          </>
         )}
       </Section>
 
       {/* Results */}
       <Section title="Últimos resultados">
         {results.length === 0 ? (
-          <EmptyText>Sem resultados ainda.</EmptyText>
+          <EmptyState icon={<ShieldOff className="h-7 w-7" />} title="Sem resultados ainda" description="Os resultados aparecem aqui após a súmula ser homologada." />
         ) : (
-          <ul className="divide-y divide-border rounded-lg border border-border bg-card">
-            {results.map((m: Match) => (
-              <li key={m.id} className="p-3 flex items-center justify-between text-sm">
-                <div className="flex items-center gap-2 min-w-0">
-                  <span className="font-medium truncate">{m.host?.short_name}</span>
-                  <span className="font-mono font-bold">
-                    {m.host_score}×{m.visitor_score}
-                  </span>
-                  <span className="font-medium truncate">{m.visitor?.short_name}</span>
-                </div>
-                {m.status === "wo" && <Badge variant="destructive">WO</Badge>}
-              </li>
-            ))}
-          </ul>
+          <>
+            <ul className="divide-y divide-border rounded-lg border border-border bg-card">
+              {results.slice(0, resultsVisible).map((m: Match) => (
+                <li key={m.id} className="p-3 flex items-center justify-between text-sm">
+                  <div className="flex items-center gap-2 min-w-0">
+                    <span className="font-medium truncate">{m.host?.short_name}</span>
+                    <span className="font-mono font-bold">
+                      {m.host_score}×{m.visitor_score}
+                    </span>
+                    <span className="font-medium truncate">{m.visitor?.short_name}</span>
+                  </div>
+                  {m.status === "wo" && <Badge variant="destructive">WO</Badge>}
+                </li>
+              ))}
+            </ul>
+            {resultsVisible < results.length && (
+              <div className="mt-4 flex justify-center">
+                <Button variant="outline" size="sm" onClick={() => setResultsVisible((v) => v + 5)}>
+                  Ver mais ({results.length - resultsVisible})
+                </Button>
+              </div>
+            )}
+          </>
         )}
       </Section>
+
 
       {/* H2H */}
       <Section title="Histórico de confrontos (H2H)">
