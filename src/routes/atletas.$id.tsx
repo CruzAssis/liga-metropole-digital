@@ -288,56 +288,68 @@ function AtletaPerfilPage() {
           <div>
             <h2 className="font-display text-xl tracking-wide mb-3">Partidas Recentes</h2>
             {(!partidas || partidas.length === 0) ? (
-              <div className="rounded-xl border border-border bg-card p-6 text-center text-sm text-muted-foreground">
-                Nenhuma partida confirmada registrada ainda.
-              </div>
+              <EmptyState
+                icon={<CalendarX className="h-7 w-7" />}
+                title="Nenhuma partida ainda"
+                description="As partidas aparecem aqui após a homologação da súmula."
+              />
             ) : (
-              <div className="rounded-xl border border-border bg-card overflow-hidden">
-                <ul className="divide-y divide-border">
-                  {partidas.map((p) => (
-                    <li key={p.match_id} className="px-4 py-3 flex items-center gap-3">
-                      <div className="flex-1 min-w-0">
-                        <div className="font-medium text-sm truncate">
-                          {p.host_team_name} × {p.visitor_team_name}
+              <>
+                <div className="rounded-xl border border-border bg-card overflow-hidden">
+                  <ul className="divide-y divide-border">
+                    {partidas.slice(0, partidasVisible).map((p) => (
+                      <li key={p.match_id} className="px-4 py-3 flex items-center gap-3">
+                        <div className="flex-1 min-w-0">
+                          <div className="font-medium text-sm truncate">
+                            {p.host_team_name} × {p.visitor_team_name}
+                          </div>
+                          <div className="text-xs text-muted-foreground mt-0.5 flex items-center gap-2">
+                            <Calendar className="h-3 w-3" />
+                            {p.scheduled_at
+                              ? new Date(p.scheduled_at).toLocaleDateString("pt-BR", {
+                                  day: "2-digit",
+                                  month: "short",
+                                  year: "numeric",
+                                })
+                              : "Data a definir"}
+                            <span>· Rodada {p.round}</span>
+                          </div>
                         </div>
-                        <div className="text-xs text-muted-foreground mt-0.5 flex items-center gap-2">
-                          <Calendar className="h-3 w-3" />
-                          {p.scheduled_at
-                            ? new Date(p.scheduled_at).toLocaleDateString("pt-BR", {
-                                day: "2-digit",
-                                month: "short",
-                                year: "numeric",
-                              })
-                            : "Data a definir"}
-                          <span>· Rodada {p.round}</span>
-                        </div>
-                      </div>
 
-                      <div className="flex items-center gap-2 shrink-0">
-                        {p.host_score !== null && p.visitor_score !== null && (
-                          <Badge variant="outline" className="font-mono text-sm">
-                            {p.host_score}–{p.visitor_score}
-                          </Badge>
-                        )}
-                        {p.gols_na_partida > 0 && (
-                          <Badge className="gap-1 font-mono">
-                            <Goal className="h-3 w-3" />
-                            {p.gols_na_partida}
-                          </Badge>
-                        )}
-                        {p.foi_destaque && (
-                          <Badge variant="secondary" className="gap-1">
-                            <Star className="h-3 w-3 fill-yellow-400 text-yellow-400" />
-                            Destaque
-                          </Badge>
-                        )}
-                      </div>
-                    </li>
-                  ))}
-                </ul>
-              </div>
+                        <div className="flex items-center gap-2 shrink-0">
+                          {p.host_score !== null && p.visitor_score !== null && (
+                            <Badge variant="outline" className="font-mono text-sm">
+                              {p.host_score}–{p.visitor_score}
+                            </Badge>
+                          )}
+                          {p.gols_na_partida > 0 && (
+                            <Badge className="gap-1 font-mono">
+                              <Goal className="h-3 w-3" />
+                              {p.gols_na_partida}
+                            </Badge>
+                          )}
+                          {p.foi_destaque && (
+                            <Badge variant="secondary" className="gap-1">
+                              <Star className="h-3 w-3 fill-yellow-400 text-yellow-400" />
+                              Destaque
+                            </Badge>
+                          )}
+                        </div>
+                      </li>
+                    ))}
+                  </ul>
+                </div>
+                {partidasVisible < partidas.length && (
+                  <div className="mt-4 flex justify-center">
+                    <Button variant="outline" size="sm" onClick={() => setPartidasVisible((v) => v + 5)}>
+                      Ver mais ({partidas.length - partidasVisible})
+                    </Button>
+                  </div>
+                )}
+              </>
             )}
           </div>
+
         </div>
       </div>
     </PublicShell>
