@@ -1,13 +1,16 @@
 import { createFileRoute, Link, notFound } from "@tanstack/react-router";
 import { useQuery } from "@tanstack/react-query";
 import { useServerFn } from "@tanstack/react-start";
+import { useState } from "react";
 import { PublicShell } from "@/components/PublicShell";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
+import { EmptyState } from "@/components/AppSkeletons";
 import { getTeamPublicProfile, getTeamContact } from "@/lib/team-profile.functions";
 import { useAuth } from "@/hooks/use-auth";
 import { buildWhatsAppLink, formatPhoneBR } from "@/lib/wa";
-import { CheckCircle2, Mail, MessageCircle, MapPin, Calendar, Lock } from "lucide-react";
+import { CheckCircle2, Mail, MessageCircle, MapPin, Calendar, Lock, Users, CalendarX, ShieldOff } from "lucide-react";
+
 
 export const Route = createFileRoute("/times/$slug")({
   component: TeamProfilePage,
