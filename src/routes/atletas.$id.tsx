@@ -6,6 +6,9 @@ import { useQuery } from "@tanstack/react-query";
 import { QRCodeSVG } from "qrcode.react";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Badge } from "@/components/ui/badge";
+import { Button } from "@/components/ui/button";
+import { Skeleton } from "@/components/ui/skeleton";
+import { EmptyState } from "@/components/AppSkeletons";
 import { PublicShell } from "@/components/PublicShell";
 import { getAtletaPublicProfile } from "@/lib/atleta-profile.functions";
 import {
@@ -15,6 +18,7 @@ import {
   Trophy,
   Users,
   Calendar,
+  CalendarX,
   Instagram,
   QrCode,
   ChevronLeft,
@@ -33,6 +37,7 @@ export const Route = createFileRoute("/atletas/$id")({
     ],
   }),
 });
+
 
 function useAtletaProfile(id: string) {
   const fn = useServerFn(getAtletaPublicProfile);
@@ -64,12 +69,42 @@ function StatCard({
 function AtletaPerfilPage() {
   const { id } = Route.useParams();
   const { data, isLoading, isError } = useAtletaProfile(id);
+  const [partidasVisible, setPartidasVisible] = useState(5);
 
   if (isLoading) {
     return (
       <PublicShell>
-        <div className="flex items-center justify-center min-h-[40vh] text-muted-foreground">
-          Carregando perfil...
+        <div className="grid gap-6 lg:grid-cols-3">
+          <div className="lg:col-span-1 flex flex-col gap-4">
+            <div className="rounded-2xl border border-border bg-card p-6 flex flex-col items-center gap-4">
+              <Skeleton className="h-28 w-28 rounded-full" />
+              <Skeleton className="h-6 w-40 rounded" />
+              <Skeleton className="h-5 w-32 rounded" />
+              <Skeleton className="h-4 w-24 rounded" />
+            </div>
+            <div className="rounded-2xl border border-border bg-card p-5 flex flex-col items-center gap-3">
+              <Skeleton className="h-4 w-32 rounded" />
+              <Skeleton className="h-40 w-40 rounded-xl" />
+            </div>
+          </div>
+          <div className="lg:col-span-2 flex flex-col gap-6">
+            <div>
+              <Skeleton className="h-6 w-32 rounded mb-3" />
+              <div className="grid grid-cols-2 sm:grid-cols-3 gap-3">
+                {Array.from({ length: 5 }).map((_, i) => (
+                  <Skeleton key={i} className="h-24 rounded-xl" />
+                ))}
+              </div>
+            </div>
+            <div>
+              <Skeleton className="h-6 w-40 rounded mb-3" />
+              <div className="space-y-2">
+                {Array.from({ length: 4 }).map((_, i) => (
+                  <Skeleton key={i} className="h-14 rounded-xl" />
+                ))}
+              </div>
+            </div>
+          </div>
         </div>
       </PublicShell>
     );
@@ -87,6 +122,7 @@ function AtletaPerfilPage() {
       </PublicShell>
     );
   }
+
 
   const { profile, partidas } = data;
   const displayName = profile.nickname || profile.full_name || "Atleta";
@@ -252,56 +288,68 @@ function AtletaPerfilPage() {
           <div>
             <h2 className="font-display text-xl tracking-wide mb-3">Partidas Recentes</h2>
             {(!partidas || partidas.length === 0) ? (
-              <div className="rounded-xl border border-border bg-card p-6 text-center text-sm text-muted-foreground">
-                Nenhuma partida confirmada registrada ainda.
-              </div>
+              <EmptyState
+                icon={<CalendarX className="h-7 w-7" />}
+                title="Nenhuma partida ainda"
+                description="As partidas aparecem aqui após a homologação da súmula."
+              />
             ) : (
-              <div className="rounded-xl border border-border bg-card overflow-hidden">
-                <ul className="divide-y divide-border">
-                  {partidas.map((p) => (
-                    <li key={p.match_id} className="px-4 py-3 flex items-center gap-3">
-                      <div className="flex-1 min-w-0">
-                        <div className="font-medium text-sm truncate">
-                          {p.host_team_name} × {p.visitor_team_name}
+              <>
+                <div className="rounded-xl border border-border bg-card overflow-hidden">
+                  <ul className="divide-y divide-border">
+                    {partidas.slice(0, partidasVisible).map((p) => (
+                      <li key={p.match_id} className="px-4 py-3 flex items-center gap-3">
+                        <div className="flex-1 min-w-0">
+                          <div className="font-medium text-sm truncate">
+                            {p.host_team_name} × {p.visitor_team_name}
+                          </div>
+                          <div className="text-xs text-muted-foreground mt-0.5 flex items-center gap-2">
+                            <Calendar className="h-3 w-3" />
+                            {p.scheduled_at
+                              ? new Date(p.scheduled_at).toLocaleDateString("pt-BR", {
+                                  day: "2-digit",
+                                  month: "short",
+                                  year: "numeric",
+                                })
+                              : "Data a definir"}
+                            <span>· Rodada {p.round}</span>
+                          </div>
                         </div>
-                        <div className="text-xs text-muted-foreground mt-0.5 flex items-center gap-2">
-                          <Calendar className="h-3 w-3" />
-                          {p.scheduled_at
-                            ? new Date(p.scheduled_at).toLocaleDateString("pt-BR", {
-                                day: "2-digit",
-                                month: "short",
-                                year: "numeric",
-                              })
-                            : "Data a definir"}
-                          <span>· Rodada {p.round}</span>
-                        </div>
-                      </div>
 
-                      <div className="flex items-center gap-2 shrink-0">
-                        {p.host_score !== null && p.visitor_score !== null && (
-                          <Badge variant="outline" className="font-mono text-sm">
-                            {p.host_score}–{p.visitor_score}
-                          </Badge>
-                        )}
-                        {p.gols_na_partida > 0 && (
-                          <Badge className="gap-1 font-mono">
-                            <Goal className="h-3 w-3" />
-                            {p.gols_na_partida}
-                          </Badge>
-                        )}
-                        {p.foi_destaque && (
-                          <Badge variant="secondary" className="gap-1">
-                            <Star className="h-3 w-3 fill-yellow-400 text-yellow-400" />
-                            Destaque
-                          </Badge>
-                        )}
-                      </div>
-                    </li>
-                  ))}
-                </ul>
-              </div>
+                        <div className="flex items-center gap-2 shrink-0">
+                          {p.host_score !== null && p.visitor_score !== null && (
+                            <Badge variant="outline" className="font-mono text-sm">
+                              {p.host_score}–{p.visitor_score}
+                            </Badge>
+                          )}
+                          {p.gols_na_partida > 0 && (
+                            <Badge className="gap-1 font-mono">
+                              <Goal className="h-3 w-3" />
+                              {p.gols_na_partida}
+                            </Badge>
+                          )}
+                          {p.foi_destaque && (
+                            <Badge variant="secondary" className="gap-1">
+                              <Star className="h-3 w-3 fill-yellow-400 text-yellow-400" />
+                              Destaque
+                            </Badge>
+                          )}
+                        </div>
+                      </li>
+                    ))}
+                  </ul>
+                </div>
+                {partidasVisible < partidas.length && (
+                  <div className="mt-4 flex justify-center">
+                    <Button variant="outline" size="sm" onClick={() => setPartidasVisible((v) => v + 5)}>
+                      Ver mais ({partidas.length - partidasVisible})
+                    </Button>
+                  </div>
+                )}
+              </>
             )}
           </div>
+
         </div>
       </div>
     </PublicShell>
