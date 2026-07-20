@@ -324,8 +324,6 @@ function HomePage() {
         </div>
       </section>
 
-        </div>
-      </section>
 
       <section className="flex flex-col items-center text-center px-4 py-12 md:py-16 w-full max-w-5xl mx-auto">
 
