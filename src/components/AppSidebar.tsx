@@ -1,5 +1,5 @@
 import { Link, useRouterState, useNavigate } from "@tanstack/react-router";
-import { Home, ClipboardList, UserCircle, LogOut, Shuffle, LayoutDashboard, ListChecks, Users, BadgeCheck, Shield, FileText, Trophy, ExternalLink, UsersRound, Megaphone, MapPin, Settings, FileClock, CalendarDays, Image as ImageIcon } from "lucide-react";
+import { Home, ClipboardList, UserCircle, LogOut, Shuffle, LayoutDashboard, ListChecks, Users, BadgeCheck, Shield, FileText, Trophy, ExternalLink, UsersRound, Megaphone, MapPin, Settings, FileClock, CalendarDays, Image as ImageIcon, Heart } from "lucide-react";
 import { BrandLogo } from "@/components/BrandLogo";
 import { useIsAdmin } from "@/hooks/use-is-admin";
 import {
@@ -18,6 +18,7 @@ import { useAuth } from "@/hooks/use-auth";
 
 const items = [
   { title: "Início", url: "/minha-conta", icon: Home },
+  { title: "Torcedor", url: "/torcedor", icon: Heart },
   { title: "Atletas", url: "/atletas", icon: Users },
   { title: "Verificar ID", url: "/verificar", icon: BadgeCheck },
   { title: "Inscrição", url: "/inscricao", icon: ClipboardList },
