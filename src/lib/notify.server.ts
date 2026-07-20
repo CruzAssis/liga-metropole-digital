@@ -28,7 +28,6 @@ function normalizePhone(phone: string | null | undefined): string | null {
   if (!phone) return null;
   const digits = phone.replace(/\D+/g, "");
   if (digits.length < 10) return null;
-  // Se não tem código de país, presumir Brasil (55)
   if (digits.length <= 11) return `55${digits}`;
   return digits;
 }
@@ -38,10 +37,6 @@ export function buildWaMeUrl(phone: string, message: string): string {
   return `https://wa.me/${phone}?text=${encodeURIComponent(message)}`;
 }
 
-/**
- * Enfileira uma notificação WhatsApp. Se não houver telefone válido, grava
- * como falhou (para admin ver e acionar manualmente).
- */
 export async function enqueueWhatsapp(params: EnqueueWhatsAppParams): Promise<void> {
   const phoneDigits = normalizePhone(params.destinatario_phone);
   const url = phoneDigits ? buildWaMeUrl(phoneDigits, params.mensagem) : null;
@@ -62,7 +57,6 @@ export async function enqueueWhatsapp(params: EnqueueWhatsAppParams): Promise<vo
   } as never);
 }
 
-/** Busca o WhatsApp/nome do manager de um time. */
 export async function fetchTeamManagerContact(teamId: string): Promise<{
   id: string;
   name: string | null;
@@ -86,5 +80,58 @@ export async function fetchTeamManagerContact(teamId: string): Promise<{
     name: profile.full_name,
     phone: profile.whatsapp || profile.phone,
     team_name: team.name,
+  };
+}
+
+// ─── Template rendering ───────────────────────────────────────────────────────
+
+const FALLBACK_TEMPLATES: Record<NotificacaoTipo, { assunto: string; mensagem: string }> = {
+  team_approved: {
+    assunto: "Status do time: {status}",
+    mensagem: "⚽ Olá {diretor}! O time *{time}* foi *{status_label}* na Liga Metrópole.",
+  },
+  jogo_agendado: {
+    assunto: "Jogo {tipo_evento}",
+    mensagem: "🏆 Jogo {tipo_evento}\n\n{time} x {adversario}\n📅 {data}\n📍 {local}",
+  },
+  sumula_disponivel: {
+    assunto: "Súmula aguardando validação",
+    mensagem: "📋 Súmula pendente — {time} x {adversario}\nPlacar: {placar_casa} x {placar_visitante}",
+  },
+  sumula_prazo_alerta: {
+    assunto: "Prazo da súmula",
+    mensagem: "⏰ {diretor}, a súmula de {time} x {adversario} vence em {horas_restantes}h.",
+  },
+  destaque_publicado: {
+    assunto: "Destaque publicado",
+    mensagem: "⭐ {atleta} foi destaque de {time} com nota {nota}/10.",
+  },
+  broadcast: {
+    assunto: "Mensagem da Liga",
+    mensagem: "{mensagem}",
+  },
+};
+
+function interpolate(template: string, vars: Record<string, string | number | null | undefined>): string {
+  return template.replace(/\{(\w+)\}/g, (_, key) => {
+    const v = vars[key];
+    return v === null || v === undefined ? "" : String(v);
+  });
+}
+
+/** Carrega template do BD (com fallback) e renderiza com as variáveis. */
+export async function renderTemplate(
+  tipo: NotificacaoTipo,
+  vars: Record<string, string | number | null | undefined>,
+): Promise<{ assunto: string; mensagem: string }> {
+  const { data } = await supabaseAdmin
+    .from("notification_templates" as never)
+    .select("assunto, mensagem")
+    .eq("tipo", tipo)
+    .maybeSingle();
+  const tpl = (data as { assunto: string | null; mensagem: string } | null) ?? FALLBACK_TEMPLATES[tipo];
+  return {
+    assunto: interpolate(tpl.assunto ?? "", vars),
+    mensagem: interpolate(tpl.mensagem ?? "", vars),
   };
 }

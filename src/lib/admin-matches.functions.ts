@@ -74,7 +74,7 @@ export const adminUpdateMatch = createServerFn({ method: "POST" })
     // Notificar diretores se scheduled_at foi alterado
     if (patch.scheduled_at !== undefined && patch.scheduled_at !== prevScheduled && prev) {
       try {
-        const { enqueueWhatsapp, fetchTeamManagerContact } = await import("@/lib/notify.server");
+        const { enqueueWhatsapp, fetchTeamManagerContact, renderTemplate } = await import("@/lib/notify.server");
         const p = prev as any;
         const isReschedule = !!prevScheduled;
         const dt = patch.scheduled_at
@@ -91,14 +91,21 @@ export const adminUpdateMatch = createServerFn({ method: "POST" })
           const { data: opp } = await supabaseAdmin
             .from("teams").select("name").eq("id", opponentId).maybeSingle();
           const oppName = (opp as any)?.name ?? "adversário";
-          const msg = `🏆 *Liga Metrópole* — ${isReschedule ? "Jogo remarcado" : "Novo jogo agendado"}\n\n${c.team_name} x ${oppName}\n📅 ${dt}${venueTxt ? `\n📍 ${venueTxt}` : ""}\n\nAcesse o app para detalhes.`;
+          const { assunto, mensagem } = await renderTemplate("jogo_agendado", {
+            diretor: c.name ?? "diretor(a)",
+            time: c.team_name ?? "",
+            adversario: oppName,
+            data: dt,
+            local: venueTxt,
+            tipo_evento: isReschedule ? "remarcado" : "agendado",
+          });
           await enqueueWhatsapp({
             tipo: "jogo_agendado",
             destinatario_id: c.id,
             destinatario_nome: c.name,
             destinatario_phone: c.phone,
-            assunto: `Jogo ${isReschedule ? "remarcado" : "agendado"}`,
-            mensagem: msg,
+            assunto,
+            mensagem,
             payload: { match_id: data.id, scheduled_at: patch.scheduled_at, is_reschedule: isReschedule },
             created_by: context.userId,
           });

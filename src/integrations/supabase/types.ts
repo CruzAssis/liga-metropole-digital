@@ -567,6 +567,33 @@ export type Database = {
         }
         Relationships: []
       }
+      notification_templates: {
+        Row: {
+          assunto: string | null
+          mensagem: string
+          tipo: string
+          updated_at: string
+          updated_by: string | null
+          variables: string[]
+        }
+        Insert: {
+          assunto?: string | null
+          mensagem: string
+          tipo: string
+          updated_at?: string
+          updated_by?: string | null
+          variables?: string[]
+        }
+        Update: {
+          assunto?: string | null
+          mensagem?: string
+          tipo?: string
+          updated_at?: string
+          updated_by?: string | null
+          variables?: string[]
+        }
+        Relationships: []
+      }
       profiles: {
         Row: {
           avatar_url: string | null

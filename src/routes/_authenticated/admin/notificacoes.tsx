@@ -1,18 +1,19 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { useServerFn } from "@tanstack/react-start";
 import { useQuery, useMutation } from "@tanstack/react-query";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import {
-  Bell, CheckCircle, XCircle, Clock, RefreshCw, Mail, MessageSquare, Send, Megaphone,
+  Bell, CheckCircle, XCircle, Clock, RefreshCw, Mail, MessageSquare, Send, Megaphone, FileText,
 } from "lucide-react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
 import {
   Select, SelectContent, SelectItem, SelectTrigger, SelectValue,
 } from "@/components/ui/select";
 import {
-  Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter, DialogTrigger,
+  Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter, DialogTrigger, DialogDescription,
 } from "@/components/ui/dialog";
 import { Textarea } from "@/components/ui/textarea";
 import { toast } from "sonner";
@@ -22,8 +23,12 @@ import {
   getNotificacoesStats,
   markNotificacaoSent,
   broadcastWhatsapp,
+  listTemplates,
+  upsertTemplate,
+  TEMPLATE_VARIABLES,
   TIPO_LABELS, STATUS_LABELS, CANAL_LABELS,
   type NotificacaoTipo, type NotificacaoCanal, type NotificacaoStatus, type NotificacaoLog,
+  type NotificationTemplate,
 } from "@/lib/notificacoes.functions";
 
 export const Route = createFileRoute("/_authenticated/admin/notificacoes")({
@@ -280,6 +285,122 @@ function BroadcastDialog({ onDone }: { onDone: () => void }) {
   );
 }
 
+function TemplatesDialog() {
+  const [open, setOpen] = useState(false);
+  const [selected, setSelected] = useState<NotificacaoTipo>("team_approved");
+  const [assunto, setAssunto] = useState("");
+  const [mensagem, setMensagem] = useState("");
+  const listFn = useServerFn(listTemplates);
+  const saveFn = useServerFn(upsertTemplate);
+
+  const { data, refetch } = useQuery({
+    queryKey: ["notification-templates"],
+    queryFn: () => listFn({}),
+    enabled: open,
+  });
+
+  const templates = data?.templates ?? [];
+  const current = templates.find((t) => t.tipo === selected);
+
+  // Sync form when selection or data changes
+  useEffect(() => {
+    if (current) {
+      setAssunto(current.assunto ?? "");
+      setMensagem(current.mensagem);
+    }
+  }, [selected, current?.updated_at]);
+
+  const saveMut = useMutation({
+    mutationFn: () => saveFn({ data: { tipo: selected, assunto: assunto || null, mensagem } }),
+    onSuccess: () => {
+      toast.success("Template salvo");
+      refetch();
+    },
+    onError: (e: Error) => toast.error(e.message),
+  });
+
+  const vars = TEMPLATE_VARIABLES[selected] ?? [];
+
+  return (
+    <Dialog open={open} onOpenChange={setOpen}>
+      <DialogTrigger asChild>
+        <Button variant="outline" size="sm" className="border-zinc-700 text-zinc-300 hover:bg-zinc-800 gap-2">
+          <FileText className="w-4 h-4" /> Templates
+        </Button>
+      </DialogTrigger>
+      <DialogContent className="bg-zinc-900 border-zinc-800 text-white max-w-2xl">
+        <DialogHeader>
+          <DialogTitle>Templates de notificação</DialogTitle>
+          <DialogDescription className="text-zinc-400">
+            Configure o texto enviado em cada evento. Use variáveis entre chaves.
+          </DialogDescription>
+        </DialogHeader>
+        <div className="space-y-3">
+          <div>
+            <label className="text-xs text-zinc-400 mb-1 block">Tipo</label>
+            <Select value={selected} onValueChange={(v) => setSelected(v as NotificacaoTipo)}>
+              <SelectTrigger className="bg-zinc-800 border-zinc-700">
+                <SelectValue />
+              </SelectTrigger>
+              <SelectContent className="bg-zinc-800 border-zinc-700">
+                {Object.entries(TIPO_LABELS).map(([k, l]) => (
+                  <SelectItem key={k} value={k}>{l}</SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+          </div>
+          <div>
+            <label className="text-xs text-zinc-400 mb-1 block">Variáveis disponíveis</label>
+            <div className="flex flex-wrap gap-1.5">
+              {vars.map((v) => (
+                <button
+                  key={v}
+                  type="button"
+                  onClick={() => setMensagem((m) => m + `{${v}}`)}
+                  className="text-xs font-mono px-2 py-0.5 rounded border border-zinc-700 bg-zinc-800 hover:bg-zinc-700 text-blue-300"
+                >
+                  {`{${v}}`}
+                </button>
+              ))}
+            </div>
+          </div>
+          <div>
+            <label className="text-xs text-zinc-400 mb-1 block">Assunto (opcional)</label>
+            <Input
+              value={assunto}
+              onChange={(e) => setAssunto(e.target.value)}
+              className="bg-zinc-800 border-zinc-700"
+              placeholder="Ex.: Status do time: {status}"
+            />
+          </div>
+          <div>
+            <label className="text-xs text-zinc-400 mb-1 block">
+              Mensagem ({mensagem.length}/2000)
+            </label>
+            <Textarea
+              value={mensagem}
+              onChange={(e) => setMensagem(e.target.value.slice(0, 2000))}
+              className="bg-zinc-800 border-zinc-700 h-40 font-mono text-xs"
+            />
+          </div>
+        </div>
+        <DialogFooter>
+          <Button variant="outline" onClick={() => setOpen(false)} className="border-zinc-700">
+            Fechar
+          </Button>
+          <Button
+            onClick={() => saveMut.mutate()}
+            disabled={saveMut.isPending || mensagem.trim().length < 1}
+            className="bg-[#1565F5] hover:bg-[#1252c9]"
+          >
+            Salvar
+          </Button>
+        </DialogFooter>
+      </DialogContent>
+    </Dialog>
+  );
+}
+
 function AdminNotificacoesPage() {
   const [filterTipo, setFilterTipo] = useState<NotificacaoTipo | "all">("all");
   const [filterStatus, setFilterStatus] = useState<NotificacaoStatus | "all">("all");
@@ -336,6 +457,7 @@ function AdminNotificacoesPage() {
           </div>
         </div>
         <div className="flex gap-2 self-start sm:self-auto">
+          <TemplatesDialog />
           <BroadcastDialog onDone={handleRefresh} />
           <Button
             variant="outline" size="sm" onClick={handleRefresh}
