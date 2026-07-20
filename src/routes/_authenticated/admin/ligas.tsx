@@ -478,6 +478,69 @@ function LigasPage() {
               </p>
             </div>
 
+            {/* Formato de disputa */}
+            <div className="sm:col-span-2 rounded-md border border-border bg-muted/30 p-3 flex items-start gap-3">
+              <input
+                id="double_round"
+                type="checkbox"
+                className="mt-1 h-4 w-4"
+                checked={form.double_round}
+                onChange={(e) => setForm((f) => ({ ...f, double_round: e.target.checked }))}
+              />
+              <div className="flex-1">
+                <Label htmlFor="double_round" className="cursor-pointer">
+                  Turno e returno (ida e volta)
+                </Label>
+                <p className="text-xs text-muted-foreground mt-1">
+                  {form.double_round
+                    ? "Cada dupla de times se enfrenta duas vezes (mando invertido no returno)."
+                    : "Turno único: cada dupla de times se enfrenta apenas uma vez."}
+                </p>
+              </div>
+            </div>
+
+            {/* Pontuação */}
+            <div>
+              <Label>Pontos por vitória</Label>
+              <Input
+                type="number"
+                min={0}
+                value={form.points_win}
+                onChange={(e) => setForm((f) => ({ ...f, points_win: e.target.value }))}
+              />
+            </div>
+            <div>
+              <Label>Pontos por empate</Label>
+              <Input
+                type="number"
+                min={0}
+                value={form.points_draw}
+                onChange={(e) => setForm((f) => ({ ...f, points_draw: e.target.value }))}
+              />
+            </div>
+            <div>
+              <Label>Pontos por derrota</Label>
+              <Input
+                type="number"
+                min={0}
+                value={form.points_loss}
+                onChange={(e) => setForm((f) => ({ ...f, points_loss: e.target.value }))}
+              />
+              <p className="text-xs text-muted-foreground mt-1">Normalmente 0.</p>
+            </div>
+
+            <div className="sm:col-span-2">
+              <Label>Regulamento / observações</Label>
+              <textarea
+                rows={4}
+                value={form.regulation_notes}
+                onChange={(e) => setForm((f) => ({ ...f, regulation_notes: e.target.value }))}
+                placeholder="Regras específicas desta liga (critérios de desempate, disciplina, W.O., etc.)"
+                className="flex w-full rounded-md border border-input bg-background px-3 py-2 text-sm mt-1"
+              />
+            </div>
+
+
             {/* Feedback dinâmico */}
             {(() => {
               const max = parseInt(form.max_teams, 10) || 0;
