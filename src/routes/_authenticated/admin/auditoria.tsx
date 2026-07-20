@@ -37,6 +37,40 @@ function formatDateTime(iso: string) {
   return d.toLocaleString("pt-BR", { dateStyle: "short", timeStyle: "short" });
 }
 
+function csvEscape(v: unknown): string {
+  if (v === null || v === undefined) return "";
+  const s = typeof v === "string" ? v : JSON.stringify(v);
+  if (/[",\n\r]/.test(s)) return `"${s.replace(/"/g, '""')}"`;
+  return s;
+}
+
+function downloadAuditCsv(rows: AuditRow[]) {
+  const headers = ["created_at", "action", "actor_email", "actor_id", "entity_type", "entity_id", "metadata"];
+  const lines = [headers.join(",")];
+  for (const r of rows) {
+    lines.push(
+      [
+        r.created_at,
+        r.action,
+        r.actor_email ?? "",
+        r.actor_id ?? "",
+        r.entity_type ?? "",
+        r.entity_id ?? "",
+        r.metadata ?? {},
+      ].map(csvEscape).join(","),
+    );
+  }
+  const blob = new Blob(["\ufeff" + lines.join("\n")], { type: "text/csv;charset=utf-8;" });
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement("a");
+  a.href = url;
+  a.download = `auditoria-${new Date().toISOString().slice(0, 10)}.csv`;
+  document.body.appendChild(a);
+  a.click();
+  document.body.removeChild(a);
+  URL.revokeObjectURL(url);
+}
+
 function AuditoriaPage() {
   const listFn = useServerFn(adminListAuditLog);
   const [actionFilter, setActionFilter] = useState<string>("todos");
