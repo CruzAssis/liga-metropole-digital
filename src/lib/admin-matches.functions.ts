@@ -1,6 +1,7 @@
 import { createServerFn } from "@tanstack/react-start";
 import { z } from "zod";
 import { requireSupabaseAuth } from "@/integrations/supabase/auth-middleware";
+import { logAudit } from "@/lib/audit.server";
 
 async function assertAdmin(supabase: any, userId: string) {
   const { data, error } = await supabase.rpc("has_role", { _user_id: userId, _role: "admin" });
@@ -55,6 +56,13 @@ export const adminUpdateMatch = createServerFn({ method: "POST" })
     if (data.status !== undefined) patch.status = data.status;
     const { error } = await supabaseAdmin.from("matches").update(patch).eq("id", data.id);
     if (error) throw new Error(error.message);
+    await logAudit({
+      claims: context.claims,
+      action: "match.update",
+      entity_type: "match",
+      entity_id: data.id,
+      metadata: patch,
+    });
     return { success: true };
   });
 
