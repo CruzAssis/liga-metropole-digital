@@ -118,11 +118,11 @@ export const generateRoundRobin = createServerFn({ method: "POST" })
     if (insErr) throw new Error(insErr.message);
 
     await logAudit({
+      claims: context.claims,
       action: "calendario.generate_round_robin",
-      actor_id: context.userId,
-      entity: "competition",
+      entity_type: "competition",
       entity_id: data.competitionId,
-      details: { matches: rows.length, groups: groups.length, doubleRound: data.doubleRound },
+      metadata: { matches: rows.length, groups: groups.length, doubleRound: data.doubleRound },
     });
 
     return { ok: true, matches: rows.length, groups: groups.length, rounds: totalRound };
