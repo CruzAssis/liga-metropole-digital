@@ -301,6 +301,22 @@ function VoteDialog({ matchId, onClose }: { matchId: string | null; onClose: () 
           </DialogDescription>
         </DialogHeader>
 
+        {lineups && !lineups.voting_open && !myVote && (
+          <div className="rounded-lg border border-destructive/30 bg-destructive/5 p-3 text-sm">
+            🔒 A votação desta partida está <strong>fechada</strong>.
+            {lineups.voting_closes_at && (
+              <p className="mt-1 text-xs text-muted-foreground">
+                Encerrada em {new Date(lineups.voting_closes_at).toLocaleString("pt-BR")}.
+              </p>
+            )}
+          </div>
+        )}
+        {lineups?.voting_open && lineups.voting_closes_at && (
+          <p className="text-xs text-muted-foreground">
+            Votação aberta até {new Date(lineups.voting_closes_at).toLocaleString("pt-BR")}.
+          </p>
+        )}
+
         {myVote ? (
           <div className="rounded-lg border border-primary/30 bg-primary/5 p-3 text-sm">
             ✅ Seu voto: <strong>{allAthletes.find((a) => a.id === myVote.athlete_id)?.nickname ?? allAthletes.find((a) => a.id === myVote.athlete_id)?.full_name ?? "—"}</strong>
@@ -309,7 +325,7 @@ function VoteDialog({ matchId, onClose }: { matchId: string | null; onClose: () 
               Só é permitido um voto por partida.
             </p>
           </div>
-        ) : (
+        ) : lineups && !lineups.voting_open ? null : (
         <>
         <div className="max-h-64 overflow-y-auto space-y-1 rounded-lg border border-border p-2">
           {lineupsQ.isLoading && <p className="p-3 text-sm text-muted-foreground">Carregando...</p>}
