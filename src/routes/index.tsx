@@ -3,10 +3,12 @@ import { createFileRoute, Link, useNavigate } from '@tanstack/react-router'
 import { useEffect, useState } from 'react'
 import { useAuth } from '@/hooks/use-auth'
 import { supabase } from '@/integrations/supabase/client'
-import { Trophy, Calendar, ChevronRight, Menu, X, LayoutDashboard, User } from 'lucide-react'
+import { Trophy, Calendar, ChevronRight, Menu, X, LayoutDashboard, User, Instagram, Mail, MessageCircle, FileText } from 'lucide-react'
 import { BrandLogo } from '@/components/BrandLogo'
 import AnimatedStats from '@/components/home/AnimatedStats'
 import HeroCarousel from '@/components/home/HeroCarousel'
+import { useLeagueConfig } from '@/hooks/use-league-config'
+
 
 export const Route = createFileRoute('/')({
   component: HomePage,
@@ -15,10 +17,20 @@ export const Route = createFileRoute('/')({
 function HomePage() {
   const { user, loading, signOut } = useAuth()
   const navigate = useNavigate()
+  const cfg = useLeagueConfig()
+  const leagueName = cfg?.league_name || 'Liga Metrópole'
+  const season = cfg?.season || '2026'
+  const tagline = cfg?.tagline
+  const formatDesc = cfg?.format_description || '32 subprefeituras, todas em pontos corridos e mata-mata no final.'
+  const whatsapp = cfg?.whatsapp
+  const instagram = cfg?.instagram
+  const rulesUrl = cfg?.rules_url
+  const contactEmail = cfg?.contact_email
   const [recentMatches, setRecentMatches] = useState([])
   const [upcomingMatches, setUpcomingMatches] = useState([])
   const [isAdmin, setIsAdmin] = useState(false)
   const [menuOpen, setMenuOpen] = useState(false)
+
 
   useEffect(() => {
     if (!user) return
@@ -138,13 +150,16 @@ function HomePage() {
           style={{ borderTop: '1px solid #27272A' }}
         >
           <div className="flex flex-col sm:flex-row items-center justify-center gap-2 sm:gap-4 text-sm" style={{ color: '#52525B' }}>
-            <span>© 2026 Liga Metrópole</span>
+            <span>© {new Date().getFullYear()} {leagueName}</span>
             <span className="hidden sm:inline">·</span>
             <Link to="/privacidade" className="hover:text-zinc-300 transition-colors">Privacidade</Link>
             <span>·</span>
             <Link to="/termos" className="hover:text-zinc-300 transition-colors">Termos</Link>
+            {contactEmail && (<><span>·</span><a href={`mailto:${contactEmail}`} className="hover:text-zinc-300 transition-colors">{contactEmail}</a></>)}
+            {instagram && (<><span>·</span><a href={`https://instagram.com/${instagram.replace('@','')}`} target="_blank" rel="noreferrer" className="hover:text-zinc-300 transition-colors">{instagram.startsWith('@') ? instagram : `@${instagram}`}</a></>)}
           </div>
         </footer>
+
       </div>
     )
   }
@@ -232,14 +247,13 @@ function HomePage() {
         <div className="relative z-10 max-w-5xl mx-auto px-4 py-12 md:py-16 text-center">
           <span className="inline-flex items-center gap-1.5 mb-4 rounded-full px-3 py-1 text-[11px] font-semibold uppercase tracking-widest"
             style={{ background: 'rgba(21,101,245,0.18)', border: '1px solid rgba(21,101,245,0.45)', color: '#93BBFF' }}>
-            Temporada 2026 · Zona Norte
+            Temporada {season} · Zona Norte
           </span>
           <h1 className="text-3xl md:text-5xl font-black tracking-tight mb-4 text-white">
-            Bem-vindo de volta à <span className="text-[#4C9BFF]">Liga Metrópole</span>
+            Bem-vindo de volta à <span className="text-[#4C9BFF]">{leagueName}</span>
           </h1>
           <p className="text-zinc-300 max-w-2xl mx-auto text-sm md:text-base leading-relaxed">
-            A liga que valoriza a história da várzea. Aqui cada gol vira estatística,
-            cada partida vira legado e cada clube conquista sua vitrine.
+            {tagline || 'A liga que valoriza a história da várzea. Aqui cada gol vira estatística, cada partida vira legado e cada clube conquista sua vitrine.'}
           </p>
 
           {/* Cards úteis */}
@@ -270,7 +284,7 @@ function HomePage() {
           <div className="mt-6 grid grid-cols-1 md:grid-cols-3 gap-3 text-left">
             <div className="rounded-xl bg-black/50 backdrop-blur border border-border p-4">
               <p className="text-xs uppercase tracking-wider text-primary font-semibold">Formato</p>
-              <p className="text-sm text-foreground/90 mt-1">32 subprefeituras, todas em pontos corridos e mata-mata no final.</p>
+              <p className="text-sm text-foreground/90 mt-1">{formatDesc}</p>
             </div>
             <div className="rounded-xl bg-black/50 backdrop-blur border border-border p-4">
               <p className="text-xs uppercase tracking-wider text-primary font-semibold">Súmula digital</p>
@@ -281,8 +295,35 @@ function HomePage() {
               <p className="text-sm text-foreground/90 mt-1">Cada atleta ganha um perfil verificado com histórico e estatísticas oficiais.</p>
             </div>
           </div>
+
+          {/* Canais oficiais */}
+          {(whatsapp || instagram || rulesUrl || contactEmail) && (
+            <div className="mt-6 flex flex-wrap items-center justify-center gap-2 text-xs">
+              {whatsapp && (
+                <a href={`https://wa.me/${whatsapp.replace(/\D/g,'')}`} target="_blank" rel="noreferrer" className="inline-flex items-center gap-1.5 rounded-full border border-border bg-black/50 backdrop-blur px-3 py-1.5 text-foreground/90 hover:text-primary">
+                  <MessageCircle className="h-3.5 w-3.5" />WhatsApp
+                </a>
+              )}
+              {instagram && (
+                <a href={`https://instagram.com/${instagram.replace('@','')}`} target="_blank" rel="noreferrer" className="inline-flex items-center gap-1.5 rounded-full border border-border bg-black/50 backdrop-blur px-3 py-1.5 text-foreground/90 hover:text-primary">
+                  <Instagram className="h-3.5 w-3.5" />{instagram.startsWith('@') ? instagram : `@${instagram}`}
+                </a>
+              )}
+              {rulesUrl && (
+                <a href={rulesUrl} target="_blank" rel="noreferrer" className="inline-flex items-center gap-1.5 rounded-full border border-border bg-black/50 backdrop-blur px-3 py-1.5 text-foreground/90 hover:text-primary">
+                  <FileText className="h-3.5 w-3.5" />Regulamento
+                </a>
+              )}
+              {contactEmail && (
+                <a href={`mailto:${contactEmail}`} className="inline-flex items-center gap-1.5 rounded-full border border-border bg-black/50 backdrop-blur px-3 py-1.5 text-foreground/90 hover:text-primary">
+                  <Mail className="h-3.5 w-3.5" />{contactEmail}
+                </a>
+              )}
+            </div>
+          )}
         </div>
       </section>
+
 
       <section className="flex flex-col items-center text-center px-4 py-12 md:py-16 w-full max-w-5xl mx-auto">
 
@@ -350,14 +391,17 @@ function HomePage() {
       </section>
 
       <footer className="border-t border-zinc-800 px-6 py-4 text-center mt-auto">
-        <div className="flex flex-col sm:flex-row items-center justify-center gap-2 sm:gap-4 text-zinc-600 text-sm">
-          <span>© 2026 Liga Metrópole</span>
+        <div className="flex flex-col sm:flex-row items-center justify-center gap-2 sm:gap-4 text-zinc-600 text-sm flex-wrap">
+          <span>© {new Date().getFullYear()} {leagueName}</span>
           <span className="hidden sm:inline">·</span>
           <Link to="/privacidade" className="hover:text-zinc-400 transition-colors">Privacidade</Link>
           <span>·</span>
           <Link to="/termos" className="hover:text-zinc-400 transition-colors">Termos</Link>
+          {contactEmail && (<><span>·</span><a href={`mailto:${contactEmail}`} className="hover:text-zinc-400 transition-colors">{contactEmail}</a></>)}
+          {instagram && (<><span>·</span><a href={`https://instagram.com/${instagram.replace('@','')}`} target="_blank" rel="noreferrer" className="hover:text-zinc-400 transition-colors">{instagram.startsWith('@') ? instagram : `@${instagram}`}</a></>)}
         </div>
       </footer>
+
     </div>
   )
 }

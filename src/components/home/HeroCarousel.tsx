@@ -1,5 +1,6 @@
 import { Link } from '@tanstack/react-router'
 import { useEffect, useState } from 'react'
+import { useLeagueConfig } from '@/hooks/use-league-config'
 import criciuma from '@/assets/campos/criciuma-elias.jpeg.asset.json'
 import sporting from '@/assets/campos/sporting.jpeg.asset.json'
 import mazoni from '@/assets/campos/tomas-mazoni.jpeg.asset.json'
@@ -7,6 +8,7 @@ import atlas from '@/assets/campos/atlas.jpeg.asset.json'
 import guacu from '@/assets/campos/arena-guacu.jpeg.asset.json'
 import savik from '@/assets/campos/santinhos-savik.jpeg.asset.json'
 import campoNovo from '@/assets/campos/campo-novo.jpeg.asset.json'
+
 
 const SLIDES = [
   { url: criciuma.url, name: 'CDC Elias' },
@@ -23,6 +25,11 @@ const FOUNDER_TAKEN = 2
 const FOUNDER_TOTAL = 20
 
 export default function HeroCarousel() {
+  const cfg = useLeagueConfig()
+  const leagueName = cfg?.league_name || 'Liga Metrópole'
+  const season = cfg?.season || '2026'
+  const tagline = cfg?.tagline
+
   const [idx, setIdx] = useState(0)
   // Track which slides have been "activated" so we only mount <img> tags for them.
   // Start with slide 0 (LCP) eagerly; the next slide is prefetched on mount.
@@ -109,7 +116,7 @@ export default function HeroCarousel() {
           className="inline-flex items-center gap-1.5 mb-6 rounded-full px-3 py-1 text-[11px] font-semibold uppercase tracking-widest"
           style={{ background: 'rgba(21,101,245,0.18)', border: '1px solid rgba(21,101,245,0.45)', color: '#93BBFF' }}
         >
-          Zona Norte · Temporada 2026
+          Zona Norte · Temporada {season}
         </span>
 
         <h1
@@ -121,7 +128,7 @@ export default function HeroCarousel() {
             textShadow: '0 4px 30px rgba(0,0,0,0.6)',
           }}
         >
-          Liga Metrópole:
+          {leagueName}:
           <br />
           <span style={{ color: '#FFFFFF' }}>o seu </span>
           <span style={{ color: '#4C9BFF' }}>legado</span>
@@ -129,6 +136,12 @@ export default function HeroCarousel() {
           <span style={{ color: '#4C9BFF' }}>vitrine</span>
           <span style={{ color: '#FFFFFF' }}>.</span>
         </h1>
+
+        {tagline && (
+          <p className="mt-4 text-sm md:text-base text-white/80 max-w-xl">{tagline}</p>
+        )}
+
+
 
         {/* Termômetro de Vagas */}
         <div className="mt-10 w-full max-w-md">
