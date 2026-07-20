@@ -150,6 +150,15 @@ export const getCompetitionStandings = createServerFn({ method: "GET" })
       .eq("competition_id", data.competitionId)
       .eq("status", "approved");
 
+    const { data: comp } = await supabaseAdmin
+      .from("competitions")
+      .select("points_win, points_draw, points_loss")
+      .eq("id", data.competitionId)
+      .maybeSingle();
+    const PW = (comp as any)?.points_win ?? 3;
+    const PD = (comp as any)?.points_draw ?? 1;
+    const PL = (comp as any)?.points_loss ?? 0;
+
     const { data: matches } = await supabaseAdmin
       .from("matches")
       .select("host_team_id, visitor_team_id, host_score, visitor_score, status, group_label")
@@ -172,15 +181,16 @@ export const getCompetitionStandings = createServerFn({ method: "GET" })
       h.played++; v.played++;
       h.gf += hs; h.ga += vs;
       v.gf += vs; v.ga += hs;
-      if (hs > vs) { h.wins++; h.points += 3; v.losses++; }
-      else if (hs < vs) { v.wins++; v.points += 3; h.losses++; }
-      else { h.draws++; v.draws++; h.points++; v.points++; }
+      if (hs > vs) { h.wins++; h.points += PW; v.losses++; v.points += PL; }
+      else if (hs < vs) { v.wins++; v.points += PW; h.losses++; h.points += PL; }
+      else { h.draws++; v.draws++; h.points += PD; v.points += PD; }
     }
     for (const s of stats.values()) s.gd = s.gf - s.ga;
     return Array.from(stats.values()).sort(
       (a, b) => b.points - a.points || b.gd - a.gd || b.gf - a.gf || a.team.name.localeCompare(b.team.name),
     );
   });
+
 
 // ============================================================
 // Bracket generator (single-elim). Seeds top N by standings.
