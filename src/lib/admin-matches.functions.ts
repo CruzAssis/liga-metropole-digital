@@ -80,5 +80,11 @@ export const adminAnnulMatch = createServerFn({ method: "POST" })
       visitor_confirmed_at: null,
     }).eq("id", data.id);
     if (error) throw new Error(error.message);
+    await logAudit({
+      claims: context.claims,
+      action: "match.annul",
+      entity_type: "match",
+      entity_id: data.id,
+    });
     return { success: true };
   });
