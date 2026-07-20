@@ -5,6 +5,8 @@ import { Button } from "@/components/ui/button";
 import { useAuth } from "@/hooks/use-auth";
 import { Menu, X } from "lucide-react";
 import { cn } from "@/lib/utils";
+import { useLeagueConfig } from "@/hooks/use-league-config";
+
 
 const NAV = [
   { to: "/ranking", label: "Ranking" },
