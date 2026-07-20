@@ -7,8 +7,16 @@ import { Card } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Switch } from "@/components/ui/switch";
 import { Badge } from "@/components/ui/badge";
+import { Button } from "@/components/ui/button";
+import {
+  AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent,
+  AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle,
+} from "@/components/ui/alert-dialog";
+import { KeyRound, Trash2 } from "lucide-react";
 import { useIsAdmin } from "@/hooks/use-is-admin";
-import { listUsers, setUserRole, type AdminUser } from "@/lib/users.functions";
+import {
+  listUsers, setUserRole, sendPasswordReset, deleteUser, type AdminUser,
+} from "@/lib/users.functions";
 import { Skeleton } from "@/components/ui/skeleton";
 
 export const Route = createFileRoute("/_authenticated/admin/usuarios")({
