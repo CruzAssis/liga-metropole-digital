@@ -432,6 +432,8 @@ export type Database = {
           visitor_confirmed_at: string | null
           visitor_score: number | null
           visitor_team_id: string
+          voting_closes_at: string | null
+          voting_open: boolean
         }
         Insert: {
           bracket_position?: number | null
@@ -455,6 +457,8 @@ export type Database = {
           visitor_confirmed_at?: string | null
           visitor_score?: number | null
           visitor_team_id: string
+          voting_closes_at?: string | null
+          voting_open?: boolean
         }
         Update: {
           bracket_position?: number | null
@@ -478,6 +482,8 @@ export type Database = {
           visitor_confirmed_at?: string | null
           visitor_score?: number | null
           visitor_team_id?: string
+          voting_closes_at?: string | null
+          voting_open?: boolean
         }
         Relationships: [
           {
@@ -1205,6 +1211,7 @@ export type Database = {
         Args: { _team_id: string; _user_id: string }
         Returns: boolean
       }
+      is_voting_open: { Args: { _match_id: string }; Returns: boolean }
       promote_waitlist_for_type: { Args: { _type: string }; Returns: undefined }
       registration_dashboard_stats: {
         Args: never
