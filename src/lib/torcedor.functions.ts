@@ -110,7 +110,7 @@ export const getMatchLineups = createServerFn({ method: "GET" })
   .handler(async ({ data }) => {
     const { data: m } = await supabaseAdmin
       .from("matches")
-      .select("id,host_team_id,visitor_team_id,status")
+      .select("id,host_team_id,visitor_team_id,status,voting_open,voting_closes_at")
       .eq("id", data.match_id)
       .maybeSingle();
     if (!m) throw new Error("Partida não encontrada");
@@ -118,11 +118,48 @@ export const getMatchLineups = createServerFn({ method: "GET" })
       .from("athletes")
       .select("id,full_name,nickname,photo_url,position,team_id")
       .in("team_id", [m.host_team_id, m.visitor_team_id]);
+    const isFinished = ["confirmed", "closed", "wo"].includes(m.status);
+    const closesAt = m.voting_closes_at ? new Date(m.voting_closes_at).getTime() : null;
+    const votingOpen =
+      isFinished &&
+      m.voting_open !== false &&
+      (closesAt === null || closesAt > Date.now());
     return {
       match: m,
+      voting_open: votingOpen,
+      voting_closes_at: m.voting_closes_at,
       host: (athletes ?? []).filter((a) => a.team_id === m.host_team_id),
       visitor: (athletes ?? []).filter((a) => a.team_id === m.visitor_team_id),
     };
+  });
+
+// ─── Admin: abrir/fechar votação ou definir prazo ───────────────────────────
+export const setMatchVotingWindow = createServerFn({ method: "POST" })
+  .middleware([requireSupabaseAuth])
+  .inputValidator((d) =>
+    z
+      .object({
+        match_id: z.string().uuid(),
+        voting_open: z.boolean().optional(),
+        voting_closes_at: z.string().datetime().nullable().optional(),
+      })
+      .parse(d),
+  )
+  .handler(async ({ data, context }) => {
+    const { data: isAdmin } = await context.supabase.rpc("has_role", {
+      _user_id: context.userId,
+      _role: "admin",
+    });
+    if (!isAdmin) throw new Error("Apenas administradores podem alterar a janela de votação.");
+    const patch: Record<string, any> = {};
+    if (data.voting_open !== undefined) patch.voting_open = data.voting_open;
+    if (data.voting_closes_at !== undefined) patch.voting_closes_at = data.voting_closes_at;
+    const { error } = await supabaseAdmin
+      .from("matches")
+      .update(patch)
+      .eq("id", data.match_id);
+    if (error) throw new Error(error.message);
+    return { ok: true };
   });
 
 // ─── Registrar voto do torcedor ─────────────────────────────────────────────
