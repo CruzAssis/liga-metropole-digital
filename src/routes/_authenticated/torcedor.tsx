@@ -301,13 +301,15 @@ function VoteDialog({ matchId, onClose }: { matchId: string | null; onClose: () 
           </DialogDescription>
         </DialogHeader>
 
-        {myVote && (
+        {myVote ? (
           <div className="rounded-lg border border-primary/30 bg-primary/5 p-3 text-sm">
-            Seu voto atual: <strong>{allAthletes.find((a) => a.id === myVote.athlete_id)?.nickname ?? allAthletes.find((a) => a.id === myVote.athlete_id)?.full_name ?? "—"}</strong>
+            ✅ Seu voto: <strong>{allAthletes.find((a) => a.id === myVote.athlete_id)?.nickname ?? allAthletes.find((a) => a.id === myVote.athlete_id)?.full_name ?? "—"}</strong>
             {" · "}{myVote.rating}⭐
+            <p className="mt-1 text-xs text-muted-foreground">
+              Só é permitido um voto por partida.
+            </p>
           </div>
-        )}
-
+        ) : (
         <div className="max-h-64 overflow-y-auto space-y-1 rounded-lg border border-border p-2">
           {lineupsQ.isLoading && <p className="p-3 text-sm text-muted-foreground">Carregando...</p>}
           {allAthletes.map((a: any) => (
