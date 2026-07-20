@@ -25,6 +25,11 @@ const FOUNDER_TAKEN = 2
 const FOUNDER_TOTAL = 20
 
 export default function HeroCarousel() {
+  const cfg = useLeagueConfig()
+  const leagueName = cfg?.league_name || 'Liga Metrópole'
+  const season = cfg?.season || '2026'
+  const tagline = cfg?.tagline
+
   const [idx, setIdx] = useState(0)
   // Track which slides have been "activated" so we only mount <img> tags for them.
   // Start with slide 0 (LCP) eagerly; the next slide is prefetched on mount.
