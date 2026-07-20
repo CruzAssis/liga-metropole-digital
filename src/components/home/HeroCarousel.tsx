@@ -116,7 +116,7 @@ export default function HeroCarousel() {
           className="inline-flex items-center gap-1.5 mb-6 rounded-full px-3 py-1 text-[11px] font-semibold uppercase tracking-widest"
           style={{ background: 'rgba(21,101,245,0.18)', border: '1px solid rgba(21,101,245,0.45)', color: '#93BBFF' }}
         >
-          Zona Norte · Temporada 2026
+          Zona Norte · Temporada {season}
         </span>
 
         <h1
@@ -128,7 +128,7 @@ export default function HeroCarousel() {
             textShadow: '0 4px 30px rgba(0,0,0,0.6)',
           }}
         >
-          Liga Metrópole:
+          {leagueName}:
           <br />
           <span style={{ color: '#FFFFFF' }}>o seu </span>
           <span style={{ color: '#4C9BFF' }}>legado</span>
@@ -136,6 +136,12 @@ export default function HeroCarousel() {
           <span style={{ color: '#4C9BFF' }}>vitrine</span>
           <span style={{ color: '#FFFFFF' }}>.</span>
         </h1>
+
+        {tagline && (
+          <p className="mt-4 text-sm md:text-base text-white/80 max-w-xl">{tagline}</p>
+        )}
+
+
 
         {/* Termômetro de Vagas */}
         <div className="mt-10 w-full max-w-md">
