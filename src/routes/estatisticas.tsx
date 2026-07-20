@@ -144,6 +144,18 @@ function KpiCard({
   );
 }
 
+type PlayerAgg = {
+  athlete_id: string;
+  full_name: string;
+  nickname: string | null;
+  photo_url: string | null;
+  position: string | null;
+  team: { id: string; name: string; short_name: string; logo_url: string | null; lado: "A" | "B" | null } | null;
+  goals: number;
+  yellow: number;
+  red: number;
+};
+
 function EstatisticasPage() {
   const [comps, setComps] = useState<Competition[]>([]);
   const [selectedComp, setSelectedComp] = useState<string | null>(null);
@@ -152,11 +164,13 @@ function EstatisticasPage() {
   const [trends, setTrends] = useState<
     { key: string; label: string; goals: number; matches: number; yellow: number; red: number }[] | null
   >(null);
+  const [players, setPlayers] = useState<{ scorers: PlayerAgg[]; discipline: PlayerAgg[] } | null>(null);
 
   const fetchKpis = useServerFn(getLeagueKpis);
   const fetchAdv = useServerFn(getAdvancedTeamStats);
   const fetchH2H = useServerFn(getHeadToHead);
   const fetchTrends = useServerFn(getLeagueTrends);
+  const fetchPlayers = useServerFn(getPlayerStats);
 
   useEffect(() => {
     (async () => {
@@ -173,14 +187,16 @@ function EstatisticasPage() {
 
   useEffect(() => {
     (async () => {
-      const [k, r, t] = await Promise.all([
+      const [k, r, t, p] = await Promise.all([
         fetchKpis({ data: { competition_id: selectedComp } }),
         fetchAdv({ data: { competition_id: selectedComp } }),
         fetchTrends({ data: { competition_id: selectedComp } }),
+        fetchPlayers({ data: { competition_id: selectedComp } }),
       ]);
       setKpis(k as Kpis);
       setRows(r as TeamAdvanced[]);
       setTrends(t as any);
+      setPlayers(p as any);
     })();
   }, [selectedComp]);
 
