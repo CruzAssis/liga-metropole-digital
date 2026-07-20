@@ -114,6 +114,7 @@ export type Database = {
           conference_name: string | null
           conference_number: number | null
           created_at: string
+          direct_red_suspension_games: number
           double_round: boolean
           draw_executed_at: string | null
           full_notified_at: string | null
@@ -130,6 +131,7 @@ export type Database = {
           points_win: number
           qualified_count: number
           qualified_per_group: number
+          red_suspension_games: number
           registration_status: string
           regulation_notes: string | null
           relegated_count: number
@@ -143,12 +145,14 @@ export type Database = {
           visitor_slots: number
           wo_fine_brl: number | null
           wo_tolerance_minutes: number | null
+          yellows_for_suspension: number
           zona: string | null
         }
         Insert: {
           conference_name?: string | null
           conference_number?: number | null
           created_at?: string
+          direct_red_suspension_games?: number
           double_round?: boolean
           draw_executed_at?: string | null
           full_notified_at?: string | null
@@ -165,6 +169,7 @@ export type Database = {
           points_win?: number
           qualified_count?: number
           qualified_per_group?: number
+          red_suspension_games?: number
           registration_status?: string
           regulation_notes?: string | null
           relegated_count?: number
@@ -178,12 +183,14 @@ export type Database = {
           visitor_slots?: number
           wo_fine_brl?: number | null
           wo_tolerance_minutes?: number | null
+          yellows_for_suspension?: number
           zona?: string | null
         }
         Update: {
           conference_name?: string | null
           conference_number?: number | null
           created_at?: string
+          direct_red_suspension_games?: number
           double_round?: boolean
           draw_executed_at?: string | null
           full_notified_at?: string | null
@@ -200,6 +207,7 @@ export type Database = {
           points_win?: number
           qualified_count?: number
           qualified_per_group?: number
+          red_suspension_games?: number
           registration_status?: string
           regulation_notes?: string | null
           relegated_count?: number
@@ -213,9 +221,84 @@ export type Database = {
           visitor_slots?: number
           wo_fine_brl?: number | null
           wo_tolerance_minutes?: number | null
+          yellows_for_suspension?: number
           zona?: string | null
         }
         Relationships: []
+      }
+      disciplinary_suspensions: {
+        Row: {
+          active: boolean
+          athlete_id: string
+          competition_id: string | null
+          created_at: string
+          games_remaining: number
+          games_total: number
+          id: string
+          notes: string | null
+          origin_match_id: string | null
+          reason: string
+          team_id: string
+          updated_at: string
+        }
+        Insert: {
+          active?: boolean
+          athlete_id: string
+          competition_id?: string | null
+          created_at?: string
+          games_remaining?: number
+          games_total?: number
+          id?: string
+          notes?: string | null
+          origin_match_id?: string | null
+          reason: string
+          team_id: string
+          updated_at?: string
+        }
+        Update: {
+          active?: boolean
+          athlete_id?: string
+          competition_id?: string | null
+          created_at?: string
+          games_remaining?: number
+          games_total?: number
+          id?: string
+          notes?: string | null
+          origin_match_id?: string | null
+          reason?: string
+          team_id?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "disciplinary_suspensions_athlete_id_fkey"
+            columns: ["athlete_id"]
+            isOneToOne: false
+            referencedRelation: "athletes"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "disciplinary_suspensions_competition_id_fkey"
+            columns: ["competition_id"]
+            isOneToOne: false
+            referencedRelation: "competitions"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "disciplinary_suspensions_origin_match_id_fkey"
+            columns: ["origin_match_id"]
+            isOneToOne: false
+            referencedRelation: "matches"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "disciplinary_suspensions_team_id_fkey"
+            columns: ["team_id"]
+            isOneToOne: false
+            referencedRelation: "teams"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       group_teams: {
         Row: {
@@ -1119,6 +1202,16 @@ export type Database = {
         }[]
       }
       generate_team_invite_code: { Args: never; Returns: string }
+      get_athlete_discipline: {
+        Args: { _athlete_id: string; _competition_id?: string }
+        Returns: {
+          active_suspension_games: number
+          direct_reds: number
+          has_active_suspension: boolean
+          reds: number
+          yellows: number
+        }[]
+      }
       get_athlete_stats: {
         Args: { _athlete_id: string }
         Returns: {
@@ -1194,6 +1287,18 @@ export type Database = {
         Returns: {
           supporter_count: number
           team_id: string
+        }[]
+      }
+      get_team_suspensions: {
+        Args: { _team_id: string }
+        Returns: {
+          athlete_id: string
+          created_at: string
+          full_name: string
+          games_remaining: number
+          nickname: string
+          origin_match_id: string
+          reason: string
         }[]
       }
       has_role: {
