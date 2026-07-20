@@ -7,8 +7,16 @@ import { Card } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Switch } from "@/components/ui/switch";
 import { Badge } from "@/components/ui/badge";
+import { Button } from "@/components/ui/button";
+import {
+  AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent,
+  AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle,
+} from "@/components/ui/alert-dialog";
+import { KeyRound, Trash2 } from "lucide-react";
 import { useIsAdmin } from "@/hooks/use-is-admin";
-import { listUsers, setUserRole, type AdminUser } from "@/lib/users.functions";
+import {
+  listUsers, setUserRole, sendPasswordReset, deleteUser, type AdminUser,
+} from "@/lib/users.functions";
 import { Skeleton } from "@/components/ui/skeleton";
 
 export const Route = createFileRoute("/_authenticated/admin/usuarios")({
@@ -19,6 +27,8 @@ function UsuariosPage() {
   const { isAdmin, loading } = useIsAdmin();
   const navigate = useNavigate();
   const [search, setSearch] = useState("");
+  const [resetting, setResetting] = useState<AdminUser | null>(null);
+  const [deleting, setDeleting] = useState<AdminUser | null>(null);
   const qc = useQueryClient();
 
   useEffect(() => {
@@ -27,6 +37,8 @@ function UsuariosPage() {
 
   const fetchUsers = useServerFn(listUsers);
   const updateRole = useServerFn(setUserRole);
+  const resetPwdFn = useServerFn(sendPasswordReset);
+  const deleteUserFn = useServerFn(deleteUser);
 
   const { data, isLoading } = useQuery({
     queryKey: ["admin-users"],
@@ -39,6 +51,25 @@ function UsuariosPage() {
       updateRole({ data: vars }),
     onSuccess: () => {
       toast.success("Papel atualizado");
+      qc.invalidateQueries({ queryKey: ["admin-users"] });
+    },
+    onError: (e: Error) => toast.error(e.message),
+  });
+
+  const resetMutation = useMutation({
+    mutationFn: (user_id: string) => resetPwdFn({ data: { user_id } }),
+    onSuccess: (r) => {
+      toast.success(`E-mail de redefinição enviado para ${r.email}`);
+      setResetting(null);
+    },
+    onError: (e: Error) => { toast.error(e.message); setResetting(null); },
+  });
+
+  const deleteMutation = useMutation({
+    mutationFn: (user_id: string) => deleteUserFn({ data: { user_id } }),
+    onSuccess: () => {
+      toast.success("Usuário excluído");
+      setDeleting(null);
       qc.invalidateQueries({ queryKey: ["admin-users"] });
     },
     onError: (e: Error) => toast.error(e.message),
@@ -82,6 +113,7 @@ function UsuariosPage() {
                 <th className="px-4 py-3">Papéis</th>
                 <th className="px-4 py-3 text-center">Admin</th>
                 <th className="px-4 py-3 text-center">Gestor</th>
+                <th className="px-4 py-3 text-right">Ações</th>
               </tr>
             </thead>
             <tbody>
@@ -94,11 +126,12 @@ function UsuariosPage() {
                     <td className="px-4 py-3"><Skeleton className="h-5 w-16 rounded" /></td>
                     <td className="px-4 py-3 text-center"><Skeleton className="h-5 w-10 rounded mx-auto" /></td>
                     <td className="px-4 py-3 text-center"><Skeleton className="h-5 w-10 rounded mx-auto" /></td>
+                    <td className="px-4 py-3 text-right"><Skeleton className="h-8 w-24 rounded ml-auto" /></td>
                   </tr>
                 ))}
               {!isLoading && filtered.length === 0 && (
                 <tr>
-                  <td colSpan={6} className="px-4 py-8 text-center text-muted-foreground">
+                  <td colSpan={7} className="px-4 py-8 text-center text-muted-foreground">
                     Nenhum usuário encontrado
                   </td>
                 </tr>
@@ -136,6 +169,26 @@ function UsuariosPage() {
                         }
                       />
                     </td>
+                    <td className="px-4 py-3">
+                      <div className="flex gap-2 justify-end">
+                        <Button
+                          variant="outline" size="sm"
+                          onClick={() => setResetting(u)}
+                          title="Enviar redefinição de senha"
+                          disabled={!u.email}
+                        >
+                          <KeyRound className="h-4 w-4" />
+                        </Button>
+                        <Button
+                          variant="outline" size="sm"
+                          onClick={() => setDeleting(u)}
+                          title="Excluir usuário"
+                          className="border-red-700 text-red-400 hover:bg-red-950 hover:text-red-300"
+                        >
+                          <Trash2 className="h-4 w-4" />
+                        </Button>
+                      </div>
+                    </td>
                   </tr>
                 );
               })}
@@ -143,6 +196,48 @@ function UsuariosPage() {
           </table>
         </div>
       </Card>
+
+      <AlertDialog open={!!resetting} onOpenChange={(v) => { if (!v) setResetting(null); }}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>Enviar redefinição de senha?</AlertDialogTitle>
+            <AlertDialogDescription>
+              Um e-mail será enviado para <b>{resetting?.email}</b> com o link para criar uma nova senha.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel>Cancelar</AlertDialogCancel>
+            <AlertDialogAction
+              disabled={resetMutation.isPending}
+              onClick={(e) => { e.preventDefault(); if (resetting) resetMutation.mutate(resetting.id); }}
+            >
+              {resetMutation.isPending ? "Enviando..." : "Enviar e-mail"}
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
+
+      <AlertDialog open={!!deleting} onOpenChange={(v) => { if (!v) setDeleting(null); }}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>Excluir usuário</AlertDialogTitle>
+            <AlertDialogDescription>
+              Esta ação é irreversível. <b>{deleting?.full_name ?? deleting?.email}</b> será removido do sistema.
+              Times gerenciados por este usuário ficarão sem diretor (transfira antes se necessário).
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel disabled={deleteMutation.isPending}>Cancelar</AlertDialogCancel>
+            <AlertDialogAction
+              disabled={deleteMutation.isPending}
+              className="bg-red-600 hover:bg-red-700 text-white"
+              onClick={(e) => { e.preventDefault(); if (deleting) deleteMutation.mutate(deleting.id); }}
+            >
+              {deleteMutation.isPending ? "Excluindo..." : "Excluir definitivamente"}
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
     </div>
   );
 }
