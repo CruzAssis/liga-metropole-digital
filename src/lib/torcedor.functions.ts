@@ -161,8 +161,9 @@ export const castSupporterVote = createServerFn({ method: "POST" })
       .select("team_id")
       .eq("id", data.athlete_id)
       .maybeSingle();
-    if (!athlete) throw new Error("Jogador não encontrado");
-    if (![m.host_team_id, m.visitor_team_id].includes(athlete.team_id)) {
+    if (!athlete || !athlete.team_id) throw new Error("Jogador não encontrado");
+    const athleteTeamId = athlete.team_id;
+    if (![m.host_team_id, m.visitor_team_id].includes(athleteTeamId)) {
       throw new Error("Jogador não participou desta partida");
     }
 
@@ -173,7 +174,7 @@ export const castSupporterVote = createServerFn({ method: "POST" })
           user_id: context.userId,
           match_id: data.match_id,
           athlete_id: data.athlete_id,
-          team_id: athlete.team_id,
+          team_id: athleteTeamId,
           rating: data.rating,
         },
         { onConflict: "user_id,match_id" },
