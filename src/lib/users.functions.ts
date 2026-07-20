@@ -185,6 +185,12 @@ export const deleteUser = createServerFn({ method: "POST" })
 
     const { error } = await supabaseAdmin.auth.admin.deleteUser(data.user_id);
     if (error) throw new Error(error.message);
+    await logAudit({
+      claims: context.claims,
+      action: "user.delete",
+      entity_type: "user",
+      entity_id: data.user_id,
+    });
     return { success: true };
   });
 
@@ -227,5 +233,12 @@ export const transferTeamOwnership = createServerFn({ method: "POST" })
         { onConflict: "team_id,user_id" },
       );
 
+    await logAudit({
+      claims: context.claims,
+      action: "team.transfer",
+      entity_type: "team",
+      entity_id: data.team_id,
+      metadata: { new_manager_id: data.new_manager_id },
+    });
     return { success: true };
   });
