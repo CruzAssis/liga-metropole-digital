@@ -212,6 +212,27 @@ function EstatisticasPage() {
     setH2h(res);
   };
 
+  const exportTeamsCsv = () => {
+    if (!rows || rows.length === 0) return;
+    const headers = ["Pos", "Time", "Sigla", "Lado", "J", "V", "E", "D", "GP", "GC", "SG", "Pts", "Aprov%", "Clean", "S/marcar", "Amarelos", "Vermelhos", "Forma"];
+    const lines = [headers.join(";")];
+    rows.forEach((r, i) => {
+      lines.push([
+        i + 1, `"${r.team.name.replace(/"/g, '""')}"`, r.team.short_name, r.team.lado ?? "",
+        r.played, r.wins, r.draws, r.losses, r.gf, r.ga, r.gd, r.points,
+        r.aproveitamento, r.clean_sheets, r.failed_to_score, r.yellow, r.red,
+        r.form.join(""),
+      ].join(";"));
+    });
+    const blob = new Blob(["\uFEFF" + lines.join("\n")], { type: "text/csv;charset=utf-8;" });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement("a");
+    a.href = url;
+    a.download = `classificacao-${new Date().toISOString().slice(0, 10)}.csv`;
+    a.click();
+    URL.revokeObjectURL(url);
+  };
+
   return (
     <PublicShell>
       <PageHeader
