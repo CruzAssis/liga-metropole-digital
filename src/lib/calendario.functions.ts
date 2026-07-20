@@ -301,11 +301,11 @@ export const generateBracket = createServerFn({ method: "POST" })
     }
 
     await logAudit({
+      claims: context.claims,
       action: "calendario.generate_bracket",
-      actor_id: context.userId,
-      entity: "competition",
+      entity_type: "competition",
       entity_id: data.competitionId,
-      details: { size: data.size, stage: firstStage, qualified: qualified.map((q) => q.id) },
+      metadata: { size: data.size, stage: firstStage, qualified: qualified.map((q) => q.id) },
     });
 
     return { ok: true, size: data.size, stages };
