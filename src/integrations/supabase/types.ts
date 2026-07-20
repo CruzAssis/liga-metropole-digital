@@ -396,6 +396,7 @@ export type Database = {
           host_team_id: string
           id: string
           parent_match_id: string | null
+          questionamento_arbitragem: string | null
           round: number
           scheduled_at: string | null
           stage: string
@@ -418,6 +419,7 @@ export type Database = {
           host_team_id: string
           id?: string
           parent_match_id?: string | null
+          questionamento_arbitragem?: string | null
           round: number
           scheduled_at?: string | null
           stage?: string
@@ -440,6 +442,7 @@ export type Database = {
           host_team_id?: string
           id?: string
           parent_match_id?: string | null
+          questionamento_arbitragem?: string | null
           round?: number
           scheduled_at?: string | null
           stage?: string
