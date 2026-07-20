@@ -42,6 +42,11 @@ const MANAGER = {
   email: "teams-rls-mgr@example.test",
   password: "Passw0rd!Mgr#2026",
 };
+const MANAGER2 = {
+  id: "aa000000-0004-4004-8004-aa0000000004",
+  email: "teams-rls-mgr2@example.test",
+  password: "Passw0rd!Mgr2#2026",
+};
 const OUTSIDER = {
   id: "aa000000-0002-4002-8002-aa0000000002",
   email: "teams-rls-out@example.test",
