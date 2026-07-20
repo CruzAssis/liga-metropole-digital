@@ -51,6 +51,7 @@ function AdminTimes() {
   const [statusFilter, setStatusFilter] = useState('todos')
   const [editing, setEditing] = useState<AdminTeamRow | null>(null)
   const [deleting, setDeleting] = useState<AdminTeamRow | null>(null)
+  const [transferring, setTransferring] = useState<AdminTeamRow | null>(null)
   const [deleteBusy, setDeleteBusy] = useState(false)
   const deleteFn = useServerFn(adminDeleteTeam)
 
