@@ -48,13 +48,21 @@ export const generateRoundRobin = createServerFn({ method: "POST" })
     z
       .object({
         competitionId: z.string().uuid(),
-        doubleRound: z.boolean().default(true),
+        doubleRound: z.boolean().optional(),
         replace: z.boolean().default(false),
       })
       .parse(i),
   )
   .handler(async ({ data, context }) => {
     await assertAdmin(context.supabase, context.userId);
+
+    const { data: comp, error: compErr } = await supabaseAdmin
+      .from("competitions")
+      .select("double_round")
+      .eq("id", data.competitionId)
+      .maybeSingle();
+    if (compErr) throw new Error(compErr.message);
+    const doubleRound = data.doubleRound ?? (comp as any)?.double_round ?? false;
 
     const { data: teams, error: teamsErr } = await supabaseAdmin
       .from("teams")
@@ -95,7 +103,7 @@ export const generateRoundRobin = createServerFn({ method: "POST" })
     let totalRound = 0;
     for (const g of groups) {
       const turn1 = roundRobinPairings(g.teams);
-      const turns = data.doubleRound
+      const turns = doubleRound
         ? [...turn1, ...turn1.map((r) => r.map(([a, b]) => [b, a] as [string, string]))]
         : turn1;
       turns.forEach((round, idx) => {
@@ -123,11 +131,12 @@ export const generateRoundRobin = createServerFn({ method: "POST" })
       action: "calendario.generate_round_robin",
       entity_type: "competition",
       entity_id: data.competitionId,
-      metadata: { matches: rows.length, groups: groups.length, doubleRound: data.doubleRound },
+      metadata: { matches: rows.length, groups: groups.length, doubleRound },
     });
 
     return { ok: true, matches: rows.length, groups: groups.length, rounds: totalRound };
   });
+
 
 // ============================================================
 // Standings computed from confirmed matches (for bracket seeding)
