@@ -207,7 +207,13 @@ function LigasPage() {
       qualified_per_group: String((c as any).qualified_per_group ?? 2),
       relegated_count: String(c.relegated_count ?? 10),
       use_sides: c.use_sides ?? true,
+      double_round: (c as any).double_round ?? false,
+      points_win: String((c as any).points_win ?? 3),
+      points_draw: String((c as any).points_draw ?? 1),
+      points_loss: String((c as any).points_loss ?? 0),
+      regulation_notes: c.regulation_notes ?? "",
     });
+
   };
 
 
