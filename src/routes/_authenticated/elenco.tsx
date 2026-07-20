@@ -261,8 +261,14 @@ function ElencoPage() {
                   </div>
                 )}
                 <div className="flex-1 min-w-0">
-                  <p className="font-semibold truncate text-white">
-                    {a.nickname || a.full_name || "Sem nome"}
+                  <p className="font-semibold truncate text-white flex items-center gap-2">
+                    <span className="truncate">{a.nickname || a.full_name || "Sem nome"}</span>
+                    {suspensionByAthlete.get(a.id) ? (
+                      <span className="inline-flex items-center gap-1 rounded-full bg-red-500/15 text-red-300 border border-red-500/30 px-2 py-0.5 text-[10px] font-semibold uppercase tracking-wider shrink-0">
+                        <ShieldAlert className="h-3 w-3" />
+                        Suspenso · {suspensionByAthlete.get(a.id)} jogo{(suspensionByAthlete.get(a.id) ?? 0) > 1 ? "s" : ""}
+                      </span>
+                    ) : null}
                   </p>
                   <p className="text-xs text-zinc-400 truncate">
                     {a.position ?? "—"}
