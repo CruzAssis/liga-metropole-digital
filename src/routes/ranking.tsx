@@ -250,6 +250,7 @@ function RankingPage() {
   const [matches, setMatches] = useState<Match[] | null>(null);
   const [teams, setTeams] = useState<Team[]>([]);
   const [supporters, setSupporters] = useState<Map<string, number>>(new Map());
+  const fetchSupporterCounts = useServerFn(getTeamSupporterCounts);
 
   // Load competitions that have active/finished status
   useEffect(() => {
