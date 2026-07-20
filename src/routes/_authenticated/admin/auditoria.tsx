@@ -42,9 +42,9 @@ function AuditoriaPage() {
   const [actionFilter, setActionFilter] = useState<string>("todos");
   const [search, setSearch] = useState("");
 
-  const { data, isLoading, refetch, isFetching } = useQuery({
+  const { data, isLoading, refetch, isFetching } = useQuery<AuditRow[]>({
     queryKey: ["admin", "audit-log"],
-    queryFn: () => listFn({ data: {} }),
+    queryFn: () => listFn({ data: {} }) as unknown as Promise<AuditRow[]>,
   });
 
   const rows: AuditRow[] = data ?? [];

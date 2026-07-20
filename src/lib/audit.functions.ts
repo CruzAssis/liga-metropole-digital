@@ -15,7 +15,7 @@ export type AuditRow = {
   action: string;
   entity_type: string | null;
   entity_id: string | null;
-  metadata: Record<string, unknown>;
+  metadata: Record<string, string | number | boolean | null>;
   created_at: string;
 };
 
@@ -42,5 +42,5 @@ export const adminListAuditLog = createServerFn({ method: "GET" })
     if (data.search) q = q.ilike("actor_email", `%${data.search}%`);
     const { data: rows, error } = await q;
     if (error) throw new Error(error.message);
-    return (rows ?? []) as AuditRow[];
+    return (rows ?? []) as unknown as AuditRow[];
   });
