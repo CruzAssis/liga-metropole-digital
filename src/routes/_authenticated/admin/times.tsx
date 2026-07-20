@@ -12,9 +12,10 @@ import {
   AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent,
   AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle,
 } from '@/components/ui/alert-dialog'
-import { Users, Search, RefreshCw, Shield, MessageCircle, Copy, Pencil, Trash2 } from 'lucide-react'
+import { Users, Search, RefreshCw, Shield, MessageCircle, Copy, Pencil, Trash2, UserCog } from 'lucide-react'
 import { listAdminTeams, type AdminTeamRow } from '@/lib/admin-teams.functions'
 import { adminUpdateTeam, adminDeleteTeam } from '@/lib/team-profile.functions'
+import { listUsers, transferTeamOwnership } from '@/lib/users.functions'
 import { supabase } from '@/integrations/supabase/client'
 import { buildWhatsAppLink, formatPhoneBR } from '@/lib/wa'
 import { toast } from 'sonner'
