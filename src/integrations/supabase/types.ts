@@ -525,6 +525,14 @@ export type Database = {
           id: boolean
           master_registration_open: boolean
           prospected_count: number
+          public_contact_email: string | null
+          public_format_description: string | null
+          public_instagram: string | null
+          public_league_name: string | null
+          public_rules_url: string | null
+          public_season: string | null
+          public_tagline: string | null
+          public_whatsapp: string | null
           updated_at: string
           updated_by: string | null
         }
@@ -533,6 +541,14 @@ export type Database = {
           id?: boolean
           master_registration_open?: boolean
           prospected_count?: number
+          public_contact_email?: string | null
+          public_format_description?: string | null
+          public_instagram?: string | null
+          public_league_name?: string | null
+          public_rules_url?: string | null
+          public_season?: string | null
+          public_tagline?: string | null
+          public_whatsapp?: string | null
           updated_at?: string
           updated_by?: string | null
         }
@@ -541,6 +557,14 @@ export type Database = {
           id?: boolean
           master_registration_open?: boolean
           prospected_count?: number
+          public_contact_email?: string | null
+          public_format_description?: string | null
+          public_instagram?: string | null
+          public_league_name?: string | null
+          public_rules_url?: string | null
+          public_season?: string | null
+          public_tagline?: string | null
+          public_whatsapp?: string | null
           updated_at?: string
           updated_by?: string | null
         }
@@ -730,6 +754,51 @@ export type Database = {
         }
         Relationships: []
       }
+      venues: {
+        Row: {
+          active: boolean
+          address: string | null
+          bairro: string | null
+          created_at: string
+          id: string
+          lado: string | null
+          maps_link: string | null
+          name: string
+          notes: string | null
+          photo_url: string | null
+          subprefeitura: string | null
+          updated_at: string
+        }
+        Insert: {
+          active?: boolean
+          address?: string | null
+          bairro?: string | null
+          created_at?: string
+          id?: string
+          lado?: string | null
+          maps_link?: string | null
+          name: string
+          notes?: string | null
+          photo_url?: string | null
+          subprefeitura?: string | null
+          updated_at?: string
+        }
+        Update: {
+          active?: boolean
+          address?: string | null
+          bairro?: string | null
+          created_at?: string
+          id?: string
+          lado?: string | null
+          maps_link?: string | null
+          name?: string
+          notes?: string | null
+          photo_url?: string | null
+          subprefeitura?: string | null
+          updated_at?: string
+        }
+        Relationships: []
+      }
     }
     Views: {
       [_ in never]: never
@@ -760,6 +829,19 @@ export type Database = {
         }[]
       }
       get_my_team_invite_code: { Args: { _team_id: string }; Returns: string }
+      get_public_league_config: {
+        Args: never
+        Returns: {
+          contact_email: string
+          format_description: string
+          instagram: string
+          league_name: string
+          rules_url: string
+          season: string
+          tagline: string
+          whatsapp: string
+        }[]
+      }
       get_public_registration_flags: {
         Args: never
         Returns: {

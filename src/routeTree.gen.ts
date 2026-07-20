@@ -51,9 +51,11 @@ import { Route as AuthenticatedAdminPartidasRouteImport } from './routes/_authen
 import { Route as AuthenticatedAdminNotificacoesRouteImport } from './routes/_authenticated/admin/notificacoes'
 import { Route as AuthenticatedAdminMasterSwitchRouteImport } from './routes/_authenticated/admin/master-switch'
 import { Route as AuthenticatedAdminManifestoRouteImport } from './routes/_authenticated/admin/manifesto'
+import { Route as AuthenticatedAdminLocaisRouteImport } from './routes/_authenticated/admin/locais'
 import { Route as AuthenticatedAdminLigasRouteImport } from './routes/_authenticated/admin/ligas'
 import { Route as AuthenticatedAdminFinanceiroRouteImport } from './routes/_authenticated/admin/financeiro'
 import { Route as AuthenticatedAdminDashboardRouteImport } from './routes/_authenticated/admin/dashboard'
+import { Route as AuthenticatedAdminConfiguracoesRouteImport } from './routes/_authenticated/admin/configuracoes'
 import { Route as AuthenticatedAdminAtletasRouteImport } from './routes/_authenticated/admin/atletas'
 import { Route as ApiPublicHooksWoCheckerRouteImport } from './routes/api/public/hooks/wo-checker'
 
@@ -275,6 +277,12 @@ const AuthenticatedAdminManifestoRoute =
     path: '/manifesto',
     getParentRoute: () => AuthenticatedAdminRoute,
   } as any)
+const AuthenticatedAdminLocaisRoute =
+  AuthenticatedAdminLocaisRouteImport.update({
+    id: '/locais',
+    path: '/locais',
+    getParentRoute: () => AuthenticatedAdminRoute,
+  } as any)
 const AuthenticatedAdminLigasRoute = AuthenticatedAdminLigasRouteImport.update({
   id: '/ligas',
   path: '/ligas',
@@ -290,6 +298,12 @@ const AuthenticatedAdminDashboardRoute =
   AuthenticatedAdminDashboardRouteImport.update({
     id: '/dashboard',
     path: '/dashboard',
+    getParentRoute: () => AuthenticatedAdminRoute,
+  } as any)
+const AuthenticatedAdminConfiguracoesRoute =
+  AuthenticatedAdminConfiguracoesRouteImport.update({
+    id: '/configuracoes',
+    path: '/configuracoes',
     getParentRoute: () => AuthenticatedAdminRoute,
   } as any)
 const AuthenticatedAdminAtletasRoute =
@@ -337,9 +351,11 @@ export interface FileRoutesByFullPath {
   '/sumula/$partidaId': typeof SumulaPartidaIdRoute
   '/times/$slug': typeof TimesSlugRoute
   '/admin/atletas': typeof AuthenticatedAdminAtletasRoute
+  '/admin/configuracoes': typeof AuthenticatedAdminConfiguracoesRoute
   '/admin/dashboard': typeof AuthenticatedAdminDashboardRoute
   '/admin/financeiro': typeof AuthenticatedAdminFinanceiroRoute
   '/admin/ligas': typeof AuthenticatedAdminLigasRoute
+  '/admin/locais': typeof AuthenticatedAdminLocaisRoute
   '/admin/manifesto': typeof AuthenticatedAdminManifestoRoute
   '/admin/master-switch': typeof AuthenticatedAdminMasterSwitchRoute
   '/admin/notificacoes': typeof AuthenticatedAdminNotificacoesRoute
@@ -385,9 +401,11 @@ export interface FileRoutesByTo {
   '/sumula/$partidaId': typeof SumulaPartidaIdRoute
   '/times/$slug': typeof TimesSlugRoute
   '/admin/atletas': typeof AuthenticatedAdminAtletasRoute
+  '/admin/configuracoes': typeof AuthenticatedAdminConfiguracoesRoute
   '/admin/dashboard': typeof AuthenticatedAdminDashboardRoute
   '/admin/financeiro': typeof AuthenticatedAdminFinanceiroRoute
   '/admin/ligas': typeof AuthenticatedAdminLigasRoute
+  '/admin/locais': typeof AuthenticatedAdminLocaisRoute
   '/admin/manifesto': typeof AuthenticatedAdminManifestoRoute
   '/admin/master-switch': typeof AuthenticatedAdminMasterSwitchRoute
   '/admin/notificacoes': typeof AuthenticatedAdminNotificacoesRoute
@@ -435,9 +453,11 @@ export interface FileRoutesById {
   '/sumula/$partidaId': typeof SumulaPartidaIdRoute
   '/times/$slug': typeof TimesSlugRoute
   '/_authenticated/admin/atletas': typeof AuthenticatedAdminAtletasRoute
+  '/_authenticated/admin/configuracoes': typeof AuthenticatedAdminConfiguracoesRoute
   '/_authenticated/admin/dashboard': typeof AuthenticatedAdminDashboardRoute
   '/_authenticated/admin/financeiro': typeof AuthenticatedAdminFinanceiroRoute
   '/_authenticated/admin/ligas': typeof AuthenticatedAdminLigasRoute
+  '/_authenticated/admin/locais': typeof AuthenticatedAdminLocaisRoute
   '/_authenticated/admin/manifesto': typeof AuthenticatedAdminManifestoRoute
   '/_authenticated/admin/master-switch': typeof AuthenticatedAdminMasterSwitchRoute
   '/_authenticated/admin/notificacoes': typeof AuthenticatedAdminNotificacoesRoute
@@ -485,9 +505,11 @@ export interface FileRouteTypes {
     | '/sumula/$partidaId'
     | '/times/$slug'
     | '/admin/atletas'
+    | '/admin/configuracoes'
     | '/admin/dashboard'
     | '/admin/financeiro'
     | '/admin/ligas'
+    | '/admin/locais'
     | '/admin/manifesto'
     | '/admin/master-switch'
     | '/admin/notificacoes'
@@ -533,9 +555,11 @@ export interface FileRouteTypes {
     | '/sumula/$partidaId'
     | '/times/$slug'
     | '/admin/atletas'
+    | '/admin/configuracoes'
     | '/admin/dashboard'
     | '/admin/financeiro'
     | '/admin/ligas'
+    | '/admin/locais'
     | '/admin/manifesto'
     | '/admin/master-switch'
     | '/admin/notificacoes'
@@ -582,9 +606,11 @@ export interface FileRouteTypes {
     | '/sumula/$partidaId'
     | '/times/$slug'
     | '/_authenticated/admin/atletas'
+    | '/_authenticated/admin/configuracoes'
     | '/_authenticated/admin/dashboard'
     | '/_authenticated/admin/financeiro'
     | '/_authenticated/admin/ligas'
+    | '/_authenticated/admin/locais'
     | '/_authenticated/admin/manifesto'
     | '/_authenticated/admin/master-switch'
     | '/_authenticated/admin/notificacoes'
@@ -921,6 +947,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedAdminManifestoRouteImport
       parentRoute: typeof AuthenticatedAdminRoute
     }
+    '/_authenticated/admin/locais': {
+      id: '/_authenticated/admin/locais'
+      path: '/locais'
+      fullPath: '/admin/locais'
+      preLoaderRoute: typeof AuthenticatedAdminLocaisRouteImport
+      parentRoute: typeof AuthenticatedAdminRoute
+    }
     '/_authenticated/admin/ligas': {
       id: '/_authenticated/admin/ligas'
       path: '/ligas'
@@ -942,6 +975,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedAdminDashboardRouteImport
       parentRoute: typeof AuthenticatedAdminRoute
     }
+    '/_authenticated/admin/configuracoes': {
+      id: '/_authenticated/admin/configuracoes'
+      path: '/configuracoes'
+      fullPath: '/admin/configuracoes'
+      preLoaderRoute: typeof AuthenticatedAdminConfiguracoesRouteImport
+      parentRoute: typeof AuthenticatedAdminRoute
+    }
     '/_authenticated/admin/atletas': {
       id: '/_authenticated/admin/atletas'
       path: '/atletas'
@@ -961,9 +1001,11 @@ declare module '@tanstack/react-router' {
 
 interface AuthenticatedAdminRouteChildren {
   AuthenticatedAdminAtletasRoute: typeof AuthenticatedAdminAtletasRoute
+  AuthenticatedAdminConfiguracoesRoute: typeof AuthenticatedAdminConfiguracoesRoute
   AuthenticatedAdminDashboardRoute: typeof AuthenticatedAdminDashboardRoute
   AuthenticatedAdminFinanceiroRoute: typeof AuthenticatedAdminFinanceiroRoute
   AuthenticatedAdminLigasRoute: typeof AuthenticatedAdminLigasRoute
+  AuthenticatedAdminLocaisRoute: typeof AuthenticatedAdminLocaisRoute
   AuthenticatedAdminManifestoRoute: typeof AuthenticatedAdminManifestoRoute
   AuthenticatedAdminMasterSwitchRoute: typeof AuthenticatedAdminMasterSwitchRoute
   AuthenticatedAdminNotificacoesRoute: typeof AuthenticatedAdminNotificacoesRoute
@@ -977,9 +1019,11 @@ interface AuthenticatedAdminRouteChildren {
 
 const AuthenticatedAdminRouteChildren: AuthenticatedAdminRouteChildren = {
   AuthenticatedAdminAtletasRoute: AuthenticatedAdminAtletasRoute,
+  AuthenticatedAdminConfiguracoesRoute: AuthenticatedAdminConfiguracoesRoute,
   AuthenticatedAdminDashboardRoute: AuthenticatedAdminDashboardRoute,
   AuthenticatedAdminFinanceiroRoute: AuthenticatedAdminFinanceiroRoute,
   AuthenticatedAdminLigasRoute: AuthenticatedAdminLigasRoute,
+  AuthenticatedAdminLocaisRoute: AuthenticatedAdminLocaisRoute,
   AuthenticatedAdminManifestoRoute: AuthenticatedAdminManifestoRoute,
   AuthenticatedAdminMasterSwitchRoute: AuthenticatedAdminMasterSwitchRoute,
   AuthenticatedAdminNotificacoesRoute: AuthenticatedAdminNotificacoesRoute,
