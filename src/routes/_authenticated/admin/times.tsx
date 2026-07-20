@@ -251,6 +251,12 @@ function AdminTimes() {
         </AlertDialogContent>
       </AlertDialog>
 
+      <TransferOwnershipDialog
+        team={transferring}
+        onOpenChange={(v) => { if (!v) setTransferring(null) }}
+        onDone={() => { setTransferring(null); refetch() }}
+      />
+
     </div>
   )
 }
