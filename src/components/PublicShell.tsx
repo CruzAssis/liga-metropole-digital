@@ -10,6 +10,7 @@ import { useLeagueConfig } from "@/hooks/use-league-config";
 
 const NAV = [
   { to: "/ranking", label: "Ranking" },
+  { to: "/estatisticas", label: "Estatísticas" },
   { to: "/resultados", label: "Resultados" },
   { to: "/agenda", label: "Agenda" },
   { to: "/times", label: "Times" },
