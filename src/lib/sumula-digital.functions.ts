@@ -58,6 +58,30 @@ export const submitSumulaScore = createServerFn({ method: "POST" })
       update.questionamento_arbitragem = data.questionamento_arbitragem ?? null;
     const { error } = await adminDb.from("matches").update(update).eq("id", data.match_id);
     if (error) throw new Error(error.message);
+
+    // Notifica diretor mandante que precisa validar a súmula
+    try {
+      const { enqueueWhatsapp, fetchTeamManagerContact } = await import("@/lib/notify.server");
+      const c = await fetchTeamManagerContact(match.host_team_id);
+      if (c) {
+        const { data: opp } = await supabaseAdmin
+          .from("teams").select("name").eq("id", match.visitor_team_id).maybeSingle();
+        const oppName = (opp as any)?.name ?? "adversário";
+        await enqueueWhatsapp({
+          tipo: "sumula_disponivel",
+          destinatario_id: c.id,
+          destinatario_nome: c.name,
+          destinatario_phone: c.phone,
+          assunto: "Súmula aguardando sua validação",
+          mensagem: `📋 *Súmula pendente* — ${c.team_name} x ${oppName}\n\nPlacar informado: ${data.host_score} x ${data.visitor_score}\n\nAcesse o app para *validar ou contestar* em até 72h.`,
+          payload: { match_id: data.match_id, host_score: data.host_score, visitor_score: data.visitor_score },
+          created_by: context.userId,
+        });
+      }
+    } catch (err) {
+      console.error("[notify:sumula_disponivel]", err);
+    }
+
     return { ok: true };
   });
 
