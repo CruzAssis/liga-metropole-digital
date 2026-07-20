@@ -1,5 +1,5 @@
 import { Link, useRouterState, useNavigate } from "@tanstack/react-router";
-import { Home, ClipboardList, UserCircle, LogOut, Shuffle, LayoutDashboard, ListChecks, Users, BadgeCheck, Shield, FileText, Trophy, ExternalLink, UsersRound, Megaphone, MapPin, Settings, FileClock } from "lucide-react";
+import { Home, ClipboardList, UserCircle, LogOut, Shuffle, LayoutDashboard, ListChecks, Users, BadgeCheck, Shield, FileText, Trophy, ExternalLink, UsersRound, Megaphone, MapPin, Settings, FileClock, CalendarDays } from "lucide-react";
 import { BrandLogo } from "@/components/BrandLogo";
 import { useIsAdmin } from "@/hooks/use-is-admin";
 import {
@@ -38,6 +38,7 @@ export function AppSidebar() {
     { title: "Times", url: "/admin/times", icon: UsersRound },
     { title: "Ligas", url: "/admin/ligas", icon: Trophy },
     { title: "Sorteio", url: "/admin/sorteio", icon: Shuffle },
+    { title: "Calendário", url: "/admin/calendario", icon: CalendarDays },
     { title: "Súmulas", url: "/admin/sumulas", icon: FileText },
     { title: "Manifesto", url: "/admin/manifesto", icon: Megaphone },
     { title: "Locais", url: "/admin/locais", icon: MapPin },

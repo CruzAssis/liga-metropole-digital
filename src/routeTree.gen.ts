@@ -37,6 +37,7 @@ import { Route as OnboardingJogadorRouteImport } from './routes/onboarding.jogad
 import { Route as OnboardingDiretorRouteImport } from './routes/onboarding.diretor'
 import { Route as ManifestoSlugRouteImport } from './routes/manifesto.$slug'
 import { Route as ConviteCodeRouteImport } from './routes/convite.$code'
+import { Route as ChaveamentoCompetitionIdRouteImport } from './routes/chaveamento.$competitionId'
 import { Route as AtletasIdRouteImport } from './routes/atletas.$id'
 import { Route as AuthenticatedMinhaContaRouteImport } from './routes/_authenticated/minha-conta'
 import { Route as AuthenticatedInscricaoRouteImport } from './routes/_authenticated/inscricao'
@@ -57,6 +58,7 @@ import { Route as AuthenticatedAdminLigasRouteImport } from './routes/_authentic
 import { Route as AuthenticatedAdminFinanceiroRouteImport } from './routes/_authenticated/admin/financeiro'
 import { Route as AuthenticatedAdminDashboardRouteImport } from './routes/_authenticated/admin/dashboard'
 import { Route as AuthenticatedAdminConfiguracoesRouteImport } from './routes/_authenticated/admin/configuracoes'
+import { Route as AuthenticatedAdminCalendarioRouteImport } from './routes/_authenticated/admin/calendario'
 import { Route as AuthenticatedAdminAuditoriaRouteImport } from './routes/_authenticated/admin/auditoria'
 import { Route as AuthenticatedAdminAtletasRouteImport } from './routes/_authenticated/admin/atletas'
 import { Route as ApiPublicHooksWoCheckerRouteImport } from './routes/api/public/hooks/wo-checker'
@@ -200,6 +202,12 @@ const ConviteCodeRoute = ConviteCodeRouteImport.update({
   path: '/convite/$code',
   getParentRoute: () => rootRouteImport,
 } as any)
+const ChaveamentoCompetitionIdRoute =
+  ChaveamentoCompetitionIdRouteImport.update({
+    id: '/chaveamento/$competitionId',
+    path: '/chaveamento/$competitionId',
+    getParentRoute: () => rootRouteImport,
+  } as any)
 const AtletasIdRoute = AtletasIdRouteImport.update({
   id: '/$id',
   path: '/$id',
@@ -313,6 +321,12 @@ const AuthenticatedAdminConfiguracoesRoute =
     path: '/configuracoes',
     getParentRoute: () => AuthenticatedAdminRoute,
   } as any)
+const AuthenticatedAdminCalendarioRoute =
+  AuthenticatedAdminCalendarioRouteImport.update({
+    id: '/calendario',
+    path: '/calendario',
+    getParentRoute: () => AuthenticatedAdminRoute,
+  } as any)
 const AuthenticatedAdminAuditoriaRoute =
   AuthenticatedAdminAuditoriaRouteImport.update({
     id: '/auditoria',
@@ -355,6 +369,7 @@ export interface FileRoutesByFullPath {
   '/inscricao': typeof AuthenticatedInscricaoRoute
   '/minha-conta': typeof AuthenticatedMinhaContaRouteWithChildren
   '/atletas/$id': typeof AtletasIdRoute
+  '/chaveamento/$competitionId': typeof ChaveamentoCompetitionIdRoute
   '/convite/$code': typeof ConviteCodeRoute
   '/manifesto/$slug': typeof ManifestoSlugRoute
   '/onboarding/diretor': typeof OnboardingDiretorRoute
@@ -366,6 +381,7 @@ export interface FileRoutesByFullPath {
   '/times/$slug': typeof TimesSlugRoute
   '/admin/atletas': typeof AuthenticatedAdminAtletasRoute
   '/admin/auditoria': typeof AuthenticatedAdminAuditoriaRoute
+  '/admin/calendario': typeof AuthenticatedAdminCalendarioRoute
   '/admin/configuracoes': typeof AuthenticatedAdminConfiguracoesRoute
   '/admin/dashboard': typeof AuthenticatedAdminDashboardRoute
   '/admin/financeiro': typeof AuthenticatedAdminFinanceiroRoute
@@ -407,6 +423,7 @@ export interface FileRoutesByTo {
   '/inscricao': typeof AuthenticatedInscricaoRoute
   '/minha-conta': typeof AuthenticatedMinhaContaRouteWithChildren
   '/atletas/$id': typeof AtletasIdRoute
+  '/chaveamento/$competitionId': typeof ChaveamentoCompetitionIdRoute
   '/convite/$code': typeof ConviteCodeRoute
   '/manifesto/$slug': typeof ManifestoSlugRoute
   '/onboarding/diretor': typeof OnboardingDiretorRoute
@@ -418,6 +435,7 @@ export interface FileRoutesByTo {
   '/times/$slug': typeof TimesSlugRoute
   '/admin/atletas': typeof AuthenticatedAdminAtletasRoute
   '/admin/auditoria': typeof AuthenticatedAdminAuditoriaRoute
+  '/admin/calendario': typeof AuthenticatedAdminCalendarioRoute
   '/admin/configuracoes': typeof AuthenticatedAdminConfiguracoesRoute
   '/admin/dashboard': typeof AuthenticatedAdminDashboardRoute
   '/admin/financeiro': typeof AuthenticatedAdminFinanceiroRoute
@@ -461,6 +479,7 @@ export interface FileRoutesById {
   '/_authenticated/inscricao': typeof AuthenticatedInscricaoRoute
   '/_authenticated/minha-conta': typeof AuthenticatedMinhaContaRouteWithChildren
   '/atletas/$id': typeof AtletasIdRoute
+  '/chaveamento/$competitionId': typeof ChaveamentoCompetitionIdRoute
   '/convite/$code': typeof ConviteCodeRoute
   '/manifesto/$slug': typeof ManifestoSlugRoute
   '/onboarding/diretor': typeof OnboardingDiretorRoute
@@ -472,6 +491,7 @@ export interface FileRoutesById {
   '/times/$slug': typeof TimesSlugRoute
   '/_authenticated/admin/atletas': typeof AuthenticatedAdminAtletasRoute
   '/_authenticated/admin/auditoria': typeof AuthenticatedAdminAuditoriaRoute
+  '/_authenticated/admin/calendario': typeof AuthenticatedAdminCalendarioRoute
   '/_authenticated/admin/configuracoes': typeof AuthenticatedAdminConfiguracoesRoute
   '/_authenticated/admin/dashboard': typeof AuthenticatedAdminDashboardRoute
   '/_authenticated/admin/financeiro': typeof AuthenticatedAdminFinanceiroRoute
@@ -515,6 +535,7 @@ export interface FileRouteTypes {
     | '/inscricao'
     | '/minha-conta'
     | '/atletas/$id'
+    | '/chaveamento/$competitionId'
     | '/convite/$code'
     | '/manifesto/$slug'
     | '/onboarding/diretor'
@@ -526,6 +547,7 @@ export interface FileRouteTypes {
     | '/times/$slug'
     | '/admin/atletas'
     | '/admin/auditoria'
+    | '/admin/calendario'
     | '/admin/configuracoes'
     | '/admin/dashboard'
     | '/admin/financeiro'
@@ -567,6 +589,7 @@ export interface FileRouteTypes {
     | '/inscricao'
     | '/minha-conta'
     | '/atletas/$id'
+    | '/chaveamento/$competitionId'
     | '/convite/$code'
     | '/manifesto/$slug'
     | '/onboarding/diretor'
@@ -578,6 +601,7 @@ export interface FileRouteTypes {
     | '/times/$slug'
     | '/admin/atletas'
     | '/admin/auditoria'
+    | '/admin/calendario'
     | '/admin/configuracoes'
     | '/admin/dashboard'
     | '/admin/financeiro'
@@ -620,6 +644,7 @@ export interface FileRouteTypes {
     | '/_authenticated/inscricao'
     | '/_authenticated/minha-conta'
     | '/atletas/$id'
+    | '/chaveamento/$competitionId'
     | '/convite/$code'
     | '/manifesto/$slug'
     | '/onboarding/diretor'
@@ -631,6 +656,7 @@ export interface FileRouteTypes {
     | '/times/$slug'
     | '/_authenticated/admin/atletas'
     | '/_authenticated/admin/auditoria'
+    | '/_authenticated/admin/calendario'
     | '/_authenticated/admin/configuracoes'
     | '/_authenticated/admin/dashboard'
     | '/_authenticated/admin/financeiro'
@@ -669,6 +695,7 @@ export interface RootRouteChildren {
   TermosRoute: typeof TermosRoute
   TimesRoute: typeof TimesRouteWithChildren
   VerificarRoute: typeof VerificarRoute
+  ChaveamentoCompetitionIdRoute: typeof ChaveamentoCompetitionIdRoute
   ConviteCodeRoute: typeof ConviteCodeRoute
   ManifestoSlugRoute: typeof ManifestoSlugRoute
   PartidasIdRoute: typeof PartidasIdRoute
@@ -875,6 +902,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof ConviteCodeRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/chaveamento/$competitionId': {
+      id: '/chaveamento/$competitionId'
+      path: '/chaveamento/$competitionId'
+      fullPath: '/chaveamento/$competitionId'
+      preLoaderRoute: typeof ChaveamentoCompetitionIdRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/atletas/$id': {
       id: '/atletas/$id'
       path: '/$id'
@@ -1015,6 +1049,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedAdminConfiguracoesRouteImport
       parentRoute: typeof AuthenticatedAdminRoute
     }
+    '/_authenticated/admin/calendario': {
+      id: '/_authenticated/admin/calendario'
+      path: '/calendario'
+      fullPath: '/admin/calendario'
+      preLoaderRoute: typeof AuthenticatedAdminCalendarioRouteImport
+      parentRoute: typeof AuthenticatedAdminRoute
+    }
     '/_authenticated/admin/auditoria': {
       id: '/_authenticated/admin/auditoria'
       path: '/auditoria'
@@ -1042,6 +1083,7 @@ declare module '@tanstack/react-router' {
 interface AuthenticatedAdminRouteChildren {
   AuthenticatedAdminAtletasRoute: typeof AuthenticatedAdminAtletasRoute
   AuthenticatedAdminAuditoriaRoute: typeof AuthenticatedAdminAuditoriaRoute
+  AuthenticatedAdminCalendarioRoute: typeof AuthenticatedAdminCalendarioRoute
   AuthenticatedAdminConfiguracoesRoute: typeof AuthenticatedAdminConfiguracoesRoute
   AuthenticatedAdminDashboardRoute: typeof AuthenticatedAdminDashboardRoute
   AuthenticatedAdminFinanceiroRoute: typeof AuthenticatedAdminFinanceiroRoute
@@ -1061,6 +1103,7 @@ interface AuthenticatedAdminRouteChildren {
 const AuthenticatedAdminRouteChildren: AuthenticatedAdminRouteChildren = {
   AuthenticatedAdminAtletasRoute: AuthenticatedAdminAtletasRoute,
   AuthenticatedAdminAuditoriaRoute: AuthenticatedAdminAuditoriaRoute,
+  AuthenticatedAdminCalendarioRoute: AuthenticatedAdminCalendarioRoute,
   AuthenticatedAdminConfiguracoesRoute: AuthenticatedAdminConfiguracoesRoute,
   AuthenticatedAdminDashboardRoute: AuthenticatedAdminDashboardRoute,
   AuthenticatedAdminFinanceiroRoute: AuthenticatedAdminFinanceiroRoute,
@@ -1170,6 +1213,7 @@ const rootRouteChildren: RootRouteChildren = {
   TermosRoute: TermosRoute,
   TimesRoute: TimesRouteWithChildren,
   VerificarRoute: VerificarRoute,
+  ChaveamentoCompetitionIdRoute: ChaveamentoCompetitionIdRoute,
   ConviteCodeRoute: ConviteCodeRoute,
   ManifestoSlugRoute: ManifestoSlugRoute,
   PartidasIdRoute: PartidasIdRoute,
