@@ -310,6 +310,7 @@ function VoteDialog({ matchId, onClose }: { matchId: string | null; onClose: () 
             </p>
           </div>
         ) : (
+        <>
         <div className="max-h-64 overflow-y-auto space-y-1 rounded-lg border border-border p-2">
           {lineupsQ.isLoading && <p className="p-3 text-sm text-muted-foreground">Carregando...</p>}
           {allAthletes.map((a: any) => (
