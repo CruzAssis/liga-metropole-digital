@@ -369,6 +369,17 @@ function EstatisticasPage() {
 
         <TabsContent value="times" className="mt-6 space-y-6">
           {rows && rows.length > 0 && (
+            <div className="flex justify-end">
+              <button
+                onClick={exportTeamsCsv}
+                className="inline-flex items-center gap-2 h-9 px-3 rounded-md border border-border bg-card hover:bg-muted/50 text-sm font-medium transition-colors"
+              >
+                <Download className="h-4 w-4" />
+                Exportar CSV
+              </button>
+            </div>
+          )}
+          {rows && rows.length > 0 && (
             <div className="grid gap-4 lg:grid-cols-2">
               <Card>
                 <CardHeader className="pb-2">
