@@ -113,6 +113,7 @@ function UsuariosPage() {
                 <th className="px-4 py-3">Papéis</th>
                 <th className="px-4 py-3 text-center">Admin</th>
                 <th className="px-4 py-3 text-center">Gestor</th>
+                <th className="px-4 py-3 text-right">Ações</th>
               </tr>
             </thead>
             <tbody>
