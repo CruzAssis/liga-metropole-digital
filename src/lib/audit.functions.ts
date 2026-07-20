@@ -23,6 +23,8 @@ const listSchema = z.object({
   action: z.string().trim().max(80).optional().nullable(),
   entity_type: z.string().trim().max(80).optional().nullable(),
   search: z.string().trim().max(120).optional().nullable(),
+  from: z.string().trim().max(40).optional().nullable(),
+  to: z.string().trim().max(40).optional().nullable(),
   limit: z.number().int().min(1).max(500).optional(),
 });
 
