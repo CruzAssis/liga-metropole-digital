@@ -141,12 +141,18 @@ export const castSupporterVote = createServerFn({ method: "POST" })
     // Só permite votar se torcedor de um dos times envolvidos e partida finalizada
     const { data: m } = await supabaseAdmin
       .from("matches")
-      .select("host_team_id,visitor_team_id,status")
+      .select("host_team_id,visitor_team_id,status,voting_open,voting_closes_at")
       .eq("id", data.match_id)
       .maybeSingle();
     if (!m) throw new Error("Partida não encontrada");
     if (!["confirmed", "closed", "wo"].includes(m.status)) {
       throw new Error("Partida ainda não foi finalizada");
+    }
+    if (m.voting_open === false) {
+      throw new Error("A votação desta partida está fechada.");
+    }
+    if (m.voting_closes_at && new Date(m.voting_closes_at).getTime() <= Date.now()) {
+      throw new Error("O prazo para votar nesta partida já encerrou.");
     }
     const { data: sup } = await context.supabase
       .from("team_supporters")
