@@ -32,21 +32,6 @@ async function isAdmin(supabase: any, userId: string) {
   return !!data;
 }
 
-function createPublicClient() {
-  const key = process.env.SUPABASE_PUBLISHABLE_KEY!;
-  const { createClient } = require("@supabase/supabase-js");
-  return createClient(process.env.SUPABASE_URL!, key, {
-    auth: { persistSession: false, autoRefreshToken: false, storage: undefined },
-    global: {
-      fetch: (input: any, init: any) => {
-        const h = new Headers(init?.headers);
-        if (key.startsWith("sb_") && h.get("Authorization") === `Bearer ${key}`) h.delete("Authorization");
-        h.set("apikey", key);
-        return fetch(input, { ...init, headers: h });
-      },
-    },
-  });
-}
 
 const listFilterSchema = z
   .object({
