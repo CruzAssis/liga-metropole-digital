@@ -254,7 +254,13 @@ function LigasPage() {
         qualified_per_group: parseInt(form.qualified_per_group, 10) || 2,
         relegated_count: relegated,
         use_sides: form.use_sides,
+        double_round: form.double_round,
+        points_win: parseInt(form.points_win, 10) || 3,
+        points_draw: parseInt(form.points_draw, 10) || 1,
+        points_loss: parseInt(form.points_loss, 10) || 0,
+        regulation_notes: form.regulation_notes.trim() || null,
       };
+
 
 
       if (editId) {
