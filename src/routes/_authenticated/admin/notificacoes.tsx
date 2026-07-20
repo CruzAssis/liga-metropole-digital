@@ -303,14 +303,12 @@ function TemplatesDialog() {
   const current = templates.find((t) => t.tipo === selected);
 
   // Sync form when selection or data changes
-  const syncKey = `${selected}:${current?.updated_at ?? ""}`;
-  useMemo(() => {
+  useEffect(() => {
     if (current) {
       setAssunto(current.assunto ?? "");
       setMensagem(current.mensagem);
     }
-    return syncKey;
-  }, [syncKey, current]);
+  }, [selected, current?.updated_at]);
 
   const saveMut = useMutation({
     mutationFn: () => saveFn({ data: { tipo: selected, assunto: assunto || null, mensagem } }),
