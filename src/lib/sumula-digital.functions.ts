@@ -36,6 +36,13 @@ export function msUntilWO(scheduledAt: string | null): number {
   return new Date(scheduledAt).getTime() + 72 * 3600 * 1000 - Date.now();
 }
 
+// Estados terminais/bloqueados para escrita da súmula
+const TERMINAL_STATUSES = new Set(["closed", "wo", "wo_host", "wo_visitor", "cancelled"]);
+// Estados válidos para o Diretor A (visitante) submeter/re-submeter placar
+const SUBMITTABLE_STATUSES = new Set(["scheduled", "live", "pending_confirm", "awaiting_confirmation", "disputed"]);
+// Apenas nesses estados o Diretor B (mandante) pode confirmar/contestar
+const CONFIRMABLE_STATUSES = new Set(["awaiting_confirmation", "pending_confirm"]);
+
 export const submitSumulaScore = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
   .inputValidator((input) =>
@@ -47,8 +54,17 @@ export const submitSumulaScore = createServerFn({ method: "POST" })
     }).parse(input))
   .handler(async ({ data, context }) => {
     const match = await loadMatchOr404(data.match_id);
+    // Somente o Diretor do time VISITANTE (Diretor A) pode preencher a súmula
     await assertIsDirector(context.userId, match.visitor_team_id);
-    if (match.status === "closed" || match.status === "wo") throw new Error("Sumula ja encerrada");
+    if (TERMINAL_STATUSES.has(match.status)) {
+      throw new Error("Súmula já encerrada — não pode ser alterada");
+    }
+    if (!SUBMITTABLE_STATUSES.has(match.status)) {
+      throw new Error(`Transição de status inválida: '${match.status}' → 'awaiting_confirmation'`);
+    }
+    if (match.status === "confirmed") {
+      throw new Error("Súmula já homologada pelo mandante — não pode ser reenviada");
+    }
     if (woExpired(match.scheduled_at)) throw new Error("Prazo de 72h expirado");
     const update: Record<string, unknown> = {
       host_score: data.host_score, visitor_score: data.visitor_score,
@@ -56,8 +72,13 @@ export const submitSumulaScore = createServerFn({ method: "POST" })
     };
     if (data.questionamento_arbitragem !== undefined)
       update.questionamento_arbitragem = data.questionamento_arbitragem ?? null;
-    const { error } = await adminDb.from("matches").update(update).eq("id", data.match_id);
+    // Guarda otimista contra corrida: só atualiza se o status ainda for um SUBMITTABLE
+    const { data: updated, error } = await adminDb.from("matches").update(update)
+      .eq("id", data.match_id)
+      .in("status", Array.from(SUBMITTABLE_STATUSES))
+      .select("id").maybeSingle();
     if (error) throw new Error(error.message);
+    if (!updated) throw new Error("O status da partida mudou; recarregue e tente novamente");
 
     // Notifica diretor mandante que precisa validar a súmula
     try {
@@ -97,12 +118,26 @@ export const confirmSumulaScore = createServerFn({ method: "POST" })
   .inputValidator((input) => z.object({ match_id: z.string().uuid() }).parse(input))
   .handler(async ({ data, context }) => {
     const match = await loadMatchOr404(data.match_id);
+    // Apenas o Diretor do time MANDANTE (Diretor B) pode homologar
     await assertIsDirector(context.userId, match.host_team_id);
+    if (TERMINAL_STATUSES.has(match.status)) {
+      throw new Error("Súmula já encerrada");
+    }
+    if (!CONFIRMABLE_STATUSES.has(match.status)) {
+      throw new Error("A súmula ainda não foi enviada pelo adversário — nada a homologar");
+    }
+    if (match.host_filled_at == null) {
+      throw new Error("A súmula ainda não foi preenchida pelo Diretor A");
+    }
     if (woExpired(match.scheduled_at)) throw new Error("Prazo de 72h expirado");
-    const { error } = await supabaseAdmin.from("matches")
+    // Guarda otimista: só confirma se ainda está aguardando confirmação
+    const { data: updated, error } = await adminDb.from("matches")
       .update({ visitor_confirmed_at: new Date().toISOString(), status: "confirmed" })
-      .eq("id", data.match_id);
+      .eq("id", data.match_id)
+      .in("status", Array.from(CONFIRMABLE_STATUSES))
+      .select("id").maybeSingle();
     if (error) throw new Error(error.message);
+    if (!updated) throw new Error("O status da partida mudou; recarregue e tente novamente");
     return { ok: true };
   });
 
@@ -115,21 +150,29 @@ export const disputeSumulaScore = createServerFn({ method: "POST" })
     }).parse(input))
   .handler(async ({ data, context }) => {
     const match = await loadMatchOr404(data.match_id);
+    // Apenas o Diretor do time MANDANTE (Diretor B) pode contestar
     await assertIsDirector(context.userId, match.host_team_id);
-    if (match.status === "closed" || match.status === "wo") {
+    if (TERMINAL_STATUSES.has(match.status)) {
       throw new Error("Súmula já encerrada — não pode ser contestada");
     }
-    const { error } = await adminDb.from("matches").update({
+    if (!CONFIRMABLE_STATUSES.has(match.status)) {
+      throw new Error("Só é possível contestar uma súmula aguardando validação");
+    }
+    if (match.host_filled_at == null) {
+      throw new Error("A súmula ainda não foi preenchida pelo Diretor A");
+    }
+    const { data: updated, error } = await adminDb.from("matches").update({
       status: "disputed",
       dispute_reason: data.reason,
       disputed_at: new Date().toISOString(),
       disputed_by: context.userId,
-    }).eq("id", data.match_id);
+    }).eq("id", data.match_id)
+      .in("status", Array.from(CONFIRMABLE_STATUSES))
+      .select("id").maybeSingle();
     if (error) throw new Error(error.message);
+    if (!updated) throw new Error("O status da partida mudou; recarregue e tente novamente");
     return { ok: true };
   });
-
-export const saveSumulaGoalsAndDestaque = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
   .inputValidator((input) =>
     z.object({
