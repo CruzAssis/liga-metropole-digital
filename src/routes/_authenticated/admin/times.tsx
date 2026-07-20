@@ -177,6 +177,9 @@ function AdminTimes() {
                 <Button variant="outline" size="sm" onClick={() => setEditing(t)} title="Editar time">
                   <Pencil className="h-4 w-4" />
                 </Button>
+                <Button variant="outline" size="sm" onClick={() => setTransferring(t)} title="Transferir titularidade">
+                  <UserCog className="h-4 w-4" />
+                </Button>
                 <Button
                   variant="outline"
                   size="sm"
