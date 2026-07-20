@@ -1,5 +1,6 @@
 import { Link } from '@tanstack/react-router'
 import { useEffect, useState } from 'react'
+import { useLeagueConfig } from '@/hooks/use-league-config'
 import criciuma from '@/assets/campos/criciuma-elias.jpeg.asset.json'
 import sporting from '@/assets/campos/sporting.jpeg.asset.json'
 import mazoni from '@/assets/campos/tomas-mazoni.jpeg.asset.json'
@@ -7,6 +8,7 @@ import atlas from '@/assets/campos/atlas.jpeg.asset.json'
 import guacu from '@/assets/campos/arena-guacu.jpeg.asset.json'
 import savik from '@/assets/campos/santinhos-savik.jpeg.asset.json'
 import campoNovo from '@/assets/campos/campo-novo.jpeg.asset.json'
+
 
 const SLIDES = [
   { url: criciuma.url, name: 'CDC Elias' },
