@@ -38,7 +38,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { ArrowLeft, Pencil, Plus, Trash2, Users } from "lucide-react";
+import { ArrowLeft, Pencil, Plus, Trash2, Users, ShieldAlert } from "lucide-react";
 
 export const Route = createFileRoute("/_authenticated/elenco")({
   component: ElencoPage,
