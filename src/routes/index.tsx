@@ -17,10 +17,20 @@ export const Route = createFileRoute('/')({
 function HomePage() {
   const { user, loading, signOut } = useAuth()
   const navigate = useNavigate()
+  const cfg = useLeagueConfig()
+  const leagueName = cfg?.league_name || 'Liga Metrópole'
+  const season = cfg?.season || '2026'
+  const tagline = cfg?.tagline
+  const formatDesc = cfg?.format_description || '32 subprefeituras, todas em pontos corridos e mata-mata no final.'
+  const whatsapp = cfg?.whatsapp
+  const instagram = cfg?.instagram
+  const rulesUrl = cfg?.rules_url
+  const contactEmail = cfg?.contact_email
   const [recentMatches, setRecentMatches] = useState([])
   const [upcomingMatches, setUpcomingMatches] = useState([])
   const [isAdmin, setIsAdmin] = useState(false)
   const [menuOpen, setMenuOpen] = useState(false)
+
 
   useEffect(() => {
     if (!user) return
