@@ -157,7 +157,8 @@ function LigasPage() {
     setLoading(true);
     const { data, error } = await supabase
       .from("competitions")
-      .select("id,name,season,status,registration_status,max_teams,host_slots,visitor_slots,starts_at,draw_executed_at,full_notified_at,created_at,conference_name,subprefeitura,zona,conference_number,qualified_count,qualified_per_group,relegated_count,use_sides")
+      .select("id,name,season,status,registration_status,max_teams,host_slots,visitor_slots,starts_at,draw_executed_at,full_notified_at,created_at,conference_name,subprefeitura,zona,conference_number,qualified_count,qualified_per_group,relegated_count,use_sides,double_round,points_win,points_draw,points_loss,regulation_notes")
+
       .order("created_at", { ascending: false });
     if (error) toast.error("Erro ao carregar ligas");
     else {
