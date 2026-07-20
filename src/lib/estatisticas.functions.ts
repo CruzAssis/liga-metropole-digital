@@ -27,20 +27,20 @@ type TeamRow = {
 };
 
 async function loadCompetition(competition_id: string | null) {
-  const matchesQ = supabaseAdmin
+  let matchesQ = supabaseAdmin
     .from("matches")
     .select("id, host_team_id, visitor_team_id, host_score, visitor_score, status, scheduled_at, competition_id")
     .in("status", FINISHED)
     .order("scheduled_at", { ascending: true })
     .limit(5000);
-  const teamsQ = supabaseAdmin
+  let teamsQ = supabaseAdmin
     .from("teams")
     .select("id, name, short_name, slug, logo_url, primary_color, lado, registration_type, competition_id")
     .eq("status", "approved");
 
   if (competition_id) {
-    matchesQ.eq("competition_id", competition_id);
-    teamsQ.eq("competition_id", competition_id);
+    matchesQ = matchesQ.eq("competition_id", competition_id);
+    teamsQ = teamsQ.eq("competition_id", competition_id);
   }
 
   const [{ data: matches }, { data: teams }] = await Promise.all([matchesQ, teamsQ]);
