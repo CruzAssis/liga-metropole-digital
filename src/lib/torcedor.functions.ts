@@ -151,10 +151,10 @@ export const setMatchVotingWindow = createServerFn({ method: "POST" })
       _role: "admin",
     });
     if (!isAdmin) throw new Error("Apenas administradores podem alterar a janela de votação.");
-    const patch: Record<string, any> = {};
+    const patch: { voting_open?: boolean; voting_closes_at?: string | null } = {};
     if (data.voting_open !== undefined) patch.voting_open = data.voting_open;
     if (data.voting_closes_at !== undefined) patch.voting_closes_at = data.voting_closes_at;
-    const { error } = await supabaseAdmin
+    const { error } = await (supabaseAdmin as any)
       .from("matches")
       .update(patch)
       .eq("id", data.match_id);
