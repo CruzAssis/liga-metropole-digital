@@ -136,7 +136,13 @@ const emptyForm = {
   qualified_per_group: "2",
   relegated_count: "10",
   use_sides: true,
+  double_round: false,
+  points_win: "3",
+  points_draw: "1",
+  points_loss: "0",
+  regulation_notes: "",
 };
+
 
 
 function LigasPage() {
