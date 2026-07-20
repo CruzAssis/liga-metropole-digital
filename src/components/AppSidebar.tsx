@@ -38,6 +38,7 @@ export function AppSidebar() {
     { title: "Times", url: "/admin/times", icon: UsersRound },
     { title: "Ligas", url: "/admin/ligas", icon: Trophy },
     { title: "Sorteio", url: "/admin/sorteio", icon: Shuffle },
+    { title: "Calendário", url: "/admin/calendario", icon: CalendarDays },
     { title: "Súmulas", url: "/admin/sumulas", icon: FileText },
     { title: "Manifesto", url: "/admin/manifesto", icon: Megaphone },
     { title: "Locais", url: "/admin/locais", icon: MapPin },
