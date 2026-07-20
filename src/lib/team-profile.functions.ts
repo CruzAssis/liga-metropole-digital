@@ -339,19 +339,22 @@ export const adminUpdateTeam = createServerFn({ method: "POST" })
     if (data.status && data.status !== prevStatus &&
         (data.status === "approved" || data.status === "waitlist")) {
       try {
-        const { enqueueWhatsapp, fetchTeamManagerContact } = await import("@/lib/notify.server");
+        const { enqueueWhatsapp, fetchTeamManagerContact, renderTemplate } = await import("@/lib/notify.server");
         const contact = await fetchTeamManagerContact(data.team_id);
         if (contact) {
-          const msg = data.status === "approved"
-            ? `⚽ Parabéns! O time *${contact.team_name}* foi *APROVADO* na Liga Metrópole. Acesse o app para conferir os próximos passos.`
-            : `⏳ Olá! O time *${contact.team_name}* entrou na *lista de espera* da Liga Metrópole. Você será avisado assim que uma vaga abrir.`;
+          const { assunto, mensagem } = await renderTemplate("team_approved", {
+            diretor: contact.name ?? "diretor(a)",
+            time: contact.team_name ?? "",
+            status: data.status,
+            status_label: data.status === "approved" ? "APROVADO" : "em lista de espera",
+          });
           await enqueueWhatsapp({
             tipo: "team_approved",
             destinatario_id: contact.id,
             destinatario_nome: contact.name,
             destinatario_phone: contact.phone,
-            assunto: `Status do time: ${data.status}`,
-            mensagem: msg,
+            assunto,
+            mensagem,
             payload: { team_id: data.team_id, new_status: data.status },
             created_by: context.userId,
           });
