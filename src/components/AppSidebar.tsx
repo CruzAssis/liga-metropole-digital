@@ -41,6 +41,7 @@ export function AppSidebar() {
     { title: "Calendário", url: "/admin/calendario", icon: CalendarDays },
     { title: "Súmulas", url: "/admin/sumulas", icon: FileText },
     { title: "Manifesto", url: "/admin/manifesto", icon: Megaphone },
+    { title: "Mídia", url: "/admin/midia", icon: ImageIcon },
     { title: "Locais", url: "/admin/locais", icon: MapPin },
     { title: "Configurações", url: "/admin/configuracoes", icon: Settings },
     { title: "Usuários", url: "/admin/usuarios", icon: Shield },
