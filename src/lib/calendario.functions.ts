@@ -256,6 +256,15 @@ export const generateBracket = createServerFn({ method: "POST" })
       .select("id, name, lado")
       .eq("competition_id", data.competitionId)
       .eq("status", "approved");
+    const { data: comp } = await supabaseAdmin
+      .from("competitions")
+      .select("points_win, points_draw, points_loss")
+      .eq("id", data.competitionId)
+      .maybeSingle();
+    const PW = (comp as any)?.points_win ?? 3;
+    const PD = (comp as any)?.points_draw ?? 1;
+    const PL = (comp as any)?.points_loss ?? 0;
+
     const { data: gm } = await supabaseAdmin
       .from("matches")
       .select("host_team_id, visitor_team_id, host_score, visitor_score, status")
@@ -270,8 +279,11 @@ export const generateBracket = createServerFn({ method: "POST" })
       if (!h || !v) continue;
       const hs = m.host_score ?? 0, vs = m.visitor_score ?? 0;
       h.gf += hs; v.gf += vs; h.gd += hs - vs; v.gd += vs - hs;
-      if (hs > vs) h.points += 3; else if (hs < vs) v.points += 3; else { h.points++; v.points++; }
+      if (hs > vs) { h.points += PW; v.points += PL; }
+      else if (hs < vs) { v.points += PW; h.points += PL; }
+      else { h.points += PD; v.points += PD; }
     }
+
     const ordered = Array.from(stats.values()).sort(
       (a, b) => b.points - a.points || b.gd - a.gd || b.gf - a.gf || a.name.localeCompare(b.name),
     );
