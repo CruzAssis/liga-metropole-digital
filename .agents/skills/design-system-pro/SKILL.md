@@ -1,6 +1,6 @@
 ---
-name: Design System Pro
-description: Gera um design system completo e justificado a partir do briefing do projeto: classifica domínio, público e mood para selecionar o padrão de layout, estilo visual, paleta de cores (tokens HSL), par tipográfico e efeitos visuais ideais. Baseado em 161 paletas, 84 estilos e 73 combinações tipográficas curadas, entrega também os anti-padrões a evitar para o perfil do projeto.
+name: design-system-pro
+description: "Gera um design system completo e justificado a partir do briefing do projeto: classifica domínio, público e mood para selecionar o padrão de layout, estilo visual, paleta de cores (tokens HSL), par tipográfico e efeitos visuais ideais. Baseado em 161 paletas, 84 estilos e 73 combinações tipográficas curadas, entrega também os anti-padrões a evitar para o perfil do projeto."
 ---
 
 Generate a complete, justified design system for this project.
