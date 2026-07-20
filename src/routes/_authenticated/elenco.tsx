@@ -9,6 +9,7 @@ import {
   updateDirectorAthlete,
   deleteDirectorAthlete,
 } from "@/lib/athletes.functions";
+import { listMyTeamSuspensions } from "@/lib/discipline.functions";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
