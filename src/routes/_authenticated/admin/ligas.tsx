@@ -264,6 +264,9 @@ function LigasPage() {
         points_win: parseInt(form.points_win, 10) || 3,
         points_draw: parseInt(form.points_draw, 10) || 1,
         points_loss: parseInt(form.points_loss, 10) || 0,
+        yellows_for_suspension: parseInt(form.yellows_for_suspension, 10) || 3,
+        red_suspension_games: parseInt(form.red_suspension_games, 10) || 1,
+        direct_red_suspension_games: parseInt(form.direct_red_suspension_games, 10) || 2,
         regulation_notes: form.regulation_notes.trim() || null,
       };
 
