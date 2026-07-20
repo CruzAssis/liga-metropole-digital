@@ -101,6 +101,18 @@ function ElencoPage() {
     queryKey: ["my-team-athletes"],
     queryFn: () => listFn(),
   });
+  const suspListFn = useServerFn(listMyTeamSuspensions);
+  const { data: suspData } = useQuery({
+    queryKey: ["my-team-suspensions"],
+    queryFn: () => suspListFn(),
+  });
+  const suspensionByAthlete = useMemo(() => {
+    const map = new Map<string, number>();
+    for (const s of (suspData?.rows ?? []) as Array<{ athlete_id: string; games_remaining: number }>) {
+      map.set(s.athlete_id, (map.get(s.athlete_id) ?? 0) + (s.games_remaining ?? 0));
+    }
+    return map;
+  }, [suspData]);
 
   const [filter, setFilter] = useState<string>("all");
   const [dialogOpen, setDialogOpen] = useState(false);
