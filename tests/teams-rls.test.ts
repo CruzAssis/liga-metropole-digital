@@ -79,7 +79,7 @@ async function reseed() {
     .from("teams")
     .delete()
     .in("id", [APPROVED_TEAM_ID, PENDING_TEAM_ID]);
-  for (const u of [MANAGER, OUTSIDER]) {
+  for (const u of [MANAGER, MANAGER2, OUTSIDER]) {
     await admin.auth.admin.deleteUser(u.id).catch(() => {});
     const { error } = await admin.auth.admin.createUser({
       id: u.id,
@@ -105,7 +105,7 @@ async function reseed() {
       id: PENDING_TEAM_ID,
       name: `${TAG} Pending`,
       short_name: "RLP",
-      manager_id: MANAGER.id,
+      manager_id: MANAGER2.id,
       registration_type: "host",
       status: "pending",
       lado: "A",
@@ -115,22 +115,26 @@ async function reseed() {
 }
 
 let mgrClient: SupabaseClient;
+let mgr2Client: SupabaseClient;
 let outClient: SupabaseClient;
 
 beforeAll(async () => {
   await reseed();
   mgrClient = await signIn(MANAGER.email, MANAGER.password);
+  mgr2Client = await signIn(MANAGER2.email, MANAGER2.password);
   outClient = await signIn(OUTSIDER.email, OUTSIDER.password);
 });
 
 afterAll(async () => {
   await mgrClient?.auth.signOut().catch(() => {});
+  await mgr2Client?.auth.signOut().catch(() => {});
   await outClient?.auth.signOut().catch(() => {});
   await admin
     .from("teams")
     .delete()
     .in("id", [APPROVED_TEAM_ID, PENDING_TEAM_ID]);
   await admin.auth.admin.deleteUser(MANAGER.id).catch(() => {});
+  await admin.auth.admin.deleteUser(MANAGER2.id).catch(() => {});
   await admin.auth.admin.deleteUser(OUTSIDER.id).catch(() => {});
 });
 
