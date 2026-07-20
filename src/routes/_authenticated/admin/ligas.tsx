@@ -140,6 +140,9 @@ const emptyForm = {
   points_win: "3",
   points_draw: "1",
   points_loss: "0",
+  yellows_for_suspension: "3",
+  red_suspension_games: "1",
+  direct_red_suspension_games: "2",
   regulation_notes: "",
 };
 
