@@ -7,6 +7,7 @@ import {
   getLeagueKpis,
   getHeadToHead,
   getLeagueTrends,
+  getPlayerStats,
 } from "@/lib/estatisticas.functions";
 import {
   ResponsiveContainer,
