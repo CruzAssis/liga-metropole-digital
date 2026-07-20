@@ -9,6 +9,7 @@ import {
   updateDirectorAthlete,
   deleteDirectorAthlete,
 } from "@/lib/athletes.functions";
+import { listMyTeamSuspensions } from "@/lib/discipline.functions";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -37,7 +38,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { ArrowLeft, Pencil, Plus, Trash2, Users } from "lucide-react";
+import { ArrowLeft, Pencil, Plus, Trash2, Users, ShieldAlert } from "lucide-react";
 
 export const Route = createFileRoute("/_authenticated/elenco")({
   component: ElencoPage,
@@ -100,6 +101,18 @@ function ElencoPage() {
     queryKey: ["my-team-athletes"],
     queryFn: () => listFn(),
   });
+  const suspListFn = useServerFn(listMyTeamSuspensions);
+  const { data: suspData } = useQuery({
+    queryKey: ["my-team-suspensions"],
+    queryFn: () => suspListFn(),
+  });
+  const suspensionByAthlete = useMemo(() => {
+    const map = new Map<string, number>();
+    for (const s of (suspData?.rows ?? []) as Array<{ athlete_id: string; games_remaining: number }>) {
+      map.set(s.athlete_id, (map.get(s.athlete_id) ?? 0) + (s.games_remaining ?? 0));
+    }
+    return map;
+  }, [suspData]);
 
   const [filter, setFilter] = useState<string>("all");
   const [dialogOpen, setDialogOpen] = useState(false);
@@ -248,8 +261,14 @@ function ElencoPage() {
                   </div>
                 )}
                 <div className="flex-1 min-w-0">
-                  <p className="font-semibold truncate text-white">
-                    {a.nickname || a.full_name || "Sem nome"}
+                  <p className="font-semibold truncate text-white flex items-center gap-2">
+                    <span className="truncate">{a.nickname || a.full_name || "Sem nome"}</span>
+                    {suspensionByAthlete.get(a.id) ? (
+                      <span className="inline-flex items-center gap-1 rounded-full bg-red-500/15 text-red-300 border border-red-500/30 px-2 py-0.5 text-[10px] font-semibold uppercase tracking-wider shrink-0">
+                        <ShieldAlert className="h-3 w-3" />
+                        Suspenso · {suspensionByAthlete.get(a.id)} jogo{(suspensionByAthlete.get(a.id) ?? 0) > 1 ? "s" : ""}
+                      </span>
+                    ) : null}
                   </p>
                   <p className="text-xs text-zinc-400 truncate">
                     {a.position ?? "—"}

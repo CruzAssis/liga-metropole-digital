@@ -138,6 +138,13 @@ export const confirmSumulaScore = createServerFn({ method: "POST" })
       .select("id").maybeSingle();
     if (error) throw new Error(error.message);
     if (!updated) throw new Error("O status da partida mudou; recarregue e tente novamente");
+    // Dispara cálculo automático de disciplina/suspensões
+    try {
+      const { computeDisciplineForMatch } = await import("@/lib/discipline.functions");
+      await computeDisciplineForMatch(data.match_id);
+    } catch (err) {
+      console.error("[discipline:compute]", err);
+    }
     return { ok: true };
   });
 

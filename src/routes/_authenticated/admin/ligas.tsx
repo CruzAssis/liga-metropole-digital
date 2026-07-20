@@ -140,6 +140,9 @@ const emptyForm = {
   points_win: "3",
   points_draw: "1",
   points_loss: "0",
+  yellows_for_suspension: "3",
+  red_suspension_games: "1",
+  direct_red_suspension_games: "2",
   regulation_notes: "",
 };
 
@@ -211,6 +214,9 @@ function LigasPage() {
       points_win: String((c as any).points_win ?? 3),
       points_draw: String((c as any).points_draw ?? 1),
       points_loss: String((c as any).points_loss ?? 0),
+      yellows_for_suspension: String((c as any).yellows_for_suspension ?? 3),
+      red_suspension_games: String((c as any).red_suspension_games ?? 1),
+      direct_red_suspension_games: String((c as any).direct_red_suspension_games ?? 2),
       regulation_notes: c.regulation_notes ?? "",
     });
 
@@ -258,6 +264,9 @@ function LigasPage() {
         points_win: parseInt(form.points_win, 10) || 3,
         points_draw: parseInt(form.points_draw, 10) || 1,
         points_loss: parseInt(form.points_loss, 10) || 0,
+        yellows_for_suspension: parseInt(form.yellows_for_suspension, 10) || 3,
+        red_suspension_games: parseInt(form.red_suspension_games, 10) || 1,
+        direct_red_suspension_games: parseInt(form.direct_red_suspension_games, 10) || 2,
         regulation_notes: form.regulation_notes.trim() || null,
       };
 
@@ -528,6 +537,41 @@ function LigasPage() {
               />
               <p className="text-xs text-muted-foreground mt-1">Normalmente 0.</p>
             </div>
+
+            {/* Disciplina */}
+            <div className="sm:col-span-2 mt-2">
+              <div className="text-xs uppercase tracking-wider text-muted-foreground font-medium">
+                Disciplina & Suspensões
+              </div>
+            </div>
+            <div>
+              <Label>Amarelos p/ suspender</Label>
+              <Input
+                type="number" min={1} max={10}
+                value={form.yellows_for_suspension}
+                onChange={(e) => setForm((f) => ({ ...f, yellows_for_suspension: e.target.value }))}
+              />
+              <p className="text-xs text-muted-foreground mt-1">Padrão: 3.</p>
+            </div>
+            <div>
+              <Label>Jogos por vermelho</Label>
+              <Input
+                type="number" min={1} max={10}
+                value={form.red_suspension_games}
+                onChange={(e) => setForm((f) => ({ ...f, red_suspension_games: e.target.value }))}
+              />
+              <p className="text-xs text-muted-foreground mt-1">Cartão vermelho normal.</p>
+            </div>
+            <div>
+              <Label>Jogos por vermelho direto</Label>
+              <Input
+                type="number" min={1} max={10}
+                value={form.direct_red_suspension_games}
+                onChange={(e) => setForm((f) => ({ ...f, direct_red_suspension_games: e.target.value }))}
+              />
+              <p className="text-xs text-muted-foreground mt-1">Expulsão sem amarelo antes.</p>
+            </div>
+
 
             <div className="sm:col-span-2">
               <Label>Regulamento / observações</Label>
