@@ -467,3 +467,91 @@ function AdminEditTeamDialog({
   )
 }
 
+function TransferOwnershipDialog({
+  team, onOpenChange, onDone,
+}: {
+  team: AdminTeamRow | null
+  onOpenChange: (v: boolean) => void
+  onDone: () => void
+}) {
+  const listUsersFn = useServerFn(listUsers)
+  const transferFn = useServerFn(transferTeamOwnership)
+  const [query, setQuery] = useState('')
+  const [selected, setSelected] = useState<string | null>(null)
+  const [busy, setBusy] = useState(false)
+
+  const { data: usersData, isLoading } = useQuery({
+    queryKey: ['admin-users-transfer'],
+    queryFn: () => listUsersFn({}),
+    enabled: !!team,
+  })
+
+  useEffect(() => { if (!team) { setSelected(null); setQuery('') } }, [team])
+
+  if (!team) return null
+  const users = usersData?.users ?? []
+  const q = query.trim().toLowerCase()
+  const filtered = q
+    ? users.filter((u) => (u.full_name ?? '').toLowerCase().includes(q) || (u.email ?? '').toLowerCase().includes(q))
+    : users.slice(0, 20)
+
+  const confirm = async () => {
+    if (!selected) return
+    setBusy(true)
+    try {
+      await transferFn({ data: { team_id: team.id, new_manager_id: selected } })
+      toast.success('Titularidade transferida')
+      onDone()
+    } catch (e) {
+      toast.error((e as Error).message)
+    } finally {
+      setBusy(false)
+    }
+  }
+
+  return (
+    <Dialog open={!!team} onOpenChange={onOpenChange}>
+      <DialogContent className="bg-zinc-950 border-zinc-800 text-white max-w-lg">
+        <DialogHeader>
+          <DialogTitle className="text-white">Transferir titularidade</DialogTitle>
+          <DialogDescription className="text-zinc-400">
+            Escolha o novo diretor de <b>{team.name}</b>. O usuário receberá papel de Gestor e o vínculo.
+          </DialogDescription>
+        </DialogHeader>
+        <div className="space-y-3">
+          <Input
+            placeholder="Buscar por nome ou e-mail..."
+            value={query}
+            onChange={(e) => setQuery(e.target.value)}
+            className="bg-zinc-900 border-zinc-700"
+          />
+          <div className="max-h-72 overflow-y-auto space-y-1 rounded border border-zinc-800">
+            {isLoading && <div className="p-4 text-sm text-zinc-500">Carregando...</div>}
+            {!isLoading && filtered.length === 0 && (
+              <div className="p-4 text-sm text-zinc-500">Nenhum usuário encontrado</div>
+            )}
+            {filtered.map((u) => (
+              <button
+                key={u.id}
+                type="button"
+                onClick={() => setSelected(u.id)}
+                className={`w-full text-left px-3 py-2 hover:bg-zinc-800 ${selected === u.id ? 'bg-blue-950/60 border-l-2 border-blue-500' : ''}`}
+              >
+                <div className="text-sm text-white">{u.full_name || '(sem nome)'}</div>
+                <div className="text-xs text-zinc-400">{u.email}</div>
+              </button>
+            ))}
+          </div>
+          <div className="flex justify-end gap-2 pt-2">
+            <Button variant="outline" onClick={() => onOpenChange(false)} disabled={busy}>Cancelar</Button>
+            <Button onClick={confirm} disabled={busy || !selected} className="bg-[#1565F5] hover:bg-blue-600 text-white">
+              {busy ? 'Transferindo...' : 'Transferir'}
+            </Button>
+          </div>
+        </div>
+      </DialogContent>
+    </Dialog>
+  )
+}
+
+
