@@ -69,12 +69,42 @@ function StatCard({
 function AtletaPerfilPage() {
   const { id } = Route.useParams();
   const { data, isLoading, isError } = useAtletaProfile(id);
+  const [partidasVisible, setPartidasVisible] = useState(5);
 
   if (isLoading) {
     return (
       <PublicShell>
-        <div className="flex items-center justify-center min-h-[40vh] text-muted-foreground">
-          Carregando perfil...
+        <div className="grid gap-6 lg:grid-cols-3">
+          <div className="lg:col-span-1 flex flex-col gap-4">
+            <div className="rounded-2xl border border-border bg-card p-6 flex flex-col items-center gap-4">
+              <Skeleton className="h-28 w-28 rounded-full" />
+              <Skeleton className="h-6 w-40 rounded" />
+              <Skeleton className="h-5 w-32 rounded" />
+              <Skeleton className="h-4 w-24 rounded" />
+            </div>
+            <div className="rounded-2xl border border-border bg-card p-5 flex flex-col items-center gap-3">
+              <Skeleton className="h-4 w-32 rounded" />
+              <Skeleton className="h-40 w-40 rounded-xl" />
+            </div>
+          </div>
+          <div className="lg:col-span-2 flex flex-col gap-6">
+            <div>
+              <Skeleton className="h-6 w-32 rounded mb-3" />
+              <div className="grid grid-cols-2 sm:grid-cols-3 gap-3">
+                {Array.from({ length: 5 }).map((_, i) => (
+                  <Skeleton key={i} className="h-24 rounded-xl" />
+                ))}
+              </div>
+            </div>
+            <div>
+              <Skeleton className="h-6 w-40 rounded mb-3" />
+              <div className="space-y-2">
+                {Array.from({ length: 4 }).map((_, i) => (
+                  <Skeleton key={i} className="h-14 rounded-xl" />
+                ))}
+              </div>
+            </div>
+          </div>
         </div>
       </PublicShell>
     );
@@ -92,6 +122,7 @@ function AtletaPerfilPage() {
       </PublicShell>
     );
   }
+
 
   const { profile, partidas } = data;
   const displayName = profile.nickname || profile.full_name || "Atleta";
