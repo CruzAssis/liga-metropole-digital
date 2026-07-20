@@ -126,10 +126,21 @@ function AuditoriaPage() {
             </p>
           </div>
         </div>
-        <Button variant="outline" size="sm" onClick={() => refetch()} disabled={isFetching}>
-          <RefreshCw className={"h-4 w-4 mr-2 " + (isFetching ? "animate-spin" : "")} />
-          Atualizar
-        </Button>
+        <div className="flex items-center gap-2">
+          <Button
+            variant="outline"
+            size="sm"
+            onClick={() => downloadAuditCsv(filtered)}
+            disabled={filtered.length === 0}
+          >
+            <Download className="h-4 w-4 mr-2" />
+            Exportar CSV
+          </Button>
+          <Button variant="outline" size="sm" onClick={() => refetch()} disabled={isFetching}>
+            <RefreshCw className={"h-4 w-4 mr-2 " + (isFetching ? "animate-spin" : "")} />
+            Atualizar
+          </Button>
+        </div>
       </div>
 
       <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-[1fr_200px_180px_180px]">
