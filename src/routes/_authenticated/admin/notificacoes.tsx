@@ -457,6 +457,7 @@ function AdminNotificacoesPage() {
           </div>
         </div>
         <div className="flex gap-2 self-start sm:self-auto">
+          <TemplatesDialog />
           <BroadcastDialog onDone={handleRefresh} />
           <Button
             variant="outline" size="sm" onClick={handleRefresh}
