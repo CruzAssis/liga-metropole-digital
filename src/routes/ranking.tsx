@@ -1,7 +1,9 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { SkeletonRankingPage, EmptyRanking } from "@/components/AppSkeletons";
 import { useEffect, useMemo, useState } from "react";
+import { useServerFn } from "@tanstack/react-start";
 import { supabase } from "@/integrations/supabase/client";
+import { getTeamSupporterCounts } from "@/lib/stats.functions";
 import { PublicShell } from "@/components/PublicShell";
 import { PageHeader } from "@/components/PageHeader";
 import { ConferenceFilter } from "@/components/ui-kit";
