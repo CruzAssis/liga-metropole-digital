@@ -510,6 +510,91 @@ export type Database = {
           },
         ]
       }
+      media_items: {
+        Row: {
+          caption: string | null
+          competition_id: string | null
+          created_at: string
+          created_by: string | null
+          credit: string | null
+          display_order: number
+          id: string
+          is_featured: boolean
+          is_published: boolean
+          kind: string
+          match_id: string | null
+          platform: string | null
+          round_number: number | null
+          team_id: string | null
+          thumbnail_url: string | null
+          title: string | null
+          updated_at: string
+          url: string
+        }
+        Insert: {
+          caption?: string | null
+          competition_id?: string | null
+          created_at?: string
+          created_by?: string | null
+          credit?: string | null
+          display_order?: number
+          id?: string
+          is_featured?: boolean
+          is_published?: boolean
+          kind: string
+          match_id?: string | null
+          platform?: string | null
+          round_number?: number | null
+          team_id?: string | null
+          thumbnail_url?: string | null
+          title?: string | null
+          updated_at?: string
+          url: string
+        }
+        Update: {
+          caption?: string | null
+          competition_id?: string | null
+          created_at?: string
+          created_by?: string | null
+          credit?: string | null
+          display_order?: number
+          id?: string
+          is_featured?: boolean
+          is_published?: boolean
+          kind?: string
+          match_id?: string | null
+          platform?: string | null
+          round_number?: number | null
+          team_id?: string | null
+          thumbnail_url?: string | null
+          title?: string | null
+          updated_at?: string
+          url?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "media_items_competition_id_fkey"
+            columns: ["competition_id"]
+            isOneToOne: false
+            referencedRelation: "competitions"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "media_items_match_id_fkey"
+            columns: ["match_id"]
+            isOneToOne: false
+            referencedRelation: "matches"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "media_items_team_id_fkey"
+            columns: ["team_id"]
+            isOneToOne: false
+            referencedRelation: "teams"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       notificacoes_log: {
         Row: {
           assunto: string | null
