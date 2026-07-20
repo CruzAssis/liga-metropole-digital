@@ -235,18 +235,24 @@ export const rateSumulaOpponentBest = createServerFn({ method: "POST" })
 
       // Notifica diretores dos destaques publicados
       try {
-        const { enqueueWhatsapp, fetchTeamManagerContact } = await import("@/lib/notify.server");
+        const { enqueueWhatsapp, fetchTeamManagerContact, renderTemplate } = await import("@/lib/notify.server");
         for (const v of (allVotes ?? [])) {
           const c = await fetchTeamManagerContact(v.opponent_team_id);
           if (!c) continue;
           const name = v.identified_name || `Camisa #${v.jersey_number}`;
+          const { assunto, mensagem } = await renderTemplate("destaque_publicado", {
+            diretor: c.name ?? "diretor(a)",
+            time: c.team_name ?? "",
+            atleta: name,
+            nota: v.rating,
+          });
           await enqueueWhatsapp({
             tipo: "destaque_publicado",
             destinatario_id: c.id,
             destinatario_nome: c.name,
             destinatario_phone: c.phone,
-            assunto: "Destaque publicado",
-            mensagem: `⭐ *Destaque da partida!* — ${c.team_name}\n\n*${name}* foi eleito destaque pelo adversário com nota *${v.rating}/10*.\n\nParabéns! Confira no app.`,
+            assunto,
+            mensagem,
             payload: { match_id: data.match_id, athlete: name, rating: v.rating },
             created_by: context.userId,
           });
