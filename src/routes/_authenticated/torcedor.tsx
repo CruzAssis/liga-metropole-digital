@@ -157,7 +157,12 @@ function TorcedorPage() {
             notifs.map((n: any) => {
               const isMvp = n.tipo === "mvp_definido";
               const mvp = isMvp ? n.payload?.mvp : null;
-              const ranking = isMvp ? (n.payload?.ranking as any[] | undefined) ?? [] : [];
+              const finalists = isMvp
+                ? (n.payload?.finalists as any[] | undefined) ??
+                  (n.payload?.ranking as any[] | undefined) ??
+                  []
+                : [];
+              const totalVoters = isMvp ? n.payload?.total_voters ?? null : null;
               return (
               <div
                 key={n.id}
@@ -175,26 +180,108 @@ function TorcedorPage() {
                 </div>
                 {n.assunto && <p className="text-sm font-medium">{n.assunto}</p>}
                 {isMvp && mvp ? (
-                  <div className="mt-2 space-y-2">
-                    <div className="flex items-center gap-2 rounded-lg bg-background/60 p-2">
-                      <Trophy className="h-5 w-5 text-yellow-400" />
-                      <div className="flex-1">
-                        <p className="text-sm font-semibold">{mvp.name}</p>
-                        <p className="text-xs text-muted-foreground">
-                          {Number(mvp.avg_rating).toFixed(1)}⭐ · {mvp.total_votes} votos
-                        </p>
-                      </div>
-                    </div>
-                    {ranking.length > 1 && (
-                      <div className="space-y-0.5 text-xs">
-                        {ranking.map((r: any, i: number) => (
-                          <div key={r.athlete_id} className="flex justify-between">
-                            <span>{i + 1}º {r.name}</span>
-                            <span className="text-muted-foreground">
-                              {Number(r.avg_rating).toFixed(1)}⭐ ({r.total_votes})
+                  <div className="mt-2 space-y-3">
+                    {/* MVP destaque */}
+                    <div className="rounded-lg border border-yellow-500/30 bg-background/60 p-3">
+                      <div className="flex items-center gap-3">
+                        {mvp.photo_url ? (
+                          <img src={mvp.photo_url} alt="" className="h-12 w-12 rounded-full object-cover border-2 border-yellow-500/50" />
+                        ) : (
+                          <div className="flex h-12 w-12 items-center justify-center rounded-full bg-yellow-500/10">
+                            <Trophy className="h-6 w-6 text-yellow-400" />
+                          </div>
+                        )}
+                        <div className="flex-1 min-w-0">
+                          <p className="text-sm font-semibold truncate">🏆 {mvp.name}</p>
+                          {mvp.team_name && (
+                            <p className="text-xs text-muted-foreground">{mvp.team_name}</p>
+                          )}
+                          <div className="mt-0.5 flex items-center gap-1">
+                            {[1, 2, 3, 4, 5].map((s) => (
+                              <Star
+                                key={s}
+                                className={`h-3.5 w-3.5 ${
+                                  s <= Math.round(Number(mvp.avg_rating))
+                                    ? "fill-yellow-400 text-yellow-400"
+                                    : "text-muted-foreground/30"
+                                }`}
+                              />
+                            ))}
+                            <span className="ml-1 text-xs text-muted-foreground">
+                              {Number(mvp.avg_rating).toFixed(1)} · {mvp.total_votes} voto{mvp.total_votes === 1 ? "" : "s"}
                             </span>
                           </div>
-                        ))}
+                        </div>
+                      </div>
+                      {/* Distribuição de estrelas do MVP */}
+                      {mvp.distribution && (
+                        <div className="mt-2 space-y-0.5">
+                          {[5, 4, 3, 2, 1].map((s) => {
+                            const count = mvp.distribution?.[s] ?? 0;
+                            const pct = mvp.total_votes ? (count / mvp.total_votes) * 100 : 0;
+                            return (
+                              <div key={s} className="flex items-center gap-2 text-[10px]">
+                                <span className="w-6 text-muted-foreground">{s}⭐</span>
+                                <div className="h-1.5 flex-1 overflow-hidden rounded-full bg-muted">
+                                  <div
+                                    className="h-full bg-yellow-400"
+                                    style={{ width: `${pct}%` }}
+                                  />
+                                </div>
+                                <span className="w-6 text-right text-muted-foreground">{count}</span>
+                              </div>
+                            );
+                          })}
+                        </div>
+                      )}
+                    </div>
+
+                    {/* Lista de finalistas */}
+                    {finalists.length > 1 && (
+                      <div>
+                        <p className="mb-1 text-[10px] font-semibold uppercase tracking-wider text-muted-foreground">
+                          Finalistas {totalVoters ? `· ${totalVoters} votos totais` : ""}
+                        </p>
+                        <div className="space-y-1">
+                          {finalists.map((r: any, i: number) => (
+                            <div
+                              key={r.athlete_id}
+                              className={`flex items-center gap-2 rounded-md px-2 py-1.5 ${
+                                i === 0 ? "bg-yellow-500/10" : "bg-background/40"
+                              }`}
+                            >
+                              <span className="w-4 text-xs font-semibold text-muted-foreground">
+                                {i + 1}º
+                              </span>
+                              {r.photo_url ? (
+                                <img src={r.photo_url} alt="" className="h-6 w-6 rounded-full object-cover" />
+                              ) : (
+                                <div className="h-6 w-6 rounded-full bg-muted" />
+                              )}
+                              <div className="flex-1 min-w-0">
+                                <p className="truncate text-xs font-medium">{r.name}</p>
+                                {r.team_name && (
+                                  <p className="truncate text-[10px] text-muted-foreground">{r.team_name}</p>
+                                )}
+                              </div>
+                              <div className="flex items-center gap-0.5">
+                                {[1, 2, 3, 4, 5].map((s) => (
+                                  <Star
+                                    key={s}
+                                    className={`h-2.5 w-2.5 ${
+                                      s <= Math.round(Number(r.avg_rating))
+                                        ? "fill-yellow-400 text-yellow-400"
+                                        : "text-muted-foreground/30"
+                                    }`}
+                                  />
+                                ))}
+                              </div>
+                              <span className="w-14 text-right text-[10px] text-muted-foreground">
+                                {Number(r.avg_rating).toFixed(1)} · {r.total_votes}
+                              </span>
+                            </div>
+                          ))}
+                        </div>
                       </div>
                     )}
                   </div>
