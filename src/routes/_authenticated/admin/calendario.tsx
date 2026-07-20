@@ -33,7 +33,7 @@ function CalendarioAdmin() {
 
   const { data: competitions = [] } = useQuery({ queryKey: ["admin-competitions"], queryFn: () => listFn() });
   const [competitionId, setCompetitionId] = useState<string>("");
-  const [doubleRound, setDoubleRound] = useState(true);
+  const [doubleRound, setDoubleRound] = useState(false);
   const [replace, setReplace] = useState(false);
   const [size, setSize] = useState<4 | 8 | 16>(8);
 
