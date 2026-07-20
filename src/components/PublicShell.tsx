@@ -163,12 +163,21 @@ export function PublicShell({ children }: { children: React.ReactNode }) {
 
       <footer className="border-t border-border mt-auto">
         <div className="mx-auto flex max-w-6xl items-center justify-between flex-wrap gap-3 px-4 sm:px-6 py-6 text-xs text-muted-foreground">
-          <span className="font-medium">© {new Date().getFullYear()} Liga Metrópole</span>
-          <nav className="flex items-center gap-5">
+          <span className="font-medium">© {new Date().getFullYear()} {leagueName}</span>
+          <nav className="flex items-center gap-5 flex-wrap">
             <Link to="/privacidade" className="hover:text-foreground transition-colors">Privacidade</Link>
             <Link to="/termos" className="hover:text-foreground transition-colors">Termos de Uso</Link>
-            <a href="mailto:shelderdouglasdacruz@gmail.com" className="hover:text-foreground transition-colors">Contato</a>
+            <a href={`mailto:${contactEmail}`} className="hover:text-foreground transition-colors">Contato</a>
+            {cfg?.instagram && (
+              <a href={`https://instagram.com/${cfg.instagram.replace('@','')}`} target="_blank" rel="noreferrer" className="hover:text-foreground transition-colors">
+                {cfg.instagram.startsWith('@') ? cfg.instagram : `@${cfg.instagram}`}
+              </a>
+            )}
+            {cfg?.rules_url && (
+              <a href={cfg.rules_url} target="_blank" rel="noreferrer" className="hover:text-foreground transition-colors">Regulamento</a>
+            )}
           </nav>
+
         </div>
       </footer>
     </div>
