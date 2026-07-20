@@ -48,13 +48,21 @@ export const generateRoundRobin = createServerFn({ method: "POST" })
     z
       .object({
         competitionId: z.string().uuid(),
-        doubleRound: z.boolean().default(true),
+        doubleRound: z.boolean().optional(),
         replace: z.boolean().default(false),
       })
       .parse(i),
   )
   .handler(async ({ data, context }) => {
     await assertAdmin(context.supabase, context.userId);
+
+    const { data: comp, error: compErr } = await supabaseAdmin
+      .from("competitions")
+      .select("double_round")
+      .eq("id", data.competitionId)
+      .maybeSingle();
+    if (compErr) throw new Error(compErr.message);
+    const doubleRound = data.doubleRound ?? (comp as any)?.double_round ?? false;
 
     const { data: teams, error: teamsErr } = await supabaseAdmin
       .from("teams")
@@ -95,7 +103,7 @@ export const generateRoundRobin = createServerFn({ method: "POST" })
     let totalRound = 0;
     for (const g of groups) {
       const turn1 = roundRobinPairings(g.teams);
-      const turns = data.doubleRound
+      const turns = doubleRound
         ? [...turn1, ...turn1.map((r) => r.map(([a, b]) => [b, a] as [string, string]))]
         : turn1;
       turns.forEach((round, idx) => {
@@ -123,11 +131,12 @@ export const generateRoundRobin = createServerFn({ method: "POST" })
       action: "calendario.generate_round_robin",
       entity_type: "competition",
       entity_id: data.competitionId,
-      metadata: { matches: rows.length, groups: groups.length, doubleRound: data.doubleRound },
+      metadata: { matches: rows.length, groups: groups.length, doubleRound },
     });
 
     return { ok: true, matches: rows.length, groups: groups.length, rounds: totalRound };
   });
+
 
 // ============================================================
 // Standings computed from confirmed matches (for bracket seeding)
@@ -140,6 +149,15 @@ export const getCompetitionStandings = createServerFn({ method: "GET" })
       .select("id, name, short_name, logo_url, lado")
       .eq("competition_id", data.competitionId)
       .eq("status", "approved");
+
+    const { data: comp } = await supabaseAdmin
+      .from("competitions")
+      .select("points_win, points_draw, points_loss")
+      .eq("id", data.competitionId)
+      .maybeSingle();
+    const PW = (comp as any)?.points_win ?? 3;
+    const PD = (comp as any)?.points_draw ?? 1;
+    const PL = (comp as any)?.points_loss ?? 0;
 
     const { data: matches } = await supabaseAdmin
       .from("matches")
@@ -163,15 +181,16 @@ export const getCompetitionStandings = createServerFn({ method: "GET" })
       h.played++; v.played++;
       h.gf += hs; h.ga += vs;
       v.gf += vs; v.ga += hs;
-      if (hs > vs) { h.wins++; h.points += 3; v.losses++; }
-      else if (hs < vs) { v.wins++; v.points += 3; h.losses++; }
-      else { h.draws++; v.draws++; h.points++; v.points++; }
+      if (hs > vs) { h.wins++; h.points += PW; v.losses++; v.points += PL; }
+      else if (hs < vs) { v.wins++; v.points += PW; h.losses++; h.points += PL; }
+      else { h.draws++; v.draws++; h.points += PD; v.points += PD; }
     }
     for (const s of stats.values()) s.gd = s.gf - s.ga;
     return Array.from(stats.values()).sort(
       (a, b) => b.points - a.points || b.gd - a.gd || b.gf - a.gf || a.team.name.localeCompare(b.team.name),
     );
   });
+
 
 // ============================================================
 // Bracket generator (single-elim). Seeds top N by standings.
@@ -237,6 +256,15 @@ export const generateBracket = createServerFn({ method: "POST" })
       .select("id, name, lado")
       .eq("competition_id", data.competitionId)
       .eq("status", "approved");
+    const { data: comp } = await supabaseAdmin
+      .from("competitions")
+      .select("points_win, points_draw, points_loss")
+      .eq("id", data.competitionId)
+      .maybeSingle();
+    const PW = (comp as any)?.points_win ?? 3;
+    const PD = (comp as any)?.points_draw ?? 1;
+    const PL = (comp as any)?.points_loss ?? 0;
+
     const { data: gm } = await supabaseAdmin
       .from("matches")
       .select("host_team_id, visitor_team_id, host_score, visitor_score, status")
@@ -251,8 +279,11 @@ export const generateBracket = createServerFn({ method: "POST" })
       if (!h || !v) continue;
       const hs = m.host_score ?? 0, vs = m.visitor_score ?? 0;
       h.gf += hs; v.gf += vs; h.gd += hs - vs; v.gd += vs - hs;
-      if (hs > vs) h.points += 3; else if (hs < vs) v.points += 3; else { h.points++; v.points++; }
+      if (hs > vs) { h.points += PW; v.points += PL; }
+      else if (hs < vs) { v.points += PW; h.points += PL; }
+      else { h.points += PD; v.points += PD; }
     }
+
     const ordered = Array.from(stats.values()).sort(
       (a, b) => b.points - a.points || b.gd - a.gd || b.gf - a.gf || a.name.localeCompare(b.name),
     );
