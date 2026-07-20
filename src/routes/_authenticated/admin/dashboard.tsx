@@ -495,6 +495,15 @@ function AdminDashboard() {
               <Calendar className="h-4 w-4" /> Partidas
             </Link>
           </Button>
+          <Button
+            asChild
+            variant="outline"
+            className="border-zinc-700 text-zinc-200 hover:bg-zinc-800 gap-2"
+          >
+            <Link to="/admin/disciplina">
+              <AlertTriangle className="h-4 w-4" /> Disciplina
+            </Link>
+          </Button>
         </div>
       </div>
 
