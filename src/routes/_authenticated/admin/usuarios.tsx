@@ -27,6 +27,8 @@ function UsuariosPage() {
   const { isAdmin, loading } = useIsAdmin();
   const navigate = useNavigate();
   const [search, setSearch] = useState("");
+  const [resetting, setResetting] = useState<AdminUser | null>(null);
+  const [deleting, setDeleting] = useState<AdminUser | null>(null);
   const qc = useQueryClient();
 
   useEffect(() => {
@@ -35,6 +37,8 @@ function UsuariosPage() {
 
   const fetchUsers = useServerFn(listUsers);
   const updateRole = useServerFn(setUserRole);
+  const resetPwdFn = useServerFn(sendPasswordReset);
+  const deleteUserFn = useServerFn(deleteUser);
 
   const { data, isLoading } = useQuery({
     queryKey: ["admin-users"],
@@ -47,6 +51,25 @@ function UsuariosPage() {
       updateRole({ data: vars }),
     onSuccess: () => {
       toast.success("Papel atualizado");
+      qc.invalidateQueries({ queryKey: ["admin-users"] });
+    },
+    onError: (e: Error) => toast.error(e.message),
+  });
+
+  const resetMutation = useMutation({
+    mutationFn: (user_id: string) => resetPwdFn({ data: { user_id } }),
+    onSuccess: (r) => {
+      toast.success(`E-mail de redefinição enviado para ${r.email}`);
+      setResetting(null);
+    },
+    onError: (e: Error) => { toast.error(e.message); setResetting(null); },
+  });
+
+  const deleteMutation = useMutation({
+    mutationFn: (user_id: string) => deleteUserFn({ data: { user_id } }),
+    onSuccess: () => {
+      toast.success("Usuário excluído");
+      setDeleting(null);
       qc.invalidateQueries({ queryKey: ["admin-users"] });
     },
     onError: (e: Error) => toast.error(e.message),
