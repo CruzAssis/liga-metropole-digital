@@ -225,6 +225,28 @@ export const rateSumulaOpponentBest = createServerFn({ method: "POST" })
         }
       }
       await supabaseAdmin.from("matches").update({ status: "closed" }).eq("id", data.match_id);
+
+      // Notifica diretores dos destaques publicados
+      try {
+        const { enqueueWhatsapp, fetchTeamManagerContact } = await import("@/lib/notify.server");
+        for (const v of (allVotes ?? [])) {
+          const c = await fetchTeamManagerContact(v.opponent_team_id);
+          if (!c) continue;
+          const name = v.identified_name || `Camisa #${v.jersey_number}`;
+          await enqueueWhatsapp({
+            tipo: "destaque_publicado",
+            destinatario_id: c.id,
+            destinatario_nome: c.name,
+            destinatario_phone: c.phone,
+            assunto: "Destaque publicado",
+            mensagem: `⭐ *Destaque da partida!* — ${c.team_name}\n\n*${name}* foi eleito destaque pelo adversário com nota *${v.rating}/10*.\n\nParabéns! Confira no app.`,
+            payload: { match_id: data.match_id, athlete: name, rating: v.rating },
+            created_by: context.userId,
+          });
+        }
+      } catch (err) {
+        console.error("[notify:destaque_publicado]", err);
+      }
     }
     return { ok: true, bothVoted };
   });
