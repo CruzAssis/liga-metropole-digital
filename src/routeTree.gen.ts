@@ -47,12 +47,14 @@ import { Route as AuthenticatedAdminTriagemRouteImport } from './routes/_authent
 import { Route as AuthenticatedAdminTimesRouteImport } from './routes/_authenticated/admin/times'
 import { Route as AuthenticatedAdminSumulasRouteImport } from './routes/_authenticated/admin/sumulas'
 import { Route as AuthenticatedAdminSorteioRouteImport } from './routes/_authenticated/admin/sorteio'
+import { Route as AuthenticatedAdminPartidasRouteImport } from './routes/_authenticated/admin/partidas'
 import { Route as AuthenticatedAdminNotificacoesRouteImport } from './routes/_authenticated/admin/notificacoes'
 import { Route as AuthenticatedAdminMasterSwitchRouteImport } from './routes/_authenticated/admin/master-switch'
 import { Route as AuthenticatedAdminManifestoRouteImport } from './routes/_authenticated/admin/manifesto'
 import { Route as AuthenticatedAdminLigasRouteImport } from './routes/_authenticated/admin/ligas'
 import { Route as AuthenticatedAdminFinanceiroRouteImport } from './routes/_authenticated/admin/financeiro'
 import { Route as AuthenticatedAdminDashboardRouteImport } from './routes/_authenticated/admin/dashboard'
+import { Route as AuthenticatedAdminAtletasRouteImport } from './routes/_authenticated/admin/atletas'
 import { Route as ApiPublicHooksWoCheckerRouteImport } from './routes/api/public/hooks/wo-checker'
 
 const VerificarRoute = VerificarRouteImport.update({
@@ -249,6 +251,12 @@ const AuthenticatedAdminSorteioRoute =
     path: '/sorteio',
     getParentRoute: () => AuthenticatedAdminRoute,
   } as any)
+const AuthenticatedAdminPartidasRoute =
+  AuthenticatedAdminPartidasRouteImport.update({
+    id: '/partidas',
+    path: '/partidas',
+    getParentRoute: () => AuthenticatedAdminRoute,
+  } as any)
 const AuthenticatedAdminNotificacoesRoute =
   AuthenticatedAdminNotificacoesRouteImport.update({
     id: '/notificacoes',
@@ -282,6 +290,12 @@ const AuthenticatedAdminDashboardRoute =
   AuthenticatedAdminDashboardRouteImport.update({
     id: '/dashboard',
     path: '/dashboard',
+    getParentRoute: () => AuthenticatedAdminRoute,
+  } as any)
+const AuthenticatedAdminAtletasRoute =
+  AuthenticatedAdminAtletasRouteImport.update({
+    id: '/atletas',
+    path: '/atletas',
     getParentRoute: () => AuthenticatedAdminRoute,
   } as any)
 const ApiPublicHooksWoCheckerRoute = ApiPublicHooksWoCheckerRouteImport.update({
@@ -322,12 +336,14 @@ export interface FileRoutesByFullPath {
   '/sumula-visual/$partidaId': typeof SumulaVisualPartidaIdRoute
   '/sumula/$partidaId': typeof SumulaPartidaIdRoute
   '/times/$slug': typeof TimesSlugRoute
+  '/admin/atletas': typeof AuthenticatedAdminAtletasRoute
   '/admin/dashboard': typeof AuthenticatedAdminDashboardRoute
   '/admin/financeiro': typeof AuthenticatedAdminFinanceiroRoute
   '/admin/ligas': typeof AuthenticatedAdminLigasRoute
   '/admin/manifesto': typeof AuthenticatedAdminManifestoRoute
   '/admin/master-switch': typeof AuthenticatedAdminMasterSwitchRoute
   '/admin/notificacoes': typeof AuthenticatedAdminNotificacoesRoute
+  '/admin/partidas': typeof AuthenticatedAdminPartidasRoute
   '/admin/sorteio': typeof AuthenticatedAdminSorteioRoute
   '/admin/sumulas': typeof AuthenticatedAdminSumulasRoute
   '/admin/times': typeof AuthenticatedAdminTimesRoute
@@ -368,12 +384,14 @@ export interface FileRoutesByTo {
   '/sumula-visual/$partidaId': typeof SumulaVisualPartidaIdRoute
   '/sumula/$partidaId': typeof SumulaPartidaIdRoute
   '/times/$slug': typeof TimesSlugRoute
+  '/admin/atletas': typeof AuthenticatedAdminAtletasRoute
   '/admin/dashboard': typeof AuthenticatedAdminDashboardRoute
   '/admin/financeiro': typeof AuthenticatedAdminFinanceiroRoute
   '/admin/ligas': typeof AuthenticatedAdminLigasRoute
   '/admin/manifesto': typeof AuthenticatedAdminManifestoRoute
   '/admin/master-switch': typeof AuthenticatedAdminMasterSwitchRoute
   '/admin/notificacoes': typeof AuthenticatedAdminNotificacoesRoute
+  '/admin/partidas': typeof AuthenticatedAdminPartidasRoute
   '/admin/sorteio': typeof AuthenticatedAdminSorteioRoute
   '/admin/sumulas': typeof AuthenticatedAdminSumulasRoute
   '/admin/times': typeof AuthenticatedAdminTimesRoute
@@ -416,12 +434,14 @@ export interface FileRoutesById {
   '/sumula-visual/$partidaId': typeof SumulaVisualPartidaIdRoute
   '/sumula/$partidaId': typeof SumulaPartidaIdRoute
   '/times/$slug': typeof TimesSlugRoute
+  '/_authenticated/admin/atletas': typeof AuthenticatedAdminAtletasRoute
   '/_authenticated/admin/dashboard': typeof AuthenticatedAdminDashboardRoute
   '/_authenticated/admin/financeiro': typeof AuthenticatedAdminFinanceiroRoute
   '/_authenticated/admin/ligas': typeof AuthenticatedAdminLigasRoute
   '/_authenticated/admin/manifesto': typeof AuthenticatedAdminManifestoRoute
   '/_authenticated/admin/master-switch': typeof AuthenticatedAdminMasterSwitchRoute
   '/_authenticated/admin/notificacoes': typeof AuthenticatedAdminNotificacoesRoute
+  '/_authenticated/admin/partidas': typeof AuthenticatedAdminPartidasRoute
   '/_authenticated/admin/sorteio': typeof AuthenticatedAdminSorteioRoute
   '/_authenticated/admin/sumulas': typeof AuthenticatedAdminSumulasRoute
   '/_authenticated/admin/times': typeof AuthenticatedAdminTimesRoute
@@ -464,12 +484,14 @@ export interface FileRouteTypes {
     | '/sumula-visual/$partidaId'
     | '/sumula/$partidaId'
     | '/times/$slug'
+    | '/admin/atletas'
     | '/admin/dashboard'
     | '/admin/financeiro'
     | '/admin/ligas'
     | '/admin/manifesto'
     | '/admin/master-switch'
     | '/admin/notificacoes'
+    | '/admin/partidas'
     | '/admin/sorteio'
     | '/admin/sumulas'
     | '/admin/times'
@@ -510,12 +532,14 @@ export interface FileRouteTypes {
     | '/sumula-visual/$partidaId'
     | '/sumula/$partidaId'
     | '/times/$slug'
+    | '/admin/atletas'
     | '/admin/dashboard'
     | '/admin/financeiro'
     | '/admin/ligas'
     | '/admin/manifesto'
     | '/admin/master-switch'
     | '/admin/notificacoes'
+    | '/admin/partidas'
     | '/admin/sorteio'
     | '/admin/sumulas'
     | '/admin/times'
@@ -557,12 +581,14 @@ export interface FileRouteTypes {
     | '/sumula-visual/$partidaId'
     | '/sumula/$partidaId'
     | '/times/$slug'
+    | '/_authenticated/admin/atletas'
     | '/_authenticated/admin/dashboard'
     | '/_authenticated/admin/financeiro'
     | '/_authenticated/admin/ligas'
     | '/_authenticated/admin/manifesto'
     | '/_authenticated/admin/master-switch'
     | '/_authenticated/admin/notificacoes'
+    | '/_authenticated/admin/partidas'
     | '/_authenticated/admin/sorteio'
     | '/_authenticated/admin/sumulas'
     | '/_authenticated/admin/times'
@@ -867,6 +893,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedAdminSorteioRouteImport
       parentRoute: typeof AuthenticatedAdminRoute
     }
+    '/_authenticated/admin/partidas': {
+      id: '/_authenticated/admin/partidas'
+      path: '/partidas'
+      fullPath: '/admin/partidas'
+      preLoaderRoute: typeof AuthenticatedAdminPartidasRouteImport
+      parentRoute: typeof AuthenticatedAdminRoute
+    }
     '/_authenticated/admin/notificacoes': {
       id: '/_authenticated/admin/notificacoes'
       path: '/notificacoes'
@@ -909,6 +942,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedAdminDashboardRouteImport
       parentRoute: typeof AuthenticatedAdminRoute
     }
+    '/_authenticated/admin/atletas': {
+      id: '/_authenticated/admin/atletas'
+      path: '/atletas'
+      fullPath: '/admin/atletas'
+      preLoaderRoute: typeof AuthenticatedAdminAtletasRouteImport
+      parentRoute: typeof AuthenticatedAdminRoute
+    }
     '/api/public/hooks/wo-checker': {
       id: '/api/public/hooks/wo-checker'
       path: '/api/public/hooks/wo-checker'
@@ -920,12 +960,14 @@ declare module '@tanstack/react-router' {
 }
 
 interface AuthenticatedAdminRouteChildren {
+  AuthenticatedAdminAtletasRoute: typeof AuthenticatedAdminAtletasRoute
   AuthenticatedAdminDashboardRoute: typeof AuthenticatedAdminDashboardRoute
   AuthenticatedAdminFinanceiroRoute: typeof AuthenticatedAdminFinanceiroRoute
   AuthenticatedAdminLigasRoute: typeof AuthenticatedAdminLigasRoute
   AuthenticatedAdminManifestoRoute: typeof AuthenticatedAdminManifestoRoute
   AuthenticatedAdminMasterSwitchRoute: typeof AuthenticatedAdminMasterSwitchRoute
   AuthenticatedAdminNotificacoesRoute: typeof AuthenticatedAdminNotificacoesRoute
+  AuthenticatedAdminPartidasRoute: typeof AuthenticatedAdminPartidasRoute
   AuthenticatedAdminSorteioRoute: typeof AuthenticatedAdminSorteioRoute
   AuthenticatedAdminSumulasRoute: typeof AuthenticatedAdminSumulasRoute
   AuthenticatedAdminTimesRoute: typeof AuthenticatedAdminTimesRoute
@@ -934,12 +976,14 @@ interface AuthenticatedAdminRouteChildren {
 }
 
 const AuthenticatedAdminRouteChildren: AuthenticatedAdminRouteChildren = {
+  AuthenticatedAdminAtletasRoute: AuthenticatedAdminAtletasRoute,
   AuthenticatedAdminDashboardRoute: AuthenticatedAdminDashboardRoute,
   AuthenticatedAdminFinanceiroRoute: AuthenticatedAdminFinanceiroRoute,
   AuthenticatedAdminLigasRoute: AuthenticatedAdminLigasRoute,
   AuthenticatedAdminManifestoRoute: AuthenticatedAdminManifestoRoute,
   AuthenticatedAdminMasterSwitchRoute: AuthenticatedAdminMasterSwitchRoute,
   AuthenticatedAdminNotificacoesRoute: AuthenticatedAdminNotificacoesRoute,
+  AuthenticatedAdminPartidasRoute: AuthenticatedAdminPartidasRoute,
   AuthenticatedAdminSorteioRoute: AuthenticatedAdminSorteioRoute,
   AuthenticatedAdminSumulasRoute: AuthenticatedAdminSumulasRoute,
   AuthenticatedAdminTimesRoute: AuthenticatedAdminTimesRoute,
