@@ -3,16 +3,17 @@ import { useServerFn } from "@tanstack/react-start";
 import { useQuery, useMutation } from "@tanstack/react-query";
 import { useState } from "react";
 import {
-  Bell, CheckCircle, XCircle, Clock, RefreshCw, Mail, MessageSquare, Send, Megaphone,
+  Bell, CheckCircle, XCircle, Clock, RefreshCw, Mail, MessageSquare, Send, Megaphone, FileText,
 } from "lucide-react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
 import {
   Select, SelectContent, SelectItem, SelectTrigger, SelectValue,
 } from "@/components/ui/select";
 import {
-  Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter, DialogTrigger,
+  Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter, DialogTrigger, DialogDescription,
 } from "@/components/ui/dialog";
 import { Textarea } from "@/components/ui/textarea";
 import { toast } from "sonner";
@@ -22,8 +23,12 @@ import {
   getNotificacoesStats,
   markNotificacaoSent,
   broadcastWhatsapp,
+  listTemplates,
+  upsertTemplate,
+  TEMPLATE_VARIABLES,
   TIPO_LABELS, STATUS_LABELS, CANAL_LABELS,
   type NotificacaoTipo, type NotificacaoCanal, type NotificacaoStatus, type NotificacaoLog,
+  type NotificationTemplate,
 } from "@/lib/notificacoes.functions";
 
 export const Route = createFileRoute("/_authenticated/admin/notificacoes")({
