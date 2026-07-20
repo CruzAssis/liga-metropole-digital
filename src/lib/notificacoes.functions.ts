@@ -2,6 +2,7 @@ import { createServerFn } from "@tanstack/react-start";
 import { z } from "zod";
 import { supabaseAdmin } from "@/integrations/supabase/client.server";
 import { requireSupabaseAuth } from "@/integrations/supabase/auth-middleware";
+import { buildWaMeUrl } from "@/lib/notify.server";
 
 // ─── Types ────────────────────────────────────────────────────────────────────
 
@@ -10,7 +11,8 @@ export type NotificacaoTipo =
   | "jogo_agendado"
   | "sumula_disponivel"
   | "sumula_prazo_alerta"
-  | "destaque_publicado";
+  | "destaque_publicado"
+  | "broadcast";
 
 export type NotificacaoCanal = "email" | "whatsapp";
 export type NotificacaoStatus = "pendente" | "enviado" | "falhou";
@@ -26,11 +28,13 @@ export interface NotificacaoLog {
   destinatario_phone: string | null;
   assunto: string | null;
   corpo_preview: string | null;
+  whatsapp_url: string | null;
   status: NotificacaoStatus;
   erro_mensagem: string | null;
   payload: JsonValue;
   whatsapp_template: string | null;
   enviado_em: string | null;
+  send_count: number;
   created_at: string;
 }
 
@@ -42,6 +46,7 @@ export const TIPO_LABELS: Record<NotificacaoTipo, string> = {
   sumula_disponivel: "Súmula Disponível",
   sumula_prazo_alerta: "Alerta de Prazo",
   destaque_publicado: "Destaque Publicado",
+  broadcast: "Mensagem Manual",
 };
 
 export const STATUS_LABELS: Record<NotificacaoStatus, string> = {
@@ -55,30 +60,20 @@ export const CANAL_LABELS: Record<NotificacaoCanal, string> = {
   whatsapp: "WhatsApp",
 };
 
+const TIPO_ENUM = [
+  "team_approved",
+  "jogo_agendado",
+  "sumula_disponivel",
+  "sumula_prazo_alerta",
+  "destaque_publicado",
+  "broadcast",
+] as const;
+
 const notificacoesFilterSchema = z.object({
   limit: z.number().min(1).max(500).default(100),
-  tipo: z
-    .enum([
-      "team_approved",
-      "jogo_agendado",
-      "sumula_disponivel",
-      "sumula_prazo_alerta",
-      "destaque_publicado",
-    ])
-    .optional(),
+  tipo: z.enum(TIPO_ENUM).optional(),
   status: z.enum(["pendente", "enviado", "falhou"]).optional(),
   canal: z.enum(["email", "whatsapp"]).optional(),
-});
-
-const triggerNotificacaoSchema = z.object({
-  functionName: z.enum([
-    "notify-team-approved",
-    "notify-jogo-agendado",
-    "notify-sumula-disponivel",
-    "notify-sumula-prazo-alerta",
-    "notify-destaque-publicado",
-  ]),
-  payload: z.record(z.string(), z.unknown()),
 });
 
 async function assertAdmin(userId: string) {
@@ -96,105 +91,151 @@ const adminDb = supabaseAdmin as any;
 
 // ─── Server Functions ──────────────────────────────────────────────────────────
 
-/**
- * List last N notification log entries (admin only)
- */
 export const listNotificacoes = createServerFn({ method: "GET" })
-  .inputValidator((input) => notificacoesFilterSchema.parse(input))
   .middleware([requireSupabaseAuth])
+  .inputValidator((input) => notificacoesFilterSchema.parse(input))
   .handler(async ({ data, context }) => {
     await assertAdmin(context.userId);
-
     let query = adminDb
       .from("notificacoes_log")
       .select("*")
       .order("created_at", { ascending: false })
       .limit(data.limit);
-
-    if (data.tipo) {
-      query = query.eq("tipo", data.tipo);
-    }
-    if (data.status) {
-      query = query.eq("status", data.status);
-    }
-    if (data.canal) {
-      query = query.eq("canal", data.canal);
-    }
-
+    if (data.tipo) query = query.eq("tipo", data.tipo);
+    if (data.status) query = query.eq("status", data.status);
+    if (data.canal) query = query.eq("canal", data.canal);
     const { data: logs, error } = await query;
-
-    if (error) {
-      throw new Error(`Erro ao buscar notificações: ${error.message}`);
-    }
-
+    if (error) throw new Error(`Erro ao buscar notificações: ${error.message}`);
     return { logs: (logs ?? []) as NotificacaoLog[] };
   });
 
-/**
- * Get notification stats for dashboard
- */
 export const getNotificacoesStats = createServerFn({ method: "GET" })
   .middleware([requireSupabaseAuth])
   .handler(async ({ context }) => {
     await assertAdmin(context.userId);
-
-    const { data: stats } = await adminDb
-      .from("notificacoes_log")
-      .select("status, canal, tipo");
-
-    const statsRows = (stats ?? []) as Array<{
+    const { data: stats } = await adminDb.from("notificacoes_log").select("status, canal, tipo");
+    const rows = (stats ?? []) as Array<{
       status: NotificacaoStatus;
       canal: NotificacaoCanal;
       tipo: NotificacaoTipo;
     }>;
-    const total = statsRows.length;
-    const enviados = statsRows.filter((s) => s.status === "enviado").length;
-    const falhos = statsRows.filter((s) => s.status === "falhou").length;
-    const pendentes = statsRows.filter((s) => s.status === "pendente").length;
-
-    const byTipo = Object.entries(TIPO_LABELS).map(([tipo, label]) => ({
-      tipo: tipo as NotificacaoTipo,
-      label,
-      count: statsRows.filter((s) => s.tipo === tipo).length,
-    }));
-
-    return { total, enviados, falhos, pendentes, byTipo };
+    return {
+      total: rows.length,
+      enviados: rows.filter((s) => s.status === "enviado").length,
+      falhos: rows.filter((s) => s.status === "falhou").length,
+      pendentes: rows.filter((s) => s.status === "pendente").length,
+      byTipo: Object.entries(TIPO_LABELS).map(([tipo, label]) => ({
+        tipo: tipo as NotificacaoTipo,
+        label,
+        count: rows.filter((s) => s.tipo === tipo).length,
+      })),
+    };
   });
 
-/**
- * Trigger an Edge Function manually (admin only)
- * Useful for retrying failed notifications
- */
-export const triggerNotificacao = createServerFn({ method: "POST" })
-  .inputValidator((input) => triggerNotificacaoSchema.parse(input))
+/** Marca uma notificação como enviada (após admin clicar em "Abrir WhatsApp"). */
+export const markNotificacaoSent = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
+  .inputValidator((i) => z.object({ id: z.string().uuid() }).parse(i))
+  .handler(async ({ data, context }) => {
+    await assertAdmin(context.userId);
+    const { data: row } = await adminDb
+      .from("notificacoes_log")
+      .select("send_count")
+      .eq("id", data.id)
+      .maybeSingle();
+    const nextCount = (row?.send_count ?? 0) + 1;
+    const { error } = await adminDb
+      .from("notificacoes_log")
+      .update({
+        status: "enviado",
+        enviado_em: new Date().toISOString(),
+        send_count: nextCount,
+      })
+      .eq("id", data.id);
+    if (error) throw new Error(error.message);
+    return { ok: true, send_count: nextCount };
+  });
+
+/** Envia um broadcast (mensagem manual) para uma lista de contatos. */
+const broadcastSchema = z.object({
+  message: z.string().trim().min(3).max(1000),
+  audience: z.enum(["directors_all", "custom"]),
+  team_id: z.string().uuid().optional().nullable(),
+  custom_contacts: z
+    .array(
+      z.object({
+        nome: z.string().max(120).optional().nullable(),
+        phone: z.string().min(8).max(20),
+      }),
+    )
+    .max(200)
+    .optional(),
+});
+
+export const broadcastWhatsapp = createServerFn({ method: "POST" })
+  .middleware([requireSupabaseAuth])
+  .inputValidator((i) => broadcastSchema.parse(i))
   .handler(async ({ data, context }) => {
     await assertAdmin(context.userId);
 
-    const supabaseUrl = process.env["SUPABASE_URL"];
-    const serviceKey = process.env["SUPABASE_SERVICE_ROLE_KEY"];
+    type Contact = { id: string | null; nome: string | null; phone: string };
+    const contacts: Contact[] = [];
 
-    if (!supabaseUrl || !serviceKey) {
-      throw new Error("Supabase credentials not configured");
-    }
-
-    const response = await fetch(
-      `${supabaseUrl}/functions/v1/${data.functionName}`,
-      {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-          Authorization: `Bearer ${serviceKey}`,
-        },
-        body: JSON.stringify(data.payload),
+    if (data.audience === "directors_all") {
+      // busca todos os managers de times aprovados
+      const { data: teams } = await adminDb
+        .from("teams")
+        .select("id, name, manager_id, status");
+      const managerIds = Array.from(
+        new Set(
+          ((teams ?? []) as Array<{ manager_id: string | null }>)
+            .map((t) => t.manager_id)
+            .filter((v): v is string => Boolean(v)),
+        ),
+      );
+      if (managerIds.length) {
+        const { data: profiles } = await adminDb
+          .from("profiles")
+          .select("id, full_name, whatsapp, phone")
+          .in("id", managerIds);
+        for (const p of (profiles ?? []) as Array<{
+          id: string;
+          full_name: string | null;
+          whatsapp: string | null;
+          phone: string | null;
+        }>) {
+          const phone = p.whatsapp || p.phone;
+          if (phone) contacts.push({ id: p.id, nome: p.full_name, phone });
+        }
       }
-    );
-
-    const result = await response.json();
-
-    if (!response.ok) {
-      throw new Error(result.error ?? `Edge Function returned ${response.status}`);
+    } else {
+      for (const c of data.custom_contacts ?? []) {
+        contacts.push({ id: null, nome: c.nome ?? null, phone: c.phone });
+      }
     }
 
-    return result as { success: boolean; log_ids?: string[] };
+    if (contacts.length === 0) throw new Error("Nenhum contato disponível");
+
+    const rows = contacts.map((c) => {
+      const digits = c.phone.replace(/\D+/g, "");
+      const normalized = digits.length <= 11 ? `55${digits}` : digits;
+      const validPhone = digits.length >= 10;
+      return {
+        tipo: "broadcast" as const,
+        canal: "whatsapp" as const,
+        destinatario_id: c.id,
+        destinatario_nome: c.nome,
+        destinatario_phone: validPhone ? normalized : null,
+        corpo_preview: data.message.slice(0, 500),
+        whatsapp_url: validPhone ? buildWaMeUrl(normalized, data.message) : null,
+        status: validPhone ? "pendente" : "falhou",
+        erro_mensagem: validPhone ? null : "Telefone inválido",
+        payload: { audience: data.audience },
+        created_by: context.userId,
+      };
+    });
+
+    const { error } = await adminDb.from("notificacoes_log").insert(rows);
+    if (error) throw new Error(error.message);
+    return { ok: true, count: rows.length };
   });
