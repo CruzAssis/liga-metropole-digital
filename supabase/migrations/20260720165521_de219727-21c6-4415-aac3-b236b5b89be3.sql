@@ -1,0 +1,1 @@
+DELETE FROM public.teams WHERE name='__TEST_FLOW__';
