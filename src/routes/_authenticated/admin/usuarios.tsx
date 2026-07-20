@@ -169,6 +169,26 @@ function UsuariosPage() {
                         }
                       />
                     </td>
+                    <td className="px-4 py-3">
+                      <div className="flex gap-2 justify-end">
+                        <Button
+                          variant="outline" size="sm"
+                          onClick={() => setResetting(u)}
+                          title="Enviar redefinição de senha"
+                          disabled={!u.email}
+                        >
+                          <KeyRound className="h-4 w-4" />
+                        </Button>
+                        <Button
+                          variant="outline" size="sm"
+                          onClick={() => setDeleting(u)}
+                          title="Excluir usuário"
+                          className="border-red-700 text-red-400 hover:bg-red-950 hover:text-red-300"
+                        >
+                          <Trash2 className="h-4 w-4" />
+                        </Button>
+                      </div>
+                    </td>
                   </tr>
                 );
               })}
@@ -176,6 +196,48 @@ function UsuariosPage() {
           </table>
         </div>
       </Card>
+
+      <AlertDialog open={!!resetting} onOpenChange={(v) => { if (!v) setResetting(null); }}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>Enviar redefinição de senha?</AlertDialogTitle>
+            <AlertDialogDescription>
+              Um e-mail será enviado para <b>{resetting?.email}</b> com o link para criar uma nova senha.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel>Cancelar</AlertDialogCancel>
+            <AlertDialogAction
+              disabled={resetMutation.isPending}
+              onClick={(e) => { e.preventDefault(); if (resetting) resetMutation.mutate(resetting.id); }}
+            >
+              {resetMutation.isPending ? "Enviando..." : "Enviar e-mail"}
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
+
+      <AlertDialog open={!!deleting} onOpenChange={(v) => { if (!v) setDeleting(null); }}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>Excluir usuário</AlertDialogTitle>
+            <AlertDialogDescription>
+              Esta ação é irreversível. <b>{deleting?.full_name ?? deleting?.email}</b> será removido do sistema.
+              Times gerenciados por este usuário ficarão sem diretor (transfira antes se necessário).
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel disabled={deleteMutation.isPending}>Cancelar</AlertDialogCancel>
+            <AlertDialogAction
+              disabled={deleteMutation.isPending}
+              className="bg-red-600 hover:bg-red-700 text-white"
+              onClick={(e) => { e.preventDefault(); if (deleting) deleteMutation.mutate(deleting.id); }}
+            >
+              {deleteMutation.isPending ? "Excluindo..." : "Excluir definitivamente"}
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
     </div>
   );
 }
