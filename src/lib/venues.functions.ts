@@ -128,5 +128,11 @@ export const adminDeleteVenue = createServerFn({ method: "POST" })
     const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
     const { error } = await supabaseAdmin.from("venues").delete().eq("id", data.id);
     if (error) throw new Error(error.message);
+    await logAudit({
+      claims: context.claims,
+      action: "venue.delete",
+      entity_type: "venue",
+      entity_id: data.id,
+    });
     return { success: true };
   });

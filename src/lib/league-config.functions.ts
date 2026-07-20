@@ -1,6 +1,7 @@
 import { createServerFn } from "@tanstack/react-start";
 import { z } from "zod";
 import { requireSupabaseAuth } from "@/integrations/supabase/auth-middleware";
+import { logAudit } from "@/lib/audit.server";
 
 async function assertAdmin(supabase: any, userId: string) {
   const { data, error } = await supabase.rpc("has_role", { _user_id: userId, _role: "admin" });
@@ -88,5 +89,12 @@ export const adminSaveLeagueConfig = createServerFn({ method: "POST" })
     };
     const { error } = await supabaseAdmin.from("system_settings").update(patch).eq("id", true);
     if (error) throw new Error(error.message);
+    await logAudit({
+      claims: context.claims,
+      action: "config.update",
+      entity_type: "system_settings",
+      entity_id: "public",
+      metadata: { fields: Object.keys(data) },
+    });
     return { success: true };
   });
