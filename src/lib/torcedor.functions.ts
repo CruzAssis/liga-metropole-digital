@@ -167,19 +167,32 @@ export const castSupporterVote = createServerFn({ method: "POST" })
       throw new Error("Jogador não participou desta partida");
     }
 
+    // Bloqueia voto duplicado: uma vez votado, não permite alterar
+    const { data: existing } = await context.supabase
+      .from("supporter_votes")
+      .select("id")
+      .eq("user_id", context.userId)
+      .eq("match_id", data.match_id)
+      .maybeSingle();
+    if (existing) {
+      throw new Error("Você já votou nesta partida. Só é permitido um voto por partida.");
+    }
+
     const { error } = await context.supabase
       .from("supporter_votes")
-      .upsert(
-        {
-          user_id: context.userId,
-          match_id: data.match_id,
-          athlete_id: data.athlete_id,
-          team_id: athleteTeamId,
-          rating: data.rating,
-        },
-        { onConflict: "user_id,match_id" },
-      );
-    if (error) throw new Error(error.message);
+      .insert({
+        user_id: context.userId,
+        match_id: data.match_id,
+        athlete_id: data.athlete_id,
+        team_id: athleteTeamId,
+        rating: data.rating,
+      });
+    if (error) {
+      if ((error as any).code === "23505") {
+        throw new Error("Você já votou nesta partida.");
+      }
+      throw new Error(error.message);
+    }
     return { ok: true };
   });
 
