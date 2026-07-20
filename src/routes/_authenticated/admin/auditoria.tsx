@@ -98,7 +98,7 @@ function AuditoriaPage() {
         </Button>
       </div>
 
-      <div className="grid sm:grid-cols-[1fr_240px] gap-3">
+      <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-[1fr_200px_180px_180px]">
         <div>
           <Label className="text-xs">Buscar por e-mail, id ou metadados</Label>
           <div className="relative">
@@ -126,6 +126,29 @@ function AuditoriaPage() {
               ))}
             </SelectContent>
           </Select>
+        </div>
+        <div>
+          <Label className="text-xs">De</Label>
+          <Input type="date" value={fromDate} onChange={(e) => setFromDate(e.target.value)} />
+        </div>
+        <div>
+          <Label className="text-xs">Até</Label>
+          <div className="flex gap-1">
+            <Input type="date" value={toDate} onChange={(e) => setToDate(e.target.value)} />
+            {(fromDate || toDate) && (
+              <Button
+                variant="ghost"
+                size="sm"
+                onClick={() => {
+                  setFromDate("");
+                  setToDate("");
+                }}
+                title="Limpar datas"
+              >
+                ✕
+              </Button>
+            )}
+          </div>
         </div>
       </div>
 
