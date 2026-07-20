@@ -214,6 +214,9 @@ function LigasPage() {
       points_win: String((c as any).points_win ?? 3),
       points_draw: String((c as any).points_draw ?? 1),
       points_loss: String((c as any).points_loss ?? 0),
+      yellows_for_suspension: String((c as any).yellows_for_suspension ?? 3),
+      red_suspension_games: String((c as any).red_suspension_games ?? 1),
+      direct_red_suspension_games: String((c as any).direct_red_suspension_games ?? 2),
       regulation_notes: c.regulation_notes ?? "",
     });
 
