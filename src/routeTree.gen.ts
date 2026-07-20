@@ -40,6 +40,7 @@ import { Route as ManifestoSlugRouteImport } from './routes/manifesto.$slug'
 import { Route as ConviteCodeRouteImport } from './routes/convite.$code'
 import { Route as ChaveamentoCompetitionIdRouteImport } from './routes/chaveamento.$competitionId'
 import { Route as AtletasIdRouteImport } from './routes/atletas.$id'
+import { Route as AuthenticatedTorcedorRouteImport } from './routes/_authenticated/torcedor'
 import { Route as AuthenticatedMinhaContaRouteImport } from './routes/_authenticated/minha-conta'
 import { Route as AuthenticatedInscricaoRouteImport } from './routes/_authenticated/inscricao'
 import { Route as AuthenticatedElencoRouteImport } from './routes/_authenticated/elenco'
@@ -220,6 +221,11 @@ const AtletasIdRoute = AtletasIdRouteImport.update({
   path: '/$id',
   getParentRoute: () => AtletasRoute,
 } as any)
+const AuthenticatedTorcedorRoute = AuthenticatedTorcedorRouteImport.update({
+  id: '/torcedor',
+  path: '/torcedor',
+  getParentRoute: () => AuthenticatedRoute,
+} as any)
 const AuthenticatedMinhaContaRoute = AuthenticatedMinhaContaRouteImport.update({
   id: '/minha-conta',
   path: '/minha-conta',
@@ -381,6 +387,7 @@ export interface FileRoutesByFullPath {
   '/elenco': typeof AuthenticatedElencoRoute
   '/inscricao': typeof AuthenticatedInscricaoRoute
   '/minha-conta': typeof AuthenticatedMinhaContaRouteWithChildren
+  '/torcedor': typeof AuthenticatedTorcedorRoute
   '/atletas/$id': typeof AtletasIdRoute
   '/chaveamento/$competitionId': typeof ChaveamentoCompetitionIdRoute
   '/convite/$code': typeof ConviteCodeRoute
@@ -437,6 +444,7 @@ export interface FileRoutesByTo {
   '/elenco': typeof AuthenticatedElencoRoute
   '/inscricao': typeof AuthenticatedInscricaoRoute
   '/minha-conta': typeof AuthenticatedMinhaContaRouteWithChildren
+  '/torcedor': typeof AuthenticatedTorcedorRoute
   '/atletas/$id': typeof AtletasIdRoute
   '/chaveamento/$competitionId': typeof ChaveamentoCompetitionIdRoute
   '/convite/$code': typeof ConviteCodeRoute
@@ -495,6 +503,7 @@ export interface FileRoutesById {
   '/_authenticated/elenco': typeof AuthenticatedElencoRoute
   '/_authenticated/inscricao': typeof AuthenticatedInscricaoRoute
   '/_authenticated/minha-conta': typeof AuthenticatedMinhaContaRouteWithChildren
+  '/_authenticated/torcedor': typeof AuthenticatedTorcedorRoute
   '/atletas/$id': typeof AtletasIdRoute
   '/chaveamento/$competitionId': typeof ChaveamentoCompetitionIdRoute
   '/convite/$code': typeof ConviteCodeRoute
@@ -553,6 +562,7 @@ export interface FileRouteTypes {
     | '/elenco'
     | '/inscricao'
     | '/minha-conta'
+    | '/torcedor'
     | '/atletas/$id'
     | '/chaveamento/$competitionId'
     | '/convite/$code'
@@ -609,6 +619,7 @@ export interface FileRouteTypes {
     | '/elenco'
     | '/inscricao'
     | '/minha-conta'
+    | '/torcedor'
     | '/atletas/$id'
     | '/chaveamento/$competitionId'
     | '/convite/$code'
@@ -666,6 +677,7 @@ export interface FileRouteTypes {
     | '/_authenticated/elenco'
     | '/_authenticated/inscricao'
     | '/_authenticated/minha-conta'
+    | '/_authenticated/torcedor'
     | '/atletas/$id'
     | '/chaveamento/$competitionId'
     | '/convite/$code'
@@ -948,6 +960,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AtletasIdRouteImport
       parentRoute: typeof AtletasRoute
     }
+    '/_authenticated/torcedor': {
+      id: '/_authenticated/torcedor'
+      path: '/torcedor'
+      fullPath: '/torcedor'
+      preLoaderRoute: typeof AuthenticatedTorcedorRouteImport
+      parentRoute: typeof AuthenticatedRoute
+    }
     '/_authenticated/minha-conta': {
       id: '/_authenticated/minha-conta'
       path: '/minha-conta'
@@ -1184,6 +1203,7 @@ interface AuthenticatedRouteChildren {
   AuthenticatedElencoRoute: typeof AuthenticatedElencoRoute
   AuthenticatedInscricaoRoute: typeof AuthenticatedInscricaoRoute
   AuthenticatedMinhaContaRoute: typeof AuthenticatedMinhaContaRouteWithChildren
+  AuthenticatedTorcedorRoute: typeof AuthenticatedTorcedorRoute
 }
 
 const AuthenticatedRouteChildren: AuthenticatedRouteChildren = {
@@ -1191,6 +1211,7 @@ const AuthenticatedRouteChildren: AuthenticatedRouteChildren = {
   AuthenticatedElencoRoute: AuthenticatedElencoRoute,
   AuthenticatedInscricaoRoute: AuthenticatedInscricaoRoute,
   AuthenticatedMinhaContaRoute: AuthenticatedMinhaContaRouteWithChildren,
+  AuthenticatedTorcedorRoute: AuthenticatedTorcedorRoute,
 }
 
 const AuthenticatedRouteWithChildren = AuthenticatedRoute._addFileChildren(
