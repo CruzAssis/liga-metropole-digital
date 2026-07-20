@@ -91,7 +91,7 @@ export const listPublicMedia = createServerFn({ method: "GET" })
     if (data?.limit) q = q.limit(data.limit);
     const { data: rows, error } = await q;
     if (error) throw new Error(error.message);
-    return (rows ?? []) as MediaItem[];
+    return (rows ?? []) as unknown as MediaItem[];
   });
 
 // Admin list — includes unpublished.
@@ -107,7 +107,7 @@ export const adminListMedia = createServerFn({ method: "GET" })
       )
       .order("created_at", { ascending: false });
     if (error) throw new Error(error.message);
-    return (data ?? []) as MediaItem[];
+    return (data ?? []) as unknown as MediaItem[];
   });
 
 const upsertSchema = z.object({
