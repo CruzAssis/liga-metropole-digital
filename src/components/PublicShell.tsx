@@ -22,6 +22,10 @@ export function PublicShell({ children }: { children: React.ReactNode }) {
   const { user, loading, signOut } = useAuth();
   const navigate = useNavigate();
   const [open, setOpen] = useState(false);
+  const cfg = useLeagueConfig();
+  const leagueName = cfg?.league_name || "Liga Metrópole";
+  const contactEmail = cfg?.contact_email || "shelderdouglasdacruz@gmail.com";
+
 
   const pathname = useRouterState({ select: (s) => s.location.pathname });
 
