@@ -266,6 +266,9 @@ function EstatisticasPage() {
           <TabsTrigger value="times">
             <Trophy className="h-4 w-4 mr-1" /> Times
           </TabsTrigger>
+          <TabsTrigger value="jogadores">
+            <Users className="h-4 w-4 mr-1" /> Jogadores
+          </TabsTrigger>
           <TabsTrigger value="confronto">
             <Swords className="h-4 w-4 mr-1" /> Confronto direto
           </TabsTrigger>
