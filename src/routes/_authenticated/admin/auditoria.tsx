@@ -8,7 +8,7 @@ import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { adminListAuditLog, type AuditRow } from "@/lib/audit.functions";
-import { RefreshCw, Search, FileClock } from "lucide-react";
+import { RefreshCw, Search, FileClock, Download } from "lucide-react";
 import { SkeletonAdminPage } from "@/components/AppSkeletons";
 
 export const Route = createFileRoute("/_authenticated/admin/auditoria")({
