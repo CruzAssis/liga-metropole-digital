@@ -154,22 +154,58 @@ function TorcedorPage() {
               Você ainda não tem notificações.
             </p>
           ) : (
-            notifs.map((n: any) => (
-              <div key={n.id} className="rounded-xl border border-border bg-card p-4">
+            notifs.map((n: any) => {
+              const isMvp = n.tipo === "mvp_definido";
+              const mvp = isMvp ? n.payload?.mvp : null;
+              const ranking = isMvp ? (n.payload?.ranking as any[] | undefined) ?? [] : [];
+              return (
+              <div
+                key={n.id}
+                className={`rounded-xl border p-4 ${
+                  isMvp ? "border-yellow-500/30 bg-yellow-500/5" : "border-border bg-card"
+                }`}
+              >
                 <div className="mb-1 flex items-center justify-between gap-2">
-                  <Badge variant="outline" className="text-[10px] uppercase">{n.tipo}</Badge>
+                  <Badge variant="outline" className="text-[10px] uppercase">
+                    {isMvp ? "⭐ Craque da partida" : n.tipo}
+                  </Badge>
                   <span className="text-xs text-muted-foreground">
                     {new Date(n.created_at).toLocaleString("pt-BR")}
                   </span>
                 </div>
                 {n.assunto && <p className="text-sm font-medium">{n.assunto}</p>}
-                {n.corpo_preview && (
+                {isMvp && mvp ? (
+                  <div className="mt-2 space-y-2">
+                    <div className="flex items-center gap-2 rounded-lg bg-background/60 p-2">
+                      <Trophy className="h-5 w-5 text-yellow-400" />
+                      <div className="flex-1">
+                        <p className="text-sm font-semibold">{mvp.name}</p>
+                        <p className="text-xs text-muted-foreground">
+                          {Number(mvp.avg_rating).toFixed(1)}⭐ · {mvp.total_votes} votos
+                        </p>
+                      </div>
+                    </div>
+                    {ranking.length > 1 && (
+                      <div className="space-y-0.5 text-xs">
+                        {ranking.map((r: any, i: number) => (
+                          <div key={r.athlete_id} className="flex justify-between">
+                            <span>{i + 1}º {r.name}</span>
+                            <span className="text-muted-foreground">
+                              {Number(r.avg_rating).toFixed(1)}⭐ ({r.total_votes})
+                            </span>
+                          </div>
+                        ))}
+                      </div>
+                    )}
+                  </div>
+                ) : n.corpo_preview ? (
                   <p className="mt-1 whitespace-pre-line text-sm text-muted-foreground">
                     {n.corpo_preview}
                   </p>
-                )}
+                ) : null}
               </div>
-            ))
+              );
+            })
           )}
         </TabsContent>
 

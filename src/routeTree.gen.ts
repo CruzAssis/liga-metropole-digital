@@ -65,6 +65,7 @@ import { Route as AuthenticatedAdminCalendarioRouteImport } from './routes/_auth
 import { Route as AuthenticatedAdminAuditoriaRouteImport } from './routes/_authenticated/admin/auditoria'
 import { Route as AuthenticatedAdminAtletasRouteImport } from './routes/_authenticated/admin/atletas'
 import { Route as ApiPublicHooksWoCheckerRouteImport } from './routes/api/public/hooks/wo-checker'
+import { Route as ApiPublicHooksCloseVotingRouteImport } from './routes/api/public/hooks/close-voting'
 
 const VerificarRoute = VerificarRouteImport.update({
   id: '/verificar',
@@ -362,6 +363,12 @@ const ApiPublicHooksWoCheckerRoute = ApiPublicHooksWoCheckerRouteImport.update({
   path: '/api/public/hooks/wo-checker',
   getParentRoute: () => rootRouteImport,
 } as any)
+const ApiPublicHooksCloseVotingRoute =
+  ApiPublicHooksCloseVotingRouteImport.update({
+    id: '/api/public/hooks/close-voting',
+    path: '/api/public/hooks/close-voting',
+    getParentRoute: () => rootRouteImport,
+  } as any)
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
@@ -418,6 +425,7 @@ export interface FileRoutesByFullPath {
   '/admin/triagem': typeof AuthenticatedAdminTriagemRoute
   '/admin/usuarios': typeof AuthenticatedAdminUsuariosRoute
   '/minha-conta/excluir-conta': typeof AuthenticatedMinhaContaExcluirContaRoute
+  '/api/public/hooks/close-voting': typeof ApiPublicHooksCloseVotingRoute
   '/api/public/hooks/wo-checker': typeof ApiPublicHooksWoCheckerRoute
 }
 export interface FileRoutesByTo {
@@ -475,6 +483,7 @@ export interface FileRoutesByTo {
   '/admin/triagem': typeof AuthenticatedAdminTriagemRoute
   '/admin/usuarios': typeof AuthenticatedAdminUsuariosRoute
   '/minha-conta/excluir-conta': typeof AuthenticatedMinhaContaExcluirContaRoute
+  '/api/public/hooks/close-voting': typeof ApiPublicHooksCloseVotingRoute
   '/api/public/hooks/wo-checker': typeof ApiPublicHooksWoCheckerRoute
 }
 export interface FileRoutesById {
@@ -534,6 +543,7 @@ export interface FileRoutesById {
   '/_authenticated/admin/triagem': typeof AuthenticatedAdminTriagemRoute
   '/_authenticated/admin/usuarios': typeof AuthenticatedAdminUsuariosRoute
   '/_authenticated/minha-conta/excluir-conta': typeof AuthenticatedMinhaContaExcluirContaRoute
+  '/api/public/hooks/close-voting': typeof ApiPublicHooksCloseVotingRoute
   '/api/public/hooks/wo-checker': typeof ApiPublicHooksWoCheckerRoute
 }
 export interface FileRouteTypes {
@@ -593,6 +603,7 @@ export interface FileRouteTypes {
     | '/admin/triagem'
     | '/admin/usuarios'
     | '/minha-conta/excluir-conta'
+    | '/api/public/hooks/close-voting'
     | '/api/public/hooks/wo-checker'
   fileRoutesByTo: FileRoutesByTo
   to:
@@ -650,6 +661,7 @@ export interface FileRouteTypes {
     | '/admin/triagem'
     | '/admin/usuarios'
     | '/minha-conta/excluir-conta'
+    | '/api/public/hooks/close-voting'
     | '/api/public/hooks/wo-checker'
   id:
     | '__root__'
@@ -708,6 +720,7 @@ export interface FileRouteTypes {
     | '/_authenticated/admin/triagem'
     | '/_authenticated/admin/usuarios'
     | '/_authenticated/minha-conta/excluir-conta'
+    | '/api/public/hooks/close-voting'
     | '/api/public/hooks/wo-checker'
   fileRoutesById: FileRoutesById
 }
@@ -738,6 +751,7 @@ export interface RootRouteChildren {
   PartidasIdRoute: typeof PartidasIdRoute
   SumulaVisualPartidaIdRoute: typeof SumulaVisualPartidaIdRoute
   SumulaPartidaIdRoute: typeof SumulaPartidaIdRoute
+  ApiPublicHooksCloseVotingRoute: typeof ApiPublicHooksCloseVotingRoute
   ApiPublicHooksWoCheckerRoute: typeof ApiPublicHooksWoCheckerRoute
 }
 
@@ -1135,6 +1149,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof ApiPublicHooksWoCheckerRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/api/public/hooks/close-voting': {
+      id: '/api/public/hooks/close-voting'
+      path: '/api/public/hooks/close-voting'
+      fullPath: '/api/public/hooks/close-voting'
+      preLoaderRoute: typeof ApiPublicHooksCloseVotingRouteImport
+      parentRoute: typeof rootRouteImport
+    }
   }
 }
 
@@ -1282,6 +1303,7 @@ const rootRouteChildren: RootRouteChildren = {
   PartidasIdRoute: PartidasIdRoute,
   SumulaVisualPartidaIdRoute: SumulaVisualPartidaIdRoute,
   SumulaPartidaIdRoute: SumulaPartidaIdRoute,
+  ApiPublicHooksCloseVotingRoute: ApiPublicHooksCloseVotingRoute,
   ApiPublicHooksWoCheckerRoute: ApiPublicHooksWoCheckerRoute,
 }
 export const routeTree = rootRouteImport
