@@ -1,6 +1,7 @@
 // @ts-nocheck
 import { createFileRoute, Link, useNavigate } from '@tanstack/react-router'
 import { useState, useEffect, type ChangeEvent, type FormEvent } from 'react'
+import { useServerFn } from '@tanstack/react-start'
 import { supabase } from '@/integrations/supabase/client'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
@@ -9,6 +10,8 @@ import { toast } from 'sonner'
 import { Spinner } from '@/components/AppSkeletons'
 import { Shirt, Star, Users, Check, ArrowLeft } from 'lucide-react'
 import { safeInternalPath } from '@/lib/public-url'
+import { assignSelfRoles } from '@/lib/onboarding.functions'
+
 
 export const Route = createFileRoute('/signup')({
   component: SignupPage,
