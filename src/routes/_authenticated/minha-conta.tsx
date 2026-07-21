@@ -13,7 +13,7 @@ import {
   ClipboardList, ExternalLink, User2, DollarSign,
   CheckCircle, Clock, AlertTriangle, CreditCard,
   Users, UserPlus, CalendarDays, Copy, Share2,
-  Shield, Trophy, Pencil,
+  Shield, Trophy, Pencil, Gavel,
 } from "lucide-react";
 
 import {
@@ -428,6 +428,14 @@ function DirectorHeroCard({ team, onSaved }: { team: Team; onSaved: () => void |
           >
             <Trophy className="h-6 w-6 text-[#5B9BFF]" />
             <span className="font-semibold text-base">Ranking da Conferência</span>
+          </Link>
+
+          <Link
+            to="/arbitros-avaliar"
+            className="group flex items-center justify-center gap-3 rounded-xl bg-zinc-900 hover:bg-zinc-800 border border-zinc-700 hover:border-[#1565F5]/60 text-white px-4 py-4 text-center transition-all sm:col-span-2"
+          >
+            <Gavel className="h-6 w-6 text-[#5B9BFF]" />
+            <span className="font-semibold text-base">Avaliar Árbitros</span>
           </Link>
         </div>
       </div>

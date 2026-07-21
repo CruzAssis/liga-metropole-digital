@@ -26,6 +26,7 @@ import { Route as LocaisRouteImport } from './routes/locais'
 import { Route as ForgotPasswordRouteImport } from './routes/forgot-password'
 import { Route as EstatisticasRouteImport } from './routes/estatisticas'
 import { Route as AtletasRouteImport } from './routes/atletas'
+import { Route as ArbitrosRouteImport } from './routes/arbitros'
 import { Route as AgendaRouteImport } from './routes/agenda'
 import { Route as AuthenticatedRouteImport } from './routes/_authenticated'
 import { Route as IndexRouteImport } from './routes/index'
@@ -44,6 +45,7 @@ import { Route as AuthenticatedTorcedorRouteImport } from './routes/_authenticat
 import { Route as AuthenticatedMinhaContaRouteImport } from './routes/_authenticated/minha-conta'
 import { Route as AuthenticatedInscricaoRouteImport } from './routes/_authenticated/inscricao'
 import { Route as AuthenticatedElencoRouteImport } from './routes/_authenticated/elenco'
+import { Route as AuthenticatedArbitrosAvaliarRouteImport } from './routes/_authenticated/arbitros-avaliar'
 import { Route as AuthenticatedAdminRouteImport } from './routes/_authenticated/admin'
 import { Route as AuthenticatedMinhaContaExcluirContaRouteImport } from './routes/_authenticated/minha-conta/excluir-conta'
 import { Route as AuthenticatedAdminUsuariosRouteImport } from './routes/_authenticated/admin/usuarios'
@@ -65,6 +67,7 @@ import { Route as AuthenticatedAdminConfiguracoesRouteImport } from './routes/_a
 import { Route as AuthenticatedAdminCalendarioRouteImport } from './routes/_authenticated/admin/calendario'
 import { Route as AuthenticatedAdminAuditoriaRouteImport } from './routes/_authenticated/admin/auditoria'
 import { Route as AuthenticatedAdminAtletasRouteImport } from './routes/_authenticated/admin/atletas'
+import { Route as AuthenticatedAdminArbitrosRouteImport } from './routes/_authenticated/admin/arbitros'
 import { Route as ApiPublicHooksWoCheckerRouteImport } from './routes/api/public/hooks/wo-checker'
 import { Route as ApiPublicHooksCloseVotingRouteImport } from './routes/api/public/hooks/close-voting'
 
@@ -151,6 +154,11 @@ const EstatisticasRoute = EstatisticasRouteImport.update({
 const AtletasRoute = AtletasRouteImport.update({
   id: '/atletas',
   path: '/atletas',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ArbitrosRoute = ArbitrosRouteImport.update({
+  id: '/arbitros',
+  path: '/arbitros',
   getParentRoute: () => rootRouteImport,
 } as any)
 const AgendaRoute = AgendaRouteImport.update({
@@ -243,6 +251,12 @@ const AuthenticatedElencoRoute = AuthenticatedElencoRouteImport.update({
   path: '/elenco',
   getParentRoute: () => AuthenticatedRoute,
 } as any)
+const AuthenticatedArbitrosAvaliarRoute =
+  AuthenticatedArbitrosAvaliarRouteImport.update({
+    id: '/arbitros-avaliar',
+    path: '/arbitros-avaliar',
+    getParentRoute: () => AuthenticatedRoute,
+  } as any)
 const AuthenticatedAdminRoute = AuthenticatedAdminRouteImport.update({
   id: '/admin',
   path: '/admin',
@@ -365,6 +379,12 @@ const AuthenticatedAdminAtletasRoute =
     path: '/atletas',
     getParentRoute: () => AuthenticatedAdminRoute,
   } as any)
+const AuthenticatedAdminArbitrosRoute =
+  AuthenticatedAdminArbitrosRouteImport.update({
+    id: '/arbitros',
+    path: '/arbitros',
+    getParentRoute: () => AuthenticatedAdminRoute,
+  } as any)
 const ApiPublicHooksWoCheckerRoute = ApiPublicHooksWoCheckerRouteImport.update({
   id: '/api/public/hooks/wo-checker',
   path: '/api/public/hooks/wo-checker',
@@ -380,6 +400,7 @@ const ApiPublicHooksCloseVotingRoute =
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
   '/agenda': typeof AgendaRoute
+  '/arbitros': typeof ArbitrosRoute
   '/atletas': typeof AtletasRouteWithChildren
   '/estatisticas': typeof EstatisticasRoute
   '/forgot-password': typeof ForgotPasswordRoute
@@ -398,6 +419,7 @@ export interface FileRoutesByFullPath {
   '/times': typeof TimesRouteWithChildren
   '/verificar': typeof VerificarRoute
   '/admin': typeof AuthenticatedAdminRouteWithChildren
+  '/arbitros-avaliar': typeof AuthenticatedArbitrosAvaliarRoute
   '/elenco': typeof AuthenticatedElencoRoute
   '/inscricao': typeof AuthenticatedInscricaoRoute
   '/minha-conta': typeof AuthenticatedMinhaContaRouteWithChildren
@@ -413,6 +435,7 @@ export interface FileRoutesByFullPath {
   '/sumula-visual/$partidaId': typeof SumulaVisualPartidaIdRoute
   '/sumula/$partidaId': typeof SumulaPartidaIdRoute
   '/times/$slug': typeof TimesSlugRoute
+  '/admin/arbitros': typeof AuthenticatedAdminArbitrosRoute
   '/admin/atletas': typeof AuthenticatedAdminAtletasRoute
   '/admin/auditoria': typeof AuthenticatedAdminAuditoriaRoute
   '/admin/calendario': typeof AuthenticatedAdminCalendarioRoute
@@ -439,6 +462,7 @@ export interface FileRoutesByFullPath {
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
   '/agenda': typeof AgendaRoute
+  '/arbitros': typeof ArbitrosRoute
   '/atletas': typeof AtletasRouteWithChildren
   '/estatisticas': typeof EstatisticasRoute
   '/forgot-password': typeof ForgotPasswordRoute
@@ -457,6 +481,7 @@ export interface FileRoutesByTo {
   '/times': typeof TimesRouteWithChildren
   '/verificar': typeof VerificarRoute
   '/admin': typeof AuthenticatedAdminRouteWithChildren
+  '/arbitros-avaliar': typeof AuthenticatedArbitrosAvaliarRoute
   '/elenco': typeof AuthenticatedElencoRoute
   '/inscricao': typeof AuthenticatedInscricaoRoute
   '/minha-conta': typeof AuthenticatedMinhaContaRouteWithChildren
@@ -472,6 +497,7 @@ export interface FileRoutesByTo {
   '/sumula-visual/$partidaId': typeof SumulaVisualPartidaIdRoute
   '/sumula/$partidaId': typeof SumulaPartidaIdRoute
   '/times/$slug': typeof TimesSlugRoute
+  '/admin/arbitros': typeof AuthenticatedAdminArbitrosRoute
   '/admin/atletas': typeof AuthenticatedAdminAtletasRoute
   '/admin/auditoria': typeof AuthenticatedAdminAuditoriaRoute
   '/admin/calendario': typeof AuthenticatedAdminCalendarioRoute
@@ -500,6 +526,7 @@ export interface FileRoutesById {
   '/': typeof IndexRoute
   '/_authenticated': typeof AuthenticatedRouteWithChildren
   '/agenda': typeof AgendaRoute
+  '/arbitros': typeof ArbitrosRoute
   '/atletas': typeof AtletasRouteWithChildren
   '/estatisticas': typeof EstatisticasRoute
   '/forgot-password': typeof ForgotPasswordRoute
@@ -518,6 +545,7 @@ export interface FileRoutesById {
   '/times': typeof TimesRouteWithChildren
   '/verificar': typeof VerificarRoute
   '/_authenticated/admin': typeof AuthenticatedAdminRouteWithChildren
+  '/_authenticated/arbitros-avaliar': typeof AuthenticatedArbitrosAvaliarRoute
   '/_authenticated/elenco': typeof AuthenticatedElencoRoute
   '/_authenticated/inscricao': typeof AuthenticatedInscricaoRoute
   '/_authenticated/minha-conta': typeof AuthenticatedMinhaContaRouteWithChildren
@@ -533,6 +561,7 @@ export interface FileRoutesById {
   '/sumula-visual/$partidaId': typeof SumulaVisualPartidaIdRoute
   '/sumula/$partidaId': typeof SumulaPartidaIdRoute
   '/times/$slug': typeof TimesSlugRoute
+  '/_authenticated/admin/arbitros': typeof AuthenticatedAdminArbitrosRoute
   '/_authenticated/admin/atletas': typeof AuthenticatedAdminAtletasRoute
   '/_authenticated/admin/auditoria': typeof AuthenticatedAdminAuditoriaRoute
   '/_authenticated/admin/calendario': typeof AuthenticatedAdminCalendarioRoute
@@ -561,6 +590,7 @@ export interface FileRouteTypes {
   fullPaths:
     | '/'
     | '/agenda'
+    | '/arbitros'
     | '/atletas'
     | '/estatisticas'
     | '/forgot-password'
@@ -579,6 +609,7 @@ export interface FileRouteTypes {
     | '/times'
     | '/verificar'
     | '/admin'
+    | '/arbitros-avaliar'
     | '/elenco'
     | '/inscricao'
     | '/minha-conta'
@@ -594,6 +625,7 @@ export interface FileRouteTypes {
     | '/sumula-visual/$partidaId'
     | '/sumula/$partidaId'
     | '/times/$slug'
+    | '/admin/arbitros'
     | '/admin/atletas'
     | '/admin/auditoria'
     | '/admin/calendario'
@@ -620,6 +652,7 @@ export interface FileRouteTypes {
   to:
     | '/'
     | '/agenda'
+    | '/arbitros'
     | '/atletas'
     | '/estatisticas'
     | '/forgot-password'
@@ -638,6 +671,7 @@ export interface FileRouteTypes {
     | '/times'
     | '/verificar'
     | '/admin'
+    | '/arbitros-avaliar'
     | '/elenco'
     | '/inscricao'
     | '/minha-conta'
@@ -653,6 +687,7 @@ export interface FileRouteTypes {
     | '/sumula-visual/$partidaId'
     | '/sumula/$partidaId'
     | '/times/$slug'
+    | '/admin/arbitros'
     | '/admin/atletas'
     | '/admin/auditoria'
     | '/admin/calendario'
@@ -680,6 +715,7 @@ export interface FileRouteTypes {
     | '/'
     | '/_authenticated'
     | '/agenda'
+    | '/arbitros'
     | '/atletas'
     | '/estatisticas'
     | '/forgot-password'
@@ -698,6 +734,7 @@ export interface FileRouteTypes {
     | '/times'
     | '/verificar'
     | '/_authenticated/admin'
+    | '/_authenticated/arbitros-avaliar'
     | '/_authenticated/elenco'
     | '/_authenticated/inscricao'
     | '/_authenticated/minha-conta'
@@ -713,6 +750,7 @@ export interface FileRouteTypes {
     | '/sumula-visual/$partidaId'
     | '/sumula/$partidaId'
     | '/times/$slug'
+    | '/_authenticated/admin/arbitros'
     | '/_authenticated/admin/atletas'
     | '/_authenticated/admin/auditoria'
     | '/_authenticated/admin/calendario'
@@ -741,6 +779,7 @@ export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
   AuthenticatedRoute: typeof AuthenticatedRouteWithChildren
   AgendaRoute: typeof AgendaRoute
+  ArbitrosRoute: typeof ArbitrosRoute
   AtletasRoute: typeof AtletasRouteWithChildren
   EstatisticasRoute: typeof EstatisticasRoute
   ForgotPasswordRoute: typeof ForgotPasswordRoute
@@ -889,6 +928,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AtletasRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/arbitros': {
+      id: '/arbitros'
+      path: '/arbitros'
+      fullPath: '/arbitros'
+      preLoaderRoute: typeof ArbitrosRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/agenda': {
       id: '/agenda'
       path: '/agenda'
@@ -1013,6 +1059,13 @@ declare module '@tanstack/react-router' {
       path: '/elenco'
       fullPath: '/elenco'
       preLoaderRoute: typeof AuthenticatedElencoRouteImport
+      parentRoute: typeof AuthenticatedRoute
+    }
+    '/_authenticated/arbitros-avaliar': {
+      id: '/_authenticated/arbitros-avaliar'
+      path: '/arbitros-avaliar'
+      fullPath: '/arbitros-avaliar'
+      preLoaderRoute: typeof AuthenticatedArbitrosAvaliarRouteImport
       parentRoute: typeof AuthenticatedRoute
     }
     '/_authenticated/admin': {
@@ -1162,6 +1215,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedAdminAtletasRouteImport
       parentRoute: typeof AuthenticatedAdminRoute
     }
+    '/_authenticated/admin/arbitros': {
+      id: '/_authenticated/admin/arbitros'
+      path: '/arbitros'
+      fullPath: '/admin/arbitros'
+      preLoaderRoute: typeof AuthenticatedAdminArbitrosRouteImport
+      parentRoute: typeof AuthenticatedAdminRoute
+    }
     '/api/public/hooks/wo-checker': {
       id: '/api/public/hooks/wo-checker'
       path: '/api/public/hooks/wo-checker'
@@ -1180,6 +1240,7 @@ declare module '@tanstack/react-router' {
 }
 
 interface AuthenticatedAdminRouteChildren {
+  AuthenticatedAdminArbitrosRoute: typeof AuthenticatedAdminArbitrosRoute
   AuthenticatedAdminAtletasRoute: typeof AuthenticatedAdminAtletasRoute
   AuthenticatedAdminAuditoriaRoute: typeof AuthenticatedAdminAuditoriaRoute
   AuthenticatedAdminCalendarioRoute: typeof AuthenticatedAdminCalendarioRoute
@@ -1202,6 +1263,7 @@ interface AuthenticatedAdminRouteChildren {
 }
 
 const AuthenticatedAdminRouteChildren: AuthenticatedAdminRouteChildren = {
+  AuthenticatedAdminArbitrosRoute: AuthenticatedAdminArbitrosRoute,
   AuthenticatedAdminAtletasRoute: AuthenticatedAdminAtletasRoute,
   AuthenticatedAdminAuditoriaRoute: AuthenticatedAdminAuditoriaRoute,
   AuthenticatedAdminCalendarioRoute: AuthenticatedAdminCalendarioRoute,
@@ -1243,6 +1305,7 @@ const AuthenticatedMinhaContaRouteWithChildren =
 
 interface AuthenticatedRouteChildren {
   AuthenticatedAdminRoute: typeof AuthenticatedAdminRouteWithChildren
+  AuthenticatedArbitrosAvaliarRoute: typeof AuthenticatedArbitrosAvaliarRoute
   AuthenticatedElencoRoute: typeof AuthenticatedElencoRoute
   AuthenticatedInscricaoRoute: typeof AuthenticatedInscricaoRoute
   AuthenticatedMinhaContaRoute: typeof AuthenticatedMinhaContaRouteWithChildren
@@ -1251,6 +1314,7 @@ interface AuthenticatedRouteChildren {
 
 const AuthenticatedRouteChildren: AuthenticatedRouteChildren = {
   AuthenticatedAdminRoute: AuthenticatedAdminRouteWithChildren,
+  AuthenticatedArbitrosAvaliarRoute: AuthenticatedArbitrosAvaliarRoute,
   AuthenticatedElencoRoute: AuthenticatedElencoRoute,
   AuthenticatedInscricaoRoute: AuthenticatedInscricaoRoute,
   AuthenticatedMinhaContaRoute: AuthenticatedMinhaContaRouteWithChildren,
@@ -1302,6 +1366,7 @@ const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
   AuthenticatedRoute: AuthenticatedRouteWithChildren,
   AgendaRoute: AgendaRoute,
+  ArbitrosRoute: ArbitrosRoute,
   AtletasRoute: AtletasRouteWithChildren,
   EstatisticasRoute: EstatisticasRoute,
   ForgotPasswordRoute: ForgotPasswordRoute,

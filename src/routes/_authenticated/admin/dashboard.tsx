@@ -504,6 +504,15 @@ function AdminDashboard() {
               <AlertTriangle className="h-4 w-4" /> Disciplina
             </Link>
           </Button>
+          <Button
+            asChild
+            variant="outline"
+            className="border-zinc-700 text-zinc-200 hover:bg-zinc-800 gap-2"
+          >
+            <Link to="/admin/arbitros">
+              <AlertTriangle className="h-4 w-4" /> Árbitros
+            </Link>
+          </Button>
         </div>
       </div>
 

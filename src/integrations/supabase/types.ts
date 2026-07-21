@@ -492,6 +492,45 @@ export type Database = {
           },
         ]
       }
+      match_referees: {
+        Row: {
+          created_at: string
+          id: string
+          match_id: string
+          referee_id: string
+          role: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          match_id: string
+          referee_id: string
+          role?: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          match_id?: string
+          referee_id?: string
+          role?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "match_referees_match_id_fkey"
+            columns: ["match_id"]
+            isOneToOne: false
+            referencedRelation: "matches"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "match_referees_referee_id_fkey"
+            columns: ["referee_id"]
+            isOneToOne: false
+            referencedRelation: "referees"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       matches: {
         Row: {
           bracket_position: number | null
@@ -842,6 +881,103 @@ export type Database = {
           phone?: string | null
           position?: string | null
           profile_type?: string | null
+          whatsapp?: string | null
+        }
+        Relationships: []
+      }
+      referee_ratings: {
+        Row: {
+          comment: string | null
+          created_at: string
+          id: string
+          match_id: string
+          rater_user_id: string
+          rating: number
+          referee_id: string
+          team_id: string | null
+          updated_at: string
+        }
+        Insert: {
+          comment?: string | null
+          created_at?: string
+          id?: string
+          match_id: string
+          rater_user_id: string
+          rating: number
+          referee_id: string
+          team_id?: string | null
+          updated_at?: string
+        }
+        Update: {
+          comment?: string | null
+          created_at?: string
+          id?: string
+          match_id?: string
+          rater_user_id?: string
+          rating?: number
+          referee_id?: string
+          team_id?: string | null
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "referee_ratings_match_id_fkey"
+            columns: ["match_id"]
+            isOneToOne: false
+            referencedRelation: "matches"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "referee_ratings_referee_id_fkey"
+            columns: ["referee_id"]
+            isOneToOne: false
+            referencedRelation: "referees"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "referee_ratings_team_id_fkey"
+            columns: ["team_id"]
+            isOneToOne: false
+            referencedRelation: "teams"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      referees: {
+        Row: {
+          active: boolean
+          city: string | null
+          created_at: string
+          full_name: string
+          id: string
+          nickname: string | null
+          notes: string | null
+          photo_url: string | null
+          updated_at: string
+          whatsapp: string | null
+        }
+        Insert: {
+          active?: boolean
+          city?: string | null
+          created_at?: string
+          full_name: string
+          id?: string
+          nickname?: string | null
+          notes?: string | null
+          photo_url?: string | null
+          updated_at?: string
+          whatsapp?: string | null
+        }
+        Update: {
+          active?: boolean
+          city?: string | null
+          created_at?: string
+          full_name?: string
+          id?: string
+          nickname?: string | null
+          notes?: string | null
+          photo_url?: string | null
+          updated_at?: string
           whatsapp?: string | null
         }
         Relationships: []
@@ -1256,6 +1392,14 @@ export type Database = {
           team_primary_color: string
           team_short_name: string
           total_evaluations: number
+        }[]
+      }
+      get_referee_stats: {
+        Args: { _referee_id: string }
+        Returns: {
+          avg_rating: number
+          total_matches: number
+          total_ratings: number
         }[]
       }
       get_supporter_mvp: {
