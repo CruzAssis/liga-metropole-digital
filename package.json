@@ -11,7 +11,8 @@
     "lint": "eslint .",
     "format": "prettier --write .",
     "test": "bun test",
-    "test:rls": "bun test tests/rls-privacy.test.ts"
+    "test:rls": "bun test tests/rls-privacy.test.ts",
+    "test:invite": "bun test tests/invite-flow.test.ts"
   },
   "dependencies": {
     "@cloudflare/vite-plugin": "^1.25.5",
