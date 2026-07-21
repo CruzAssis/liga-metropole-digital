@@ -11,6 +11,31 @@ export type ManifestoTeam = {
 }
 
 export function ManifestoContent({ team }: { team: ManifestoTeam }) {
+  const flyerRef = useRef<HTMLElement | null>(null)
+  const [exporting, setExporting] = useState(false)
+
+  async function handleDownloadImage() {
+    if (!flyerRef.current || exporting) return
+    setExporting(true)
+    try {
+      const dataUrl = await toJpeg(flyerRef.current, {
+        quality: 0.92,
+        pixelRatio: 2,
+        backgroundColor: '#000000',
+        cacheBust: true,
+      })
+      const a = document.createElement('a')
+      const safe = team.name.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/^-|-$/g, '')
+      a.download = `manifesto-${safe || 'liga-metropole'}.jpg`
+      a.href = dataUrl
+      a.click()
+    } catch (e) {
+      console.error('[manifesto] falha ao gerar imagem', e)
+    } finally {
+      setExporting(false)
+    }
+  }
+
   return (
     <div className="min-h-screen bg-black text-white relative overflow-hidden">
       <div className="absolute top-0 left-0 right-0 h-1.5 bg-[#1565F5]" aria-hidden />
