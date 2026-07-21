@@ -65,7 +65,7 @@ function TorcedorOnboarding() {
         if (error) throw error
       }
       toast.success('Agora você torce por ' + selectedTeam.name + '!')
-      navigate({ to: '/minha-conta', replace: true })
+      navigate({ to: '/torcedor', replace: true })
     } catch (err) {
       const msg = err instanceof Error ? err.message : 'Erro ao selecionar time'
       setErrorMsg(msg)
@@ -160,7 +160,7 @@ function TorcedorOnboarding() {
 
         <button
           type="button"
-          onClick={() => navigate({ to: '/minha-conta', replace: true })}
+          onClick={() => navigate({ to: '/torcedor', replace: true })}
           className="w-full text-center text-sm text-zinc-500 hover:text-zinc-300 transition-colors"
         >
           Fazer isso depois
