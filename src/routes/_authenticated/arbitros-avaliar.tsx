@@ -87,6 +87,29 @@ function DirectorRateRefereesPage() {
     return { pendentes: pend, historico: hist };
   }, [rows]);
 
+  const historicoSorted = useMemo(() => {
+    const scored = historico.map((m) => {
+      const rated = m.assignments.filter((a) => a.my_rating != null);
+      const mostRecent = rated.reduce((acc, a) => {
+        const t = a.my_rating_at ? new Date(a.my_rating_at).getTime() : 0;
+        return t > acc ? t : acc;
+      }, 0);
+      const ratings = rated.map((a) => a.my_rating as number);
+      const maxRating = ratings.length ? Math.max(...ratings) : 0;
+      const minRating = ratings.length ? Math.min(...ratings) : 0;
+      const avgRating = ratings.length ? ratings.reduce((s, x) => s + x, 0) / ratings.length : 0;
+      return { m, mostRecent, maxRating, minRating, avgRating };
+    });
+    if (sortHist === "rating_desc") {
+      scored.sort((a, b) => b.avgRating - a.avgRating || b.mostRecent - a.mostRecent);
+    } else if (sortHist === "rating_asc") {
+      scored.sort((a, b) => a.avgRating - b.avgRating || b.mostRecent - a.mostRecent);
+    } else {
+      scored.sort((a, b) => b.mostRecent - a.mostRecent);
+    }
+    return scored.map((s) => s.m);
+  }, [historico, sortHist]);
+
   return (
     <div className="p-4 sm:p-6 max-w-3xl mx-auto">
       <Button asChild variant="ghost" size="sm" className="mb-4 -ml-2">
