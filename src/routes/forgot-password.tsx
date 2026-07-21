@@ -7,6 +7,7 @@ import { Label } from "@/components/ui/label";
 import { toast } from "sonner";
 import { Spinner } from "@/components/AppSkeletons";
 import { BrandLogo } from "@/components/BrandLogo";
+import { publicUrl } from "@/lib/public-url";
 
 export const Route = createFileRoute("/forgot-password")({
   component: ForgotPasswordPage,
@@ -21,7 +22,7 @@ function ForgotPasswordPage() {
     e.preventDefault();
     if (!email.trim()) return;
     setSending(true);
-    const redirectTo = `${window.location.origin}/reset-password`;
+    const redirectTo = publicUrl("/reset-password");
     const { error } = await supabase.auth.resetPasswordForEmail(email.trim(), {
       redirectTo,
     });

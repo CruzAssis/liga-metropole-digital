@@ -15,14 +15,13 @@ import {
   saveGoals,
   rateOpponentBest,
 } from '@/lib/match-sumula.functions'
+import { publicUrl } from '@/lib/public-url'
 
 
 // ── Share Buttons ──────────────────────────────────────────────────────────
 function ShareButtons({ match, votes }: { match: Match; votes: BestVote[] }) {
   const [copied, setCopied] = useState(false)
-  const matchUrl = typeof window !== 'undefined'
-    ? window.location.href
-    : `https://liga-metropole.app/partidas/${match.id}`
+  const matchUrl = publicUrl(`/partidas/${match.id}`)
 
   const topVote = votes[0]
   const destaqueText = topVote

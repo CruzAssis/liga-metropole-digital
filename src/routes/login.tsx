@@ -11,6 +11,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { BrandLogo } from "@/components/BrandLogo";
 import { Spinner } from "@/components/AppSkeletons";
+import { safeInternalPath } from "@/lib/public-url";
 
 const schema = z.object({
   email: z.string().email("Email inválido").max(255),
@@ -33,14 +34,17 @@ function LoginPage() {
   const { user, loading } = useAuth();
   const navigate = useNavigate();
   const { redirect: redirectTo } = useSearch({ from: "/login" });
+  const safeRedirect = safeInternalPath(redirectTo, "/");
+  const hasRedirect = Boolean(redirectTo);
   const [submitting, setSubmitting] = useState(false);
 
   // Se ja esta autenticado, vai para redirect ou home
   useEffect(() => {
     if (!loading && user) {
-      navigate({ to: redirectTo ?? "/", replace: true });
+      if (hasRedirect) window.location.replace(safeRedirect);
+      else navigate({ to: "/", replace: true });
     }
-  }, [user, loading, navigate, redirectTo]);
+  }, [user, loading, navigate, hasRedirect, safeRedirect]);
 
   const { register, handleSubmit, formState: { errors } } = useForm<FormData>({
     resolver: zodResolver(schema),
@@ -68,7 +72,8 @@ function LoginPage() {
         return;
       }
       toast.success("Bem-vindo de volta!");
-      navigate({ to: redirectTo ?? "/", replace: true });
+      if (hasRedirect) window.location.replace(safeRedirect);
+      else navigate({ to: "/", replace: true });
     } catch (err) {
       const msg = err instanceof Error ? err.message : "Erro inesperado ao entrar.";
       toast.error("Não foi possível entrar", { description: msg });
@@ -88,7 +93,7 @@ function LoginPage() {
         <div className="rounded-lg border border-border bg-card p-8">
           <h1 className="font-display text-3xl tracking-wide mb-1">Entrar</h1>
           <p className="text-sm text-muted-foreground mb-6">
-            {redirectTo === "/inscricao"
+            {safeRedirect === "/inscricao"
               ? "Entre na sua conta para inscrever seu time."
               : "Acesse sua conta de gestor."}
           </p>
