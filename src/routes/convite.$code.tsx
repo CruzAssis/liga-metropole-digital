@@ -89,17 +89,12 @@ function InvitePage() {
 
         setTeam(t);
 
-        // Auto-join if user is already authenticated to avoid landing on wrong pages.
+        // Auto-join if user is already authenticated; show confirmation screen after.
         if (authed) {
           try {
             const joinRes = await doJoin({ data: { invite_code: normalizedCode } });
             if (cancelled) return;
-            toast.success(
-              joinRes.already_member
-                ? `Você já fazia parte de ${joinRes.team_name}!`
-                : `Bem-vindo(a) ao ${joinRes.team_name}!`,
-            );
-            navigate({ to: "/minha-conta", replace: true });
+            setJoined({ teamName: joinRes.team_name, alreadyMember: joinRes.already_member });
             return;
           } catch {
             // Fall through to manual join button if auto-join fails
