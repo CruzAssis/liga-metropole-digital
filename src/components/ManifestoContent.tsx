@@ -17,12 +17,32 @@ export function ManifestoContent({ team }: { team: ManifestoTeam }) {
   async function handleDownloadImage() {
     if (!flyerRef.current || exporting) return
     setExporting(true)
+    // Força largura de desktop para não sair cortado em telas pequenas
+    const node = flyerRef.current
+    const EXPORT_WIDTH = 720
+    const prevWidth = node.style.width
+    const prevMaxWidth = node.style.maxWidth
+    node.style.width = `${EXPORT_WIDTH}px`
+    node.style.maxWidth = `${EXPORT_WIDTH}px`
+    // Aguarda o layout recalcular antes de capturar
+    await new Promise((r) => requestAnimationFrame(() => requestAnimationFrame(r)))
     try {
-      const dataUrl = await toJpeg(flyerRef.current, {
+      const height = Math.max(node.scrollHeight, node.offsetHeight)
+      const dataUrl = await toJpeg(node, {
         quality: 0.92,
         pixelRatio: 2,
         backgroundColor: '#000000',
         cacheBust: true,
+        width: EXPORT_WIDTH,
+        height,
+        canvasWidth: EXPORT_WIDTH,
+        canvasHeight: height,
+        style: {
+          margin: '0',
+          transform: 'none',
+          width: `${EXPORT_WIDTH}px`,
+          height: `${height}px`,
+        },
       })
       const a = document.createElement('a')
       const safe = team.name.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/^-|-$/g, '')
@@ -32,6 +52,8 @@ export function ManifestoContent({ team }: { team: ManifestoTeam }) {
     } catch (e) {
       console.error('[manifesto] falha ao gerar imagem', e)
     } finally {
+      node.style.width = prevWidth
+      node.style.maxWidth = prevMaxWidth
       setExporting(false)
     }
   }
