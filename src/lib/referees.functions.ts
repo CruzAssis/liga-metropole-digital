@@ -331,11 +331,14 @@ export const rateReferee = createServerFn({ method: "POST" })
     // confirm caller directs one of the teams in the match
     const { data: match, error: mErr } = await supabase
       .from("matches")
-      .select("host_team_id, visitor_team_id")
+      .select("host_team_id, visitor_team_id, status")
       .eq("id", data.match_id)
       .maybeSingle();
     if (mErr) throw new Error(mErr.message);
     if (!match) throw new Response("Partida não encontrada", { status: 404 });
+    if (match.status === "closed") {
+      throw new Response("Partida encerrada: avaliação bloqueada", { status: 403 });
+    }
     const [{ data: isHostDir }, { data: isVisDir }] = await Promise.all([
       supabase.rpc("is_team_director", { _user_id: userId, _team_id: match.host_team_id }),
       supabase.rpc("is_team_director", { _user_id: userId, _team_id: match.visitor_team_id }),
