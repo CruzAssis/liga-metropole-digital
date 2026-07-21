@@ -57,7 +57,8 @@ function SignupPage() {
     ;(async () => {
       const { data } = await supabase.auth.getUser()
       if (data.user) {
-        navigate({ to: '/minha-conta', replace: true })
+        if (redirectTo) window.location.replace(redirectTo)
+        else navigate({ to: '/minha-conta', replace: true })
       } else {
         setCheckingAuth(false)
       }
