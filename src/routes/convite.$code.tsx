@@ -5,7 +5,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
 import { Spinner } from "@/components/AppSkeletons";
 import { toast } from "sonner";
-import { Users, Shield, LogIn } from "lucide-react";
+import { Users, Shield, LogIn, AlertTriangle, WifiOff } from "lucide-react";
 import { lookupInvite, joinTeamByInvite } from "@/lib/invite.functions";
 import { BrandLogo } from "@/components/BrandLogo";
 
@@ -23,38 +23,85 @@ type Team = {
   status: string | null;
 };
 
+type InviteError =
+  | { kind: "malformed" }
+  | { kind: "not_found" }
+  | { kind: "inactive"; status: string }
+  | { kind: "network" };
+
+const INVITE_CODE_RE = /^[A-Z0-9]{4,16}$/;
+// Statuses in which a director's team can still receive players via invite.
+const JOINABLE_STATUSES = new Set(["approved", "pending", "waitlist"]);
+
 function InvitePage() {
   const { code } = useParams({ from: "/convite/$code" });
   const navigate = useNavigate();
   const doLookup = useServerFn(lookupInvite);
   const doJoin = useServerFn(joinTeamByInvite);
 
+  const normalizedCode = (code ?? "").trim().toUpperCase();
+
   const [loading, setLoading] = useState(true);
   const [team, setTeam] = useState<Team | null>(null);
+  const [error, setError] = useState<InviteError | null>(null);
   const [isAuthed, setIsAuthed] = useState(false);
   const [joining, setJoining] = useState(false);
 
   useEffect(() => {
+    let cancelled = false;
+
     (async () => {
+      setLoading(true);
+      setError(null);
+      setTeam(null);
+
+      // 1. Client-side format validation — catches typos/truncated links early.
+      if (!INVITE_CODE_RE.test(normalizedCode)) {
+        if (!cancelled) {
+          setError({ kind: "malformed" });
+          setLoading(false);
+        }
+        return;
+      }
+
       try {
         const [res, { data }] = await Promise.all([
-          doLookup({ data: { invite_code: code } }),
+          doLookup({ data: { invite_code: normalizedCode } }),
           supabase.auth.getUser(),
         ]);
+        if (cancelled) return;
+
         setIsAuthed(!!data.user);
-        if (res.found) setTeam(res.team as Team);
+
+        if (!res.found) {
+          setError({ kind: "not_found" });
+          return;
+        }
+
+        const t = res.team as Team;
+        const status = (t.status ?? "").toLowerCase();
+        if (status && !JOINABLE_STATUSES.has(status)) {
+          setError({ kind: "inactive", status });
+          return;
+        }
+
+        setTeam(t);
       } catch {
-        setTeam(null);
+        if (!cancelled) setError({ kind: "network" });
       } finally {
-        setLoading(false);
+        if (!cancelled) setLoading(false);
       }
     })();
-  }, [code]);
+
+    return () => {
+      cancelled = true;
+    };
+  }, [normalizedCode]);
 
   async function handleJoin() {
     setJoining(true);
     try {
-      const res = await doJoin({ data: { invite_code: code } });
+      const res = await doJoin({ data: { invite_code: normalizedCode } });
       toast.success(
         res.already_member
           ? `Você já fazia parte de ${res.team_name}!`
@@ -69,7 +116,61 @@ function InvitePage() {
     }
   }
 
-  const redirectSearch = { redirect: `/convite/${code}` } as const;
+  const redirectSearch = { redirect: `/convite/${normalizedCode}` } as const;
+
+  const errorView = error
+    ? (() => {
+        switch (error.kind) {
+          case "malformed":
+            return {
+              icon: <AlertTriangle className="mx-auto h-10 w-10 text-amber-400 mb-3" />,
+              title: "Link de convite malformado",
+              body: (
+                <>
+                  O código <span className="font-mono text-white">{code}</span> não está no formato
+                  esperado. Verifique se você copiou o link inteiro — às vezes o WhatsApp corta o
+                  final da URL.
+                </>
+              ),
+            };
+          case "not_found":
+            return {
+              icon: <Shield className="mx-auto h-10 w-10 text-red-400 mb-3" />,
+              title: "Convite inválido ou expirado",
+              body: (
+                <>
+                  Não encontramos nenhum time com o código{" "}
+                  <span className="font-mono text-white">{normalizedCode}</span>. O convite pode ter
+                  sido revogado pelo diretor. Peça um novo link.
+                </>
+              ),
+            };
+          case "inactive":
+            return {
+              icon: <AlertTriangle className="mx-auto h-10 w-10 text-amber-400 mb-3" />,
+              title: "Este time não aceita novos jogadores",
+              body: (
+                <>
+                  A inscrição deste time está atualmente com status{" "}
+                  <span className="font-mono text-white">{error.status}</span> e não permite entrada
+                  por convite. Fale com o diretor do time.
+                </>
+              ),
+            };
+          case "network":
+            return {
+              icon: <WifiOff className="mx-auto h-10 w-10 text-zinc-400 mb-3" />,
+              title: "Não conseguimos validar o convite",
+              body: (
+                <>
+                  Houve um problema de conexão ao verificar o código. Confira sua internet e tente
+                  novamente.
+                </>
+              ),
+            };
+        }
+      })()
+    : null;
 
   return (
     <div className="min-h-screen flex items-center justify-center px-4 py-12 bg-black">
@@ -84,19 +185,27 @@ function InvitePage() {
             <div className="py-8 flex justify-center">
               <Spinner className="h-6 w-6" />
             </div>
-          ) : !team ? (
+          ) : errorView ? (
             <>
-              <Shield className="mx-auto h-10 w-10 text-red-400 mb-3" />
-              <h1 className="font-display text-2xl text-white mb-2">Convite inválido</h1>
-              <p className="text-sm text-zinc-400 mb-6">
-                Não encontramos nenhum time com o código <span className="font-mono text-white">{code}</span>.
-                Confirme com o diretor se o link está correto.
-              </p>
-              <Button asChild className="w-full">
-                <Link to="/">Ir para o início</Link>
-              </Button>
+              {errorView.icon}
+              <h1 className="font-display text-2xl text-white mb-2">{errorView.title}</h1>
+              <p className="text-sm text-zinc-400 mb-6">{errorView.body}</p>
+              <div className="space-y-3">
+                {error?.kind === "network" && (
+                  <Button className="w-full" onClick={() => location.reload()}>
+                    Tentar novamente
+                  </Button>
+                )}
+                <Button
+                  asChild={error?.kind !== "network"}
+                  variant={error?.kind === "network" ? "outline" : "default"}
+                  className="w-full"
+                >
+                  <Link to="/">Ir para o início</Link>
+                </Button>
+              </div>
             </>
-          ) : (
+          ) : team ? (
             <>
               <div
                 className="mx-auto h-20 w-20 rounded-full border-4 flex items-center justify-center mb-4 overflow-hidden"
@@ -145,7 +254,7 @@ function InvitePage() {
                 </div>
               )}
             </>
-          )}
+          ) : null}
         </div>
       </div>
     </div>
