@@ -13,7 +13,8 @@
     "test": "bun test",
     "test:rls": "bun test tests/rls-privacy.test.ts",
     "test:invite": "bun test tests/invite-flow.test.ts",
-    "test:onboarding": "bun test tests/onboarding-flow.test.ts"
+    "test:onboarding": "bun test tests/onboarding-flow.test.ts",
+    "test:inscricao": "bun test tests/inscricao-flow.test.ts"
   },
   "dependencies": {
     "@cloudflare/vite-plugin": "^1.25.5",
