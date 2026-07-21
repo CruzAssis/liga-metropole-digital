@@ -133,6 +133,10 @@ function SignupPage() {
       }
 
       toast.success('Conta criada!')
+      if (redirectTo) {
+        window.location.replace(redirectTo)
+        return
+      }
       if (perfil === 'diretor') navigate({ to: '/onboarding/diretor', replace: true })
       else if (perfil === 'jogador') navigate({ to: '/onboarding/jogador', replace: true })
       else if (perfil === 'torcedor') navigate({ to: '/onboarding/torcedor', replace: true })
