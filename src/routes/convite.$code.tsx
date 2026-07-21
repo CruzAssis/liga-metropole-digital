@@ -116,12 +116,7 @@ function InvitePage() {
     setJoining(true);
     try {
       const res = await doJoin({ data: { invite_code: normalizedCode } });
-      toast.success(
-        res.already_member
-          ? `Você já fazia parte de ${res.team_name}!`
-          : `Bem-vindo(a) ao ${res.team_name}!`,
-      );
-      navigate({ to: "/minha-conta", replace: true });
+      setJoined({ teamName: res.team_name, alreadyMember: res.already_member });
     } catch (err) {
       const msg = err instanceof Error ? err.message : "Erro ao entrar no time";
       toast.error(msg);
