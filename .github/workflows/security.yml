@@ -6,12 +6,16 @@ on:
     paths:
       - "supabase/migrations/**"
       - "tests/**"
+      - "src/lib/public-url.ts"
+      - "src/lib/invite.functions.ts"
       - "scripts/security-assert.sql"
       - ".github/workflows/security.yml"
   pull_request:
     paths:
       - "supabase/migrations/**"
       - "tests/**"
+      - "src/lib/public-url.ts"
+      - "src/lib/invite.functions.ts"
       - "scripts/security-assert.sql"
       - ".github/workflows/security.yml"
   workflow_dispatch:
@@ -59,6 +63,9 @@ jobs:
 
       - name: RLS regression tests
         run: bun test tests/rls-privacy.test.ts tests/profiles-rls.test.ts tests/teams-rls.test.ts
+
+      - name: Invite flow E2E test
+        run: bun run test:invite
 
       - name: Stop Supabase
         if: always()
