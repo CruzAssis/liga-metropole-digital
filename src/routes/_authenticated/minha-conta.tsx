@@ -25,6 +25,7 @@ import { TeamHomeVenueCard } from "@/components/teams/TeamHomeVenueCard";
 import { getMyProfile, updateMyProfile } from "@/lib/profile.functions";
 import { getMyTeamPagamentos, type PagamentoStatus } from "@/lib/pagamentos.functions";
 import { updateTeamByDirector } from "@/lib/team-profile.functions";
+import { publicUrl } from "@/lib/public-url";
 
 import { formatPhoneBR } from "@/lib/wa";
 import { WelcomeAthleteModal } from "@/components/WelcomeAthleteModal";
@@ -614,8 +615,7 @@ function EditTeamDialog({
 
 
 function InviteShareBox({ code, teamName }: { code: string; teamName: string }) {
-  const origin = typeof window !== "undefined" ? window.location.origin : "";
-  const url = `${origin}/convite/${code}`;
+  const url = publicUrl(`/convite/${code}`);
   const waMessage = encodeURIComponent(
     `Olá! Você foi convidado(a) para se juntar ao time ${teamName} na Liga Metrópole. Clique no link e crie sua conta de jogador: ${url}`,
   );
@@ -707,8 +707,7 @@ function TeamCard({ team }: { team: Team }) {
 }
 
 function InviteLinkBlock({ code, teamName }: { code: string; teamName: string }) {
-  const origin = typeof window !== "undefined" ? window.location.origin : "";
-  const url = `${origin}/convite/${code}`;
+  const url = publicUrl(`/convite/${code}`);
   const waMessage = encodeURIComponent(
     `Olá! Você foi convidado(a) para se juntar ao time ${teamName} na Liga Metrópole. Clique no link e crie sua conta de jogador: ${url}`,
   );
