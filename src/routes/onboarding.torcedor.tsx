@@ -160,7 +160,7 @@ function TorcedorOnboarding() {
 
         <button
           type="button"
-          onClick={() => navigate({ to: '/minha-conta', replace: true })}
+          onClick={() => navigate({ to: '/torcedor', replace: true })}
           className="w-full text-center text-sm text-zinc-500 hover:text-zinc-300 transition-colors"
         >
           Fazer isso depois
