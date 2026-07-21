@@ -65,7 +65,7 @@ function TorcedorOnboarding() {
         if (error) throw error
       }
       toast.success('Agora você torce por ' + selectedTeam.name + '!')
-      navigate({ to: '/minha-conta', replace: true })
+      navigate({ to: '/torcedor', replace: true })
     } catch (err) {
       const msg = err instanceof Error ? err.message : 'Erro ao selecionar time'
       setErrorMsg(msg)
