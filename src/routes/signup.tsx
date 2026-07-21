@@ -137,6 +137,19 @@ function SignupPage() {
         } catch { session = null }
       }
 
+      // Persist chosen role so /onboarding can auto-skip and sub-flows have RLS access
+      if (session) {
+        const roleMap: Record<string, 'director' | 'player' | 'supporter'> = {
+          diretor: 'director',
+          jogador: 'player',
+          torcedor: 'supporter',
+        }
+        const roleKey = roleMap[perfil]
+        if (roleKey) {
+          try { await assignRoles({ data: { roles: [roleKey] } }) } catch {}
+        }
+      }
+
       toast.success('Conta criada!')
       if (redirectTo) {
         window.location.replace(redirectTo)
