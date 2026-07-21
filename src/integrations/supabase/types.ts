@@ -278,13 +278,6 @@ export type Database = {
             referencedColumns: ["id"]
           },
           {
-            foreignKeyName: "disciplinary_suspensions_athlete_id_fkey"
-            columns: ["athlete_id"]
-            isOneToOne: false
-            referencedRelation: "athletes_public"
-            referencedColumns: ["id"]
-          },
-          {
             foreignKeyName: "disciplinary_suspensions_competition_id_fkey"
             columns: ["competition_id"]
             isOneToOne: false
@@ -481,13 +474,6 @@ export type Database = {
             columns: ["athlete_id"]
             isOneToOne: false
             referencedRelation: "athletes"
-            referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "match_events_athlete_id_fkey"
-            columns: ["athlete_id"]
-            isOneToOne: false
-            referencedRelation: "athletes_public"
             referencedColumns: ["id"]
           },
           {
@@ -1036,13 +1022,6 @@ export type Database = {
             referencedColumns: ["id"]
           },
           {
-            foreignKeyName: "supporter_votes_athlete_id_fkey"
-            columns: ["athlete_id"]
-            isOneToOne: false
-            referencedRelation: "athletes_public"
-            referencedColumns: ["id"]
-          },
-          {
             foreignKeyName: "supporter_votes_match_id_fkey"
             columns: ["match_id"]
             isOneToOne: false
@@ -1340,47 +1319,7 @@ export type Database = {
       }
     }
     Views: {
-      athletes_public: {
-        Row: {
-          created_at: string | null
-          full_name: string | null
-          id: string | null
-          nickname: string | null
-          photo_url: string | null
-          position: string | null
-          team_id: string | null
-          verified: boolean | null
-        }
-        Insert: {
-          created_at?: string | null
-          full_name?: string | null
-          id?: string | null
-          nickname?: string | null
-          photo_url?: string | null
-          position?: string | null
-          team_id?: string | null
-          verified?: boolean | null
-        }
-        Update: {
-          created_at?: string | null
-          full_name?: string | null
-          id?: string | null
-          nickname?: string | null
-          photo_url?: string | null
-          position?: string | null
-          team_id?: string | null
-          verified?: boolean | null
-        }
-        Relationships: [
-          {
-            foreignKeyName: "athletes_team_id_fkey"
-            columns: ["team_id"]
-            isOneToOne: false
-            referencedRelation: "teams"
-            referencedColumns: ["id"]
-          },
-        ]
-      }
+      [_ in never]: never
     }
     Functions: {
       competition_fill_stats: {
