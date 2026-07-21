@@ -150,6 +150,19 @@ function RootDocument({ children }: { children: React.ReactNode }) {
 
 function RootComponent() {
   const { queryClient } = Route.useRouteContext();
+  const router = useRouter();
+
+  // Single global auth listener: refresh router/queries only on identity changes.
+  // Filtering out TOKEN_REFRESHED / INITIAL_SESSION avoids router+cache thrash
+  // (~hourly refresh + every tab focus + every mount).
+  useEffect(() => {
+    const { data: { subscription } } = supabase.auth.onAuthStateChange((event) => {
+      if (event !== "SIGNED_IN" && event !== "SIGNED_OUT" && event !== "USER_UPDATED") return;
+      router.invalidate();
+      if (event !== "SIGNED_OUT") queryClient.invalidateQueries();
+    });
+    return () => subscription.unsubscribe();
+  }, [router, queryClient]);
 
   return (
     <QueryClientProvider client={queryClient}>
@@ -160,3 +173,4 @@ function RootComponent() {
     </QueryClientProvider>
   );
 }
+
