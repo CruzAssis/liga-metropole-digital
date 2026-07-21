@@ -26,7 +26,7 @@ import {
 } from "@/components/ui/dialog";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { toast } from "sonner";
-import { Plus, Pencil, Trash2, Whistle, Users, X, ArrowLeft } from "lucide-react";
+import { Plus, Pencil, Trash2, Gavel, Users, X, ArrowLeft } from "lucide-react";
 import { SkeletonAdminList } from "@/components/AppSkeletons";
 
 export const Route = createFileRoute("/_authenticated/admin/arbitros")({
@@ -172,7 +172,7 @@ function AdminArbitrosPage() {
           <Users className="h-4 w-4 mr-1" /> Cadastro
         </Button>
         <Button variant={tab === "escala" ? "default" : "outline"} size="sm" onClick={() => setTab("escala")}>
-          <Whistle className="h-4 w-4 mr-1" /> Escala por partida
+          <Gavel className="h-4 w-4 mr-1" /> Escala por partida
         </Button>
       </div>
 
@@ -181,7 +181,7 @@ function AdminArbitrosPage() {
           <SkeletonAdminList rows={5} />
         ) : items.length === 0 ? (
           <div className="rounded-xl border border-border bg-card p-10 text-center">
-            <Whistle className="mx-auto h-8 w-8 text-muted-foreground/60 mb-3" />
+            <Gavel className="mx-auto h-8 w-8 text-muted-foreground/60 mb-3" />
             <p className="font-semibold">Nenhum árbitro cadastrado</p>
             <p className="text-sm text-muted-foreground mt-1">Cadastre o primeiro para poder escalar em partidas.</p>
           </div>
@@ -193,7 +193,7 @@ function AdminArbitrosPage() {
                   <img src={r.photo_url} alt="" className="h-12 w-12 rounded-full object-cover shrink-0" />
                 ) : (
                   <div className="h-12 w-12 rounded-full bg-muted flex items-center justify-center shrink-0">
-                    <Whistle className="h-5 w-5 text-muted-foreground" />
+                    <Gavel className="h-5 w-5 text-muted-foreground" />
                   </div>
                 )}
                 <div className="flex-1 min-w-0">
