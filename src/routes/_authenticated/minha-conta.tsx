@@ -13,7 +13,7 @@ import {
   ClipboardList, ExternalLink, User2, DollarSign,
   CheckCircle, Clock, AlertTriangle, CreditCard,
   Users, UserPlus, CalendarDays, Copy, Share2,
-  Shield, Trophy, Pencil,
+  Shield, Trophy, Pencil, Gavel,
 } from "lucide-react";
 
 import {
