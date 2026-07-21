@@ -5,7 +5,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
 import { Spinner } from "@/components/AppSkeletons";
 import { toast } from "sonner";
-import { Users, Shield, LogIn, AlertTriangle, WifiOff } from "lucide-react";
+import { Users, Shield, LogIn, AlertTriangle, WifiOff, CheckCircle2 } from "lucide-react";
 import { lookupInvite, joinTeamByInvite } from "@/lib/invite.functions";
 import { BrandLogo } from "@/components/BrandLogo";
 
