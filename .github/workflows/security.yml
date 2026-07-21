@@ -60,6 +60,9 @@ jobs:
       - name: RLS regression tests
         run: bun test tests/rls-privacy.test.ts tests/profiles-rls.test.ts tests/teams-rls.test.ts
 
+      - name: Invite flow E2E test
+        run: bun run test:invite
+
       - name: Stop Supabase
         if: always()
         run: supabase stop --no-backup || true
