@@ -87,6 +87,23 @@ function InvitePage() {
         }
 
         setTeam(t);
+
+        // Auto-join if user is already authenticated to avoid landing on wrong pages.
+        if (authed) {
+          try {
+            const joinRes = await doJoin({ data: { invite_code: normalizedCode } });
+            if (cancelled) return;
+            toast.success(
+              joinRes.already_member
+                ? `Você já fazia parte de ${joinRes.team_name}!`
+                : `Bem-vindo(a) ao ${joinRes.team_name}!`,
+            );
+            navigate({ to: "/minha-conta", replace: true });
+            return;
+          } catch {
+            // Fall through to manual join button if auto-join fails
+          }
+        }
       } catch {
         if (!cancelled) setError({ kind: "network" });
       } finally {
