@@ -88,8 +88,8 @@ export function AppSidebar() {
                       tooltip={item.title}
                       className="data-[active=true]:bg-primary/10 data-[active=true]:text-primary data-[active=true]:font-medium hover:bg-sidebar-accent/60 transition-colors"
                     >
-                      <Link to={item.url}>
-                        <item.icon className="h-4 w-4" />
+                      <Link to={item.url} aria-current={active ? "page" : undefined}>
+                        <item.icon className="h-4 w-4" aria-hidden="true" />
                         <span>{item.title}</span>
                       </Link>
                     </SidebarMenuButton>
