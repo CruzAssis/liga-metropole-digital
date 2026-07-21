@@ -34,6 +34,7 @@ function SignupPage() {
   const [checkingAuth, setCheckingAuth] = useState(true)
   const search = typeof window !== 'undefined' ? new URLSearchParams(window.location.search) : new URLSearchParams()
   const perfilParam = search.get('perfil') || ''
+  const redirectTo = search.get('redirect') || ''
 
   const [step, setStep] = useState(perfilParam ? 2 : 1)
   const [perfil, setPerfil] = useState(perfilParam)
@@ -56,7 +57,8 @@ function SignupPage() {
     ;(async () => {
       const { data } = await supabase.auth.getUser()
       if (data.user) {
-        navigate({ to: '/minha-conta', replace: true })
+        if (redirectTo) window.location.replace(redirectTo)
+        else navigate({ to: '/minha-conta', replace: true })
       } else {
         setCheckingAuth(false)
       }
@@ -131,6 +133,10 @@ function SignupPage() {
       }
 
       toast.success('Conta criada!')
+      if (redirectTo) {
+        window.location.replace(redirectTo)
+        return
+      }
       if (perfil === 'diretor') navigate({ to: '/onboarding/diretor', replace: true })
       else if (perfil === 'jogador') navigate({ to: '/onboarding/jogador', replace: true })
       else if (perfil === 'torcedor') navigate({ to: '/onboarding/torcedor', replace: true })

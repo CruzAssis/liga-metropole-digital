@@ -71,7 +71,8 @@ function InvitePage() {
         ]);
         if (cancelled) return;
 
-        setIsAuthed(!!data.user);
+        const authed = !!data.user;
+        setIsAuthed(authed);
 
         if (!res.found) {
           setError({ kind: "not_found" });
@@ -86,6 +87,23 @@ function InvitePage() {
         }
 
         setTeam(t);
+
+        // Auto-join if user is already authenticated to avoid landing on wrong pages.
+        if (authed) {
+          try {
+            const joinRes = await doJoin({ data: { invite_code: normalizedCode } });
+            if (cancelled) return;
+            toast.success(
+              joinRes.already_member
+                ? `Você já fazia parte de ${joinRes.team_name}!`
+                : `Bem-vindo(a) ao ${joinRes.team_name}!`,
+            );
+            navigate({ to: "/minha-conta", replace: true });
+            return;
+          } catch {
+            // Fall through to manual join button if auto-join fails
+          }
+        }
       } catch {
         if (!cancelled) setError({ kind: "network" });
       } finally {
@@ -242,7 +260,7 @@ function InvitePage() {
                     Para entrar no time, crie sua conta ou faça login.
                   </p>
                   <Button asChild className="w-full">
-                    <Link to="/signup" search={{ perfil: "jogador" } as never}>
+                    <Link to="/signup" search={{ perfil: "jogador", redirect: `/convite/${normalizedCode}` } as never}>
                       Criar minha conta de jogador
                     </Link>
                   </Button>
