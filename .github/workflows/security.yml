@@ -1,0 +1,65 @@
+name: Security — RLS & PII
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - "supabase/migrations/**"
+      - "tests/**"
+      - "scripts/security-assert.sql"
+      - ".github/workflows/security.yml"
+  pull_request:
+    paths:
+      - "supabase/migrations/**"
+      - "tests/**"
+      - "scripts/security-assert.sql"
+      - ".github/workflows/security.yml"
+  workflow_dispatch:
+
+jobs:
+  rls-pii:
+    name: RLS & PII checks
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: oven-sh/setup-bun@v2
+        with:
+          bun-version: latest
+
+      - uses: supabase/setup-cli@v1
+        with:
+          version: latest
+
+      - name: Start local Supabase (applies migrations)
+        run: supabase start --workdir . --ignore-health-check
+
+      - name: Read local Supabase credentials
+        id: creds
+        run: |
+          status_json=$(supabase status -o json)
+          echo "$status_json" | jq -e . >/dev/null
+          {
+            echo "SUPABASE_URL=$(echo "$status_json" | jq -r '.API_URL')"
+            echo "SUPABASE_PUBLISHABLE_KEY=$(echo "$status_json" | jq -r '.ANON_KEY')"
+            echo "SUPABASE_SERVICE_ROLE_KEY=$(echo "$status_json" | jq -r '.SERVICE_ROLE_KEY')"
+            echo "SUPABASE_DB_URL=$(echo "$status_json" | jq -r '.DB_URL')"
+          } >> "$GITHUB_ENV"
+
+      - name: Supabase database linter
+        run: supabase db lint --level warning
+
+      - name: RLS / PII SQL assertions
+        run: psql "$SUPABASE_DB_URL" -v ON_ERROR_STOP=1 -f scripts/security-assert.sql
+
+      - name: Install test dependencies
+        run: bun install --frozen-lockfile
+
+      - name: RLS regression tests
+        run: bun test tests/rls-privacy.test.ts tests/profiles-rls.test.ts tests/teams-rls.test.ts
+
+      - name: Stop Supabase
+        if: always()
+        run: supabase stop --no-backup || true
