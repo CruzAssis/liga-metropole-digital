@@ -57,7 +57,11 @@ export function AppSidebar() {
   const isActive = (url: string) => pathname === url;
 
   return (
-    <Sidebar collapsible="icon" className="border-r border-sidebar-border">
+    <Sidebar
+      collapsible="icon"
+      className="border-r border-sidebar-border"
+      aria-label="Navegação principal"
+    >
       <SidebarHeader className="border-b border-sidebar-border">
         <div className="flex items-center gap-2 px-2 py-3">
           {collapsed ? (
@@ -84,8 +88,8 @@ export function AppSidebar() {
                       tooltip={item.title}
                       className="data-[active=true]:bg-primary/10 data-[active=true]:text-primary data-[active=true]:font-medium hover:bg-sidebar-accent/60 transition-colors"
                     >
-                      <Link to={item.url}>
-                        <item.icon className="h-4 w-4" />
+                      <Link to={item.url} aria-current={active ? "page" : undefined}>
+                        <item.icon className="h-4 w-4" aria-hidden="true" />
                         <span>{item.title}</span>
                       </Link>
                     </SidebarMenuButton>
@@ -122,8 +126,8 @@ export function AppSidebar() {
                         tooltip={item.title}
                         className="data-[active=true]:bg-primary/10 data-[active=true]:text-primary data-[active=true]:font-medium hover:bg-sidebar-accent/60 transition-colors"
                       >
-                        <Link to={item.url}>
-                          <item.icon className="h-4 w-4" />
+                        <Link to={item.url} aria-current={active ? "page" : undefined}>
+                          <item.icon className="h-4 w-4" aria-hidden="true" />
                           <span>{item.title}</span>
                         </Link>
                       </SidebarMenuButton>
