@@ -65,6 +65,7 @@ import { Route as AuthenticatedAdminConfiguracoesRouteImport } from './routes/_a
 import { Route as AuthenticatedAdminCalendarioRouteImport } from './routes/_authenticated/admin/calendario'
 import { Route as AuthenticatedAdminAuditoriaRouteImport } from './routes/_authenticated/admin/auditoria'
 import { Route as AuthenticatedAdminAtletasRouteImport } from './routes/_authenticated/admin/atletas'
+import { Route as AuthenticatedAdminArbitrosRouteImport } from './routes/_authenticated/admin/arbitros'
 import { Route as ApiPublicHooksWoCheckerRouteImport } from './routes/api/public/hooks/wo-checker'
 import { Route as ApiPublicHooksCloseVotingRouteImport } from './routes/api/public/hooks/close-voting'
 
@@ -365,6 +366,12 @@ const AuthenticatedAdminAtletasRoute =
     path: '/atletas',
     getParentRoute: () => AuthenticatedAdminRoute,
   } as any)
+const AuthenticatedAdminArbitrosRoute =
+  AuthenticatedAdminArbitrosRouteImport.update({
+    id: '/arbitros',
+    path: '/arbitros',
+    getParentRoute: () => AuthenticatedAdminRoute,
+  } as any)
 const ApiPublicHooksWoCheckerRoute = ApiPublicHooksWoCheckerRouteImport.update({
   id: '/api/public/hooks/wo-checker',
   path: '/api/public/hooks/wo-checker',
@@ -413,6 +420,7 @@ export interface FileRoutesByFullPath {
   '/sumula-visual/$partidaId': typeof SumulaVisualPartidaIdRoute
   '/sumula/$partidaId': typeof SumulaPartidaIdRoute
   '/times/$slug': typeof TimesSlugRoute
+  '/admin/arbitros': typeof AuthenticatedAdminArbitrosRoute
   '/admin/atletas': typeof AuthenticatedAdminAtletasRoute
   '/admin/auditoria': typeof AuthenticatedAdminAuditoriaRoute
   '/admin/calendario': typeof AuthenticatedAdminCalendarioRoute
@@ -472,6 +480,7 @@ export interface FileRoutesByTo {
   '/sumula-visual/$partidaId': typeof SumulaVisualPartidaIdRoute
   '/sumula/$partidaId': typeof SumulaPartidaIdRoute
   '/times/$slug': typeof TimesSlugRoute
+  '/admin/arbitros': typeof AuthenticatedAdminArbitrosRoute
   '/admin/atletas': typeof AuthenticatedAdminAtletasRoute
   '/admin/auditoria': typeof AuthenticatedAdminAuditoriaRoute
   '/admin/calendario': typeof AuthenticatedAdminCalendarioRoute
@@ -533,6 +542,7 @@ export interface FileRoutesById {
   '/sumula-visual/$partidaId': typeof SumulaVisualPartidaIdRoute
   '/sumula/$partidaId': typeof SumulaPartidaIdRoute
   '/times/$slug': typeof TimesSlugRoute
+  '/_authenticated/admin/arbitros': typeof AuthenticatedAdminArbitrosRoute
   '/_authenticated/admin/atletas': typeof AuthenticatedAdminAtletasRoute
   '/_authenticated/admin/auditoria': typeof AuthenticatedAdminAuditoriaRoute
   '/_authenticated/admin/calendario': typeof AuthenticatedAdminCalendarioRoute
@@ -594,6 +604,7 @@ export interface FileRouteTypes {
     | '/sumula-visual/$partidaId'
     | '/sumula/$partidaId'
     | '/times/$slug'
+    | '/admin/arbitros'
     | '/admin/atletas'
     | '/admin/auditoria'
     | '/admin/calendario'
@@ -653,6 +664,7 @@ export interface FileRouteTypes {
     | '/sumula-visual/$partidaId'
     | '/sumula/$partidaId'
     | '/times/$slug'
+    | '/admin/arbitros'
     | '/admin/atletas'
     | '/admin/auditoria'
     | '/admin/calendario'
@@ -713,6 +725,7 @@ export interface FileRouteTypes {
     | '/sumula-visual/$partidaId'
     | '/sumula/$partidaId'
     | '/times/$slug'
+    | '/_authenticated/admin/arbitros'
     | '/_authenticated/admin/atletas'
     | '/_authenticated/admin/auditoria'
     | '/_authenticated/admin/calendario'
@@ -1162,6 +1175,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedAdminAtletasRouteImport
       parentRoute: typeof AuthenticatedAdminRoute
     }
+    '/_authenticated/admin/arbitros': {
+      id: '/_authenticated/admin/arbitros'
+      path: '/arbitros'
+      fullPath: '/admin/arbitros'
+      preLoaderRoute: typeof AuthenticatedAdminArbitrosRouteImport
+      parentRoute: typeof AuthenticatedAdminRoute
+    }
     '/api/public/hooks/wo-checker': {
       id: '/api/public/hooks/wo-checker'
       path: '/api/public/hooks/wo-checker'
@@ -1180,6 +1200,7 @@ declare module '@tanstack/react-router' {
 }
 
 interface AuthenticatedAdminRouteChildren {
+  AuthenticatedAdminArbitrosRoute: typeof AuthenticatedAdminArbitrosRoute
   AuthenticatedAdminAtletasRoute: typeof AuthenticatedAdminAtletasRoute
   AuthenticatedAdminAuditoriaRoute: typeof AuthenticatedAdminAuditoriaRoute
   AuthenticatedAdminCalendarioRoute: typeof AuthenticatedAdminCalendarioRoute
@@ -1202,6 +1223,7 @@ interface AuthenticatedAdminRouteChildren {
 }
 
 const AuthenticatedAdminRouteChildren: AuthenticatedAdminRouteChildren = {
+  AuthenticatedAdminArbitrosRoute: AuthenticatedAdminArbitrosRoute,
   AuthenticatedAdminAtletasRoute: AuthenticatedAdminAtletasRoute,
   AuthenticatedAdminAuditoriaRoute: AuthenticatedAdminAuditoriaRoute,
   AuthenticatedAdminCalendarioRoute: AuthenticatedAdminCalendarioRoute,
