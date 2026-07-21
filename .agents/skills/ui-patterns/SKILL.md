@@ -1,5 +1,5 @@
 ---
-name: UI Patterns
+name: ui-patterns
 description: "Padrões de UI comprovados e extraídos de produtos reais: hero sections em três variantes (statement/split/imersivo), navegação sticky com auto-hide, cards com estados de hover, formulários em coluna única com validação inline, pricing tables, depoimentos, CTAs orientados a ação e rodapés completos. Cada padrão vem com código pronto para uso imediato."
 ---
 
