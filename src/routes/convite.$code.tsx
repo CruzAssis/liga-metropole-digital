@@ -71,7 +71,8 @@ function InvitePage() {
         ]);
         if (cancelled) return;
 
-        setIsAuthed(!!data.user);
+        const authed = !!data.user;
+        setIsAuthed(authed);
 
         if (!res.found) {
           setError({ kind: "not_found" });
