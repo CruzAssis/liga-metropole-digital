@@ -47,7 +47,7 @@ async function publicClient() {
 // Public: list active referees with aggregate stats.
 export const listPublicReferees = createServerFn({ method: "GET" }).handler(
   async (): Promise<RefereeWithStats[]> => {
-    const supabase = publicClient();
+    const supabase = await publicClient();
     const { data, error } = await supabase
       .from("referees")
       .select("id, full_name, nickname, whatsapp, city, photo_url, active, notes, created_at, updated_at")
