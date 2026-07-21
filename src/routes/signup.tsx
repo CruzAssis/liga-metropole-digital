@@ -1,6 +1,7 @@
 // @ts-nocheck
 import { createFileRoute, Link, useNavigate } from '@tanstack/react-router'
 import { useState, useEffect, type ChangeEvent, type FormEvent } from 'react'
+import { useServerFn } from '@tanstack/react-start'
 import { supabase } from '@/integrations/supabase/client'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
@@ -9,6 +10,8 @@ import { toast } from 'sonner'
 import { Spinner } from '@/components/AppSkeletons'
 import { Shirt, Star, Users, Check, ArrowLeft } from 'lucide-react'
 import { safeInternalPath } from '@/lib/public-url'
+import { assignSelfRoles } from '@/lib/onboarding.functions'
+
 
 export const Route = createFileRoute('/signup')({
   component: SignupPage,
@@ -31,6 +34,7 @@ function maskPhone(v: string) {
 
 function SignupPage() {
   const navigate = useNavigate()
+  const assignRoles = useServerFn(assignSelfRoles)
   const [loading, setLoading] = useState(false)
   const [checkingAuth, setCheckingAuth] = useState(true)
   const search = typeof window !== 'undefined' ? new URLSearchParams(window.location.search) : new URLSearchParams()
@@ -131,6 +135,19 @@ function SignupPage() {
           const { data: signIn } = await supabase.auth.signInWithPassword({ email: form.email, password: form.password })
           session = signIn.session ?? null
         } catch { session = null }
+      }
+
+      // Persist chosen role so /onboarding can auto-skip and sub-flows have RLS access
+      if (session) {
+        const roleMap: Record<string, 'director' | 'player' | 'supporter'> = {
+          diretor: 'director',
+          jogador: 'player',
+          torcedor: 'supporter',
+        }
+        const roleKey = roleMap[perfil]
+        if (roleKey) {
+          try { await assignRoles({ data: { roles: [roleKey] } }) } catch {}
+        }
       }
 
       toast.success('Conta criada!')
