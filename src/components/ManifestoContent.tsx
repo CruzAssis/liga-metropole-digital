@@ -48,7 +48,7 @@ export function ManifestoContent({ team }: { team: ManifestoTeam }) {
         }}
       />
 
-      <article className="relative max-w-2xl mx-auto px-6 py-16 sm:py-20">
+      <article ref={flyerRef} className="relative max-w-2xl mx-auto px-6 py-16 sm:py-20">
         <header className="flex items-center justify-between gap-6 mb-14">
           <div className="flex flex-col items-center gap-2">
             {team.logo_url ? (
