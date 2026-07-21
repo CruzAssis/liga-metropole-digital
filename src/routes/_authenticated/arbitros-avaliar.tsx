@@ -41,6 +41,7 @@ function DirectorRateRefereesPage() {
   const rateFn = useServerFn(rateReferee);
   const [draft, setDraft] = useState<Record<string, { rating: number; comment: string }>>({});
   const [editingKey, setEditingKey] = useState<string | null>(null);
+  const [sortHist, setSortHist] = useState<SortKey>("recent");
 
   const refresh = useCallback(async () => {
     setLoading(true);
