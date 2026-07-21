@@ -34,6 +34,7 @@ function maskPhone(v: string) {
 
 function SignupPage() {
   const navigate = useNavigate()
+  const assignRoles = useServerFn(assignSelfRoles)
   const [loading, setLoading] = useState(false)
   const [checkingAuth, setCheckingAuth] = useState(true)
   const search = typeof window !== 'undefined' ? new URLSearchParams(window.location.search) : new URLSearchParams()
