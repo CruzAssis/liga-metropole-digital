@@ -1,6 +1,8 @@
 import { BrandLogo } from '@/components/BrandLogo'
 import { Link } from '@tanstack/react-router'
-import { Download, UserPlus } from 'lucide-react'
+import { Download, Image as ImageIcon, UserPlus } from 'lucide-react'
+import { useRef, useState } from 'react'
+import { toJpeg } from 'html-to-image'
 
 export type ManifestoTeam = {
   name: string
@@ -9,6 +11,31 @@ export type ManifestoTeam = {
 }
 
 export function ManifestoContent({ team }: { team: ManifestoTeam }) {
+  const flyerRef = useRef<HTMLElement | null>(null)
+  const [exporting, setExporting] = useState(false)
+
+  async function handleDownloadImage() {
+    if (!flyerRef.current || exporting) return
+    setExporting(true)
+    try {
+      const dataUrl = await toJpeg(flyerRef.current, {
+        quality: 0.92,
+        pixelRatio: 2,
+        backgroundColor: '#000000',
+        cacheBust: true,
+      })
+      const a = document.createElement('a')
+      const safe = team.name.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/^-|-$/g, '')
+      a.download = `manifesto-${safe || 'liga-metropole'}.jpg`
+      a.href = dataUrl
+      a.click()
+    } catch (e) {
+      console.error('[manifesto] falha ao gerar imagem', e)
+    } finally {
+      setExporting(false)
+    }
+  }
+
   return (
     <div className="min-h-screen bg-black text-white relative overflow-hidden">
       <div className="absolute top-0 left-0 right-0 h-1.5 bg-[#1565F5]" aria-hidden />
@@ -21,7 +48,7 @@ export function ManifestoContent({ team }: { team: ManifestoTeam }) {
         }}
       />
 
-      <article className="relative max-w-2xl mx-auto px-6 py-16 sm:py-20">
+      <article ref={flyerRef} className="relative max-w-2xl mx-auto px-6 py-16 sm:py-20">
         <header className="flex items-center justify-between gap-6 mb-14">
           <div className="flex flex-col items-center gap-2">
             {team.logo_url ? (
@@ -131,6 +158,15 @@ export function ManifestoContent({ team }: { team: ManifestoTeam }) {
             <UserPlus className="h-5 w-5" />
             Cadastrar equipe
           </Link>
+          <button
+            type="button"
+            onClick={handleDownloadImage}
+            disabled={exporting}
+            className="flex-1 inline-flex items-center justify-center gap-2 rounded-xl border border-zinc-700 hover:border-[#1565F5] hover:bg-zinc-900 text-white font-semibold py-4 px-6 transition-colors disabled:opacity-60"
+          >
+            <ImageIcon className="h-5 w-5" />
+            {exporting ? 'Gerando imagem...' : 'Baixar flyer (JPG)'}
+          </button>
           <button
             type="button"
             onClick={() => {
