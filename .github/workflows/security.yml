@@ -6,12 +6,16 @@ on:
     paths:
       - "supabase/migrations/**"
       - "tests/**"
+      - "src/lib/public-url.ts"
+      - "src/lib/invite.functions.ts"
       - "scripts/security-assert.sql"
       - ".github/workflows/security.yml"
   pull_request:
     paths:
       - "supabase/migrations/**"
       - "tests/**"
+      - "src/lib/public-url.ts"
+      - "src/lib/invite.functions.ts"
       - "scripts/security-assert.sql"
       - ".github/workflows/security.yml"
   workflow_dispatch:
