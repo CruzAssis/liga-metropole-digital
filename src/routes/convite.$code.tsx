@@ -46,6 +46,7 @@ function InvitePage() {
   const [error, setError] = useState<InviteError | null>(null);
   const [isAuthed, setIsAuthed] = useState(false);
   const [joining, setJoining] = useState(false);
+  const [joined, setJoined] = useState<null | { teamName: string; alreadyMember: boolean }>(null);
 
   useEffect(() => {
     let cancelled = false;
