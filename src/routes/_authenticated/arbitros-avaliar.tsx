@@ -172,7 +172,7 @@ function DirectorRateRefereesPage() {
                 <div className="mb-3 flex items-center justify-end gap-2">
                   <ArrowDownAZ className="h-4 w-4 text-muted-foreground" />
                   <Select value={sortHist} onValueChange={(v) => setSortHist(v as SortKey)}>
-                    <SelectTrigger className="h-8 w-[200px] text-xs">
+                    <SelectTrigger className="h-8 w-full max-w-[220px] sm:w-[200px] text-xs">
                       <SelectValue />
                     </SelectTrigger>
                     <SelectContent>
