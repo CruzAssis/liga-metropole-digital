@@ -34,6 +34,7 @@ function SignupPage() {
   const [checkingAuth, setCheckingAuth] = useState(true)
   const search = typeof window !== 'undefined' ? new URLSearchParams(window.location.search) : new URLSearchParams()
   const perfilParam = search.get('perfil') || ''
+  const redirectTo = search.get('redirect') || ''
 
   const [step, setStep] = useState(perfilParam ? 2 : 1)
   const [perfil, setPerfil] = useState(perfilParam)
