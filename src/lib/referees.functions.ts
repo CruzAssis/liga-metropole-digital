@@ -250,6 +250,8 @@ export type DirectorMatchAssignment = {
     photo_url: string | null;
     my_rating: number | null;
     my_comment: string | null;
+    my_rating_at: string | null;
+    editable: boolean;
   }[];
 };
 
@@ -257,7 +259,6 @@ export const listDirectorMatchesWithReferees = createServerFn({ method: "GET" })
   .middleware([requireSupabaseAuth])
   .handler(async ({ context }): Promise<DirectorMatchAssignment[]> => {
     const { supabase, userId } = context;
-    // teams user directs
     const { data: teamRows } = await supabase
       .from("team_members")
       .select("team_id")
@@ -275,37 +276,42 @@ export const listDirectorMatchesWithReferees = createServerFn({ method: "GET" })
       .in("status", ["confirmed", "closed", "wo"])
       .or(`host_team_id.in.(${teamIds.join(",")}),visitor_team_id.in.(${teamIds.join(",")})`)
       .order("scheduled_at", { ascending: false })
-      .limit(60);
+      .limit(120);
     if (error) throw new Error(error.message);
     const { data: myRatings } = await supabaseAdmin
       .from("referee_ratings")
-      .select("match_id, referee_id, rating, comment")
+      .select("match_id, referee_id, rating, comment, updated_at")
       .eq("rater_user_id", userId);
-    const ratingMap = new Map<string, { rating: number; comment: string | null }>();
-    for (const r of myRatings ?? []) ratingMap.set(`${r.match_id}:${r.referee_id}`, r);
+    const ratingMap = new Map<string, { rating: number; comment: string | null; updated_at: string }>();
+    for (const r of myRatings ?? []) ratingMap.set(`${r.match_id}:${r.referee_id}`, r as any);
     return (matches ?? [])
       .filter((m: any) => (m.match_referees ?? []).length > 0)
-      .map((m: any) => ({
-        match_id: m.id,
-        scheduled_at: m.scheduled_at,
-        status: m.status,
-        host_team_id: m.host_team_id,
-        visitor_team_id: m.visitor_team_id,
-        host_name: m.host?.name ?? "—",
-        visitor_name: m.visitor?.name ?? "—",
-        assignments: (m.match_referees ?? []).map((a: any) => {
-          const mine = ratingMap.get(`${m.id}:${a.referee_id}`) ?? null;
-          return {
-            referee_id: a.referee_id,
-            role: a.role,
-            full_name: a.referees?.full_name ?? "—",
-            nickname: a.referees?.nickname ?? null,
-            photo_url: a.referees?.photo_url ?? null,
-            my_rating: mine?.rating ?? null,
-            my_comment: mine?.comment ?? null,
-          };
-        }),
-      }));
+      .map((m: any) => {
+        const editable = m.status !== "closed";
+        return {
+          match_id: m.id,
+          scheduled_at: m.scheduled_at,
+          status: m.status,
+          host_team_id: m.host_team_id,
+          visitor_team_id: m.visitor_team_id,
+          host_name: m.host?.name ?? "—",
+          visitor_name: m.visitor?.name ?? "—",
+          assignments: (m.match_referees ?? []).map((a: any) => {
+            const mine = ratingMap.get(`${m.id}:${a.referee_id}`) ?? null;
+            return {
+              referee_id: a.referee_id,
+              role: a.role,
+              full_name: a.referees?.full_name ?? "—",
+              nickname: a.referees?.nickname ?? null,
+              photo_url: a.referees?.photo_url ?? null,
+              my_rating: mine?.rating ?? null,
+              my_comment: mine?.comment ?? null,
+              my_rating_at: mine?.updated_at ?? null,
+              editable,
+            };
+          }),
+        };
+      });
   });
 
 export const rateReferee = createServerFn({ method: "POST" })
@@ -325,11 +331,14 @@ export const rateReferee = createServerFn({ method: "POST" })
     // confirm caller directs one of the teams in the match
     const { data: match, error: mErr } = await supabase
       .from("matches")
-      .select("host_team_id, visitor_team_id")
+      .select("host_team_id, visitor_team_id, status")
       .eq("id", data.match_id)
       .maybeSingle();
     if (mErr) throw new Error(mErr.message);
     if (!match) throw new Response("Partida não encontrada", { status: 404 });
+    if (match.status === "closed") {
+      throw new Response("Partida encerrada: avaliação bloqueada", { status: 403 });
+    }
     const [{ data: isHostDir }, { data: isVisDir }] = await Promise.all([
       supabase.rpc("is_team_director", { _user_id: userId, _team_id: match.host_team_id }),
       supabase.rpc("is_team_director", { _user_id: userId, _team_id: match.visitor_team_id }),
