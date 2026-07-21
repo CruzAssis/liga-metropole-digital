@@ -160,6 +160,15 @@ export function ManifestoContent({ team }: { team: ManifestoTeam }) {
           </Link>
           <button
             type="button"
+            onClick={handleDownloadImage}
+            disabled={exporting}
+            className="flex-1 inline-flex items-center justify-center gap-2 rounded-xl border border-zinc-700 hover:border-[#1565F5] hover:bg-zinc-900 text-white font-semibold py-4 px-6 transition-colors disabled:opacity-60"
+          >
+            <ImageIcon className="h-5 w-5" />
+            {exporting ? 'Gerando imagem...' : 'Baixar flyer (JPG)'}
+          </button>
+          <button
+            type="button"
             onClick={() => {
               if (typeof window !== 'undefined') window.print()
             }}
