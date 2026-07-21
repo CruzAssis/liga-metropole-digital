@@ -707,8 +707,7 @@ function TeamCard({ team }: { team: Team }) {
 }
 
 function InviteLinkBlock({ code, teamName }: { code: string; teamName: string }) {
-  const origin = typeof window !== "undefined" ? window.location.origin : "";
-  const url = `${origin}/convite/${code}`;
+  const url = publicUrl(`/convite/${code}`);
   const waMessage = encodeURIComponent(
     `Olá! Você foi convidado(a) para se juntar ao time ${teamName} na Liga Metrópole. Clique no link e crie sua conta de jogador: ${url}`,
   );
