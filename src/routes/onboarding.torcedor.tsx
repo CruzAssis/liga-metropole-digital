@@ -34,10 +34,24 @@ function TorcedorOnboarding() {
   const [errorMsg, setErrorMsg] = useState('')
 
   useEffect(() => {
-    supabase.auth.getUser().then(({ data }) => {
-      if (!data.user) navigate({ to: '/login', replace: true })
-      else setUserId(data.user.id)
-    })
+    (async () => {
+      const { data } = await supabase.auth.getUser()
+      if (!data.user) {
+        navigate({ to: '/login', replace: true })
+        return
+      }
+      setUserId(data.user.id)
+      // If user already follows a team, skip onboarding and go to /torcedor
+      const { data: existing } = await supabase
+        .from('team_supporters')
+        .select('id')
+        .eq('user_id', data.user.id)
+        .limit(1)
+        .maybeSingle()
+      if (existing) {
+        navigate({ to: '/torcedor', replace: true })
+      }
+    })()
   }, [])
 
   useEffect(() => {
