@@ -10,7 +10,16 @@ import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
 import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
 import { toast } from "sonner";
-import { ArrowLeft, Gavel, Star, Lock, History } from "lucide-react";
+import { ArrowLeft, Gavel, Star, Lock, History, ArrowDownAZ } from "lucide-react";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
+
+type SortKey = "recent" | "rating_desc" | "rating_asc";
 import { SkeletonAdminList } from "@/components/AppSkeletons";
 
 export const Route = createFileRoute("/_authenticated/arbitros-avaliar")({
