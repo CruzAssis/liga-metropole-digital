@@ -89,8 +89,7 @@ export default function HeroCarousel() {
                 alt={`Campo ${s.name}`}
                 loading={i === 0 ? 'eager' : 'lazy'}
                 decoding={i === 0 ? 'sync' : 'async'}
-                // @ts-expect-error fetchpriority is a valid HTML attribute
-                fetchpriority={i === 0 ? 'high' : 'low'}
+                fetchPriority={i === 0 ? 'high' : 'low'}
                 draggable={false}
                 sizes="100vw"
                 className="absolute inset-0 h-full w-full object-cover select-none"
