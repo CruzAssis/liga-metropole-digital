@@ -5,7 +5,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
 import { Spinner } from "@/components/AppSkeletons";
 import { toast } from "sonner";
-import { Users, Shield, LogIn, AlertTriangle, WifiOff } from "lucide-react";
+import { Users, Shield, LogIn, AlertTriangle, WifiOff, CheckCircle2 } from "lucide-react";
 import { lookupInvite, joinTeamByInvite } from "@/lib/invite.functions";
 import { BrandLogo } from "@/components/BrandLogo";
 
@@ -46,6 +46,7 @@ function InvitePage() {
   const [error, setError] = useState<InviteError | null>(null);
   const [isAuthed, setIsAuthed] = useState(false);
   const [joining, setJoining] = useState(false);
+  const [joined, setJoined] = useState<null | { teamName: string; alreadyMember: boolean }>(null);
 
   useEffect(() => {
     let cancelled = false;
@@ -88,17 +89,12 @@ function InvitePage() {
 
         setTeam(t);
 
-        // Auto-join if user is already authenticated to avoid landing on wrong pages.
+        // Auto-join if user is already authenticated; show confirmation screen after.
         if (authed) {
           try {
             const joinRes = await doJoin({ data: { invite_code: normalizedCode } });
             if (cancelled) return;
-            toast.success(
-              joinRes.already_member
-                ? `Você já fazia parte de ${joinRes.team_name}!`
-                : `Bem-vindo(a) ao ${joinRes.team_name}!`,
-            );
-            navigate({ to: "/minha-conta", replace: true });
+            setJoined({ teamName: joinRes.team_name, alreadyMember: joinRes.already_member });
             return;
           } catch {
             // Fall through to manual join button if auto-join fails
@@ -120,12 +116,7 @@ function InvitePage() {
     setJoining(true);
     try {
       const res = await doJoin({ data: { invite_code: normalizedCode } });
-      toast.success(
-        res.already_member
-          ? `Você já fazia parte de ${res.team_name}!`
-          : `Bem-vindo(a) ao ${res.team_name}!`,
-      );
-      navigate({ to: "/minha-conta", replace: true });
+      setJoined({ teamName: res.team_name, alreadyMember: res.already_member });
     } catch (err) {
       const msg = err instanceof Error ? err.message : "Erro ao entrar no time";
       toast.error(msg);
@@ -203,6 +194,33 @@ function InvitePage() {
             <div className="py-8 flex justify-center">
               <Spinner className="h-6 w-6" />
             </div>
+          ) : joined ? (
+            <>
+              <CheckCircle2 className="mx-auto h-14 w-14 text-emerald-400 mb-3" />
+              <p className="text-xs uppercase tracking-widest text-emerald-400">
+                {joined.alreadyMember ? "Você já fazia parte" : "Associação confirmada"}
+              </p>
+              <h1 className="font-display text-3xl text-white mt-1 mb-2">{joined.teamName}</h1>
+              <div className="mx-auto inline-flex items-center gap-2 rounded-full border border-emerald-500/30 bg-emerald-500/10 px-3 py-1 mb-6">
+                <span className="h-2 w-2 rounded-full bg-emerald-400" />
+                <span className="text-xs text-emerald-300">
+                  Status: Jogador ativo no elenco
+                </span>
+              </div>
+              <p className="text-sm text-zinc-400 mb-6">
+                {joined.alreadyMember
+                  ? "Sua vinculação com este time já estava ativa. Você pode acessar sua conta a qualquer momento."
+                  : "Você foi vinculado(a) ao elenco. O diretor do time já pode escalar você nas próximas partidas."}
+              </p>
+              <div className="space-y-3">
+                <Button className="w-full" onClick={() => navigate({ to: "/minha-conta" })}>
+                  Ir para minha conta
+                </Button>
+                <Button asChild variant="outline" className="w-full">
+                  <Link to="/">Explorar a Liga</Link>
+                </Button>
+              </div>
+            </>
           ) : errorView ? (
             <>
               {errorView.icon}
