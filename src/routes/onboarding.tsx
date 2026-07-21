@@ -44,18 +44,52 @@ function OnboardingPage() {
   const navigate = useNavigate()
   const [selected, setSelected] = useState<string[]>([])
   const [loading, setLoading] = useState(false)
+  const [checking, setChecking] = useState(true)
   const [userId, setUserId] = useState<string | null>(null)
   const assignRoles = useServerFn(assignSelfRoles)
 
   useEffect(() => {
-    supabase.auth.getUser().then(({ data }) => {
-      if (!data.user) {
+    ;(async () => {
+      const { data } = await supabase.auth.getUser()
+      const user = data.user
+      if (!user) {
         navigate({ to: '/login', replace: true })
-      } else {
-        setUserId(data.user.id)
+        return
       }
-    })
+      setUserId(user.id)
+
+      // If a role is already assigned, skip the picker and go straight to the matching sub-flow.
+      const { data: roles } = await supabase
+        .from('user_roles')
+        .select('role')
+        .eq('user_id', user.id)
+      const existing = (roles ?? []).map(r => r.role as string)
+
+      // Fallback: use profile_type set during signup metadata
+      const metaProfile = (user.user_metadata?.profile_type as string | undefined) ?? ''
+      const metaMap: Record<string, string> = { diretor: 'director', jogador: 'player', torcedor: 'supporter' }
+      const metaRole = metaMap[metaProfile]
+
+      const target = existing.includes('director') ? '/onboarding/diretor'
+        : existing.includes('player') ? '/onboarding/jogador'
+        : existing.includes('supporter') ? '/onboarding/torcedor'
+        : metaRole === 'director' ? '/onboarding/diretor'
+        : metaRole === 'player' ? '/onboarding/jogador'
+        : metaRole === 'supporter' ? '/onboarding/torcedor'
+        : null
+
+      if (target) {
+        // Ensure role row exists (idempotent) then redirect
+        if (!existing.length && metaRole) {
+          try { await assignRoles({ data: { roles: [metaRole as 'director' | 'player' | 'supporter'] } }) } catch {}
+        }
+        navigate({ to: target, replace: true })
+        return
+      }
+      setChecking(false)
+    })()
   }, [])
+
 
   function toggleProfile(key: string) {
     setSelected(prev =>
