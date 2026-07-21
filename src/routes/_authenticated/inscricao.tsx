@@ -205,9 +205,7 @@ function InscricaoPage() {
   }
 
   if (submitted) {
-    const inviteUrl = inviteCode && typeof window !== 'undefined'
-      ? `${window.location.origin}/convite/${inviteCode}`
-      : ''
+    const inviteUrl = inviteCode ? publicUrl(`/convite/${inviteCode}`) : ''
     return (
       <div className="min-h-screen bg-black flex items-center justify-center px-4 py-12">
         <div className="text-center max-w-md space-y-6 w-full">
