@@ -10,7 +10,16 @@ import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
 import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
 import { toast } from "sonner";
-import { ArrowLeft, Gavel, Star, Lock, History } from "lucide-react";
+import { ArrowLeft, Gavel, Star, Lock, History, ArrowDownAZ } from "lucide-react";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
+
+type SortKey = "recent" | "rating_desc" | "rating_asc";
 import { SkeletonAdminList } from "@/components/AppSkeletons";
 
 export const Route = createFileRoute("/_authenticated/arbitros-avaliar")({
@@ -32,6 +41,7 @@ function DirectorRateRefereesPage() {
   const rateFn = useServerFn(rateReferee);
   const [draft, setDraft] = useState<Record<string, { rating: number; comment: string }>>({});
   const [editingKey, setEditingKey] = useState<string | null>(null);
+  const [sortHist, setSortHist] = useState<SortKey>("recent");
 
   const refresh = useCallback(async () => {
     setLoading(true);
@@ -76,6 +86,29 @@ function DirectorRateRefereesPage() {
     }
     return { pendentes: pend, historico: hist };
   }, [rows]);
+
+  const historicoSorted = useMemo(() => {
+    const scored = historico.map((m) => {
+      const rated = m.assignments.filter((a) => a.my_rating != null);
+      const mostRecent = rated.reduce((acc, a) => {
+        const t = a.my_rating_at ? new Date(a.my_rating_at).getTime() : 0;
+        return t > acc ? t : acc;
+      }, 0);
+      const ratings = rated.map((a) => a.my_rating as number);
+      const maxRating = ratings.length ? Math.max(...ratings) : 0;
+      const minRating = ratings.length ? Math.min(...ratings) : 0;
+      const avgRating = ratings.length ? ratings.reduce((s, x) => s + x, 0) / ratings.length : 0;
+      return { m, mostRecent, maxRating, minRating, avgRating };
+    });
+    if (sortHist === "rating_desc") {
+      scored.sort((a, b) => b.avgRating - a.avgRating || b.mostRecent - a.mostRecent);
+    } else if (sortHist === "rating_asc") {
+      scored.sort((a, b) => a.avgRating - b.avgRating || b.mostRecent - a.mostRecent);
+    } else {
+      scored.sort((a, b) => b.mostRecent - a.mostRecent);
+    }
+    return scored.map((s) => s.m);
+  }, [historico, sortHist]);
 
   return (
     <div className="p-4 sm:p-6 max-w-3xl mx-auto">
@@ -135,15 +168,30 @@ function DirectorRateRefereesPage() {
                 Você ainda não avaliou árbitros.
               </div>
             ) : (
-              <MatchList
-                items={historico}
-                mode="historico"
-                draft={draft}
-                setDraft={setDraft}
-                editingKey={editingKey}
-                setEditingKey={setEditingKey}
-                onSubmit={submitRating}
-              />
+              <>
+                <div className="mb-3 flex items-center justify-end gap-2">
+                  <ArrowDownAZ className="h-4 w-4 text-muted-foreground" />
+                  <Select value={sortHist} onValueChange={(v) => setSortHist(v as SortKey)}>
+                    <SelectTrigger className="h-8 w-[200px] text-xs">
+                      <SelectValue />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="recent">Mais recentes</SelectItem>
+                      <SelectItem value="rating_desc">Nota: maior → menor</SelectItem>
+                      <SelectItem value="rating_asc">Nota: menor → maior</SelectItem>
+                    </SelectContent>
+                  </Select>
+                </div>
+                <MatchList
+                  items={historicoSorted}
+                  mode="historico"
+                  draft={draft}
+                  setDraft={setDraft}
+                  editingKey={editingKey}
+                  setEditingKey={setEditingKey}
+                  onSubmit={submitRating}
+                />
+              </>
             )}
           </TabsContent>
         </Tabs>
