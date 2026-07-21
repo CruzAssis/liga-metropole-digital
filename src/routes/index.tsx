@@ -88,82 +88,18 @@ function HomePage() {
 
   // ============== PUBLIC (UNAUTHENTICATED) HOME ==============
   if (!loading && !user) {
-    return (
-      <div className="min-h-screen flex flex-col" style={{ background: '#09090B', color: '#FAFAFA' }}>
-        {/* NAVBAR */}
-        <nav
-          className="sticky top-0 z-50 flex items-center justify-between px-4 md:px-8 h-16"
-          style={{
-            background: 'rgba(9,9,11,0.95)',
-            backdropFilter: 'blur(12px)',
-            borderBottom: '1px solid #27272A',
-          }}
-        >
-          <Link to="/" aria-label="Liga Metrópole" className="flex items-center gap-2">
-            <BrandLogo className="h-9 w-auto" />
-            <span className="font-black tracking-tight text-sm hidden sm:inline">
-              <span className="text-white">LIGA</span>{' '}
-              <span className="text-[#1565F5]">METRÓPOLE</span>
-            </span>
-          </Link>
-
-          <div className="hidden md:flex items-center gap-1">
-            <Link to="/ranking" className="px-4 py-2 text-sm font-medium rounded-md transition-colors" style={{ color: '#A1A1AA' }}>
-              Ranking
-            </Link>
-            <Link to="/times" className="px-4 py-2 text-sm font-medium rounded-md transition-colors" style={{ color: '#A1A1AA' }}>
-              Times
-            </Link>
-            <Link to="/atletas" className="px-4 py-2 text-sm font-medium rounded-md transition-colors" style={{ color: '#A1A1AA' }}>
-              Atletas
-            </Link>
-          </div>
-
-          <div className="flex items-center gap-2">
-            <Link
-              to="/login"
-              className="px-4 py-2 text-sm font-semibold rounded-md transition-colors"
-              style={{ color: '#FAFAFA' }}
-            >
-              Entrar
-            </Link>
-            <Link
-              to="/signup"
-              search={{ perfil: 'diretor' }}
-              className="hidden md:inline-flex px-4 py-2 text-sm font-bold rounded-md transition-all hover:brightness-110"
-              style={{ background: '#1565F5', color: '#FFFFFF' }}
-            >
-              Inscrever time
-            </Link>
-          </div>
-        </nav>
-
-        {/* HERO */}
-        <HeroCarousel />
-
-
-        {/* STATS */}
-        <AnimatedStats />
-
-        {/* FOOTER */}
-        <footer
-          className="px-6 py-6 text-center mt-auto"
-          style={{ borderTop: '1px solid #27272A' }}
-        >
-          <div className="flex flex-col sm:flex-row items-center justify-center gap-2 sm:gap-4 text-sm" style={{ color: '#52525B' }}>
-            <span>© {new Date().getFullYear()} {leagueName}</span>
-            <span className="hidden sm:inline">·</span>
-            <Link to="/privacidade" className="hover:text-zinc-300 transition-colors">Privacidade</Link>
-            <span>·</span>
-            <Link to="/termos" className="hover:text-zinc-300 transition-colors">Termos</Link>
-            {contactEmail && (<><span>·</span><a href={`mailto:${contactEmail}`} className="hover:text-zinc-300 transition-colors">{contactEmail}</a></>)}
-            {instagram && (<><span>·</span><a href={`https://instagram.com/${instagram.replace('@','')}`} target="_blank" rel="noreferrer" className="hover:text-zinc-300 transition-colors">{instagram.startsWith('@') ? instagram : `@${instagram}`}</a></>)}
-          </div>
-        </footer>
-
-      </div>
-    )
+    return <PublicHome
+      leagueName={leagueName}
+      season={season}
+      tagline={tagline}
+      formatDesc={formatDesc}
+      whatsapp={whatsapp}
+      instagram={instagram}
+      rulesUrl={rulesUrl}
+      contactEmail={contactEmail}
+    />
   }
+
 
   // ============== AUTHENTICATED HOME (unchanged behavior) ==============
   const navLinks = [
