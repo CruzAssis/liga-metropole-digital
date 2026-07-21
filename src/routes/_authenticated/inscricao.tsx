@@ -10,6 +10,7 @@ import { toast } from 'sonner'
 import { Spinner } from '@/components/AppSkeletons'
 import { supabase } from '@/integrations/supabase/client'
 import { createTeamRegistration } from '@/lib/team-registration.functions'
+import { publicUrl } from '@/lib/public-url'
 
 export const Route = createFileRoute('/_authenticated/inscricao')({
   component: InscricaoPage,
