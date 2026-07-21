@@ -260,7 +260,7 @@ function InvitePage() {
                     Para entrar no time, crie sua conta ou faça login.
                   </p>
                   <Button asChild className="w-full">
-                    <Link to="/signup" search={{ perfil: "jogador" } as never}>
+                    <Link to="/signup" search={{ perfil: "jogador", redirect: `/convite/${normalizedCode}` } as never}>
                       Criar minha conta de jogador
                     </Link>
                   </Button>
