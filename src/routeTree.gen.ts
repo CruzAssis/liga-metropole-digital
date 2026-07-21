@@ -44,6 +44,7 @@ import { Route as AuthenticatedTorcedorRouteImport } from './routes/_authenticat
 import { Route as AuthenticatedMinhaContaRouteImport } from './routes/_authenticated/minha-conta'
 import { Route as AuthenticatedInscricaoRouteImport } from './routes/_authenticated/inscricao'
 import { Route as AuthenticatedElencoRouteImport } from './routes/_authenticated/elenco'
+import { Route as AuthenticatedArbitrosAvaliarRouteImport } from './routes/_authenticated/arbitros-avaliar'
 import { Route as AuthenticatedAdminRouteImport } from './routes/_authenticated/admin'
 import { Route as AuthenticatedMinhaContaExcluirContaRouteImport } from './routes/_authenticated/minha-conta/excluir-conta'
 import { Route as AuthenticatedAdminUsuariosRouteImport } from './routes/_authenticated/admin/usuarios'
@@ -244,6 +245,12 @@ const AuthenticatedElencoRoute = AuthenticatedElencoRouteImport.update({
   path: '/elenco',
   getParentRoute: () => AuthenticatedRoute,
 } as any)
+const AuthenticatedArbitrosAvaliarRoute =
+  AuthenticatedArbitrosAvaliarRouteImport.update({
+    id: '/arbitros-avaliar',
+    path: '/arbitros-avaliar',
+    getParentRoute: () => AuthenticatedRoute,
+  } as any)
 const AuthenticatedAdminRoute = AuthenticatedAdminRouteImport.update({
   id: '/admin',
   path: '/admin',
@@ -405,6 +412,7 @@ export interface FileRoutesByFullPath {
   '/times': typeof TimesRouteWithChildren
   '/verificar': typeof VerificarRoute
   '/admin': typeof AuthenticatedAdminRouteWithChildren
+  '/arbitros-avaliar': typeof AuthenticatedArbitrosAvaliarRoute
   '/elenco': typeof AuthenticatedElencoRoute
   '/inscricao': typeof AuthenticatedInscricaoRoute
   '/minha-conta': typeof AuthenticatedMinhaContaRouteWithChildren
@@ -465,6 +473,7 @@ export interface FileRoutesByTo {
   '/times': typeof TimesRouteWithChildren
   '/verificar': typeof VerificarRoute
   '/admin': typeof AuthenticatedAdminRouteWithChildren
+  '/arbitros-avaliar': typeof AuthenticatedArbitrosAvaliarRoute
   '/elenco': typeof AuthenticatedElencoRoute
   '/inscricao': typeof AuthenticatedInscricaoRoute
   '/minha-conta': typeof AuthenticatedMinhaContaRouteWithChildren
@@ -527,6 +536,7 @@ export interface FileRoutesById {
   '/times': typeof TimesRouteWithChildren
   '/verificar': typeof VerificarRoute
   '/_authenticated/admin': typeof AuthenticatedAdminRouteWithChildren
+  '/_authenticated/arbitros-avaliar': typeof AuthenticatedArbitrosAvaliarRoute
   '/_authenticated/elenco': typeof AuthenticatedElencoRoute
   '/_authenticated/inscricao': typeof AuthenticatedInscricaoRoute
   '/_authenticated/minha-conta': typeof AuthenticatedMinhaContaRouteWithChildren
@@ -589,6 +599,7 @@ export interface FileRouteTypes {
     | '/times'
     | '/verificar'
     | '/admin'
+    | '/arbitros-avaliar'
     | '/elenco'
     | '/inscricao'
     | '/minha-conta'
@@ -649,6 +660,7 @@ export interface FileRouteTypes {
     | '/times'
     | '/verificar'
     | '/admin'
+    | '/arbitros-avaliar'
     | '/elenco'
     | '/inscricao'
     | '/minha-conta'
@@ -710,6 +722,7 @@ export interface FileRouteTypes {
     | '/times'
     | '/verificar'
     | '/_authenticated/admin'
+    | '/_authenticated/arbitros-avaliar'
     | '/_authenticated/elenco'
     | '/_authenticated/inscricao'
     | '/_authenticated/minha-conta'
@@ -1028,6 +1041,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedElencoRouteImport
       parentRoute: typeof AuthenticatedRoute
     }
+    '/_authenticated/arbitros-avaliar': {
+      id: '/_authenticated/arbitros-avaliar'
+      path: '/arbitros-avaliar'
+      fullPath: '/arbitros-avaliar'
+      preLoaderRoute: typeof AuthenticatedArbitrosAvaliarRouteImport
+      parentRoute: typeof AuthenticatedRoute
+    }
     '/_authenticated/admin': {
       id: '/_authenticated/admin'
       path: '/admin'
@@ -1265,6 +1285,7 @@ const AuthenticatedMinhaContaRouteWithChildren =
 
 interface AuthenticatedRouteChildren {
   AuthenticatedAdminRoute: typeof AuthenticatedAdminRouteWithChildren
+  AuthenticatedArbitrosAvaliarRoute: typeof AuthenticatedArbitrosAvaliarRoute
   AuthenticatedElencoRoute: typeof AuthenticatedElencoRoute
   AuthenticatedInscricaoRoute: typeof AuthenticatedInscricaoRoute
   AuthenticatedMinhaContaRoute: typeof AuthenticatedMinhaContaRouteWithChildren
@@ -1273,6 +1294,7 @@ interface AuthenticatedRouteChildren {
 
 const AuthenticatedRouteChildren: AuthenticatedRouteChildren = {
   AuthenticatedAdminRoute: AuthenticatedAdminRouteWithChildren,
+  AuthenticatedArbitrosAvaliarRoute: AuthenticatedArbitrosAvaliarRoute,
   AuthenticatedElencoRoute: AuthenticatedElencoRoute,
   AuthenticatedInscricaoRoute: AuthenticatedInscricaoRoute,
   AuthenticatedMinhaContaRoute: AuthenticatedMinhaContaRouteWithChildren,
