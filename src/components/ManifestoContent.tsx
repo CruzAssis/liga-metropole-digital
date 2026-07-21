@@ -1,6 +1,8 @@
 import { BrandLogo } from '@/components/BrandLogo'
 import { Link } from '@tanstack/react-router'
-import { Download, UserPlus } from 'lucide-react'
+import { Download, Image as ImageIcon, UserPlus } from 'lucide-react'
+import { useRef, useState } from 'react'
+import { toJpeg } from 'html-to-image'
 
 export type ManifestoTeam = {
   name: string
