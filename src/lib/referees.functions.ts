@@ -28,8 +28,8 @@ export type RefereeWithStats = RefereeRow & {
   total_matches: number;
 };
 
-function publicClient() {
-  const { createClient } = require("@supabase/supabase-js");
+async function publicClient() {
+  const { createClient } = await import("@supabase/supabase-js");
   const key = process.env.SUPABASE_PUBLISHABLE_KEY!;
   return createClient(process.env.SUPABASE_URL!, key, {
     auth: { persistSession: false, autoRefreshToken: false, storage: undefined },
