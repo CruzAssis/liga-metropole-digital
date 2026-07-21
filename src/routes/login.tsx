@@ -35,14 +35,16 @@ function LoginPage() {
   const navigate = useNavigate();
   const { redirect: redirectTo } = useSearch({ from: "/login" });
   const safeRedirect = safeInternalPath(redirectTo, "/");
+  const hasRedirect = Boolean(redirectTo);
   const [submitting, setSubmitting] = useState(false);
 
   // Se ja esta autenticado, vai para redirect ou home
   useEffect(() => {
     if (!loading && user) {
-      navigate({ to: safeRedirect as never, replace: true });
+      if (hasRedirect) window.location.replace(safeRedirect);
+      else navigate({ to: "/", replace: true });
     }
-  }, [user, loading, navigate, safeRedirect]);
+  }, [user, loading, navigate, hasRedirect, safeRedirect]);
 
   const { register, handleSubmit, formState: { errors } } = useForm<FormData>({
     resolver: zodResolver(schema),
@@ -70,7 +72,8 @@ function LoginPage() {
         return;
       }
       toast.success("Bem-vindo de volta!");
-      navigate({ to: safeRedirect as never, replace: true });
+      if (hasRedirect) window.location.replace(safeRedirect);
+      else navigate({ to: "/", replace: true });
     } catch (err) {
       const msg = err instanceof Error ? err.message : "Erro inesperado ao entrar.";
       toast.error("Não foi possível entrar", { description: msg });
