@@ -168,15 +168,30 @@ function DirectorRateRefereesPage() {
                 Você ainda não avaliou árbitros.
               </div>
             ) : (
-              <MatchList
-                items={historico}
-                mode="historico"
-                draft={draft}
-                setDraft={setDraft}
-                editingKey={editingKey}
-                setEditingKey={setEditingKey}
-                onSubmit={submitRating}
-              />
+              <>
+                <div className="mb-3 flex items-center justify-end gap-2">
+                  <ArrowDownAZ className="h-4 w-4 text-muted-foreground" />
+                  <Select value={sortHist} onValueChange={(v) => setSortHist(v as SortKey)}>
+                    <SelectTrigger className="h-8 w-[200px] text-xs">
+                      <SelectValue />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="recent">Mais recentes</SelectItem>
+                      <SelectItem value="rating_desc">Nota: maior → menor</SelectItem>
+                      <SelectItem value="rating_asc">Nota: menor → maior</SelectItem>
+                    </SelectContent>
+                  </Select>
+                </div>
+                <MatchList
+                  items={historicoSorted}
+                  mode="historico"
+                  draft={draft}
+                  setDraft={setDraft}
+                  editingKey={editingKey}
+                  setEditingKey={setEditingKey}
+                  onSubmit={submitRating}
+                />
+              </>
             )}
           </TabsContent>
         </Tabs>
