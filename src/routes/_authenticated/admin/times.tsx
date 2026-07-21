@@ -18,6 +18,7 @@ import { adminUpdateTeam, adminDeleteTeam } from '@/lib/team-profile.functions'
 import { listUsers, transferTeamOwnership } from '@/lib/users.functions'
 import { supabase } from '@/integrations/supabase/client'
 import { buildWhatsAppLink, formatPhoneBR } from '@/lib/wa'
+import { publicUrl } from '@/lib/public-url'
 import { toast } from 'sonner'
 import { Skeleton } from '@/components/ui/skeleton'
 
@@ -27,7 +28,7 @@ export const Route = createFileRoute('/_authenticated/admin/times')({
 })
 
 const SENDER_NAME = 'Liga Metrópole'
-const PROPOSAL_URL = 'https://liga-metropole-digital.lovable.app/manifesto/proposta-fundadores'
+const PROPOSAL_URL = publicUrl('/manifesto/proposta-fundadores')
 
 function inviteMessage(clubName: string) {
   return `Olá, diretor! Aqui é ${SENDER_NAME}. Analisamos a história do ${clubName} e queremos convidá-los a serem pilares da nossa liga. Confira a proposta aqui: ${PROPOSAL_URL}. Vamos elevar o nível da várzea?`

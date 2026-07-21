@@ -9,6 +9,7 @@ import { Upload, Copy, Check, ImageIcon, Save, Trash2, ExternalLink } from 'luci
 import { toast } from 'sonner'
 import { saveManifesto, listManifestos, deleteManifesto } from '@/lib/manifestos.functions'
 import { SkeletonAdminList } from '@/components/AppSkeletons'
+import { publicUrl } from '@/lib/public-url'
 
 export const Route = createFileRoute('/_authenticated/admin/manifesto')({
   component: AdminManifestoPage,
@@ -52,7 +53,7 @@ function AdminManifestoPage() {
   const slug = useMemo(() => slugify(name), [name])
   const shareUrl = useMemo(() => {
     if (!slug) return ''
-    return `${typeof window !== 'undefined' ? window.location.origin : ''}/manifesto/${slug}`
+    return publicUrl(`/manifesto/${slug}`)
   }, [slug])
   const previewLogo = logoDataUrl ?? existingLogoUrl
 

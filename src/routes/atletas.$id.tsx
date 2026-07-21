@@ -11,6 +11,7 @@ import { Skeleton } from "@/components/ui/skeleton";
 import { EmptyState } from "@/components/AppSkeletons";
 import { PublicShell } from "@/components/PublicShell";
 import { getAtletaPublicProfile } from "@/lib/atleta-profile.functions";
+import { publicUrl } from "@/lib/public-url";
 import {
   CheckCircle,
   Goal,
@@ -25,8 +26,6 @@ import {
   Copy,
   Check,
 } from "lucide-react";
-
-const APP_BASE_URL = "https://ligametropole.app";
 
 export const Route = createFileRoute("/atletas/$id")({
   component: AtletaPerfilPage,
@@ -126,7 +125,7 @@ function AtletaPerfilPage() {
 
   const { profile, partidas } = data;
   const displayName = profile.nickname || profile.full_name || "Atleta";
-  const profileUrl = `${APP_BASE_URL}/atletas/${profile.id}`;
+  const profileUrl = publicUrl(`/atletas/${profile.id}`);
 
   return (
     <PublicShell>

@@ -8,6 +8,7 @@ import { Label } from '@/components/ui/label'
 import { toast } from 'sonner'
 import { Spinner } from '@/components/AppSkeletons'
 import { Shirt, Star, Users, Check, ArrowLeft } from 'lucide-react'
+import { safeInternalPath } from '@/lib/public-url'
 
 export const Route = createFileRoute('/signup')({
   component: SignupPage,
@@ -34,7 +35,7 @@ function SignupPage() {
   const [checkingAuth, setCheckingAuth] = useState(true)
   const search = typeof window !== 'undefined' ? new URLSearchParams(window.location.search) : new URLSearchParams()
   const perfilParam = search.get('perfil') || ''
-  const redirectTo = search.get('redirect') || ''
+  const redirectTo = safeInternalPath(search.get('redirect'), '')
 
   const [step, setStep] = useState(perfilParam ? 2 : 1)
   const [perfil, setPerfil] = useState(perfilParam)

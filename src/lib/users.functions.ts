@@ -3,6 +3,7 @@ import { z } from "zod";
 import { requireSupabaseAuth } from "@/integrations/supabase/auth-middleware";
 import { supabaseAdmin } from "@/integrations/supabase/client.server";
 import { logAudit } from "@/lib/audit.server";
+import { PUBLIC_ORIGIN } from "@/lib/public-url";
 
 async function assertCallerIsAdmin(userId: string) {
   const { data, error } = await supabaseAdmin
@@ -136,7 +137,7 @@ export const sendPasswordReset = createServerFn({ method: "POST" })
     if (!email) throw new Error("Usuário sem e-mail cadastrado");
 
     const { error } = await supabaseAdmin.auth.resetPasswordForEmail(email, {
-      redirectTo: `${process.env.SITE_URL ?? "https://liga-metropole-digital.lovable.app"}/reset-password`,
+      redirectTo: `${process.env.SITE_URL ?? PUBLIC_ORIGIN}/reset-password`,
     });
     if (error) throw new Error(error.message);
     await logAudit({

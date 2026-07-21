@@ -1,7 +1,7 @@
 // ─── Share utilities for Liga Metrópole ──────────────────────────────────────
 // Used by DestaqueShareCard to share match highlights via WhatsApp, clipboard, etc.
 
-const APP_BASE_URL = "https://ligametropole.app";
+import { publicUrl } from "@/lib/public-url";
 
 export interface DestaqueShareData {
   matchId: string;
@@ -18,7 +18,7 @@ export interface DestaqueShareData {
 
 /** Full public URL for a match */
 export function matchUrl(matchId: string): string {
-  return `${APP_BASE_URL}/partida/${matchId}`;
+  return publicUrl(`/partidas/${matchId}`);
 }
 
 /** WhatsApp deep link with pre-formatted message */
