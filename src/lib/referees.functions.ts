@@ -67,6 +67,7 @@ export const listPublicReferees = createServerFn({ method: "GET" }).handler(
       const avg = list.length ? list.reduce((s, x) => s + x.rating, 0) / list.length : 0;
       out.push({
         ...r,
+        whatsapp: null,
         total_matches: matches ?? 0,
         total_ratings: list.length,
         avg_rating: Math.round(avg * 100) / 100,
