@@ -50,7 +50,7 @@ export const listPublicReferees = createServerFn({ method: "GET" }).handler(
     const supabase = await publicClient();
     const { data, error } = await supabase
       .from("referees")
-      .select("id, full_name, nickname, whatsapp, city, photo_url, active, notes, created_at, updated_at")
+      .select("id, full_name, nickname, city, photo_url, active, notes, created_at, updated_at")
       .eq("active", true)
       .order("full_name");
     if (error) throw new Error(error.message);
