@@ -1,4 +1,4 @@
-import { createFileRoute, Link } from "@tanstack/react-router";
+import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
 import { useEffect, useMemo, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { PublicShell } from "@/components/PublicShell";
@@ -6,7 +6,7 @@ import { PageHeader } from "@/components/PageHeader";
 import { Badge } from "@/components/ui/badge";
 import { Input } from "@/components/ui/input";
 import { SkeletonTeamGrid, EmptyTimes } from "@/components/AppSkeletons";
-import { ArrowRight, Search, MapPin, User } from "lucide-react";
+import { ArrowRight, Search, MapPin, User, ChevronLeft, ChevronRight, ArrowUpDown } from "lucide-react";
 
 type PublicTeam = {
   id: string;
@@ -21,7 +21,31 @@ type PublicTeam = {
   manager_name: string | null;
 };
 
+type SortKey = "name-asc" | "name-desc" | "sigla-asc" | "subpref-asc" | "lado-asc";
+type LadoFilter = "" | "A" | "B";
+
+const PAGE_SIZE_OPTIONS = [12, 24, 48] as const;
+type PageSize = (typeof PAGE_SIZE_OPTIONS)[number];
+
+const SORT_OPTIONS: { value: SortKey; label: string }[] = [
+  { value: "name-asc", label: "Nome (A-Z)" },
+  { value: "name-desc", label: "Nome (Z-A)" },
+  { value: "sigla-asc", label: "Sigla (A-Z)" },
+  { value: "subpref-asc", label: "Subprefeitura" },
+  { value: "lado-asc", label: "Lado (A → B)" },
+];
+
+type ClubesSearch = { page: number; size: PageSize; sort: SortKey; q: string; lado: LadoFilter };
+
 export const Route = createFileRoute("/clubes")({
+  validateSearch: (search: Record<string, unknown>): ClubesSearch => {
+    const rawSize = Number(search.size);
+    const size = (PAGE_SIZE_OPTIONS as readonly number[]).includes(rawSize) ? (rawSize as PageSize) : 12;
+    const sort = SORT_OPTIONS.some((o) => o.value === search.sort) ? (search.sort as SortKey) : "name-asc";
+    const lado = search.lado === "A" || search.lado === "B" ? search.lado : "";
+    const page = Math.max(1, Number(search.page) || 1);
+    return { page, size, sort, q: typeof search.q === "string" ? search.q : "", lado };
+  },
   component: ClubesPage,
   head: () => ({
     meta: [
@@ -34,6 +58,7 @@ export const Route = createFileRoute("/clubes")({
     ],
   }),
 });
+
 
 function LadoBadge({ lado }: { lado: "A" | "B" | null }) {
   if (!lado) return null;
@@ -101,9 +126,11 @@ function ClubeCard({ t }: { t: PublicTeam }) {
 }
 
 function ClubesPage() {
+  const navigate = useNavigate({ from: "/clubes" });
+  const { page, size, sort, q, lado } = Route.useSearch();
+
   const [teams, setTeams] = useState<PublicTeam[] | null>(null);
-  const [query, setQuery] = useState("");
-  const [lado, setLado] = useState<"" | "A" | "B">("");
+  const [queryInput, setQueryInput] = useState(q);
 
   useEffect(() => {
     (async () => {
@@ -117,20 +144,49 @@ function ClubesPage() {
     })();
   }, []);
 
-  const filtered = useMemo(() => {
+  // Debounce query input → URL
+  useEffect(() => {
+    const t = setTimeout(() => {
+      if (queryInput !== q) {
+        navigate({ search: (prev: ClubesSearch) => ({ ...prev, q: queryInput, page: 1 }) });
+      }
+    }, 250);
+    return () => clearTimeout(t);
+     
+  }, [queryInput]);
+
+  const filteredSorted = useMemo(() => {
     if (!teams) return [];
-    const q = query.trim().toLowerCase();
-    return teams.filter((t) => {
+    const needle = q.trim().toLowerCase();
+    const list = teams.filter((t) => {
       if (lado && t.lado !== lado) return false;
-      if (!q) return true;
+      if (!needle) return true;
       return (
-        t.name.toLowerCase().includes(q) ||
-        t.short_name.toLowerCase().includes(q) ||
-        (t.manager_name ?? "").toLowerCase().includes(q) ||
-        (t.subprefeitura ?? "").toLowerCase().includes(q)
+        t.name.toLowerCase().includes(needle) ||
+        t.short_name.toLowerCase().includes(needle) ||
+        (t.manager_name ?? "").toLowerCase().includes(needle) ||
+        (t.subprefeitura ?? "").toLowerCase().includes(needle)
       );
     });
-  }, [teams, query, lado]);
+    const cmp = (a: string, b: string) => a.localeCompare(b, "pt-BR", { sensitivity: "base" });
+    list.sort((a, b) => {
+      switch (sort) {
+        case "name-desc": return cmp(b.name, a.name);
+        case "sigla-asc": return cmp(a.short_name, b.short_name);
+        case "subpref-asc": return cmp(a.subprefeitura ?? "\uffff", b.subprefeitura ?? "\uffff") || cmp(a.name, b.name);
+        case "lado-asc": return cmp(a.lado ?? "\uffff", b.lado ?? "\uffff") || cmp(a.name, b.name);
+        case "name-asc":
+        default: return cmp(a.name, b.name);
+      }
+    });
+    return list;
+  }, [teams, q, lado, sort]);
+
+  const total = filteredSorted.length;
+  const totalPages = Math.max(1, Math.ceil(total / size));
+  const safePage = Math.min(page, totalPages);
+  const start = (safePage - 1) * size;
+  const pageItems = filteredSorted.slice(start, start + size);
 
   if (!teams) {
     return (
@@ -149,13 +205,13 @@ function ClubesPage() {
         description="Todos os clubes confirmados na Liga Metrópole, com escudo, sigla e gestor responsável."
       />
 
-      <div className="mb-6 grid gap-3 sm:grid-cols-[1fr_auto]">
+      <div className="mb-4 grid gap-3 sm:grid-cols-[1fr_auto_auto]">
         <div className="relative">
           <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
           <Input
             placeholder="Buscar por clube, sigla, gestor ou subprefeitura…"
-            value={query}
-            onChange={(e) => setQuery(e.target.value)}
+            value={queryInput}
+            onChange={(e) => setQueryInput(e.target.value)}
             className="pl-9"
           />
         </div>
@@ -163,7 +219,7 @@ function ClubesPage() {
           {(["", "A", "B"] as const).map((v) => (
             <button
               key={v || "all"}
-              onClick={() => setLado(v)}
+              onClick={() => navigate({ search: (prev: ClubesSearch) => ({ ...prev, lado: v, page: 1 }) })}
               className={`px-3 py-1.5 rounded text-xs font-semibold tracking-widest uppercase transition ${
                 lado === v ? "bg-primary text-primary-foreground" : "text-muted-foreground hover:text-foreground"
               }`}
@@ -172,15 +228,98 @@ function ClubesPage() {
             </button>
           ))}
         </div>
+        <label className="relative flex items-center">
+          <ArrowUpDown className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground pointer-events-none" />
+          <select
+            value={sort}
+            onChange={(e) => navigate({ search: (prev: ClubesSearch) => ({ ...prev, sort: e.target.value as SortKey, page: 1 }) })}
+            className="h-10 rounded-md border border-input bg-background pl-9 pr-3 text-sm focus:outline-none focus:ring-2 focus:ring-primary/40"
+            aria-label="Ordenar clubes"
+          >
+            {SORT_OPTIONS.map((o) => <option key={o.value} value={o.value}>{o.label}</option>)}
+          </select>
+        </label>
       </div>
 
-      {filtered.length === 0 ? (
+      <div className="mb-4 flex flex-wrap items-center justify-between gap-2 text-xs text-muted-foreground">
+        <span>
+          {total === 0 ? "Nenhum resultado" : `Mostrando ${start + 1}–${Math.min(start + size, total)} de ${total}`}
+        </span>
+        <label className="flex items-center gap-2">
+          <span className="uppercase tracking-widest font-semibold">Por página</span>
+          <select
+            value={size}
+            onChange={(e) => navigate({ search: (prev: ClubesSearch) => ({ ...prev, size: Number(e.target.value) as PageSize, page: 1 }) })}
+            className="h-8 rounded-md border border-input bg-background px-2 text-xs focus:outline-none focus:ring-2 focus:ring-primary/40"
+            aria-label="Itens por página"
+          >
+            {PAGE_SIZE_OPTIONS.map((n) => <option key={n} value={n}>{n}</option>)}
+          </select>
+        </label>
+      </div>
+
+      {total === 0 ? (
         <EmptyTimes />
       ) : (
-        <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
-          {filtered.map((t) => <ClubeCard key={t.id} t={t} />)}
-        </div>
+        <>
+          <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
+            {pageItems.map((t) => <ClubeCard key={t.id} t={t} />)}
+          </div>
+
+          {totalPages > 1 && (
+            <nav className="mt-6 flex items-center justify-center gap-1" aria-label="Paginação">
+              <button
+                onClick={() => navigate({ search: (prev: ClubesSearch) => ({ ...prev, page: Math.max(1, safePage - 1) }) })}
+                disabled={safePage <= 1}
+                className="inline-flex h-9 items-center gap-1 rounded-md border border-border bg-card px-3 text-xs font-semibold uppercase tracking-widest hover:bg-muted disabled:opacity-40 disabled:cursor-not-allowed"
+                aria-label="Página anterior"
+              >
+                <ChevronLeft className="h-4 w-4" /> Anterior
+              </button>
+              {getPageWindow(safePage, totalPages).map((p, i) =>
+                p === "…" ? (
+                  <span key={`e${i}`} className="px-2 text-muted-foreground">…</span>
+                ) : (
+                  <button
+                    key={p}
+                    onClick={() => navigate({ search: (prev: ClubesSearch) => ({ ...prev, page: p as number }) })}
+                    aria-current={p === safePage ? "page" : undefined}
+                    className={`h-9 min-w-9 rounded-md border px-3 text-xs font-semibold transition ${
+                      p === safePage
+                        ? "border-primary bg-primary text-primary-foreground"
+                        : "border-border bg-card hover:bg-muted"
+                    }`}
+                  >
+                    {p}
+                  </button>
+                )
+              )}
+              <button
+                onClick={() => navigate({ search: (prev: ClubesSearch) => ({ ...prev, page: Math.min(totalPages, safePage + 1) }) })}
+                disabled={safePage >= totalPages}
+                className="inline-flex h-9 items-center gap-1 rounded-md border border-border bg-card px-3 text-xs font-semibold uppercase tracking-widest hover:bg-muted disabled:opacity-40 disabled:cursor-not-allowed"
+                aria-label="Próxima página"
+              >
+                Próxima <ChevronRight className="h-4 w-4" />
+              </button>
+            </nav>
+          )}
+        </>
       )}
     </PublicShell>
   );
+}
+
+function getPageWindow(current: number, total: number): (number | "…")[] {
+  const out: (number | "…")[] = [];
+  const push = (n: number | "…") => out.push(n);
+  const add = new Set<number>([1, total, current, current - 1, current + 1]);
+  const pages = [...add].filter((n) => n >= 1 && n <= total).sort((a, b) => a - b);
+  let prev = 0;
+  for (const p of pages) {
+    if (p - prev > 1) push("…");
+    push(p);
+    prev = p;
+  }
+  return out;
 }
