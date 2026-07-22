@@ -23,6 +23,8 @@ import { toPng } from "html-to-image";
 import { toast } from "sonner";
 import lmShield from "@/assets/lm-shield.png.asset.json";
 
+export { ConviteFlyerPage };
+
 export const Route = createFileRoute("/convite-flyer")({
   component: ConviteFlyerPage,
   head: () => ({
