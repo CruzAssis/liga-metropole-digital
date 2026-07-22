@@ -25,6 +25,7 @@ import { Route as LoginRouteImport } from './routes/login'
 import { Route as LocaisRouteImport } from './routes/locais'
 import { Route as ForgotPasswordRouteImport } from './routes/forgot-password'
 import { Route as EstatisticasRouteImport } from './routes/estatisticas'
+import { Route as ConviteFlyerRouteImport } from './routes/convite-flyer'
 import { Route as ClubesRouteImport } from './routes/clubes'
 import { Route as AtletasRouteImport } from './routes/atletas'
 import { Route as ArbitrosRouteImport } from './routes/arbitros'
@@ -150,6 +151,11 @@ const ForgotPasswordRoute = ForgotPasswordRouteImport.update({
 const EstatisticasRoute = EstatisticasRouteImport.update({
   id: '/estatisticas',
   path: '/estatisticas',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ConviteFlyerRoute = ConviteFlyerRouteImport.update({
+  id: '/convite-flyer',
+  path: '/convite-flyer',
   getParentRoute: () => rootRouteImport,
 } as any)
 const ClubesRoute = ClubesRouteImport.update({
@@ -409,6 +415,7 @@ export interface FileRoutesByFullPath {
   '/arbitros': typeof ArbitrosRoute
   '/atletas': typeof AtletasRouteWithChildren
   '/clubes': typeof ClubesRoute
+  '/convite-flyer': typeof ConviteFlyerRoute
   '/estatisticas': typeof EstatisticasRoute
   '/forgot-password': typeof ForgotPasswordRoute
   '/locais': typeof LocaisRoute
@@ -472,6 +479,7 @@ export interface FileRoutesByTo {
   '/arbitros': typeof ArbitrosRoute
   '/atletas': typeof AtletasRouteWithChildren
   '/clubes': typeof ClubesRoute
+  '/convite-flyer': typeof ConviteFlyerRoute
   '/estatisticas': typeof EstatisticasRoute
   '/forgot-password': typeof ForgotPasswordRoute
   '/locais': typeof LocaisRoute
@@ -537,6 +545,7 @@ export interface FileRoutesById {
   '/arbitros': typeof ArbitrosRoute
   '/atletas': typeof AtletasRouteWithChildren
   '/clubes': typeof ClubesRoute
+  '/convite-flyer': typeof ConviteFlyerRoute
   '/estatisticas': typeof EstatisticasRoute
   '/forgot-password': typeof ForgotPasswordRoute
   '/locais': typeof LocaisRoute
@@ -602,6 +611,7 @@ export interface FileRouteTypes {
     | '/arbitros'
     | '/atletas'
     | '/clubes'
+    | '/convite-flyer'
     | '/estatisticas'
     | '/forgot-password'
     | '/locais'
@@ -665,6 +675,7 @@ export interface FileRouteTypes {
     | '/arbitros'
     | '/atletas'
     | '/clubes'
+    | '/convite-flyer'
     | '/estatisticas'
     | '/forgot-password'
     | '/locais'
@@ -729,6 +740,7 @@ export interface FileRouteTypes {
     | '/arbitros'
     | '/atletas'
     | '/clubes'
+    | '/convite-flyer'
     | '/estatisticas'
     | '/forgot-password'
     | '/locais'
@@ -794,6 +806,7 @@ export interface RootRouteChildren {
   ArbitrosRoute: typeof ArbitrosRoute
   AtletasRoute: typeof AtletasRouteWithChildren
   ClubesRoute: typeof ClubesRoute
+  ConviteFlyerRoute: typeof ConviteFlyerRoute
   EstatisticasRoute: typeof EstatisticasRoute
   ForgotPasswordRoute: typeof ForgotPasswordRoute
   LocaisRoute: typeof LocaisRoute
@@ -932,6 +945,13 @@ declare module '@tanstack/react-router' {
       path: '/estatisticas'
       fullPath: '/estatisticas'
       preLoaderRoute: typeof EstatisticasRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/convite-flyer': {
+      id: '/convite-flyer'
+      path: '/convite-flyer'
+      fullPath: '/convite-flyer'
+      preLoaderRoute: typeof ConviteFlyerRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/clubes': {
@@ -1389,6 +1409,7 @@ const rootRouteChildren: RootRouteChildren = {
   ArbitrosRoute: ArbitrosRoute,
   AtletasRoute: AtletasRouteWithChildren,
   ClubesRoute: ClubesRoute,
+  ConviteFlyerRoute: ConviteFlyerRoute,
   EstatisticasRoute: EstatisticasRoute,
   ForgotPasswordRoute: ForgotPasswordRoute,
   LocaisRoute: LocaisRoute,
@@ -1417,13 +1438,3 @@ const rootRouteChildren: RootRouteChildren = {
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)
   ._addFileTypes<FileRouteTypes>()
-
-import type { getRouter } from './router.tsx'
-import type { startInstance } from './start.ts'
-declare module '@tanstack/react-start' {
-  interface Register {
-    ssr: true
-    router: Awaited<ReturnType<typeof getRouter>>
-    config: Awaited<ReturnType<typeof startInstance.getOptions>>
-  }
-}
