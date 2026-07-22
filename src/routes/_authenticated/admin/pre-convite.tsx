@@ -1,5 +1,5 @@
 import { createFileRoute } from "@tanstack/react-router";
-import { ConviteFlyerPage } from "@/routes/convite-flyer";
+import { ConviteFlyerPage } from "@/components/ConviteFlyerPage";
 
 export const Route = createFileRoute("/_authenticated/admin/pre-convite")({
   component: ConviteFlyerPage,
