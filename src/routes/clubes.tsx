@@ -1,4 +1,4 @@
-import { createFileRoute, Link } from "@tanstack/react-router";
+import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
 import { useEffect, useMemo, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { PublicShell } from "@/components/PublicShell";
@@ -6,7 +6,7 @@ import { PageHeader } from "@/components/PageHeader";
 import { Badge } from "@/components/ui/badge";
 import { Input } from "@/components/ui/input";
 import { SkeletonTeamGrid, EmptyTimes } from "@/components/AppSkeletons";
-import { ArrowRight, Search, MapPin, User } from "lucide-react";
+import { ArrowRight, Search, MapPin, User, ChevronLeft, ChevronRight, ArrowUpDown } from "lucide-react";
 
 type PublicTeam = {
   id: string;
@@ -21,7 +21,31 @@ type PublicTeam = {
   manager_name: string | null;
 };
 
+type SortKey = "name-asc" | "name-desc" | "sigla-asc" | "subpref-asc" | "lado-asc";
+type LadoFilter = "" | "A" | "B";
+
+const PAGE_SIZE_OPTIONS = [12, 24, 48] as const;
+type PageSize = (typeof PAGE_SIZE_OPTIONS)[number];
+
+const SORT_OPTIONS: { value: SortKey; label: string }[] = [
+  { value: "name-asc", label: "Nome (A-Z)" },
+  { value: "name-desc", label: "Nome (Z-A)" },
+  { value: "sigla-asc", label: "Sigla (A-Z)" },
+  { value: "subpref-asc", label: "Subprefeitura" },
+  { value: "lado-asc", label: "Lado (A → B)" },
+];
+
+type ClubesSearch = { page: number; size: PageSize; sort: SortKey; q: string; lado: LadoFilter };
+
 export const Route = createFileRoute("/clubes")({
+  validateSearch: (search: Record<string, unknown>): ClubesSearch => {
+    const rawSize = Number(search.size);
+    const size = (PAGE_SIZE_OPTIONS as readonly number[]).includes(rawSize) ? (rawSize as PageSize) : 12;
+    const sort = SORT_OPTIONS.some((o) => o.value === search.sort) ? (search.sort as SortKey) : "name-asc";
+    const lado = search.lado === "A" || search.lado === "B" ? search.lado : "";
+    const page = Math.max(1, Number(search.page) || 1);
+    return { page, size, sort, q: typeof search.q === "string" ? search.q : "", lado };
+  },
   component: ClubesPage,
   head: () => ({
     meta: [
@@ -34,6 +58,7 @@ export const Route = createFileRoute("/clubes")({
     ],
   }),
 });
+
 
 function LadoBadge({ lado }: { lado: "A" | "B" | null }) {
   if (!lado) return null;
