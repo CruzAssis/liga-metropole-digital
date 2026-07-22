@@ -1461,6 +1461,21 @@ export type Database = {
         Returns: boolean
       }
       is_voting_open: { Args: { _match_id: string }; Returns: boolean }
+      list_public_teams: {
+        Args: never
+        Returns: {
+          id: string
+          lado: string
+          logo_url: string
+          manager_name: string
+          name: string
+          primary_color: string
+          registration_type: string
+          short_name: string
+          slug: string
+          subprefeitura: string
+        }[]
+      }
       promote_waitlist_for_type: { Args: { _type: string }; Returns: undefined }
       registration_dashboard_stats: {
         Args: never
