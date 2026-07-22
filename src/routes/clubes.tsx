@@ -323,5 +323,3 @@ function getPageWindow(current: number, total: number): (number | "…")[] {
   }
   return out;
 }
-
-}
