@@ -6,7 +6,7 @@ import { PageHeader } from "@/components/PageHeader";
 import { Badge } from "@/components/ui/badge";
 import { Input } from "@/components/ui/input";
 import { SkeletonTeamGrid, EmptyTimes } from "@/components/AppSkeletons";
-import { ArrowRight, Search, MapPin, User, ChevronLeft, ChevronRight, ArrowUpDown } from "lucide-react";
+import { ArrowRight, Search, MapPin, ChevronLeft, ChevronRight, ArrowUpDown } from "lucide-react";
 
 type PublicTeam = {
   id: string;
@@ -18,8 +18,8 @@ type PublicTeam = {
   registration_type: string | null;
   lado: "A" | "B" | null;
   subprefeitura: string | null;
-  manager_name: string | null;
 };
+
 
 type SortKey = "name-asc" | "name-desc" | "sigla-asc" | "subpref-asc" | "lado-asc";
 type LadoFilter = "" | "A" | "B";
