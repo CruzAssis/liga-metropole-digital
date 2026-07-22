@@ -148,7 +148,7 @@ function ClubesPage() {
   useEffect(() => {
     const t = setTimeout(() => {
       if (queryInput !== q) {
-        navigate({ search: (prev) => ({ ...prev, q: queryInput, page: 1 }) });
+        navigate({ search: (prev: ClubesSearch) => ({ ...prev, q: queryInput, page: 1 }) });
       }
     }, 250);
     return () => clearTimeout(t);
@@ -219,7 +219,7 @@ function ClubesPage() {
           {(["", "A", "B"] as const).map((v) => (
             <button
               key={v || "all"}
-              onClick={() => navigate({ search: (prev) => ({ ...prev, lado: v, page: 1 }) })}
+              onClick={() => navigate({ search: (prev: ClubesSearch) => ({ ...prev, lado: v, page: 1 }) })}
               className={`px-3 py-1.5 rounded text-xs font-semibold tracking-widest uppercase transition ${
                 lado === v ? "bg-primary text-primary-foreground" : "text-muted-foreground hover:text-foreground"
               }`}
@@ -232,7 +232,7 @@ function ClubesPage() {
           <ArrowUpDown className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground pointer-events-none" />
           <select
             value={sort}
-            onChange={(e) => navigate({ search: (prev) => ({ ...prev, sort: e.target.value as SortKey, page: 1 }) })}
+            onChange={(e) => navigate({ search: (prev: ClubesSearch) => ({ ...prev, sort: e.target.value as SortKey, page: 1 }) })}
             className="h-10 rounded-md border border-input bg-background pl-9 pr-3 text-sm focus:outline-none focus:ring-2 focus:ring-primary/40"
             aria-label="Ordenar clubes"
           >
@@ -249,7 +249,7 @@ function ClubesPage() {
           <span className="uppercase tracking-widest font-semibold">Por página</span>
           <select
             value={size}
-            onChange={(e) => navigate({ search: (prev) => ({ ...prev, size: Number(e.target.value) as PageSize, page: 1 }) })}
+            onChange={(e) => navigate({ search: (prev: ClubesSearch) => ({ ...prev, size: Number(e.target.value) as PageSize, page: 1 }) })}
             className="h-8 rounded-md border border-input bg-background px-2 text-xs focus:outline-none focus:ring-2 focus:ring-primary/40"
             aria-label="Itens por página"
           >
@@ -269,7 +269,7 @@ function ClubesPage() {
           {totalPages > 1 && (
             <nav className="mt-6 flex items-center justify-center gap-1" aria-label="Paginação">
               <button
-                onClick={() => navigate({ search: (prev) => ({ ...prev, page: Math.max(1, safePage - 1) }) })}
+                onClick={() => navigate({ search: (prev: ClubesSearch) => ({ ...prev, page: Math.max(1, safePage - 1) }) })}
                 disabled={safePage <= 1}
                 className="inline-flex h-9 items-center gap-1 rounded-md border border-border bg-card px-3 text-xs font-semibold uppercase tracking-widest hover:bg-muted disabled:opacity-40 disabled:cursor-not-allowed"
                 aria-label="Página anterior"
@@ -282,7 +282,7 @@ function ClubesPage() {
                 ) : (
                   <button
                     key={p}
-                    onClick={() => navigate({ search: (prev) => ({ ...prev, page: p as number }) })}
+                    onClick={() => navigate({ search: (prev: ClubesSearch) => ({ ...prev, page: p as number }) })}
                     aria-current={p === safePage ? "page" : undefined}
                     className={`h-9 min-w-9 rounded-md border px-3 text-xs font-semibold transition ${
                       p === safePage
@@ -295,7 +295,7 @@ function ClubesPage() {
                 )
               )}
               <button
-                onClick={() => navigate({ search: (prev) => ({ ...prev, page: Math.min(totalPages, safePage + 1) }) })}
+                onClick={() => navigate({ search: (prev: ClubesSearch) => ({ ...prev, page: Math.min(totalPages, safePage + 1) }) })}
                 disabled={safePage >= totalPages}
                 className="inline-flex h-9 items-center gap-1 rounded-md border border-border bg-card px-3 text-xs font-semibold uppercase tracking-widest hover:bg-muted disabled:opacity-40 disabled:cursor-not-allowed"
                 aria-label="Próxima página"
