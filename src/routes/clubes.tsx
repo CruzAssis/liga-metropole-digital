@@ -102,12 +102,7 @@ function ClubeCard({ t }: { t: PublicTeam }) {
             </span>
           )}
         </div>
-        {t.manager_name && (
-          <div className="mt-2 flex items-center gap-1.5 text-xs text-muted-foreground">
-            <User className="h-3 w-3 shrink-0" />
-            <span className="truncate">Gestor: <span className="text-foreground/90">{t.manager_name}</span></span>
-          </div>
-        )}
+
       </div>
       {t.slug && (
         <ArrowRight className="h-4 w-4 text-muted-foreground/60 group-hover:text-primary group-hover:translate-x-0.5 transition-all shrink-0" />
