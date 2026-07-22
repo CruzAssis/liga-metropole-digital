@@ -55,6 +55,7 @@ import { Route as AuthenticatedAdminTriagemRouteImport } from './routes/_authent
 import { Route as AuthenticatedAdminTimesRouteImport } from './routes/_authenticated/admin/times'
 import { Route as AuthenticatedAdminSumulasRouteImport } from './routes/_authenticated/admin/sumulas'
 import { Route as AuthenticatedAdminSorteioRouteImport } from './routes/_authenticated/admin/sorteio'
+import { Route as AuthenticatedAdminPreConviteRouteImport } from './routes/_authenticated/admin/pre-convite'
 import { Route as AuthenticatedAdminPartidasRouteImport } from './routes/_authenticated/admin/partidas'
 import { Route as AuthenticatedAdminNotificacoesRouteImport } from './routes/_authenticated/admin/notificacoes'
 import { Route as AuthenticatedAdminMidiaRouteImport } from './routes/_authenticated/admin/midia'
@@ -309,6 +310,12 @@ const AuthenticatedAdminSorteioRoute =
     path: '/sorteio',
     getParentRoute: () => AuthenticatedAdminRoute,
   } as any)
+const AuthenticatedAdminPreConviteRoute =
+  AuthenticatedAdminPreConviteRouteImport.update({
+    id: '/pre-convite',
+    path: '/pre-convite',
+    getParentRoute: () => AuthenticatedAdminRoute,
+  } as any)
 const AuthenticatedAdminPartidasRoute =
   AuthenticatedAdminPartidasRouteImport.update({
     id: '/partidas',
@@ -464,6 +471,7 @@ export interface FileRoutesByFullPath {
   '/admin/midia': typeof AuthenticatedAdminMidiaRoute
   '/admin/notificacoes': typeof AuthenticatedAdminNotificacoesRoute
   '/admin/partidas': typeof AuthenticatedAdminPartidasRoute
+  '/admin/pre-convite': typeof AuthenticatedAdminPreConviteRoute
   '/admin/sorteio': typeof AuthenticatedAdminSorteioRoute
   '/admin/sumulas': typeof AuthenticatedAdminSumulasRoute
   '/admin/times': typeof AuthenticatedAdminTimesRoute
@@ -528,6 +536,7 @@ export interface FileRoutesByTo {
   '/admin/midia': typeof AuthenticatedAdminMidiaRoute
   '/admin/notificacoes': typeof AuthenticatedAdminNotificacoesRoute
   '/admin/partidas': typeof AuthenticatedAdminPartidasRoute
+  '/admin/pre-convite': typeof AuthenticatedAdminPreConviteRoute
   '/admin/sorteio': typeof AuthenticatedAdminSorteioRoute
   '/admin/sumulas': typeof AuthenticatedAdminSumulasRoute
   '/admin/times': typeof AuthenticatedAdminTimesRoute
@@ -594,6 +603,7 @@ export interface FileRoutesById {
   '/_authenticated/admin/midia': typeof AuthenticatedAdminMidiaRoute
   '/_authenticated/admin/notificacoes': typeof AuthenticatedAdminNotificacoesRoute
   '/_authenticated/admin/partidas': typeof AuthenticatedAdminPartidasRoute
+  '/_authenticated/admin/pre-convite': typeof AuthenticatedAdminPreConviteRoute
   '/_authenticated/admin/sorteio': typeof AuthenticatedAdminSorteioRoute
   '/_authenticated/admin/sumulas': typeof AuthenticatedAdminSumulasRoute
   '/_authenticated/admin/times': typeof AuthenticatedAdminTimesRoute
@@ -660,6 +670,7 @@ export interface FileRouteTypes {
     | '/admin/midia'
     | '/admin/notificacoes'
     | '/admin/partidas'
+    | '/admin/pre-convite'
     | '/admin/sorteio'
     | '/admin/sumulas'
     | '/admin/times'
@@ -724,6 +735,7 @@ export interface FileRouteTypes {
     | '/admin/midia'
     | '/admin/notificacoes'
     | '/admin/partidas'
+    | '/admin/pre-convite'
     | '/admin/sorteio'
     | '/admin/sumulas'
     | '/admin/times'
@@ -789,6 +801,7 @@ export interface FileRouteTypes {
     | '/_authenticated/admin/midia'
     | '/_authenticated/admin/notificacoes'
     | '/_authenticated/admin/partidas'
+    | '/_authenticated/admin/pre-convite'
     | '/_authenticated/admin/sorteio'
     | '/_authenticated/admin/sumulas'
     | '/_authenticated/admin/times'
@@ -1157,6 +1170,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedAdminSorteioRouteImport
       parentRoute: typeof AuthenticatedAdminRoute
     }
+    '/_authenticated/admin/pre-convite': {
+      id: '/_authenticated/admin/pre-convite'
+      path: '/pre-convite'
+      fullPath: '/admin/pre-convite'
+      preLoaderRoute: typeof AuthenticatedAdminPreConviteRouteImport
+      parentRoute: typeof AuthenticatedAdminRoute
+    }
     '/_authenticated/admin/partidas': {
       id: '/_authenticated/admin/partidas'
       path: '/partidas'
@@ -1295,6 +1315,7 @@ interface AuthenticatedAdminRouteChildren {
   AuthenticatedAdminMidiaRoute: typeof AuthenticatedAdminMidiaRoute
   AuthenticatedAdminNotificacoesRoute: typeof AuthenticatedAdminNotificacoesRoute
   AuthenticatedAdminPartidasRoute: typeof AuthenticatedAdminPartidasRoute
+  AuthenticatedAdminPreConviteRoute: typeof AuthenticatedAdminPreConviteRoute
   AuthenticatedAdminSorteioRoute: typeof AuthenticatedAdminSorteioRoute
   AuthenticatedAdminSumulasRoute: typeof AuthenticatedAdminSumulasRoute
   AuthenticatedAdminTimesRoute: typeof AuthenticatedAdminTimesRoute
@@ -1318,6 +1339,7 @@ const AuthenticatedAdminRouteChildren: AuthenticatedAdminRouteChildren = {
   AuthenticatedAdminMidiaRoute: AuthenticatedAdminMidiaRoute,
   AuthenticatedAdminNotificacoesRoute: AuthenticatedAdminNotificacoesRoute,
   AuthenticatedAdminPartidasRoute: AuthenticatedAdminPartidasRoute,
+  AuthenticatedAdminPreConviteRoute: AuthenticatedAdminPreConviteRoute,
   AuthenticatedAdminSorteioRoute: AuthenticatedAdminSorteioRoute,
   AuthenticatedAdminSumulasRoute: AuthenticatedAdminSumulasRoute,
   AuthenticatedAdminTimesRoute: AuthenticatedAdminTimesRoute,
