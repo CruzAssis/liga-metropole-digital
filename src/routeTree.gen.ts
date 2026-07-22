@@ -25,6 +25,7 @@ import { Route as LoginRouteImport } from './routes/login'
 import { Route as LocaisRouteImport } from './routes/locais'
 import { Route as ForgotPasswordRouteImport } from './routes/forgot-password'
 import { Route as EstatisticasRouteImport } from './routes/estatisticas'
+import { Route as ClubesRouteImport } from './routes/clubes'
 import { Route as AtletasRouteImport } from './routes/atletas'
 import { Route as ArbitrosRouteImport } from './routes/arbitros'
 import { Route as AgendaRouteImport } from './routes/agenda'
@@ -149,6 +150,11 @@ const ForgotPasswordRoute = ForgotPasswordRouteImport.update({
 const EstatisticasRoute = EstatisticasRouteImport.update({
   id: '/estatisticas',
   path: '/estatisticas',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ClubesRoute = ClubesRouteImport.update({
+  id: '/clubes',
+  path: '/clubes',
   getParentRoute: () => rootRouteImport,
 } as any)
 const AtletasRoute = AtletasRouteImport.update({
@@ -402,6 +408,7 @@ export interface FileRoutesByFullPath {
   '/agenda': typeof AgendaRoute
   '/arbitros': typeof ArbitrosRoute
   '/atletas': typeof AtletasRouteWithChildren
+  '/clubes': typeof ClubesRoute
   '/estatisticas': typeof EstatisticasRoute
   '/forgot-password': typeof ForgotPasswordRoute
   '/locais': typeof LocaisRoute
@@ -464,6 +471,7 @@ export interface FileRoutesByTo {
   '/agenda': typeof AgendaRoute
   '/arbitros': typeof ArbitrosRoute
   '/atletas': typeof AtletasRouteWithChildren
+  '/clubes': typeof ClubesRoute
   '/estatisticas': typeof EstatisticasRoute
   '/forgot-password': typeof ForgotPasswordRoute
   '/locais': typeof LocaisRoute
@@ -528,6 +536,7 @@ export interface FileRoutesById {
   '/agenda': typeof AgendaRoute
   '/arbitros': typeof ArbitrosRoute
   '/atletas': typeof AtletasRouteWithChildren
+  '/clubes': typeof ClubesRoute
   '/estatisticas': typeof EstatisticasRoute
   '/forgot-password': typeof ForgotPasswordRoute
   '/locais': typeof LocaisRoute
@@ -592,6 +601,7 @@ export interface FileRouteTypes {
     | '/agenda'
     | '/arbitros'
     | '/atletas'
+    | '/clubes'
     | '/estatisticas'
     | '/forgot-password'
     | '/locais'
@@ -654,6 +664,7 @@ export interface FileRouteTypes {
     | '/agenda'
     | '/arbitros'
     | '/atletas'
+    | '/clubes'
     | '/estatisticas'
     | '/forgot-password'
     | '/locais'
@@ -717,6 +728,7 @@ export interface FileRouteTypes {
     | '/agenda'
     | '/arbitros'
     | '/atletas'
+    | '/clubes'
     | '/estatisticas'
     | '/forgot-password'
     | '/locais'
@@ -781,6 +793,7 @@ export interface RootRouteChildren {
   AgendaRoute: typeof AgendaRoute
   ArbitrosRoute: typeof ArbitrosRoute
   AtletasRoute: typeof AtletasRouteWithChildren
+  ClubesRoute: typeof ClubesRoute
   EstatisticasRoute: typeof EstatisticasRoute
   ForgotPasswordRoute: typeof ForgotPasswordRoute
   LocaisRoute: typeof LocaisRoute
@@ -919,6 +932,13 @@ declare module '@tanstack/react-router' {
       path: '/estatisticas'
       fullPath: '/estatisticas'
       preLoaderRoute: typeof EstatisticasRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/clubes': {
+      id: '/clubes'
+      path: '/clubes'
+      fullPath: '/clubes'
+      preLoaderRoute: typeof ClubesRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/atletas': {
@@ -1368,6 +1388,7 @@ const rootRouteChildren: RootRouteChildren = {
   AgendaRoute: AgendaRoute,
   ArbitrosRoute: ArbitrosRoute,
   AtletasRoute: AtletasRouteWithChildren,
+  ClubesRoute: ClubesRoute,
   EstatisticasRoute: EstatisticasRoute,
   ForgotPasswordRoute: ForgotPasswordRoute,
   LocaisRoute: LocaisRoute,
