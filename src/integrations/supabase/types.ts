@@ -1467,7 +1467,6 @@ export type Database = {
           id: string
           lado: string
           logo_url: string
-          manager_name: string
           name: string
           primary_color: string
           registration_type: string
