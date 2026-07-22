@@ -50,7 +50,7 @@ export const listPublicReferees = createServerFn({ method: "GET" }).handler(
     const supabase = await publicClient();
     const { data, error } = await supabase
       .from("referees")
-      .select("id, full_name, nickname, whatsapp, city, photo_url, active, notes, created_at, updated_at")
+      .select("id, full_name, nickname, city, photo_url, active, notes, created_at, updated_at")
       .eq("active", true)
       .order("full_name");
     if (error) throw new Error(error.message);
@@ -67,6 +67,7 @@ export const listPublicReferees = createServerFn({ method: "GET" }).handler(
       const avg = list.length ? list.reduce((s, x) => s + x.rating, 0) / list.length : 0;
       out.push({
         ...r,
+        whatsapp: null,
         total_matches: matches ?? 0,
         total_ratings: list.length,
         avg_rating: Math.round(avg * 100) / 100,
