@@ -50,9 +50,9 @@ export const Route = createFileRoute("/clubes")({
   head: () => ({
     meta: [
       { title: "Clubes aprovados · Liga Metrópole" },
-      { name: "description", content: "Lista pública dos clubes aprovados na Liga Metrópole, com escudo, sigla e nome do gestor responsável." },
+      { name: "description", content: "Lista pública dos clubes aprovados na Liga Metrópole, com escudo, sigla e subprefeitura." },
       { property: "og:title", content: "Clubes aprovados · Liga Metrópole" },
-      { property: "og:description", content: "Conheça os clubes participantes da Liga Metrópole e seus gestores." },
+      { property: "og:description", content: "Conheça os clubes participantes da Liga Metrópole e suas subprefeituras." },
       { property: "og:type", content: "website" },
       { name: "twitter:card", content: "summary_large_image" },
     ],
@@ -196,14 +196,14 @@ function ClubesPage() {
       <PageHeader
         eyebrow={`${teams.length} clube${teams.length !== 1 ? "s" : ""} aprovado${teams.length !== 1 ? "s" : ""}`}
         title="Clubes da Liga"
-        description="Todos os clubes confirmados na Liga Metrópole, com escudo, sigla e gestor responsável."
+        description="Todos os clubes confirmados na Liga Metrópole, com escudo, sigla e subprefeitura."
       />
 
       <div className="mb-4 grid gap-3 sm:grid-cols-[1fr_auto_auto]">
         <div className="relative">
           <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
           <Input
-            placeholder="Buscar por clube, sigla, gestor ou subprefeitura…"
+            placeholder="Buscar por clube, sigla ou subprefeitura…"
             value={queryInput}
             onChange={(e) => setQueryInput(e.target.value)}
             className="pl-9"
