@@ -6,7 +6,7 @@ import { PageHeader } from "@/components/PageHeader";
 import { Badge } from "@/components/ui/badge";
 import { Input } from "@/components/ui/input";
 import { SkeletonTeamGrid, EmptyTimes } from "@/components/AppSkeletons";
-import { ArrowRight, Search, MapPin, User, ChevronLeft, ChevronRight, ArrowUpDown } from "lucide-react";
+import { ArrowRight, Search, MapPin, ChevronLeft, ChevronRight, ArrowUpDown } from "lucide-react";
 
 type PublicTeam = {
   id: string;
@@ -18,8 +18,8 @@ type PublicTeam = {
   registration_type: string | null;
   lado: "A" | "B" | null;
   subprefeitura: string | null;
-  manager_name: string | null;
 };
+
 
 type SortKey = "name-asc" | "name-desc" | "sigla-asc" | "subpref-asc" | "lado-asc";
 type LadoFilter = "" | "A" | "B";
@@ -50,9 +50,9 @@ export const Route = createFileRoute("/clubes")({
   head: () => ({
     meta: [
       { title: "Clubes aprovados · Liga Metrópole" },
-      { name: "description", content: "Lista pública dos clubes aprovados na Liga Metrópole, com escudo, sigla e nome do gestor responsável." },
+      { name: "description", content: "Lista pública dos clubes aprovados na Liga Metrópole, com escudo, sigla e subprefeitura." },
       { property: "og:title", content: "Clubes aprovados · Liga Metrópole" },
-      { property: "og:description", content: "Conheça os clubes participantes da Liga Metrópole e seus gestores." },
+      { property: "og:description", content: "Conheça os clubes participantes da Liga Metrópole e suas subprefeituras." },
       { property: "og:type", content: "website" },
       { name: "twitter:card", content: "summary_large_image" },
     ],
@@ -102,12 +102,7 @@ function ClubeCard({ t }: { t: PublicTeam }) {
             </span>
           )}
         </div>
-        {t.manager_name && (
-          <div className="mt-2 flex items-center gap-1.5 text-xs text-muted-foreground">
-            <User className="h-3 w-3 shrink-0" />
-            <span className="truncate">Gestor: <span className="text-foreground/90">{t.manager_name}</span></span>
-          </div>
-        )}
+
       </div>
       {t.slug && (
         <ArrowRight className="h-4 w-4 text-muted-foreground/60 group-hover:text-primary group-hover:translate-x-0.5 transition-all shrink-0" />
@@ -164,7 +159,6 @@ function ClubesPage() {
       return (
         t.name.toLowerCase().includes(needle) ||
         t.short_name.toLowerCase().includes(needle) ||
-        (t.manager_name ?? "").toLowerCase().includes(needle) ||
         (t.subprefeitura ?? "").toLowerCase().includes(needle)
       );
     });
@@ -202,14 +196,14 @@ function ClubesPage() {
       <PageHeader
         eyebrow={`${teams.length} clube${teams.length !== 1 ? "s" : ""} aprovado${teams.length !== 1 ? "s" : ""}`}
         title="Clubes da Liga"
-        description="Todos os clubes confirmados na Liga Metrópole, com escudo, sigla e gestor responsável."
+        description="Todos os clubes confirmados na Liga Metrópole, com escudo, sigla e subprefeitura."
       />
 
       <div className="mb-4 grid gap-3 sm:grid-cols-[1fr_auto_auto]">
         <div className="relative">
           <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
           <Input
-            placeholder="Buscar por clube, sigla, gestor ou subprefeitura…"
+            placeholder="Buscar por clube, sigla ou subprefeitura…"
             value={queryInput}
             onChange={(e) => setQueryInput(e.target.value)}
             className="pl-9"
