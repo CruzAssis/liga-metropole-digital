@@ -1,0 +1,1 @@
+GRANT SELECT (id, public_league_name, public_tagline, public_season, public_whatsapp, public_rules_url, public_format_description, public_instagram, public_contact_email, master_registration_open, host_slots_limit) ON public.system_settings TO anon, authenticated;
