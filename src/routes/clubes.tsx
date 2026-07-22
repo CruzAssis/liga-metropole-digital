@@ -159,7 +159,6 @@ function ClubesPage() {
       return (
         t.name.toLowerCase().includes(needle) ||
         t.short_name.toLowerCase().includes(needle) ||
-        (t.manager_name ?? "").toLowerCase().includes(needle) ||
         (t.subprefeitura ?? "").toLowerCase().includes(needle)
       );
     });
