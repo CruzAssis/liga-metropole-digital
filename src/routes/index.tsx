@@ -9,6 +9,7 @@ import { BrandLogo } from '@/components/BrandLogo'
 import AnimatedStats from '@/components/home/AnimatedStats'
 import HeroCarousel from '@/components/home/HeroCarousel'
 import { useLeagueConfig } from '@/hooks/use-league-config'
+import homeBg from '@/assets/home-bg.png'
 
 
 export const Route = createFileRoute('/')({
@@ -175,7 +176,7 @@ function HomePage() {
       <section
         className="relative isolate overflow-hidden w-full"
         style={{
-          backgroundImage: `url(/__l5e/assets-v1/d438b335-8cbb-4ede-a9d5-743b72546a9f/home-bg.png)`,
+          backgroundImage: `url(${homeBg})`,
           backgroundSize: 'cover',
           backgroundPosition: 'center',
         }}

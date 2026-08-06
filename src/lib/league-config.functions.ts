@@ -2,6 +2,7 @@ import { createServerFn } from "@tanstack/react-start";
 import { z } from "zod";
 import { requireSupabaseAuth } from "@/integrations/supabase/auth-middleware";
 import { logAudit } from "@/lib/audit.server";
+import { supabaseAdmin } from "@/integrations/supabase/client.server";
 
 async function assertAdmin(supabase: any, userId: string) {
   const { data, error } = await supabase.rpc("has_role", { _user_id: userId, _role: "admin" });
@@ -40,6 +41,41 @@ export const getPublicLeagueConfig = createServerFn({ method: "GET" }).handler(
     if (error) throw new Error(error.message);
     const row = Array.isArray(data) ? data[0] : data;
     return (row ?? null) as PublicLeagueConfig | null;
+  },
+);
+
+export type PublicFounderStats = {
+  taken: number;
+  total: number;
+};
+
+// Public proxy for the "vagas de fundadores" counter on the homepage.
+// competition_fill_stats is a SECURITY INVOKER RPC restricted to
+// authenticated/service_role — proxying via supabaseAdmin keeps that
+// restriction in place instead of granting EXECUTE to anon.
+export const getPublicFounderStats = createServerFn({ method: "GET" }).handler(
+  async (): Promise<PublicFounderStats | null> => {
+    const { data: comp, error: compError } = await supabaseAdmin
+      .from("competitions")
+      .select("id, max_teams")
+      .eq("registration_status", "open")
+      .order("created_at", { ascending: false })
+      .limit(1)
+      .maybeSingle();
+    if (compError) throw new Error(compError.message);
+    if (!comp) return null;
+
+    const { data: stats, error: statsError } = await supabaseAdmin.rpc("competition_fill_stats", {
+      _competition_id: comp.id,
+    });
+    if (statsError) throw new Error(statsError.message);
+    const row = Array.isArray(stats) ? stats[0] : stats;
+    if (!row) return null;
+
+    return {
+      taken: row.total_approved ?? 0,
+      total: row.max_teams ?? comp.max_teams ?? 0,
+    };
   },
 );
 

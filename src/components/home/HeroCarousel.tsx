@@ -1,34 +1,47 @@
 import { Link } from '@tanstack/react-router'
 import { useEffect, useState } from 'react'
+import { useQuery } from '@tanstack/react-query'
+import { useServerFn } from '@tanstack/react-start'
 import { useLeagueConfig } from '@/hooks/use-league-config'
-import criciuma from '@/assets/campos/criciuma-elias.jpeg.asset.json'
-import sporting from '@/assets/campos/sporting.jpeg.asset.json'
-import mazoni from '@/assets/campos/tomas-mazoni.jpeg.asset.json'
-import atlas from '@/assets/campos/atlas.jpeg.asset.json'
-import guacu from '@/assets/campos/arena-guacu.jpeg.asset.json'
-import savik from '@/assets/campos/santinhos-savik.jpeg.asset.json'
-import campoNovo from '@/assets/campos/campo-novo.jpeg.asset.json'
+import { getPublicFounderStats } from '@/lib/league-config.functions'
+import criciuma from '@/assets/campos/criciuma-elias.jpeg'
+import sporting from '@/assets/campos/sporting.jpeg'
+import mazoni from '@/assets/campos/tomas-mazoni.jpeg'
+import atlas from '@/assets/campos/atlas.jpeg'
+import guacu from '@/assets/campos/arena-guacu.jpeg'
+import savik from '@/assets/campos/santinhos-savik.jpeg'
+import campoNovo from '@/assets/campos/campo-novo.jpeg'
 
 
 const SLIDES = [
-  { url: criciuma.url, name: 'CDC Elias' },
-  { url: guacu.url, name: 'Atlas' },
-  { url: mazoni.url, name: 'Thomaz Mazzoni' },
-  { url: savik.url, name: 'Savic' },
-  { url: atlas.url, name: 'Santinhos' },
-  { url: sporting.url, name: 'Sporting' },
-  { url: campoNovo.url, name: 'Campo Zona Norte' },
+  { url: criciuma, name: 'CDC Elias' },
+  { url: guacu, name: 'Atlas' },
+  { url: mazoni, name: 'Thomaz Mazzoni' },
+  { url: savik, name: 'Savic' },
+  { url: atlas, name: 'Santinhos' },
+  { url: sporting, name: 'Sporting' },
+  { url: campoNovo, name: 'Campo Zona Norte' },
 ]
 
 const INTERVAL_MS = 6000
-const FOUNDER_TAKEN = 2
-const FOUNDER_TOTAL = 20
+
+function useFounderStats() {
+  const fn = useServerFn(getPublicFounderStats)
+  return useQuery({
+    queryKey: ['public-founder-stats'],
+    queryFn: () => fn(),
+  })
+}
 
 export default function HeroCarousel() {
   const cfg = useLeagueConfig()
   const leagueName = cfg?.league_name || 'Liga Metrópole'
   const season = cfg?.season || '2026'
   const tagline = cfg?.tagline
+
+  const { data: founderStats } = useFounderStats()
+  const founderTaken = founderStats?.taken ?? 0
+  const founderTotal = founderStats?.total ?? 0
 
   const [idx, setIdx] = useState(0)
   // Track which slides have been "activated" so we only mount <img> tags for them.
@@ -64,7 +77,7 @@ export default function HeroCarousel() {
     return () => clearInterval(t)
   }, [])
 
-  const pct = (FOUNDER_TAKEN / FOUNDER_TOTAL) * 100
+  const pct = founderTotal > 0 ? (founderTaken / founderTotal) * 100 : 0
 
   return (
     <section className="relative isolate overflow-hidden h-[70svh] min-h-[460px] sm:h-[85vh] sm:min-h-[600px] w-full">
@@ -143,10 +156,11 @@ export default function HeroCarousel() {
 
 
         {/* Termômetro de Vagas */}
+        {founderTotal > 0 && (
         <div className="mt-10 w-full max-w-md">
           <div className="flex items-center justify-between text-xs font-semibold uppercase tracking-wider mb-2 text-white/90">
             <span>Vagas de Clubes Fundadores</span>
-            <span className="tabular-nums text-[#4C9BFF]">{FOUNDER_TAKEN} / {FOUNDER_TOTAL}</span>
+            <span className="tabular-nums text-[#4C9BFF]">{founderTaken} / {founderTotal}</span>
           </div>
           <div className="h-2 w-full rounded-full overflow-hidden" style={{ background: 'rgba(255,255,255,0.15)', border: '1px solid rgba(255,255,255,0.15)' }}>
             <div
@@ -159,9 +173,10 @@ export default function HeroCarousel() {
             />
           </div>
           <p className="mt-2 text-xs text-white/70">
-            {FOUNDER_TOTAL - FOUNDER_TAKEN} vagas restantes · acesso vitalício de fundador
+            {founderTotal - founderTaken} vagas restantes · acesso vitalício de fundador
           </p>
         </div>
+        )}
 
         {/* CTA */}
         <Link

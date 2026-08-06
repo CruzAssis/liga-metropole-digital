@@ -10,6 +10,7 @@ import {
   nativeShare,
   matchUrl,
 } from "@/lib/share";
+import ligaLogo from "@/assets/liga-metropole-logo.png";
 
 // ─── Props ────────────────────────────────────────────────────────────────────
 
@@ -71,7 +72,7 @@ export function DestaqueShareCard({ data, fullCard = true }: DestaqueShareCardPr
         <div className="flex items-center gap-2">
           {/* Liga Metrópole shield */}
           <img
-            src="/__l5e/assets-v1/3c66aee9-99bb-4064-8206-4d8a7d43a64d/liga-metropole-logo.png"
+            src={ligaLogo}
             alt="Liga Metrópole"
             className="w-8 h-8 object-contain shrink-0"
             draggable={false}

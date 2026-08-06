@@ -20,7 +20,7 @@ import {
 } from "lucide-react";
 import { toPng } from "html-to-image";
 import { toast } from "sonner";
-import lmShield from "@/assets/lm-shield.png.asset.json";
+import lmShield from "@/assets/lm-shield.png";
 
 
 const NEON = "#00E5FF";
@@ -65,7 +65,7 @@ export function ConviteFlyerPage() {
     [],
   );
 
-  const ligaLogoSrc = ligaLogo ?? lmShield.url;
+  const ligaLogoSrc = ligaLogo ?? lmShield;
 
   async function handleDownload() {
     if (!flyerRef.current) return;
@@ -105,7 +105,7 @@ export function ConviteFlyerPage() {
       <header className="border-b border-zinc-900 bg-black/80 backdrop-blur sticky top-0 z-20">
         <div className="mx-auto max-w-7xl px-4 py-3 flex items-center justify-between gap-3">
           <div className="flex items-center gap-3 min-w-0">
-            <img src={lmShield.url} alt="Liga Metrópole" className="h-8 w-8 shrink-0" />
+            <img src={lmShield} alt="Liga Metrópole" className="h-8 w-8 shrink-0" />
             <div className="min-w-0">
               <p className="text-[10px] uppercase tracking-[0.3em] text-zinc-500">
                 Ferramenta oficial

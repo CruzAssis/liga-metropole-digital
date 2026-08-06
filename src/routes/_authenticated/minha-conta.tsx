@@ -29,7 +29,7 @@ import { publicUrl } from "@/lib/public-url";
 
 import { formatPhoneBR } from "@/lib/wa";
 import { WelcomeAthleteModal } from "@/components/WelcomeAthleteModal";
-import homeBg from "@/assets/home-bg.png.asset.json";
+import homeBg from "@/assets/home-bg.png";
 
 
 // ─── Ligas abertas para inscrição ────────────────────────────────────────────
@@ -273,7 +273,7 @@ function MinhaContaPage() {
       <div
         aria-hidden
         className="pointer-events-none absolute inset-0 -z-10 bg-cover bg-center bg-no-repeat opacity-30"
-        style={{ backgroundImage: `url(${homeBg.url})` }}
+        style={{ backgroundImage: `url(${homeBg})` }}
       />
       <div
         aria-hidden
