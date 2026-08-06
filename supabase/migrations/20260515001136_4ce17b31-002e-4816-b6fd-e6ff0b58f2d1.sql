@@ -151,7 +151,8 @@ create trigger on_auth_user_created
 
 -- Storage bucket for team logos
 insert into storage.buckets (id, name, public)
-values ('team-logos', 'team-logos', true);
+values ('team-logos', 'team-logos', true)
+on conflict (id) do nothing;
 
 create policy "Team logos: public read"
   on storage.objects for select

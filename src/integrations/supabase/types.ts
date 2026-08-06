@@ -12,6 +12,31 @@ export type Database = {
   __InternalSupabase: {
     PostgrestVersion: "14.5"
   }
+  graphql_public: {
+    Tables: {
+      [_ in never]: never
+    }
+    Views: {
+      [_ in never]: never
+    }
+    Functions: {
+      graphql: {
+        Args: {
+          extensions?: Json
+          operationName?: string
+          query?: string
+          variables?: Json
+        }
+        Returns: Json
+      }
+    }
+    Enums: {
+      [_ in never]: never
+    }
+    CompositeTypes: {
+      [_ in never]: never
+    }
+  }
   public: {
     Tables: {
       admin_audit_log: {
@@ -146,7 +171,7 @@ export type Database = {
           wo_fine_brl: number | null
           wo_tolerance_minutes: number | null
           yellows_for_suspension: number
-          zona: string | null
+          zona: Database["public"]["Enums"]["zona_enum"] | null
         }
         Insert: {
           conference_name?: string | null
@@ -184,7 +209,7 @@ export type Database = {
           wo_fine_brl?: number | null
           wo_tolerance_minutes?: number | null
           yellows_for_suspension?: number
-          zona?: string | null
+          zona?: Database["public"]["Enums"]["zona_enum"] | null
         }
         Update: {
           conference_name?: string | null
@@ -222,7 +247,7 @@ export type Database = {
           wo_fine_brl?: number | null
           wo_tolerance_minutes?: number | null
           yellows_for_suspension?: number
-          zona?: string | null
+          zona?: Database["public"]["Enums"]["zona_enum"] | null
         }
         Relationships: []
       }
@@ -276,6 +301,13 @@ export type Database = {
             isOneToOne: false
             referencedRelation: "athletes"
             referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "disciplinary_suspensions_athlete_id_fkey"
+            columns: ["athlete_id"]
+            isOneToOne: false
+            referencedRelation: "atleta_stats"
+            referencedColumns: ["athlete_id"]
           },
           {
             foreignKeyName: "disciplinary_suspensions_competition_id_fkey"
@@ -440,6 +472,113 @@ export type Database = {
         }
         Relationships: []
       }
+      match_best_own_votes: {
+        Row: {
+          athlete_id: string | null
+          created_at: string | null
+          id: string
+          identified_name: string | null
+          jersey_number: number
+          match_id: string
+          team_id: string
+          updated_at: string | null
+        }
+        Insert: {
+          athlete_id?: string | null
+          created_at?: string | null
+          id?: string
+          identified_name?: string | null
+          jersey_number: number
+          match_id: string
+          team_id: string
+          updated_at?: string | null
+        }
+        Update: {
+          athlete_id?: string | null
+          created_at?: string | null
+          id?: string
+          identified_name?: string | null
+          jersey_number?: number
+          match_id?: string
+          team_id?: string
+          updated_at?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "match_best_own_votes_athlete_id_fkey"
+            columns: ["athlete_id"]
+            isOneToOne: false
+            referencedRelation: "athletes"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "match_best_own_votes_athlete_id_fkey"
+            columns: ["athlete_id"]
+            isOneToOne: false
+            referencedRelation: "atleta_stats"
+            referencedColumns: ["athlete_id"]
+          },
+          {
+            foreignKeyName: "match_best_own_votes_match_id_fkey"
+            columns: ["match_id"]
+            isOneToOne: false
+            referencedRelation: "matches"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "match_best_own_votes_team_id_fkey"
+            columns: ["team_id"]
+            isOneToOne: false
+            referencedRelation: "teams"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      match_destaques_publicados: {
+        Row: {
+          id: string
+          identified_name: string | null
+          jersey_number: number
+          match_id: string
+          published_at: string
+          rating: number
+          team_id: string
+        }
+        Insert: {
+          id?: string
+          identified_name?: string | null
+          jersey_number: number
+          match_id: string
+          published_at?: string
+          rating: number
+          team_id: string
+        }
+        Update: {
+          id?: string
+          identified_name?: string | null
+          jersey_number?: number
+          match_id?: string
+          published_at?: string
+          rating?: number
+          team_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "match_destaques_publicados_match_id_fkey"
+            columns: ["match_id"]
+            isOneToOne: false
+            referencedRelation: "matches"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "match_destaques_publicados_team_id_fkey"
+            columns: ["team_id"]
+            isOneToOne: false
+            referencedRelation: "teams"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       match_events: {
         Row: {
           athlete_id: string | null
@@ -475,6 +614,13 @@ export type Database = {
             isOneToOne: false
             referencedRelation: "athletes"
             referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "match_events_athlete_id_fkey"
+            columns: ["athlete_id"]
+            isOneToOne: false
+            referencedRelation: "atleta_stats"
+            referencedColumns: ["athlete_id"]
           },
           {
             foreignKeyName: "match_events_match_id_fkey"
@@ -726,10 +872,9 @@ export type Database = {
       notificacoes_log: {
         Row: {
           assunto: string | null
-          canal: string
+          canal: Database["public"]["Enums"]["notificacao_canal"]
           corpo_preview: string | null
           created_at: string
-          created_by: string | null
           destinatario_email: string | null
           destinatario_id: string | null
           destinatario_nome: string | null
@@ -737,19 +882,16 @@ export type Database = {
           enviado_em: string | null
           erro_mensagem: string | null
           id: string
-          payload: Json
-          send_count: number
-          status: string
-          tipo: string
+          payload: Json | null
+          status: Database["public"]["Enums"]["notificacao_status"]
+          tipo: Database["public"]["Enums"]["notificacao_tipo"]
           whatsapp_template: string | null
-          whatsapp_url: string | null
         }
         Insert: {
           assunto?: string | null
-          canal: string
+          canal?: Database["public"]["Enums"]["notificacao_canal"]
           corpo_preview?: string | null
           created_at?: string
-          created_by?: string | null
           destinatario_email?: string | null
           destinatario_id?: string | null
           destinatario_nome?: string | null
@@ -757,19 +899,16 @@ export type Database = {
           enviado_em?: string | null
           erro_mensagem?: string | null
           id?: string
-          payload?: Json
-          send_count?: number
-          status?: string
-          tipo: string
+          payload?: Json | null
+          status?: Database["public"]["Enums"]["notificacao_status"]
+          tipo: Database["public"]["Enums"]["notificacao_tipo"]
           whatsapp_template?: string | null
-          whatsapp_url?: string | null
         }
         Update: {
           assunto?: string | null
-          canal?: string
+          canal?: Database["public"]["Enums"]["notificacao_canal"]
           corpo_preview?: string | null
           created_at?: string
-          created_by?: string | null
           destinatario_email?: string | null
           destinatario_id?: string | null
           destinatario_nome?: string | null
@@ -777,14 +916,20 @@ export type Database = {
           enviado_em?: string | null
           erro_mensagem?: string | null
           id?: string
-          payload?: Json
-          send_count?: number
-          status?: string
-          tipo?: string
+          payload?: Json | null
+          status?: Database["public"]["Enums"]["notificacao_status"]
+          tipo?: Database["public"]["Enums"]["notificacao_tipo"]
           whatsapp_template?: string | null
-          whatsapp_url?: string | null
         }
-        Relationships: []
+        Relationships: [
+          {
+            foreignKeyName: "notificacoes_log_destinatario_id_fkey"
+            columns: ["destinatario_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       notification_log: {
         Row: {
@@ -836,6 +981,66 @@ export type Database = {
           variables?: string[]
         }
         Relationships: []
+      }
+      pagamentos: {
+        Row: {
+          competicao_id: string | null
+          created_at: string | null
+          data_pagamento: string | null
+          id: string
+          marcado_por: string | null
+          mes_referencia: string
+          metodo: Database["public"]["Enums"]["pagamento_metodo"] | null
+          observacoes: string | null
+          status: Database["public"]["Enums"]["pagamento_status"]
+          time_id: string
+          updated_at: string | null
+          valor: number
+        }
+        Insert: {
+          competicao_id?: string | null
+          created_at?: string | null
+          data_pagamento?: string | null
+          id?: string
+          marcado_por?: string | null
+          mes_referencia: string
+          metodo?: Database["public"]["Enums"]["pagamento_metodo"] | null
+          observacoes?: string | null
+          status?: Database["public"]["Enums"]["pagamento_status"]
+          time_id: string
+          updated_at?: string | null
+          valor?: number
+        }
+        Update: {
+          competicao_id?: string | null
+          created_at?: string | null
+          data_pagamento?: string | null
+          id?: string
+          marcado_por?: string | null
+          mes_referencia?: string
+          metodo?: Database["public"]["Enums"]["pagamento_metodo"] | null
+          observacoes?: string | null
+          status?: Database["public"]["Enums"]["pagamento_status"]
+          time_id?: string
+          updated_at?: string | null
+          valor?: number
+        }
+        Relationships: [
+          {
+            foreignKeyName: "pagamentos_competicao_id_fkey"
+            columns: ["competicao_id"]
+            isOneToOne: false
+            referencedRelation: "competitions"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "pagamentos_time_id_fkey"
+            columns: ["time_id"]
+            isOneToOne: false
+            referencedRelation: "teams"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       profiles: {
         Row: {
@@ -1020,6 +1225,13 @@ export type Database = {
             isOneToOne: false
             referencedRelation: "athletes"
             referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "supporter_votes_athlete_id_fkey"
+            columns: ["athlete_id"]
+            isOneToOne: false
+            referencedRelation: "atleta_stats"
+            referencedColumns: ["athlete_id"]
           },
           {
             foreignKeyName: "supporter_votes_match_id_fkey"
@@ -1319,9 +1531,105 @@ export type Database = {
       }
     }
     Views: {
-      [_ in never]: never
+      atleta_stats: {
+        Row: {
+          assistencias: number | null
+          athlete_id: string | null
+          gols: number | null
+          jogos: number | null
+          media_nota: number | null
+          vezes_destaque: number | null
+        }
+        Insert: {
+          assistencias?: never
+          athlete_id?: string | null
+          gols?: never
+          jogos?: never
+          media_nota?: never
+          vezes_destaque?: never
+        }
+        Update: {
+          assistencias?: never
+          athlete_id?: string | null
+          gols?: never
+          jogos?: never
+          media_nota?: never
+          vezes_destaque?: never
+        }
+        Relationships: []
+      }
+      pagamentos_com_status: {
+        Row: {
+          competicao_id: string | null
+          created_at: string | null
+          data_pagamento: string | null
+          dias_atraso: number | null
+          id: string | null
+          marcado_por: string | null
+          mes_referencia: string | null
+          metodo: Database["public"]["Enums"]["pagamento_metodo"] | null
+          observacoes: string | null
+          status: Database["public"]["Enums"]["pagamento_status"] | null
+          status_calculado: string | null
+          time_id: string | null
+          updated_at: string | null
+          valor: number | null
+        }
+        Insert: {
+          competicao_id?: string | null
+          created_at?: string | null
+          data_pagamento?: string | null
+          dias_atraso?: never
+          id?: string | null
+          marcado_por?: string | null
+          mes_referencia?: string | null
+          metodo?: Database["public"]["Enums"]["pagamento_metodo"] | null
+          observacoes?: string | null
+          status?: Database["public"]["Enums"]["pagamento_status"] | null
+          status_calculado?: never
+          time_id?: string | null
+          updated_at?: string | null
+          valor?: number | null
+        }
+        Update: {
+          competicao_id?: string | null
+          created_at?: string | null
+          data_pagamento?: string | null
+          dias_atraso?: never
+          id?: string | null
+          marcado_por?: string | null
+          mes_referencia?: string | null
+          metodo?: Database["public"]["Enums"]["pagamento_metodo"] | null
+          observacoes?: string | null
+          status?: Database["public"]["Enums"]["pagamento_status"] | null
+          status_calculado?: never
+          time_id?: string | null
+          updated_at?: string | null
+          valor?: number | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "pagamentos_competicao_id_fkey"
+            columns: ["competicao_id"]
+            isOneToOne: false
+            referencedRelation: "competitions"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "pagamentos_time_id_fkey"
+            columns: ["time_id"]
+            isOneToOne: false
+            referencedRelation: "teams"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
     }
     Functions: {
+      competition_approved_count: {
+        Args: { _competition_id: string }
+        Returns: number
+      }
       competition_fill_stats: {
         Args: { _competition_id: string }
         Returns: {
@@ -1498,8 +1806,19 @@ export type Database = {
         | "director"
         | "player"
         | "supporter"
+      notificacao_canal: "email" | "whatsapp"
+      notificacao_status: "pendente" | "enviado" | "falhou"
+      notificacao_tipo:
+        | "team_approved"
+        | "jogo_agendado"
+        | "sumula_disponivel"
+        | "sumula_prazo_alerta"
+        | "destaque_publicado"
+      pagamento_metodo: "pix" | "outro"
+      pagamento_status: "pendente" | "pago" | "atrasado"
       team_serie: "A" | "B"
       team_side: "A" | "B"
+      zona_enum: "norte" | "sul" | "leste" | "oeste" | "centro"
     }
     CompositeTypes: {
       [_ in never]: never
@@ -1625,6 +1944,9 @@ export type CompositeTypes<
     : never
 
 export const Constants = {
+  graphql_public: {
+    Enums: {},
+  },
   public: {
     Enums: {
       app_role: [
@@ -1635,8 +1957,20 @@ export const Constants = {
         "player",
         "supporter",
       ],
+      notificacao_canal: ["email", "whatsapp"],
+      notificacao_status: ["pendente", "enviado", "falhou"],
+      notificacao_tipo: [
+        "team_approved",
+        "jogo_agendado",
+        "sumula_disponivel",
+        "sumula_prazo_alerta",
+        "destaque_publicado",
+      ],
+      pagamento_metodo: ["pix", "outro"],
+      pagamento_status: ["pendente", "pago", "atrasado"],
       team_serie: ["A", "B"],
       team_side: ["A", "B"],
+      zona_enum: ["norte", "sul", "leste", "oeste", "centro"],
     },
   },
 } as const
