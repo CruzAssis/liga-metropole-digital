@@ -103,12 +103,8 @@ function clientIp(req: Request | undefined): string {
   const h = req?.headers;
   if (!h) return "";
   const forwarded = h.get("x-forwarded-for");
-  return (
-    h.get("cf-connecting-ip") ??
-    h.get("x-real-ip") ??
-    (forwarded ? forwarded.split(",")[0]!.trim() : "") ??
-    ""
-  );
+  const firstHop = forwarded ? forwarded.split(",")[0].trim() : "";
+  return h.get("cf-connecting-ip") ?? h.get("x-real-ip") ?? firstHop;
 }
 
 async function hashIp(ip: string, salt: string): Promise<string> {
@@ -134,9 +130,11 @@ export const findAthleteByCpf = createServerFn({ method: "POST" })
     const ip = clientIp(getRequest()) || "sem-ip";
     const ipHash = await hashIp(ip, salt);
 
-    const { data: limit, error: limitErr } = await supabaseAdmin.rpc(
-      "check_cpf_lookup_rate_limit" as never,
-      { _ip_hash: ipHash } as never,
+    // A funcao e nova e ainda nao esta em integrations/supabase/types.ts
+    // (o arquivo e gerado). Mesmo padrao usado em sumula-digital.functions.ts.
+    const { data: limit, error: limitErr } = await (supabaseAdmin as any).rpc(
+      "check_cpf_lookup_rate_limit",
+      { _ip_hash: ipHash },
     );
     if (limitErr) {
       console.error("[verificar] rate limit indisponivel:", limitErr.message);

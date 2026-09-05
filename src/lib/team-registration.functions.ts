@@ -62,13 +62,20 @@ export const createTeamRegistration = createServerFn({ method: "POST" })
       .maybeSingle();
 
     const masterOpen = (settings as { master_registration_open?: boolean } | null)?.master_registration_open ?? false;
-    const globalHostLimit = (settings as { host_slots_limit?: number } | null)?.host_slots_limit ?? 20;
+    const globalHostLimit =
+      (settings as { host_slots_limit?: number } | null)?.host_slots_limit ?? 20;
 
     // Master desligado: todo mundo espera.
     let initialStatus: "pending" | "waitlist" = masterOpen ? "pending" : "waitlist";
 
     // If a competition_id was provided, verify it is open for registration
-    let comp: { registration_status: string; max_teams: number; host_slots: number; visitor_slots: number } | null = null;
+    type CompSlots = {
+      registration_status: string;
+      max_teams: number;
+      host_slots: number;
+      visitor_slots: number;
+    };
+    let comp: CompSlots | null = null;
     if (data.competition_id) {
       const { data: found, error: compErr } = await supabaseAdmin
         .from("competitions")
@@ -79,7 +86,7 @@ export const createTeamRegistration = createServerFn({ method: "POST" })
       if (compErr || !found) {
         throw new Error("Liga nao encontrada");
       }
-      comp = found as typeof comp;
+      comp = found as CompSlots;
       if (comp!.registration_status !== "open") {
         throw new Error("Esta liga nao esta aceitando novas inscricoes");
       }
