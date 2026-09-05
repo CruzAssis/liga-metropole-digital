@@ -219,8 +219,9 @@ function SorteioPage() {
                           <AlertDialogHeader>
                             <AlertDialogTitle>Confirmar sorteio</AlertDialogTitle>
                             <AlertDialogDescription>
-                              Esta acao e definitiva. Serao criadas as partidas para todos as 20 rodadas
-                              (Mandantes x Visitantes, Lado A com A, Lado B com B).
+                              Esta acao e definitiva. Cada Mandante recebe todos os Visitantes
+                              do mesmo Lado, uma vez cada — sao tantas rodadas quantos forem os
+                              mandantes aprovados no Lado.
                               {!firstRoundDate && (
                                 <span className="block mt-2 text-destructive font-medium">
                                   Atencao: voce nao informou a data da rodada 1!
