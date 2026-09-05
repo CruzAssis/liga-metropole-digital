@@ -53,22 +53,27 @@ function ExcluirContaPage() {
         return;
       }
 
-      // 2. Solicitar exclusao da conta (Supabase Admin via Edge Function ou direto)
-      // Como nao temos Edge Function dedicada, usamos deleteUser via API publica
-      // que aciona a logica de exclusao em cascata configurada no banco.
+      // 2. Anonimizar o dado pessoal e bloquear o login.
+      // A funcao esta em supabase/migrations/20260904120000_lgpd_account_deletion.sql.
+      // Se ela falhar, NAO confirmamos exclusao: dizer "excluido" sem excluir e
+      // pior que nao ter o recurso, e e justamente o bug que isto corrige.
       const { error: delErr } = await supabaseAny.rpc("request_account_deletion");
 
       if (delErr) {
-        // Fallback: marcar conta para exclusao via metadata e notificar admin
-        await supabase.auth.updateUser({
-          data: { deletion_requested_at: new Date().toISOString() },
-        });
+        setErro(
+          delErr.message?.includes("responsavel pelo time")
+            ? delErr.message
+            : "Nao foi possivel concluir a exclusao agora. Nenhum dado foi alterado. " +
+              "Tente de novo em alguns minutos ou fale com a organizacao da liga.",
+        );
+        setStep("senha");
+        return;
       }
 
       // 3. Fazer logout
       await signOut();
       setStep("concluido");
-      toast.success("Solicitacao de exclusao registrada. Sua conta sera removida em ate 30 dias.");
+      toast.success("Conta excluida. Seus dados pessoais foram removidos.");
       setTimeout(() => navigate({ to: "/", replace: true }), 4000);
     } catch (e) {
       const msg = e instanceof Error ? e.message : "Erro inesperado.";
@@ -86,10 +91,11 @@ function ExcluirContaPage() {
           <div className="h-16 w-16 rounded-full bg-green-900/20 border border-green-800/40 flex items-center justify-center mx-auto">
             <Trash2 className="h-8 w-8 text-green-400" />
           </div>
-          <h1 className="font-display text-3xl tracking-wide">Solicitacao registrada</h1>
+          <h1 className="font-display text-3xl tracking-wide">Conta excluida</h1>
           <p className="text-muted-foreground">
-            Sua solicitacao de exclusao de conta foi registrada. Os seus dados serao removidos
-            conforme nossa{" "}
+            Seu nome, CPF, telefone, foto e Instagram foram removidos e seu acesso foi
+            encerrado. Gols, cartoes e placares de partidas ja encerradas continuam na
+            competicao, sem qualquer identificacao sua — como explicado na{" "}
             <Link to="/privacidade" className="text-primary hover:underline">
               Politica de Privacidade
             </Link>
