@@ -2,7 +2,7 @@ import { createServerFn } from "@tanstack/react-start";
 import { supabaseAdmin } from "@/integrations/supabase/client.server";
 import { z } from "zod";
 
-const FINISHED = ["confirmed", "closed", "wo"];
+import { FINISHED } from "./match-status";
 
 type MatchRow = {
   id: string;

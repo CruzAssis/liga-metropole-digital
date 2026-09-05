@@ -1,5 +1,6 @@
 import { createServerFn } from "@tanstack/react-start";
 import { supabaseAdmin } from "@/integrations/supabase/client.server";
+import { FINISHED } from "./match-status";
 
 // =============================================================
 // Rankings públicos de atletas:
@@ -13,7 +14,7 @@ export const getAthleteRankings = createServerFn({ method: "GET" }).handler(asyn
   const { data: confirmedMatches } = await supabaseAdmin
     .from("matches")
     .select("id")
-    .in("status", ["confirmed", "wo"])
+    .in("status", FINISHED)
     .limit(2000);
   const confirmedIds = new Set((confirmedMatches ?? []).map((m) => m.id));
 

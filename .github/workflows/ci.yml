@@ -1,0 +1,41 @@
+# Portao basico do repositorio: o codigo compila, passa no lint e a tabela
+# fecha a conta. Nao precisa de banco, entao roda em todo push e em todo PR.
+#
+# O projeto so tinha o workflow de seguranca, disparado apenas quando mexiam
+# em migrations/tests — dava para quebrar o build da producao sem CI reclamar.
+name: CI — build, lint e classificacao
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+  workflow_dispatch:
+
+jobs:
+  check:
+    name: Typecheck, lint e teste da tabela
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: oven-sh/setup-bun@v2
+        with:
+          bun-version: latest
+
+      - name: Instalar dependencias
+        run: bun install --frozen-lockfile
+
+      - name: Typecheck
+        run: bunx tsc --noEmit
+
+      - name: Lint
+        run: bun run lint
+
+      # Puro, sem banco: o calculo da classificacao.
+      - name: Teste da classificacao
+        run: bun test tests/standings.test.ts
+
+      - name: Build
+        run: bun run build

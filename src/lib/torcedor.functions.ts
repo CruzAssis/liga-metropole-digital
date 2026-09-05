@@ -2,6 +2,7 @@ import { createServerFn } from "@tanstack/react-start";
 import { z } from "zod";
 import { requireSupabaseAuth } from "@/integrations/supabase/auth-middleware";
 import { supabaseAdmin } from "@/integrations/supabase/client.server";
+import { FINISHED, isFinished } from "./match-status";
 
 // ─── Times seguidos pelo torcedor ────────────────────────────────────────────
 export const getSupporterTeams = createServerFn({ method: "GET" })
@@ -53,7 +54,7 @@ export const getSupporterFeed = createServerFn({ method: "GET" })
       const recQ = await supabaseAdmin
         .from("matches")
         .select("id,host_team_id,visitor_team_id,host_score,visitor_score,status,scheduled_at,venue,round,competition_id")
-        .in("status", ["confirmed", "closed", "wo"])
+        .in("status", FINISHED)
         .gte("scheduled_at", from30d)
         .or(
           teamIds.map((id) => `host_team_id.eq.${id},visitor_team_id.eq.${id}`).join(","),
@@ -118,10 +119,10 @@ export const getMatchLineups = createServerFn({ method: "GET" })
       .from("athletes")
       .select("id,full_name,nickname,photo_url,position,team_id")
       .in("team_id", [m.host_team_id, m.visitor_team_id]);
-    const isFinished = ["confirmed", "closed", "wo"].includes(m.status);
+    const matchFinished = isFinished(m.status);
     const closesAt = m.voting_closes_at ? new Date(m.voting_closes_at).getTime() : null;
     const votingOpen =
-      isFinished &&
+      matchFinished &&
       m.voting_open !== false &&
       (closesAt === null || closesAt > Date.now());
     return {
@@ -182,7 +183,7 @@ export const castSupporterVote = createServerFn({ method: "POST" })
       .eq("id", data.match_id)
       .maybeSingle();
     if (!m) throw new Error("Partida não encontrada");
-    if (!["confirmed", "closed", "wo"].includes(m.status)) {
+    if (!isFinished(m.status)) {
       throw new Error("Partida ainda não foi finalizada");
     }
     if (m.voting_open === false) {

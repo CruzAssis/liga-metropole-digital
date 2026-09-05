@@ -1,6 +1,7 @@
 import { createServerFn } from "@tanstack/react-start";
 import { z } from "zod";
 import { supabaseAdmin } from "@/integrations/supabase/client.server";
+import { FINISHED } from "./match-status";
 
 const adminDb = supabaseAdmin as any;
 
@@ -86,7 +87,7 @@ export const getAtletaPublicProfile = createServerFn({ method: "GET" })
     const { data: confirmedMatches } = await supabaseAdmin
       .from("matches")
       .select("id")
-      .in("status", ["confirmed", "wo", "finished"])
+      .in("status", FINISHED)
       .limit(5000);
 
     const confirmedIds = (confirmedMatches ?? []).map((m) => m.id);

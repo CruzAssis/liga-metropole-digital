@@ -2,6 +2,7 @@ import { createServerFn } from "@tanstack/react-start";
 import { z } from "zod";
 import { requireSupabaseAuth } from "@/integrations/supabase/auth-middleware";
 import { logAudit } from "@/lib/audit.server";
+import { FINISHED } from "./match-status";
 
 async function assertAdmin(supabase: any, userId: string) {
   const { data, error } = await supabase.rpc("has_role", { _user_id: userId, _role: "admin" });
@@ -274,7 +275,7 @@ export const listDirectorMatchesWithReferees = createServerFn({ method: "GET" })
       .select(
         "id, scheduled_at, status, host_team_id, visitor_team_id, host:teams!matches_host_team_id_fkey(name), visitor:teams!matches_visitor_team_id_fkey(name), match_referees(id, referee_id, role, referees(full_name, nickname, photo_url))",
       )
-      .in("status", ["confirmed", "closed", "wo"])
+      .in("status", FINISHED)
       .or(`host_team_id.in.(${teamIds.join(",")}),visitor_team_id.in.(${teamIds.join(",")})`)
       .order("scheduled_at", { ascending: false })
       .limit(120);

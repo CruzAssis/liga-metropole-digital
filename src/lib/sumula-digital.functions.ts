@@ -316,13 +316,70 @@ export const rateSumulaOpponentBest = createServerFn({ method: "POST" })
     return { ok: true, bothVoted };
   });
 
+/**
+ * WO por prazo vencido, disparado da tela da súmula.
+ *
+ * Tinha dois defeitos, os dois no resultado da partida:
+ *
+ *  1. Sem NENHUMA checagem de quem chama. `requireSupabaseAuth` só provava
+ *     que havia um login — qualquer torcedor cadastrado podia marcar WO em
+ *     qualquer jogo vencido de qualquer time. A tabela é o produto.
+ *  2. Gravava status='wo' sem placar. Com host_score/visitor_score nulos, a
+ *     classificação lia 0x0 e dava 1 ponto para CADA time — o time que não
+ *     apareceu ganhava ponto pelo WO que sofreu.
+ *
+ * A regra do placar é a mesma do cron em /api/public/hooks/wo-checker:
+ * ninguém lançou a súmula no prazo → 3x0 para o mandante.
+ */
 export const applyAutoWO = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
   .inputValidator((input) => z.object({ match_id: z.string().uuid() }).parse(input))
-  .handler(async ({ data }) => {
+  .handler(async ({ data, context }) => {
     const match = await loadMatchOr404(data.match_id);
+
+    // Admin, ou diretor de um dos dois times da partida. Mais ninguém.
+    const { data: isAdmin } = await supabaseAdmin.rpc("has_role", {
+      _user_id: context.userId,
+      _role: "admin",
+    });
+    if (!isAdmin) {
+      let allowed = false;
+      for (const teamId of [match.host_team_id, match.visitor_team_id]) {
+        try {
+          await assertIsDirector(context.userId, teamId);
+          allowed = true;
+          break;
+        } catch {
+          /* tenta o outro time */
+        }
+      }
+      if (!allowed) {
+        throw new Response(
+          JSON.stringify({ error: "Apenas os diretores da partida ou a organização podem aplicar WO" }),
+          { status: 403 },
+        );
+      }
+    }
+
     if (!woExpired(match.scheduled_at)) return { applied: false };
-    if (match.status === "closed" || match.status === "wo") return { applied: false };
-    await supabaseAdmin.from("matches").update({ status: "wo" }).eq("id", data.match_id);
+    if (TERMINAL_STATUSES.has(match.status)) return { applied: false };
+
+    // Guarda otimista: só aplica se o status não mudou no meio do caminho.
+    const { data: updated, error } = await adminDb
+      .from("matches")
+      .update({
+        status: "wo",
+        host_score: 3,
+        visitor_score: 0,
+        host_filled_at: new Date().toISOString(),
+        visitor_confirmed_at: new Date().toISOString(),
+      })
+      .eq("id", data.match_id)
+      .not("status", "in", `(${Array.from(TERMINAL_STATUSES).join(",")})`)
+      .select("id")
+      .maybeSingle();
+    if (error) throw new Error(error.message);
+    if (!updated) return { applied: false };
+
     return { applied: true };
   });

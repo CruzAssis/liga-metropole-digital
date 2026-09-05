@@ -2,6 +2,13 @@ import { createServerFn } from "@tanstack/react-start";
 import { z } from "zod";
 import { requireSupabaseAuth } from "@/integrations/supabase/auth-middleware";
 import { supabaseAdmin } from "@/integrations/supabase/client.server";
+import { FINISHED } from "./match-status";
+import {
+  computeStandings,
+  type StandingTeam,
+  type StandingMatch,
+  type StandingsConfig,
+} from "./standings";
 
 import { logAudit } from "@/lib/audit.server";
 
@@ -152,42 +159,22 @@ export const getCompetitionStandings = createServerFn({ method: "GET" })
 
     const { data: comp } = await supabaseAdmin
       .from("competitions")
-      .select("points_win, points_draw, points_loss")
+      .select("points_win, points_draw, points_loss, tiebreakers")
       .eq("id", data.competitionId)
       .maybeSingle();
-    const PW = (comp as any)?.points_win ?? 3;
-    const PD = (comp as any)?.points_draw ?? 1;
-    const PL = (comp as any)?.points_loss ?? 0;
 
     const { data: matches } = await supabaseAdmin
       .from("matches")
       .select("host_team_id, visitor_team_id, host_score, visitor_score, status, group_label")
       .eq("competition_id", data.competitionId)
       .eq("stage", "group")
-      .in("status", ["confirmed", "closed", "wo"]);
+      .in("status", FINISHED);
 
-    const stats = new Map<string, any>();
-    for (const t of teams ?? []) {
-      stats.set(t.id, { team: t, group_label: null as string | null, played: 0, wins: 0, draws: 0, losses: 0, gf: 0, ga: 0, gd: 0, points: 0 });
-    }
-    for (const m of matches ?? []) {
-      const h = stats.get(m.host_team_id);
-      const v = stats.get(m.visitor_team_id);
-      if (!h || !v) continue;
-      if (m.group_label && !h.group_label) h.group_label = m.group_label;
-      if (m.group_label && !v.group_label) v.group_label = m.group_label;
-      const hs = m.host_score ?? 0;
-      const vs = m.visitor_score ?? 0;
-      h.played++; v.played++;
-      h.gf += hs; h.ga += vs;
-      v.gf += vs; v.ga += hs;
-      if (hs > vs) { h.wins++; h.points += PW; v.losses++; v.points += PL; }
-      else if (hs < vs) { v.wins++; v.points += PW; h.losses++; h.points += PL; }
-      else { h.draws++; v.draws++; h.points += PD; v.points += PD; }
-    }
-    for (const s of stats.values()) s.gd = s.gf - s.ga;
-    return Array.from(stats.values()).sort(
-      (a, b) => b.points - a.points || b.gd - a.gd || b.gf - a.gf || a.team.name.localeCompare(b.team.name),
+    // A matematica da tabela mora em standings.ts, sem banco, e tem teste.
+    return computeStandings(
+      (teams ?? []) as StandingTeam[],
+      (matches ?? []) as StandingMatch[],
+      (comp ?? {}) as StandingsConfig,
     );
   });
 
@@ -270,7 +257,7 @@ export const generateBracket = createServerFn({ method: "POST" })
       .select("host_team_id, visitor_team_id, host_score, visitor_score, status")
       .eq("competition_id", data.competitionId)
       .eq("stage", "group")
-      .in("status", ["confirmed", "closed", "wo"]);
+      .in("status", FINISHED);
 
     const stats = new Map<string, { id: string; name: string; points: number; gd: number; gf: number }>();
     for (const t of teams ?? []) stats.set(t.id, { id: t.id, name: t.name, points: 0, gd: 0, gf: 0 });

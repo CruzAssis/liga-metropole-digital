@@ -2,6 +2,7 @@ import { createServerFn } from "@tanstack/react-start";
 import { z } from "zod";
 import { requireSupabaseAuth } from "@/integrations/supabase/auth-middleware";
 import { supabaseAdmin } from "@/integrations/supabase/client.server";
+import { FINISHED } from "./match-status";
 
 const adminDb = supabaseAdmin as any;
 
@@ -86,7 +87,7 @@ export async function computeDisciplineForMatch(matchId: string): Promise<void> 
     let q = adminDb.from("match_events")
       .select("id, matches!inner(status, competition_id)", { count: "exact", head: true })
       .eq("athlete_id", athleteId).eq("kind", "yellow_card")
-      .in("matches.status", ["confirmed", "closed"]);
+      .in("matches.status", FINISHED);
     if (compId) q = q.eq("matches.competition_id", compId);
     const { count } = await q;
     const totalYellows = count ?? 0;
