@@ -62,33 +62,25 @@ export const createTeamRegistration = createServerFn({ method: "POST" })
       .maybeSingle();
 
     const masterOpen = (settings as { master_registration_open?: boolean } | null)?.master_registration_open ?? false;
-    const hostLimit = (settings as { host_slots_limit?: number } | null)?.host_slots_limit ?? 20;
+    const globalHostLimit = (settings as { host_slots_limit?: number } | null)?.host_slots_limit ?? 20;
 
-    // If master is OFF, everyone waits. If ON and host slots full, host goes to waitlist.
+    // Master desligado: todo mundo espera.
     let initialStatus: "pending" | "waitlist" = masterOpen ? "pending" : "waitlist";
-    if (masterOpen && data.registration_type === "host") {
-      const { count: approvedHosts } = await supabaseAdmin
-        .from("teams")
-        .select("id", { count: "exact", head: true })
-        .eq("registration_type", "host")
-        .eq("status", "approved");
-      if ((approvedHosts ?? 0) >= hostLimit) {
-        initialStatus = "waitlist";
-      }
-    }
 
     // If a competition_id was provided, verify it is open for registration
+    let comp: { registration_status: string; max_teams: number; host_slots: number; visitor_slots: number } | null = null;
     if (data.competition_id) {
-      const { data: comp, error: compErr } = await supabaseAdmin
+      const { data: found, error: compErr } = await supabaseAdmin
         .from("competitions")
-        .select("id, registration_status, max_teams")
+        .select("id, registration_status, max_teams, host_slots, visitor_slots")
         .eq("id", data.competition_id)
         .single();
 
-      if (compErr || !comp) {
+      if (compErr || !found) {
         throw new Error("Liga nao encontrada");
       }
-      if (comp.registration_status !== "open") {
+      comp = found as typeof comp;
+      if (comp!.registration_status !== "open") {
         throw new Error("Esta liga nao esta aceitando novas inscricoes");
       }
 
@@ -98,8 +90,44 @@ export const createTeamRegistration = createServerFn({ method: "POST" })
         .eq("competition_id", data.competition_id)
         .eq("status", "approved");
 
-      if ((count ?? 0) >= comp.max_teams) {
+      if ((count ?? 0) >= comp!.max_teams) {
         throw new Error("Liga lotada. O numero maximo de equipes foi atingido");
+      }
+    }
+
+    // Vagas por categoria.
+    //
+    // Antes so o Mandante tinha teto, e vinha de system_settings (global,
+    // default 20). O Visitante nao tinha teto NENHUM: dava para inscrever 40
+    // visitantes numa liga vendida como "10 e 10". E o teto de mandante
+    // ignorava competitions.host_slots, que e onde o numero da competicao
+    // esta configurado.
+    //
+    // Agora: quando ha competicao, valem os slots dela e a contagem e dentro
+    // dela; sem competicao, cai no limite global de mandante como antes.
+    // Estourou, a inscricao entra em waitlist — nao e recusada, porque time
+    // na fila e exatamente o que garante repor quem desistir antes da trava.
+    if (masterOpen) {
+      const isHost = data.registration_type === "host";
+      let approvedQ = supabaseAdmin
+        .from("teams")
+        .select("id", { count: "exact", head: true })
+        .eq("registration_type", data.registration_type)
+        .eq("status", "approved");
+
+      let limit: number;
+      if (comp && data.competition_id) {
+        approvedQ = approvedQ.eq("competition_id", data.competition_id);
+        limit = isHost ? comp.host_slots : comp.visitor_slots;
+      } else {
+        limit = isHost ? globalHostLimit : Number.POSITIVE_INFINITY;
+      }
+
+      if (Number.isFinite(limit)) {
+        const { count: approvedSameType } = await approvedQ;
+        if ((approvedSameType ?? 0) >= limit) {
+          initialStatus = "waitlist";
+        }
       }
     }
 

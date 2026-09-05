@@ -108,30 +108,49 @@ function TimesPage() {
   const [lado, setLado] = useState<LadoFilter>("");
   const [mando, setMando] = useState<MandoFilter>("");
   const [query, setQuery] = useState("");
+  const [loadError, setLoadError] = useState<string | null>(null);
 
   useEffect(() => {
+    let cancelled = false;
     (async () => {
-      const { data } = await supabase
-        .from("teams")
-        .select("id, name, short_name, slug, logo_url, registration_type, lado, competitions:competition_id(subprefeitura)")
-        .eq("status", "approved")
-        .order("name");
-      const rows: Team[] = (data ?? []).map((t: {
-        id: string; name: string; short_name: string; slug: string | null;
-        logo_url: string | null; registration_type: string; lado: "A" | "B" | null;
-        competitions: { subprefeitura: string | null } | null;
-      }) => ({
-        id: t.id,
-        name: t.name,
-        short_name: t.short_name,
-        slug: t.slug,
-        logo_url: t.logo_url,
-        registration_type: t.registration_type,
-        lado: t.lado,
-        subprefeitura: t.competitions?.subprefeitura ?? null,
-      }));
-      setTeams(rows);
+      // teams comeca em null e o null e o proprio spinner. Se a consulta
+      // falhasse (rede caindo, Supabase fora), a promise rejeitava, setTeams
+      // nunca era chamado e a pagina ficava girando para sempre. Agora todo
+      // caminho — sucesso, erro do PostgREST ou excecao — termina com um
+      // estado, e o erro aparece na tela em vez de virar spinner eterno.
+      try {
+        const { data, error } = await supabase
+          .from("teams")
+          .select("id, name, short_name, slug, logo_url, registration_type, lado, competitions:competition_id(subprefeitura)")
+          .eq("status", "approved")
+          .order("name");
+        if (cancelled) return;
+        if (error) throw new Error(error.message);
+        const rows: Team[] = (data ?? []).map((t: {
+          id: string; name: string; short_name: string; slug: string | null;
+          logo_url: string | null; registration_type: string; lado: "A" | "B" | null;
+          competitions: { subprefeitura: string | null } | null;
+        }) => ({
+          id: t.id,
+          name: t.name,
+          short_name: t.short_name,
+          slug: t.slug,
+          logo_url: t.logo_url,
+          registration_type: t.registration_type,
+          lado: t.lado,
+          subprefeitura: t.competitions?.subprefeitura ?? null,
+        }));
+        setTeams(rows);
+      } catch (e) {
+        if (cancelled) return;
+        console.error("[/times] falha ao carregar times:", e);
+        setLoadError("Nao foi possivel carregar os times agora.");
+        setTeams([]);
+      }
     })();
+    return () => {
+      cancelled = true;
+    };
   }, []);
 
   // Cascading filter: subpref → lado → mando → search
@@ -163,6 +182,15 @@ function TimesPage() {
         title="Times"
         description="Filtre por subprefeitura, lado da conferência e mando para encontrar seu time."
       />
+
+      {loadError && (
+        <div className="mb-6 rounded-xl border border-destructive/40 bg-destructive/10 p-4 text-sm">
+          {loadError}{" "}
+          <button onClick={() => window.location.reload()} className="text-primary hover:underline">
+            Tentar de novo
+          </button>
+        </div>
+      )}
 
       {/* Filter bar */}
       <div className="mb-6 rounded-xl border border-border bg-card/60 backdrop-blur p-4 space-y-3">
