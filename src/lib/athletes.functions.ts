@@ -3,7 +3,8 @@ import { z } from "zod";
 import bcrypt from "bcryptjs";
 import { requireSupabaseAuth } from "@/integrations/supabase/auth-middleware";
 import { supabaseAdmin } from "@/integrations/supabase/client.server";
-import { onlyDigits, isValidCpf, cpfLast4 } from "./cpf";
+import { getRequest } from "@tanstack/react-start/server";
+import { onlyDigits, isValidCpf, cpfLast4, maskFullName } from "./cpf";
 
 const BCRYPT_ROUNDS = 10;
 
@@ -82,30 +83,115 @@ export const preRegisterAthletes = createServerFn({ method: "POST" })
   });
 
 // =============================================================
-// Public: find athlete by CPF (used in /verificar)
+// Publico: localizar pre-cadastro por CPF (usado em /verificar)
+//
+// Esta e a unica rota que aceita CPF sem login. Duas travas obrigatorias:
+//
+//  1. RATE LIMIT por hash de IP. Sem ele, CPF valido e enumeravel e a base
+//     inteira sai pela porta da frente.
+//  2. DIVULGACAO MINIMA. Antes daqui saiam nome completo, WhatsApp,
+//     Instagram, foto e time — um dossie por CPF adivinhado. Agora sai o
+//     nome mascarado, que e o suficiente para o atleta reconhecer o proprio
+//     pre-cadastro e nao serve para montar base de terceiros.
+//
+// Falha fechada de proposito: sem IP_HASH_SALT ou sem a migration de rate
+// limit aplicada, a rota responde 503 em vez de responder sem protecao.
 // =============================================================
 const findSchema = z.object({ cpf: z.string().min(11).max(20) });
+
+function clientIp(req: Request | undefined): string {
+  const h = req?.headers;
+  if (!h) return "";
+  const forwarded = h.get("x-forwarded-for");
+  return (
+    h.get("cf-connecting-ip") ??
+    h.get("x-real-ip") ??
+    (forwarded ? forwarded.split(",")[0]!.trim() : "") ??
+    ""
+  );
+}
+
+async function hashIp(ip: string, salt: string): Promise<string> {
+  const bytes = new TextEncoder().encode(`${salt}:${ip}`);
+  const digest = await crypto.subtle.digest("SHA-256", bytes);
+  return Array.from(new Uint8Array(digest))
+    .map((b) => b.toString(16).padStart(2, "0"))
+    .join("");
+}
 
 export const findAthleteByCpf = createServerFn({ method: "POST" })
   .inputValidator((input) => findSchema.parse(input))
   .handler(async ({ data }) => {
+    const salt = process.env.IP_HASH_SALT ?? "";
+    if (!salt) {
+      console.error("[verificar] IP_HASH_SALT ausente — consulta por CPF bloqueada");
+      throw new Response(
+        JSON.stringify({ error: "Consulta indisponivel no momento. Tente mais tarde." }),
+        { status: 503 },
+      );
+    }
+
+    const ip = clientIp(getRequest()) || "sem-ip";
+    const ipHash = await hashIp(ip, salt);
+
+    const { data: limit, error: limitErr } = await supabaseAdmin.rpc(
+      "check_cpf_lookup_rate_limit" as never,
+      { _ip_hash: ipHash } as never,
+    );
+    if (limitErr) {
+      console.error("[verificar] rate limit indisponivel:", limitErr.message);
+      throw new Response(
+        JSON.stringify({ error: "Consulta indisponivel no momento. Tente mais tarde." }),
+        { status: 503 },
+      );
+    }
+    const verdict = limit as { allowed: boolean; retry_after_seconds?: number } | null;
+    if (!verdict?.allowed) {
+      throw new Response(
+        JSON.stringify({
+          error: "Muitas consultas seguidas. Aguarde alguns minutos e tente de novo.",
+        }),
+        {
+          status: 429,
+          headers: { "retry-after": String(verdict?.retry_after_seconds ?? 600) },
+        },
+      );
+    }
+
     const cpf = onlyDigits(data.cpf);
     if (!isValidCpf(cpf)) {
-      throw new Response(JSON.stringify({ error: "CPF inválido" }), { status: 400 });
+      throw new Response(JSON.stringify({ error: "CPF invalido" }), { status: 400 });
     }
 
     const last4 = cpfLast4(cpf);
     const { data: candidates, error } = await supabaseAdmin
       .from("athletes")
-      .select("id, cpf_hash, full_name, nickname, position, photo_url, team_id, verified, whatsapp, instagram_handle")
+      .select("id, cpf_hash, full_name, nickname, team_id, verified")
       .eq("cpf_last4", last4);
     if (error) throw new Error(error.message);
 
     for (const c of candidates ?? []) {
-      if (c.cpf_hash && await bcrypt.compare(cpf, c.cpf_hash)) {
-        // strip cpf_hash before returning
-        const { cpf_hash: _omit, ...safe } = c;
-        return { found: true as const, athlete: safe };
+      if (c.cpf_hash && (await bcrypt.compare(cpf, c.cpf_hash))) {
+        // Nome do time e informacao publica (aparece em /times) e e o que
+        // permite ao atleta reconhecer o pre-cadastro. Nome vai mascarado.
+        let teamName: string | null = null;
+        if (c.team_id) {
+          const { data: team } = await supabaseAdmin
+            .from("teams")
+            .select("name")
+            .eq("id", c.team_id)
+            .maybeSingle();
+          teamName = team?.name ?? null;
+        }
+        return {
+          found: true as const,
+          athlete: {
+            id: c.id,
+            masked_name: maskFullName(c.full_name ?? c.nickname),
+            team_name: teamName,
+            verified: c.verified,
+          },
+        };
       }
     }
     return { found: false as const };

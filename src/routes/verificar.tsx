@@ -11,7 +11,6 @@ import { PageHeader } from "@/components/PageHeader";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { IDMetropoleCard } from "@/components/athletes/IDMetropoleCard";
 import { Upload, BadgeCheck } from "lucide-react";
 
 export const Route = createFileRoute("/verificar")({
@@ -26,14 +25,9 @@ export const Route = createFileRoute("/verificar")({
 
 type FoundAthlete = {
   id: string;
-  full_name: string | null;
-  nickname: string | null;
-  position: string | null;
-  photo_url: string | null;
-  team_id: string | null;
+  masked_name: string;
+  team_name: string | null;
   verified: boolean;
-  whatsapp: string | null;
-  instagram_handle: string | null;
 };
 
 function VerificarPage() {
@@ -67,13 +61,10 @@ function VerificarPage() {
     try {
       const res = await findFn({ data: { cpf: onlyDigits(cpf) } });
       if (res.found) {
+        // A busca publica devolve so o nome mascarado — o bastante para o
+        // atleta reconhecer o proprio pre-cadastro. Todo o resto ele preenche
+        // abaixo, ja logado, e so entao vira dado nosso.
         setAthlete(res.athlete as FoundAthlete);
-        setFullName(res.athlete.full_name ?? "");
-        setNickname(res.athlete.nickname ?? "");
-        setPosition(res.athlete.position ?? "");
-        setWhatsapp(res.athlete.whatsapp ?? "");
-        setInstagram(res.athlete.instagram_handle ?? "");
-        setPhotoPreview(res.athlete.photo_url ?? null);
       } else {
         setNotFound(true);
       }
@@ -107,7 +98,7 @@ function VerificarPage() {
     }
     setSubmitting(true);
     try {
-      let photoUrl = athlete.photo_url ?? undefined;
+      let photoUrl: string | undefined;
       if (photoFile) {
         const ext = photoFile.name.split(".").pop() ?? "jpg";
         const path = `${athlete.id}/${Date.now()}.${ext}`;
@@ -174,7 +165,28 @@ function VerificarPage() {
 
         {athlete && (
           <div className="mt-6 rounded-lg border border-border bg-card p-6 space-y-4">
-            <h2 className="font-display text-2xl tracking-wide">Confirme seus dados</h2>
+            <div className="rounded-md border border-primary/30 bg-primary/5 p-4">
+              <p className="text-xs uppercase tracking-widest text-muted-foreground font-semibold">
+                Pré-cadastro encontrado
+              </p>
+              <p className="mt-1 font-display text-xl tracking-wide">{athlete.masked_name}</p>
+              {athlete.team_name && (
+                <p className="text-sm text-muted-foreground mt-0.5">{athlete.team_name}</p>
+              )}
+              <p className="text-xs text-muted-foreground mt-2">
+                Mostramos o nome parcial de propósito. Complete os campos abaixo com seus
+                dados para ativar seu ID.
+              </p>
+            </div>
+
+            {athlete.verified && (
+              <div className="rounded-md border border-amber-500/40 bg-amber-500/10 p-4 text-sm">
+                Este pré-cadastro já foi ativado por uma conta. Se não foi você, fale com o
+                diretor do seu time antes de continuar.
+              </div>
+            )}
+
+            <h2 className="font-display text-2xl tracking-wide">Preencha seus dados</h2>
 
             <div className="flex items-center gap-4">
               <div className="h-20 w-20 rounded-full border border-border bg-background/50 overflow-hidden flex items-center justify-center">
@@ -239,12 +251,6 @@ function VerificarPage() {
                 Você precisa estar logado para vincular este atleta à sua conta.
               </p>
             )}
-          </div>
-        )}
-
-        {athlete?.verified && (
-          <div className="mt-6">
-            <IDMetropoleCard athlete={athlete} />
           </div>
         )}
       </div>

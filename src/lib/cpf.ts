@@ -32,3 +32,20 @@ export function isValidCpf(value: string): boolean {
 export function cpfLast4(value: string): string {
   return onlyDigits(value).slice(-4);
 }
+
+// Mascara nome proprio para confirmacao publica: mostra a inicial de cada
+// palavra significativa e esconde o resto. Preposicoes ficam legiveis porque
+// nao identificam ninguem. "Maressa Alves da Silva" -> "M****** A**** da S****".
+const NAME_PARTICLES = new Set(["de", "da", "do", "das", "dos", "e", "di", "del"]);
+
+export function maskFullName(value: string | null | undefined): string {
+  const words = (value ?? "").trim().split(/\s+/).filter(Boolean);
+  if (words.length === 0) return "";
+  return words
+    .map((w) => {
+      if (NAME_PARTICLES.has(w.toLowerCase())) return w.toLowerCase();
+      if (w.length <= 1) return w.toUpperCase();
+      return w[0].toUpperCase() + "*".repeat(Math.min(w.length - 1, 6));
+    })
+    .join(" ");
+}
