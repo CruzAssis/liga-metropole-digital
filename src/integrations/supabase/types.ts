@@ -1806,7 +1806,7 @@ export type Database = {
         | "director"
         | "player"
         | "supporter"
-      notificacao_canal: "email" | "whatsapp"
+      notificacao_canal: "email" | "whatsapp" | "app"
       notificacao_status: "pendente" | "enviado" | "falhou"
       notificacao_tipo:
         | "team_approved"
@@ -1814,6 +1814,7 @@ export type Database = {
         | "sumula_disponivel"
         | "sumula_prazo_alerta"
         | "destaque_publicado"
+        | "mvp_definido"
       pagamento_metodo: "pix" | "outro"
       pagamento_status: "pendente" | "pago" | "atrasado"
       team_serie: "A" | "B"
@@ -1957,7 +1958,7 @@ export const Constants = {
         "player",
         "supporter",
       ],
-      notificacao_canal: ["email", "whatsapp"],
+      notificacao_canal: ["email", "whatsapp", "app"],
       notificacao_status: ["pendente", "enviado", "falhou"],
       notificacao_tipo: [
         "team_approved",
@@ -1965,6 +1966,7 @@ export const Constants = {
         "sumula_disponivel",
         "sumula_prazo_alerta",
         "destaque_publicado",
+        "mvp_definido",
       ],
       pagamento_metodo: ["pix", "outro"],
       pagamento_status: ["pendente", "pago", "atrasado"],
