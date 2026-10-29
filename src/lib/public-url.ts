@@ -3,7 +3,7 @@
 // director opens the app inside lovable.dev, which then sends recipients
 // to a Lovable signup page instead of our app. We always build public
 // links against the published domain.
-export const PUBLIC_ORIGIN = "https://liga-metropole-digital.lovable.app";
+export const PUBLIC_ORIGIN = "https://liga-metropole-digital.vercel.app";
 
 export function safeInternalPath(value: string | null | undefined, fallback = "/"): string {
   if (!value) return fallback;
