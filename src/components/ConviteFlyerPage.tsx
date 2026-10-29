@@ -25,7 +25,7 @@ import lmShield from "@/assets/lm-shield.png";
 
 const NEON = "#00E5FF";
 const CARD_BG = "#121214";
-const INVITE_URL = "https://liga-metropole-digital.lovable.app";
+const INVITE_URL = "https://liga-metropole-digital.vercel.app";
 
 type UploadState = string | null;
 function useImageUpload(setter: (v: UploadState) => void) {
@@ -438,7 +438,7 @@ export function ConviteFlyerPage() {
                     CONFIRME SUA<br />PARTICIPAÇÃO
                   </div>
                   <div className="text-[11px] md:text-xs text-white mt-2 font-mono">
-                    liga-metropole-digital.lovable.app
+                    liga-metropole-digital.vercel.app
                   </div>
                 </div>
                 <div
