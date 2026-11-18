@@ -11,6 +11,7 @@ import { defineConfig } from "@lovable.dev/vite-tanstack-config";
 export default defineConfig({
   tanstackStart: {
     server: {
-// entry removido — auto-detectado na 1.169
-},
+      // entry removido — auto-detectado na 1.169
+    },
+  },
 });
